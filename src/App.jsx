@@ -7,11 +7,9 @@ function App() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <div className="pt-20"> {/* Reduced padding for smaller navbar */}
-        <Routes>
-          <Route path="/" element={<Home />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
     </div>
   )
 }

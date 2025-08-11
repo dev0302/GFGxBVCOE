@@ -1,7 +1,7 @@
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
 import logo from "../images/gfgLogo.png";
+import { animateNavbar } from "../animations/gsapAnimations";
 
 function Navbar() {
     const navbarRef = useRef(null);
@@ -11,110 +11,8 @@ function Navbar() {
     const buttonRef = useRef(null);
 
     useEffect(() => {
-        // Initial animation timeline
-        const tl = gsap.timeline({ ease: "power3.out" });
-        
-        // Navbar entrance animation
-        tl.fromTo(navbarRef.current, 
-            { y: -100, opacity: 0, backdropFilter: "blur(0px)" },
-            { y: 0, opacity: 1, backdropFilter: "blur(20px)", duration: 1 }
-        );
-        
-        // Logo animation
-        tl.fromTo(logoRef.current,
-            { scale: 0, rotation: -180 },
-            { scale: 1, rotation: 0, duration: 0.8, ease: "back.out(1.7)" },
-            "-=0.5"
-        );
-        
-        // Title animation
-        tl.fromTo(titleRef.current,
-            { x: -50, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.8, ease: "power2.out" },
-            "-=0.6"
-        );
-        
-        // Navigation items animation
-        tl.fromTo(navRef.current.children,
-            { y: -30, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: "power2.out" },
-            "-=0.4"
-        );
-        
-        // Button animation
-        tl.fromTo(buttonRef.current,
-            { scale: 0, opacity: 0 },
-            { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" },
-            "-=0.3"
-        );
-
-        // Hover animations for nav items
-        const navItems = navRef.current?.children;
-        if (navItems) {
-            Array.from(navItems).forEach(item => {
-                const link = item.querySelector('a');
-                if (link) {
-                    link.addEventListener('mouseenter', () => {
-                        gsap.to(link, { 
-                            y: -2, 
-                            scale: 1.05, 
-                            duration: 0.3, 
-                            ease: "power2.out" 
-                        });
-                    });
-                    
-                    link.addEventListener('mouseleave', () => {
-                        gsap.to(link, { 
-                            y: 0, 
-                            scale: 1, 
-                            duration: 0.3, 
-                            ease: "power2.out" 
-                        });
-                    });
-                }
-            });
-        }
-
-        // Logo hover animation
-        if (logoRef.current) {
-            logoRef.current.addEventListener('mouseenter', () => {
-                gsap.to(logoRef.current, { 
-                    rotation: 360, 
-                    scale: 1.1, 
-                    duration: 0.6, 
-                    ease: "power2.out" 
-                });
-            });
-            
-            logoRef.current.addEventListener('mouseleave', () => {
-                gsap.to(logoRef.current, { 
-                    rotation: 0, 
-                    scale: 1, 
-                    duration: 0.6, 
-                    ease: "power2.out" 
-                });
-            });
-        }
-
-        // Button hover animation
-        if (buttonRef.current) {
-            buttonRef.current.addEventListener('mouseenter', () => {
-                gsap.to(buttonRef.current, { 
-                    scale: 1.05, 
-                    duration: 0.3, 
-                    ease: "power2.out" 
-                });
-            });
-            
-            buttonRef.current.addEventListener('mouseleave', () => {
-                gsap.to(buttonRef.current, { 
-                    scale: 1, 
-                    duration: 0.3, 
-                    ease: "power2.out" 
-                });
-            });
-        }
-
+        const cleanup = animateNavbar({ navbarRef, logoRef, titleRef, navRef, buttonRef });
+        return () => cleanup && cleanup();
     }, []);
 
     return (
