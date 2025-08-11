@@ -83,27 +83,55 @@ function Home() {
       "-=0.5"
     );
     
-    // Description animation with staggered text reveal
-    const descriptionText = descriptionRef.current;
-    if (descriptionText) {
-      const words = descriptionText.textContent.split(' ');
-      descriptionText.innerHTML = '';
+    // New description animations
+    if (descriptionRef.current) {
+      // Initial state
+      gsap.set(descriptionRef.current, { 
+        opacity: 0, 
+        y: 50,
+        scale: 0.9,
+        rotationX: 15
+      });
       
-      words.forEach((word, index) => {
-        const span = document.createElement('span');
-        span.textContent = word + ' ';
-        span.style.opacity = '0';
-        span.style.display = 'inline-block';
-        span.style.transform = 'translateY(20px)';
-        descriptionText.appendChild(span);
-        
-        gsap.to(span, {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          delay: 1.5 + (index * 0.1),
-          ease: "power2.out"
-        });
+      // Entrance animation with 3D effect
+      gsap.to(descriptionRef.current, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        rotationX: 0,
+        duration: 1.2,
+        delay: 1.8,
+        ease: "power3.out"
+      });
+      
+      // Continuous floating animation
+      gsap.to(descriptionRef.current, {
+        y: -8,
+        duration: 4,
+        repeat: -1,
+        yoyo: true,
+        ease: "power1.inOut",
+        delay: 3
+      });
+      
+      // Subtle rotation animation
+      gsap.to(descriptionRef.current, {
+        rotationY: 2,
+        duration: 6,
+        repeat: -1,
+        yoyo: true,
+        ease: "power1.inOut",
+        delay: 4
+      });
+      
+      // Text glow effect
+      gsap.to(descriptionRef.current, {
+        textShadow: "0 0 20px rgba(34, 197, 94, 0.4)",
+        duration: 2,
+        repeat: -1,
+        yoyo: true,
+        ease: "power1.inOut",
+        delay: 5
       });
     }
 
@@ -175,10 +203,17 @@ function Home() {
           GFG x BVCOE
         </h1>
 
-        {/* Description */}
+        {/* Description with new animations */}
         <p 
           ref={descriptionRef}
-          className="text-lg md:text-xl text-green-100 max-w-3xl leading-relaxed font-light"
+          className="text-lg md:text-xl text-green-100 max-w-3xl leading-relaxed font-light transform-gpu perspective-1000"
+          style={{
+            textShadow: '0 0 10px rgba(34, 197, 94, 0.3)',
+            background: 'linear-gradient(135deg, #bbf7d0, #86efac, #4ade80)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}
         >
           Empowering students with cutting-edge technology skills, fostering innovation, and building a community of passionate developers. Join us in shaping the future of software engineering through collaborative learning, hands-on projects, and industry connections.
         </p>
