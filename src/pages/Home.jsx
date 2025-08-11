@@ -11,6 +11,8 @@ function Home() {
       learnMoreBtnEl: document.getElementById("btn-events"),
       statsGridEl: document.getElementById("stats-grid"),
       countEl: document.getElementById("count-members"),
+      countProjectsEl: document.getElementById("count-projects"),
+      countWorkshopsEl: document.getElementById("count-workshops"),
     });
 
     return () => cleanup && cleanup();
@@ -71,11 +73,11 @@ function Home() {
             <div className="text-green-100">Active Members</div>
           </div>
           <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20">
-            <div className="text-3xl font-bold text-emerald-300 mb-2">50+</div>
+            <div id="count-projects" className="text-3xl font-bold text-emerald-300 mb-2">0+</div>
             <div className="text-green-100">Projects Completed</div>
           </div>
           <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20">
-            <div className="text-3xl font-bold text-green-300 mb-2">100+</div>
+            <div id="count-workshops" className="text-3xl font-bold text-green-300 mb-2">100+</div>
             <div className="text-green-100">Workshops Conducted</div>
           </div>
         </div>

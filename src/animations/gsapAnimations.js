@@ -181,7 +181,7 @@ export const animateTitle = (titleEl) => {
  * Home UI animations: title, description, buttons, cards, and count-up.
  * Accepts DOM elements (not refs) for flexibility.
  */
-export function animateHomeUI({ titleEl, descriptionEl, getStartedBtnEl, learnMoreBtnEl, statsGridEl, countEl }) {
+export function animateHomeUI({ titleEl, descriptionEl, getStartedBtnEl, learnMoreBtnEl, statsGridEl, countEl, countProjectsEl, countWorkshopsEl }) {
   const listeners = [];
   const toCleanup = [];
 
@@ -271,6 +271,32 @@ export function animateHomeUI({ titleEl, descriptionEl, getStartedBtnEl, learnMo
       ease: "power1.out",
       onUpdate: () => {
         countEl.textContent = `${Math.floor(counter.value)}+`;
+      },
+    });
+    toCleanup.push(t);
+  }
+
+  if (countProjectsEl) {
+    const counter = { value: 0 };
+    const t = gsap.to(counter, {
+      value: 50,
+      duration: 1.6,
+      ease: "power1.out",
+      onUpdate: () => {
+        countProjectsEl.textContent = `${Math.floor(counter.value)}+`;
+      },
+    });
+    toCleanup.push(t);
+  }
+
+  if (countWorkshopsEl) {
+    const counter = { value: 0 };
+    const t = gsap.to(counter, {
+      value: 100,
+      duration: 1.6,
+      ease: "power1.out",
+      onUpdate: () => {
+        countWorkshopsEl.textContent = `${Math.floor(counter.value)}+`;
       },
     });
     toCleanup.push(t);
