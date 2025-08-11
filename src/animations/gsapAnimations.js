@@ -47,6 +47,9 @@ export function animateNavbar({ navbarRef, logoRef, titleRef, navRef, buttonRef 
     "-=0.3"
   );
 
+  // title animation on entrance
+  
+
   // Attach hover animations for nav links, logo, and CTA button
   const attachHover = (element, enterVars, leaveVars) => {
     if (!element) return;
@@ -102,15 +105,93 @@ export function animateNavbar({ navbarRef, logoRef, titleRef, navRef, buttonRef 
   };
 }
 
+// title animation
+export const animateTitle = (titleEl) => {
+  // Store original HTML
+  const originalHTML = titleEl.innerHTML;
+  const lines = originalHTML.split('<br>');
+  titleEl.innerHTML = '';
+  
+  // Create character elements
+  lines.forEach((line, i) => {
+    const lineEl = document.createElement('div');
+    lineEl.className = `line line-${i}`;
+    lineEl.style.lineHeight = '1.1'; // Reduce line height
+    lineEl.style.marginBottom = '0.1em'; // Minimal spacing between lines
+    
+    line.split(' ').forEach(word => {
+      const wordEl = document.createElement('span');
+      wordEl.className = 'word';
+      wordEl.style.display = 'inline-block';
+      wordEl.style.overflow = 'visible'; // Changed from 'hidden' to prevent clipping
+      wordEl.style.marginRight = '0.25em';
+      
+      word.split('').forEach(char => {
+        const charEl = document.createElement('span');
+        charEl.className = 'char';
+        charEl.style.display = 'inline-block';
+        charEl.textContent = char;
+        charEl.style.lineHeight = '1.3';
+        
+        // Apply gradient styling to each character
+        charEl.style.background = 'linear-gradient(135deg, #22c55e, #10b981, #059669)';
+        charEl.style.backgroundClip = 'text';
+        charEl.style.webkitBackgroundClip = 'text';
+        charEl.style.webkitTextFillColor = 'transparent';
+        charEl.style.color = 'transparent';
+        
+        wordEl.appendChild(charEl);
+      });
+      
+      lineEl.appendChild(wordEl);
+    });
+    
+    titleEl.appendChild(lineEl);
+    if (i < lines.length - 1) {
+      // Add minimal spacing between lines
+      const spacer = document.createElement('div');
+      spacer.style.height = '0.2em'; // Very small gap
+      titleEl.appendChild(spacer);
+    }
+  });
+
+  // Set initial state
+  gsap.set('.char', {
+    y: '100%',
+    opacity: 0,
+    rotationX: 45,
+    transformOrigin: 'bottom center'
+  });
+
+  // Create and return animation
+  return gsap.to('.char', {
+    y: '0%',
+    opacity: 1,
+    rotationX: 0,
+    duration: 0.8,
+    stagger: {
+      amount: 1,
+      from: 'random'
+    },
+    ease: 'back.out(2)'
+  });
+};
+
 /**
- * Home UI animations: description, buttons, cards, and count-up.
+ * Home UI animations: title, description, buttons, cards, and count-up.
  * Accepts DOM elements (not refs) for flexibility.
  */
-export function animateHomeUI({ descriptionEl, getStartedBtnEl, learnMoreBtnEl, statsGridEl, countEl }) {
+export function animateHomeUI({ titleEl, descriptionEl, getStartedBtnEl, learnMoreBtnEl, statsGridEl, countEl }) {
   const listeners = [];
   const toCleanup = [];
 
   const safe = (el) => (el ? [el] : []);
+
+  // Title animation with character-by-character reveal
+  if (titleEl) {
+    const titleAnimation = animateTitle(titleEl);
+    toCleanup.push(titleAnimation);
+  }
 
   // Description entrance
   if (descriptionEl) {
@@ -202,7 +283,7 @@ export function animateHomeUI({ descriptionEl, getStartedBtnEl, learnMoreBtnEl, 
       el.removeEventListener("mouseleave", onLeave);
     });
     toCleanup.forEach((t) => t.kill && t.kill());
-    gsap.killTweensOf([descriptionEl, ...buttons]);
+    gsap.killTweensOf([titleEl, descriptionEl, ...buttons]);
     if (statsGridEl) {
       const cards = statsGridEl.querySelectorAll('div[class*="rounded-2xl"]');
       gsap.killTweensOf(cards);

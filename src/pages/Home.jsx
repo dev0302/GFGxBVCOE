@@ -1,20 +1,11 @@
 import { useEffect } from "react";
-import { gsap } from "gsap";
 import { animateHomeUI } from "../animations/gsapAnimations";
 
 function Home() {
   useEffect(() => {
-    // Title animation (as requested previously)
-    gsap.from(".hero-text", {
-      opacity: 0,
-      y: 50,
-      scale: 0.95,
-      duration: 1.5,
-      ease: "power3.out",
-    });
-
     // Home UI animations
     const cleanup = animateHomeUI({
+      titleEl: document.querySelector("h1"),
       descriptionEl: document.getElementById("home-desc"),
       getStartedBtnEl: document.getElementById("btn-join"),
       learnMoreBtnEl: document.getElementById("btn-events"),
@@ -45,7 +36,7 @@ function Home() {
       <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-6 pt-16 text-center">
         {/* Title */}
         <h1
-          className="hero-text text-2xl md:text-5xl font-bold text-white mb-8 tracking-tight leading-tight md:leading-tight pb-1"
+          className="text-2xl md:text-5xl font-bold text-white mb-8 tracking-tight leading-tight md:leading-tight pb-1"
           style={{
             background: "linear-gradient(135deg, #22c55e, #10b981, #059669)",
             backgroundClip: "text",
@@ -93,4 +84,4 @@ function Home() {
   );
 }
 
-export default Home
+export default Home;
