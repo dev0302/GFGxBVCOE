@@ -43,7 +43,7 @@ export function animateNavbar({ navbarRef, logoRef, titleRef, navRef, buttonRef 
   timeline.fromTo(
     buttonRef.current,
     { scale: 0, opacity: 0 },
-    { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" },
+    { scale: 1, opacity: 1, duration: 0.2, ease: "power2.out" },
     "-=0.3"
   );
 
