@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { animateHomeUI } from "../animations/gsapAnimations";
+import GFGBentoGrid from "../components/GFGBentoGrid";
 
 function Home() {
   useEffect(() => {
@@ -52,35 +53,67 @@ function Home() {
         </h1>
 
         {/* Description */}
-        <p id="home-desc" className="text-lg md:text-xl text-green-100 max-w-3xl leading-relaxed font-light">
+        <p
+          id="home-desc"
+          className="text-lg md:text-xl text-green-100 max-w-3xl leading-relaxed font-light"
+        >
           Join GFG BVCOE - learn, teach, and collaborate through workshops, events, project showcases and mentorship.
         </p>
 
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-6 mt-12">
-          <button id="btn-join" className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg border border-green-300/30">
+          <button
+            id="btn-join"
+            className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg border border-green-300/30"
+          >
             Join Now
           </button>
-          <button id="btn-events" className="px-8 py-4 bg-transparent text-green-100 font-semibold rounded-full text-lg border-2 border-green-300/40 backdrop-blur-sm">
+          <button
+            id="btn-events"
+            className="px-8 py-4 bg-transparent text-green-100 font-semibold rounded-full text-lg border-2 border-green-300/40 backdrop-blur-sm"
+          >
             Explore Events
           </button>
         </div>
 
         {/* Stats */}
-        <div id="stats-grid" className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 text-center">
+        <div
+          id="stats-grid"
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 text-center"
+        >
           <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20">
-            <div id="count-members" className="text-3xl font-bold text-green-300 mb-2">0+</div>
+            <div
+              id="count-members"
+              className="text-3xl font-bold text-green-300 mb-2"
+            >
+              0+
+            </div>
             <div className="text-green-100">Active Members</div>
           </div>
           <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20">
-            <div id="count-projects" className="text-3xl font-bold text-emerald-300 mb-2">0+</div>
+            <div
+              id="count-projects"
+              className="text-3xl font-bold text-emerald-300 mb-2"
+            >
+              0+
+            </div>
             <div className="text-green-100">Projects Completed</div>
           </div>
           <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20">
-            <div id="count-workshops" className="text-3xl font-bold text-green-300 mb-2">100+</div>
+            <div
+              id="count-workshops"
+              className="text-3xl font-bold text-green-300 mb-2"
+            >
+              100+
+            </div>
             <div className="text-green-100">Workshops Conducted</div>
           </div>
         </div>
+      </div>
+
+      {/* Bento Grid Section */}
+      <div className="relative z-10">
+        <GFGBentoGrid />
       </div>
     </div>
   );
