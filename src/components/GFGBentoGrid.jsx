@@ -1,177 +1,75 @@
-import { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
+import { useState, useRef, useEffect } from "react";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Lenis from "lenis";
+import { useNavigate } from "react-router-dom";
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
 
 const GFGBentoGrid = () => {
-  const gridRef = useRef(null);
-  const cardsRef = useRef([]);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const lenisRef = useRef(null);
+  const containerRef = useRef();
+  const cardsRef = useRef([]);
+  const navigate = useNavigate();
 
+  // Simple image loading without GSAP
   useEffect(() => {
-    // Initialize Lenis for smooth scrolling
-    lenisRef.current = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      direction: 'vertical',
-      gestureDirection: 'vertical',
-      smooth: true,
-      mouseMultiplier: 1,
-      smoothTouch: false,
-      touchMultiplier: 2,
-      infinite: false,
-    });
-
-    // Connect Lenis to GSAP ScrollTrigger
-    lenisRef.current.on('scroll', ScrollTrigger.update);
-
-    gsap.ticker.add((time) => {
-      lenisRef.current.raf(time * 1000);
-    });
-
-    gsap.ticker.lagSmoothing(0);
-
-    // Optimized image preloading with better performance
-    const imageUrls = [
-      '/src/images/gfg1.jpg',
-      '/src/images/gfg2.jpg',
-      '/src/images/gfg3.jpg',
-      '/src/images/gfg4.jpg',
-      '/src/images/gfg5.jpg',
-      '/src/images/gfgLogo.png'
-    ];
-
-    const preloadImages = async () => {
-      setIsLoading(true);
-      
-      // Use Intersection Observer for better performance
-      const imagePromises = imageUrls.map((url) => {
-        return new Promise((resolve) => {
-          const img = new Image();
-          img.onload = () => resolve();
-          img.onerror = () => resolve(); // Continue even if image fails
-          img.src = url;
-          
-          // Set low priority for non-critical images
-          if (img.decode) {
-            img.decode().then(resolve).catch(() => resolve());
-          } else {
-            resolve();
-          }
-        });
-      });
-
-      await Promise.all(imagePromises);
+    const timer = setTimeout(() => {
       setImagesLoaded(true);
       setIsLoading(false);
-    };
+    }, 100);
 
-    // Delay image loading slightly to prioritize initial render
-    const timer = setTimeout(preloadImages, 100);
-
-    return () => {
-      clearTimeout(timer);
-      if (lenisRef.current) {
-        lenisRef.current.destroy();
-      }
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
+    return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    if (!imagesLoaded || !gridRef.current || isLoading) return;
-
-    const cards = cardsRef.current;
-    if (!cards.length) return;
-
-    // Much simpler initial state - minimal transforms for better performance
-    gsap.set(cards, {
+  // GSAP animations for smooth entrance
+  useGSAP(() => {
+    // Set initial states - images start from infinity
+    gsap.set(cardsRef.current, {
+      x: (i) => (i % 2 === 0 ? 1000 : -1000), // Alternate left/right infinity
+      y: (i) => (i % 3 === 0 ? 500 : -500),    // Alternate top/bottom infinity
       opacity: 0,
-      y: 20, // Reduced from 40
-      scale: 0.98, // Reduced from 0.95
+      scale: 0.5,
+      rotation: (i) => (i % 2 === 0 ? 45 : -45) // Alternate rotation
     });
 
-    // Simplified scroll trigger animation
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: gridRef.current,
-        start: "top 90%", // Trigger later for better performance
-        end: "bottom 10%",
-        toggleActions: "play none none reverse",
-        fastScrollEnd: true,
-        preventOverlaps: true,
-        // Reduce ScrollTrigger overhead
-        onUpdate: () => {
-          // Throttle updates for better performance
-          if (lenisRef.current) {
-            lenisRef.current.raf(performance.now());
-          }
-        },
-      },
-    });
-
-    // Ultra-smooth animation with minimal complexity
-    tl.to(cards, {
-      opacity: 1,
+    // Animate images to their positions with stagger and scrub
+    gsap.to(cardsRef.current, {
+      x: 0,
       y: 0,
+      opacity: 1,
       scale: 1,
-      duration: 0.4, // Reduced from 0.6
-      ease: "power1.out", // Simpler easing
-      stagger: 0.08, // Reduced from 0.1
+      rotation: 0,
+      duration: 1,
+      ease: "power2.out",
+      stagger: 0.1,
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: "top 50%",
+        end: "bottom 10%",
+        scrub: 2,
+        toggleActions: "play none none none"
+      }
     });
 
-    // Simplified hover animations with better performance
-    cards.forEach((card) => {
-      const cardEl = card;
-      
-      const onEnter = () => {
-        gsap.to(cardEl, {
-          y: -2, // Reduced from -4
-          scale: 1.005, // Reduced from 1.01
-          duration: 0.15, // Reduced from 0.2
-          ease: "power1.out",
-        });
-      };
-
-      const onLeave = () => {
-        gsap.to(cardEl, {
-          y: 0,
-          scale: 1,
-          duration: 0.15, // Reduced from 0.2
-          ease: "power1.out",
-        });
-      };
-
-      cardEl.addEventListener('mouseenter', onEnter);
-      cardEl.addEventListener('mouseleave', onLeave);
-
-      // Cleanup
-      return () => {
-        cardEl.removeEventListener('mouseenter', onEnter);
-        cardEl.removeEventListener('mouseleave', onLeave);
-      };
+    // Pin the section after animation completes so images stick in place
+    ScrollTrigger.create({
+      trigger: containerRef.current,
+      start: "bottom 10%",
+      end: "bottom -20%",
+      pin: true,
+      pinSpacing: true
     });
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [imagesLoaded, isLoading]);
-
-  const addCardRef = (el) => {
-    if (el && !cardsRef.current.includes(el)) {
-      cardsRef.current.push(el);
-    }
-  };
+  }, [imagesLoaded]);
 
   const handleViewAllEvents = () => {
-    // Navigate to events page - you can replace this with your routing logic
-    console.log('Navigating to events page...');
-    // window.location.href = '/events'; // or use React Router navigation
+    navigate('/events');
   };
 
   // Loading skeleton while images are loading
@@ -218,7 +116,7 @@ const GFGBentoGrid = () => {
   }
 
   return (
-    <section className="relative py-20 bg-gradient-to-br from-green-950/50 via-green-900/30 to-emerald-900/50">
+    <section ref={containerRef} className="relative py-20 bg-gradient-to-br from-green-950/50 via-green-900/30 to-emerald-900/50">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div
@@ -250,7 +148,6 @@ const GFGBentoGrid = () => {
         {/* Bento Grid Container */}
         <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 backdrop-blur-sm border border-green-400/20 rounded-3xl p-8 mb-12 shadow-2xl">
           <div 
-            ref={gridRef}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
             style={{
               gridAutoRows: 'minmax(200px, auto)',
@@ -258,112 +155,70 @@ const GFGBentoGrid = () => {
           >
             {/* Hero Card - Large */}
             <div 
-              ref={addCardRef}
-              className="card hero-card group relative overflow-hidden rounded-2xl col-span-2 row-span-2"
+              ref={el => cardsRef.current[0] = el}
+              className="card hero-card relative overflow-hidden rounded-2xl col-span-2 row-span-2"
               style={{
                 backgroundImage: `url('/src/images/gfg1.jpg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
-            >
-              <div className="glass-overlay absolute bottom-0 left-0 right-0 p-6 bg-black/40 backdrop-blur-md border-t border-white/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <h3 className="text-2xl font-bold text-white mb-2">GFG Community</h3>
-                <p className="text-green-100 text-sm leading-relaxed">
-                  Building a vibrant community of developers, learners, and innovators
-                </p>
-              </div>
-            </div>
+            />
 
             {/* Vertical Card */}
             <div 
-              ref={addCardRef}
-              className="card vertical-card group relative overflow-hidden rounded-2xl row-span-2"
+              ref={el => cardsRef.current[1] = el}
+              className="card vertical-card relative overflow-hidden rounded-2xl row-span-2"
               style={{
                 backgroundImage: `url('/src/images/gfg2.jpg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
-            >
-              <div className="glass-overlay absolute bottom-0 left-0 right-0 p-6 bg-black/40 backdrop-blur-md border-t border-white/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <h3 className="text-xl font-bold text-white mb-2">Learning Hub</h3>
-                <p className="text-green-100 text-sm leading-relaxed">
-                  Workshops, tutorials, and hands-on learning experiences
-                </p>
-              </div>
-            </div>
+            />
 
             {/* Small Square Card */}
             <div 
-              ref={addCardRef}
-              className="card square-card group relative overflow-hidden rounded-2xl aspect-square"
+              ref={el => cardsRef.current[2] = el}
+              className="card square-card relative overflow-hidden rounded-2xl aspect-square"
               style={{
                 backgroundImage: `url('/src/images/gfg3.jpg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
-            >
-              <div className="glass-overlay absolute bottom-0 left-0 right-0 p-6 bg-black/40 backdrop-blur-md border-t border-white/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <h3 className="text-lg font-bold text-white mb-2">Projects</h3>
-                <p className="text-green-100 text-sm leading-relaxed">
-                  Showcasing innovative student projects
-                </p>
-              </div>
-            </div>
+            />
 
             {/* Wide Card */}
             <div 
-              ref={addCardRef}
-              className="card wide-card group relative overflow-hidden rounded-2xl col-span-2"
+              ref={el => cardsRef.current[3] = el}
+              className="card wide-card relative overflow-hidden rounded-2xl col-span-2"
               style={{
                 backgroundImage: `url('/src/images/gfg4.jpg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
-            >
-              <div className="glass-overlay absolute bottom-0 left-0 right-0 p-6 bg-black/40 backdrop-blur-md border-t border-white/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <h3 className="text-xl font-bold text-white mb-2">Events & Workshops</h3>
-                <p className="text-green-100 text-sm leading-relaxed">
-                  Engaging events that bring the community together
-                </p>
-              </div>
-            </div>
+            />
 
             {/* Tall Card */}
             <div 
-              ref={addCardRef}
-              className="card tall-card group relative overflow-hidden rounded-2xl row-span-2"
+              ref={el => cardsRef.current[4] = el}
+              className="card tall-card relative overflow-hidden rounded-2xl row-span-2"
               style={{
                 backgroundImage: `url('/src/images/gfg5.jpg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
-            >
-              <div className="glass-overlay absolute bottom-0 left-0 right-0 p-6 bg-black/40 backdrop-blur-md border-t border-white/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <h3 className="text-xl font-bold text-white mb-2">Innovation</h3>
-                <p className="text-green-100 text-sm leading-relaxed">
-                  Fostering creativity and technical excellence
-                </p>
-              </div>
-            </div>
+            />
 
             {/* Small Square Card */}
             <div 
-              ref={addCardRef}
-              className="card square-card group relative overflow-hidden rounded-2xl aspect-square"
+              ref={el => cardsRef.current[5] = el}
+              className="card square-card relative overflow-hidden rounded-2xl aspect-square"
               style={{
                 backgroundImage: `url('/src/images/gfgLogo.png')`,
                 backgroundSize: 'contain',
                 backgroundPosition: 'center',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
               }}
-            >
-              <div className="glass-overlay absolute bottom-0 left-0 right-0 p-6 bg-black/40 backdrop-blur-md border-t border-white/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                <h3 className="text-lg font-bold text-white mb-2">GFG BVCOE</h3>
-                <p className="text-green-100 text-sm leading-relaxed">
-                  Your gateway to tech excellence
-                </p>
-              </div>
-            </div>
+            />
           </div>
         </div>
 

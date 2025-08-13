@@ -1,0 +1,333 @@
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useRef, useEffect } from "react";
+
+// Register ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
+
+const About = () => {
+  const containerRef = useRef();
+  const heroRef = useRef();
+  const visionRef = useRef();
+  const missionRef = useRef();
+  const featuresRef = useRef();
+  const benefitsRef = useRef();
+  const ctaRef = useRef();
+
+
+
+  useGSAP(() => {
+    // Set initial states
+    gsap.set([heroRef.current, visionRef.current, missionRef.current, featuresRef.current, benefitsRef.current, ctaRef.current], {
+      opacity: 0,
+      y: 50
+    });
+
+    // Hero section animation
+    gsap.fromTo(heroRef.current, 
+      { opacity: 0, y: 100 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1.2, 
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+
+    // Vision section animation
+    gsap.fromTo(visionRef.current, 
+      { opacity: 0, y: 60, scale: 0.95 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        scale: 1, 
+        duration: 1, 
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: visionRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+
+    // Mission section animation
+    gsap.fromTo(missionRef.current, 
+      { opacity: 0, y: 60, scale: 0.95 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        scale: 1, 
+        duration: 1, 
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: missionRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+
+    // Features section animation
+    gsap.fromTo(featuresRef.current, 
+      { opacity: 0, y: 60 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1, 
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: featuresRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+
+    // Benefits section animation
+    gsap.fromTo(benefitsRef.current, 
+      { opacity: 0, y: 60 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1, 
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: benefitsRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+
+    // Animate individual benefit cards with stagger
+    const benefitCards = benefitsRef.current?.querySelectorAll('.benefits-grid > div');
+    if (benefitCards) {
+      gsap.fromTo(benefitCards, 
+        { opacity: 0, y: 40, scale: 0.9 },
+        { 
+          opacity: 1, 
+          y: 0, 
+          scale: 1, 
+          duration: 0.8, 
+          stagger: 0.2,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: benefitsRef.current,
+            start: "top 80%",
+            end: "bottom 20%",
+            toggleActions: "play none none none"
+          }
+        }
+      );
+    }
+
+    // CTA section animation
+    gsap.fromTo(ctaRef.current, 
+      { opacity: 0, y: 60, scale: 0.95 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        scale: 1, 
+        duration: 1, 
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: ctaRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none none"
+        }
+      }
+    );
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 overflow-hidden">
+      {/* Background Pattern */}
+      <div className="fixed inset-0 opacity-5">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(circle at 25% 25%, #10b981 1px, transparent 1px)`,
+            backgroundSize: "60px 60px",
+          }}
+        />
+      </div>
+
+      <div className="relative z-10">
+        {/* Hero Section */}
+        <section ref={heroRef} className="pt-32 pb-20 px-6">
+          <div className="max-w-6xl mx-auto text-center">
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight font-['Inter'] tracking-tight">
+              About{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">
+                GFG BVCOE
+              </span>
+            </h1>
+            <p className="text-xl md:text-2xl text-green-100 max-w-4xl mx-auto leading-relaxed font-light">
+              Empowering students through collaborative learning, innovation, and knowledge sharing in a dynamic tech community.
+            </p>
+          </div>
+        </section>
+
+        {/* Vision Section */}
+        <section ref={visionRef} className="py-20 px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="bg-gradient-to-br from-green-800/20 to-emerald-800/20 backdrop-blur-xl border border-green-400/20 rounded-3xl p-12">
+              <div className="text-center mb-12">
+                <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 font-['Inter']">
+                  Our{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
+                    Vision
+                  </span>
+                </h2>
+              </div>
+              <p className="text-xl md:text-2xl text-green-100 leading-relaxed text-center max-w-5xl mx-auto font-['Inter'] font-light">
+                The GFG BVCOE Student Chapter envisions a collaborative and dynamic learning environment where students continuously grow, innovate, and share knowledge. We aim to cultivate a community that fosters curiosity, skill enhancement, and the exchange of ideas, ensuring that every member contributes to a collective journey of learning and discovery.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Mission Section */}
+        <section ref={missionRef} className="py-20 px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="bg-gradient-to-br from-emerald-800/20 to-teal-800/20 backdrop-blur-xl border border-emerald-400/20 rounded-3xl p-12">
+              <div className="text-center mb-12">
+                <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 font-['Inter']">
+                  Our{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
+                    Mission
+                  </span>
+                </h2>
+              </div>
+              <p className="text-xl md:text-2xl text-green-100 leading-relaxed text-center max-w-5xl mx-auto font-['Inter'] font-light">
+                Our mission is to provide a supportive and engaging platform where students can learn, teach, and grow through seminars, workshops, talks, competitions, and project showcases. We are dedicated to fostering peer-driven learning, equipping students with the necessary guidance and resources to excel in their chosen fields while embracing the spirit of continuous innovation and teamwork.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* What Sets Us Apart Section */}
+        <section ref={featuresRef} className="py-20 px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-8 font-['Inter']">
+                What Sets Us{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
+                  Apart?
+                </span>
+              </h2>
+              <div className="bg-gradient-to-br from-green-700/20 to-emerald-700/20 backdrop-blur-xl border border-green-400/20 rounded-3xl p-12 max-w-4xl mx-auto">
+                <p className="text-xl md:text-2xl text-green-100 leading-relaxed font-['Inter'] font-light">
+                  Our dedication to create a society where anyone can work on their goals by learning and teaching while getting the guidance they need.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Benefits Section */}
+        <section ref={benefitsRef} className="py-20 px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-8 font-['Inter']">
+                What You'll Get from{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
+                  Geeks for Geeks
+                </span>
+              </h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 benefits-grid">
+              <div className="bg-gradient-to-br from-green-800/20 to-emerald-800/20 backdrop-blur-xl border border-green-400/20 rounded-2xl p-8 hover:scale-105 transition-transform duration-300">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-400 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-4 font-['Inter']">Project Showcases</h3>
+                <p className="text-green-100 leading-relaxed font-['Inter']">
+                  Engage in impactful project showcases, gaining recognition within our dynamic community.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-emerald-800/20 to-teal-800/20 backdrop-blur-xl border border-emerald-400/20 rounded-2xl p-8 hover:scale-105 transition-transform duration-300">
+                <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-4 font-['Inter']">Personalized Mentorship</h3>
+                <p className="text-green-100 leading-relaxed font-['Inter']">
+                  Receive personalized mentorship tailored to your individual technical journey from experienced members.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-teal-800/20 to-cyan-800/20 backdrop-blur-xl border border-teal-400/20 rounded-2xl p-8 hover:scale-105 transition-transform duration-300">
+                <div className="w-16 h-16 bg-gradient-to-br from-teal-400 to-cyan-400 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-4 font-['Inter']">Community Connections</h3>
+                <p className="text-green-100 leading-relaxed font-['Inter']">
+                  Cultivate lasting connections within a close-knit community where collaboration and shared learning thrive.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-cyan-800/20 to-blue-800/20 backdrop-blur-xl border border-cyan-400/20 rounded-2xl p-8 hover:scale-105 transition-transform duration-300">
+                <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-4 font-['Inter']">Exclusive Events</h3>
+                <p className="text-green-100 leading-relaxed font-['Inter']">
+                  Access exclusive events, workshops, and seminars for hands-on experiences and valuable networking opportunities.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section ref={ctaRef} className="py-20 px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="bg-gradient-to-br from-green-700/20 via-emerald-700/20 to-teal-700/20 backdrop-blur-xl border border-green-400/20 rounded-3xl p-16 text-center">
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-8 font-['Inter']">
+                Want to Join{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">
+                  Geeks for Geeks?
+                </span>
+              </h2>
+              <p className="text-xl md:text-2xl text-green-100 mb-12 leading-relaxed font-['Inter'] font-light">
+                Connect with our team today to become a part of a society where you are the protagonist of your technical journey!
+              </p>
+              <button className="px-12 py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold text-xl rounded-full border border-green-300/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-500/25 font-['Inter']">
+                Get Started Today
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+};
+
+export default About;

@@ -1,22 +1,43 @@
-import { useEffect } from "react";
-import { animateHomeUI } from "../animations/gsapAnimations";
 import GFGBentoGrid from "../components/GFGBentoGrid";
+import TeamSection from "../components/TeamSection";
+import { useNavigate } from "react-router-dom";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { useRef } from "react";
 
 function Home() {
-  useEffect(() => {
-    // Home UI animations
-    const cleanup = animateHomeUI({
-      titleEl: document.querySelector("h1"),
-      descriptionEl: document.getElementById("home-desc"),
-      getStartedBtnEl: document.getElementById("btn-join"),
-      learnMoreBtnEl: document.getElementById("btn-events"),
-      statsGridEl: document.getElementById("stats-grid"),
-      countEl: document.getElementById("count-members"),
-      countProjectsEl: document.getElementById("count-projects"),
-      countWorkshopsEl: document.getElementById("count-workshops"),
+  const navigate = useNavigate();
+  const titleRef = useRef();
+  const descRef = useRef();
+  const btnRef = useRef();
+
+  // GSAP animations for smooth entrance
+  useGSAP(() => {
+    // Title animation
+    gsap.from(titleRef.current, {
+      y: 50,
+      opacity: 0,
+      duration: 1.2,
+      ease: "power2.out"
     });
 
-    return () => cleanup && cleanup();
+    // Description animation
+    gsap.from(descRef.current, {
+      y: 40,
+      opacity: 0,
+      duration: 1,
+      ease: "power2.out",
+      delay: 0.3
+    });
+
+    // Buttons animation
+    gsap.from(btnRef.current, {
+      y: 30,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power2.out",
+      delay: 0.6
+    });
   }, []);
 
   return (
@@ -39,6 +60,7 @@ function Home() {
       <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-6 pt-16 text-center">
         {/* Title */}
         <h1
+          ref={titleRef}
           className="text-2xl md:text-5xl font-bold text-white mb-8 tracking-tight leading-tight md:leading-tight pb-1"
           style={{
             background: "linear-gradient(135deg, #22c55e, #10b981, #059669)",
@@ -54,6 +76,7 @@ function Home() {
 
         {/* Description */}
         <p
+          ref={descRef}
           id="home-desc"
           className="text-lg md:text-xl text-green-100 max-w-3xl leading-relaxed font-light"
         >
@@ -61,18 +84,19 @@ function Home() {
         </p>
 
         {/* CTAs */}
-        <div className="flex flex-col sm:flex-row gap-6 mt-12">
+        <div ref={btnRef} className="flex flex-col sm:flex-row gap-6 mt-12">
           <button
             id="btn-join"
-            className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg border border-green-300/30"
+            className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg border border-green-300/30 hover:from-green-600 hover:to-emerald-600 hover:scale-105 transition-all duration-300"
           >
             Join Now
           </button>
           <button
-            id="btn-events"
-            className="px-8 py-4 bg-transparent text-green-100 font-semibold rounded-full text-lg border-2 border-green-300/40 backdrop-blur-sm"
+            id="btn-about"
+            onClick={() => navigate('/about')}
+            className="px-8 py-4 bg-transparent text-green-100 font-semibold rounded-full text-lg border-2 border-green-300/40 backdrop-blur-sm hover:bg-green-300/10 hover:scale-105 transition-all duration-300"
           >
-            Explore Events
+            About Us
           </button>
         </div>
 
@@ -81,30 +105,30 @@ function Home() {
           id="stats-grid"
           className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 text-center"
         >
-          <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20">
+          <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-105">
             <div
               id="count-members"
               className="text-3xl font-bold text-green-300 mb-2"
             >
-              0+
+              50+
             </div>
             <div className="text-green-100">Active Members</div>
           </div>
-          <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20">
+          <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-105">
             <div
-              id="count-projects"
+              id="count-events"
               className="text-3xl font-bold text-emerald-300 mb-2"
             >
-              0+
+              10+
             </div>
-            <div className="text-green-100">Projects Completed</div>
+            <div className="text-green-100">Events Held</div>
           </div>
-          <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20">
+          <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-105">
             <div
               id="count-workshops"
               className="text-3xl font-bold text-green-300 mb-2"
             >
-              100+
+              10+
             </div>
             <div className="text-green-100">Workshops Conducted</div>
           </div>
@@ -114,6 +138,11 @@ function Home() {
       {/* Bento Grid Section */}
       <div className="relative z-10">
         <GFGBentoGrid />
+      </div>
+
+      {/* Team Section */}
+      <div className="relative z-10">
+        <TeamSection />
       </div>
     </div>
   );
