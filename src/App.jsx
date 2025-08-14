@@ -4,6 +4,7 @@ import About from "./pages/About"
 import Team from "./pages/Team"
 import Events from "./pages/Events"
 import Navbar from "./components/Navbar"
+import Contact from "./pages/Contact"
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/team" element={<Team />} />
         <Route path="/events" element={<Events />} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
     </>
   )
