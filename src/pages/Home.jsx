@@ -1,6 +1,6 @@
 import GFGBentoGrid from "../components/GFGBentoGrid";
 import TeamSection from "../components/TeamSection";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef } from "react";
@@ -88,12 +88,12 @@ function Home() {
 
         {/* CTAs */}
         <div ref={btnRef} className="flex flex-col sm:flex-row gap-6 mt-12 font-nunito">
-          <button
+          <NavLink to="notfound"><button
             id="btn-join"
             className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg border border-green-300/30 hover:from-green-600 hover:to-emerald-600 hover:scale-105 transition-all duration-300"
           >
             Join Now
-          </button>
+          </button ></NavLink>
           <button
             id="btn-about"
             onClick={() => navigate('/about')}
