@@ -102,6 +102,14 @@ const Footer = () => {
             >
               Dev
             </a>
+            <a
+              href="https://www.linkedin.com/in/himank-pandoh-58a0b52b1/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#38bdf8] hover:text-[#7dd3fc] transition-colors duration-300 inline-block relative hover:-translate-y-0.5"
+            >
+              Himank
+            </a>
           </p>
         </div>
       </footer>
