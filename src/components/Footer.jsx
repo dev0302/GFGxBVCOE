@@ -108,7 +108,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="text-[#38bdf8] hover:text-[#7dd3fc] transition-colors duration-300 inline-block relative hover:-translate-y-0.5"
             >
-              Himank
+               , Himank
             </a>
           </p>
         </div>
