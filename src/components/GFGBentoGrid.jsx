@@ -86,7 +86,7 @@ const GFGBentoGrid = () => {
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
               Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">Highlights</span>
             </h2>
-            <p className="text-xl text-green-100 max-w-3xl mx-auto leading-relaxed font-light">
+            <p className="text-xl text-green-100 max-w-3xl mx-auto leading-relaxed font-nunito">
               Discover the amazing work and achievements of our GFG community through our featured events and workshops
             </p>
           </div>
@@ -140,7 +140,7 @@ const GFGBentoGrid = () => {
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">Highlights</span>
           </h2>
-          <p className="text-xl text-green-100 max-w-3xl mx-auto leading-relaxed font-light">
+          <p className="text-xl text-green-100 max-w-3xl mx-auto leading-relaxed font-light font-nunito">
             Discover the amazing work and achievements of our GFG community through our featured events and workshops
           </p>
         </div>
@@ -223,11 +223,11 @@ const GFGBentoGrid = () => {
         </div>
 
         {/* Call to Action Section */}
-        <div className="text-center">
+        <div className="text-center font-nunito">
           <div className="inline-flex flex-col sm:flex-row items-center gap-6 p-8 bg-gradient-to-r from-green-800/30 to-emerald-800/30 backdrop-blur-sm border border-green-400/20 rounded-3xl">
             <div className="text-left sm:text-center">
-              <h3 className="text-2xl font-bold text-white mb-2">Ready to Join More Events?</h3>
-              <p className="text-green-100 text-lg">
+              <h3 className="text-2xl font-bold text-white mb-2 font-nunito">Ready to Join More Events?</h3>
+              <p className="text-green-100 text-lg font-nunito">
                 Explore our full calendar of workshops, hackathons, and community meetups
               </p>
             </div>
