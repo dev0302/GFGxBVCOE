@@ -11,7 +11,7 @@ export default {
         montserrat: ['Montserrat', 'sans-serif'],
         nunito: ['Nunito', 'sans-serif'],
         'alfa': ['"Alfa Slab One"', 'serif'],
-
+        'audiowide': ['Audiowide', 'sans-serif'],
       },
       colors: {
         primary: '#6c5ce7',

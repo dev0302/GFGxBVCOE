@@ -1,4 +1,5 @@
 import { useGSAP } from "@gsap/react";
+import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef } from "react";
@@ -10,6 +11,7 @@ const Events = () => {
   const containerRef = useRef();
   const heroRef = useRef();
   const eventsRef = useRef();
+  const navigate = useNavigate();
 
   // Sample events data
   const events = [
@@ -110,6 +112,10 @@ const Events = () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
+
+  const handleNavigateToContact = () => {
+    navigate('/contact');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-950 via-green-900 to-emerald-900">
@@ -223,7 +229,10 @@ const Events = () => {
             <p className="text-green-100 text-lg mb-8 max-w-2xl mx-auto">
               Have an idea for a workshop or event? We'd love to hear from you! Let's collaborate to create amazing learning experiences.
             </p>
-            <button className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-full text-lg border border-green-300/30 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-green-500/25">
+            <button
+              onClick={handleNavigateToContact}
+              className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-full text-lg border border-green-300/30 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-green-500/25"
+            >
               Contact Us
             </button>
           </div>
