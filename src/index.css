@@ -24,6 +24,8 @@ body {
   background: linear-gradient(135deg, #064e3b, #065f46, #047857);
 }
 
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
