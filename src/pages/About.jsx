@@ -173,9 +173,9 @@ const About = () => {
         {/* Hero Section */}
         <section ref={heroRef} className="pt-32 pb-6 px-6 md:pb-10">
           <div className="max-w-6xl mx-auto text-center">
-            <h1 className="text-2xl md:text-4xl font-bold text-white mb-6 leading-tight font-alfa tracking-tight">
+            <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight font-alfa tracking-tight">
               {/* GFG TAGLINE?{" "} */}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 font-alfa">
+              <span id="about_us_para" className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 font-alfa">
                 ABOUT US
               </span>
             </h1>

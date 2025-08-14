@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef } from "react";
+import Footer from "../components/Footer";
+
+
 
 function Home() {
   const navigate = useNavigate();
@@ -144,6 +147,15 @@ function Home() {
       {/* <div className="relative z-10">
         <TeamSection />
       </div> */}
+
+
+      {/* footer */}
+
+      <Footer></Footer>
+
+  
+
+
     </div>
   );
 }
