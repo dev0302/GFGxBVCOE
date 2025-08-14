@@ -3,6 +3,11 @@ import logo from "../images/gfgLogo.png";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef } from "react";
+import { SaxHome2Linear } from '@meysam213/iconsax-react'
+import { SaxInfoCircleLinear } from '@meysam213/iconsax-react'
+import { SaxProfile2UserLinear } from '@meysam213/iconsax-react'
+import { SaxCalendarTickTwotone } from '@meysam213/iconsax-react'
+import { SaxUserTwotone } from '@meysam213/iconsax-react'
 
 function Navbar() {
   const navMain = useRef();
@@ -69,44 +74,48 @@ function Navbar() {
       <nav>
         <ul ref={navList} className="hidden gap-8 text-sm sm:flex">
           <li>
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
-                  isActive
-                    ? "text-white bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30"
-                    : "text-green-100 hover:text-white hover:bg-green-700/50 backdrop-blur-sm"
-                }`
-              }
-            >
-              Home
-            </NavLink>
-          </li>
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
+                isActive
+                  ? "text-white bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30"
+                  : "text-green-100 hover:text-white hover:bg-green-700/50 backdrop-blur-sm"
+              }`
+            }
+          >
+            <SaxHome2Linear className="mr-2" />
+            <span>Home</span>
+          </NavLink>
+        </li>
+
+
           <li>
             <NavLink
               to="/about"
               className={({ isActive }) =>
-                `px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
+                `flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
                   isActive
                     ? "text-white bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30"
                     : "text-green-100 hover:text-white hover:bg-green-700/50 backdrop-blur-sm"
                 }`
               }
-            >
-              About
+            > <SaxInfoCircleLinear className="mr-2"/>
+              <span>About</span>
             </NavLink>
           </li>
           <li>
             <NavLink
               to="/team"
               className={({ isActive }) =>
-                `px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
+                `flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
                   isActive
                     ? "text-white bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30"
                     : "text-green-100 hover:text-white hover:bg-green-700/50 backdrop-blur-sm"
                 }`
               }
             >
+              <SaxProfile2UserLinear className="mr-2" />
               Team
             </NavLink>
           </li>
@@ -114,13 +123,14 @@ function Navbar() {
             <NavLink
               to="/events"
               className={({ isActive }) =>
-                `px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
+                `flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
                   isActive
                     ? "text-white bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30"
                     : "text-green-100 hover:text-white hover:bg-green-700/50 backdrop-blur-sm"
                 }`
               }
             >
+              <SaxCalendarTickTwotone className="mr-2"/>
               Events
             </NavLink>
           </li>
@@ -128,13 +138,14 @@ function Navbar() {
             <NavLink
               to="/contact"
               className={({ isActive }) =>
-                `px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
+                `flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
                   isActive
                     ? "text-white bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30"
                     : "text-green-100 hover:text-white hover:bg-green-700/50 backdrop-blur-sm"
                 }`
               }
             >
+              <SaxUserTwotone className="mr-2" />
               Contact
             </NavLink>
           </li>

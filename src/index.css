@@ -24,6 +24,102 @@ body {
   background: linear-gradient(135deg, #064e3b, #065f46, #047857);
 }
 
+#about_us_para {
+  position: relative;
+  overflow: hidden;
+  will-change: transform, text-shadow;
+  display: inline-block;
+}
+
+/* Shimmer effect: wider and longer travel */
+#about_us_para::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  /* start far left */
+  width: 200%;
+  /* double width for longer sweep */
+  height: 100%;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.15),
+      transparent);
+  transform: translateX(-100%);
+  animation: shimmer 2s linear infinite;
+  /* slightly faster */
+}
+
+/* Bottom underline on hover */
+#about_us_para::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #4aff92, #1e9c46);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#about_us_para:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  50% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+
+  /* travels twice the width */
+}
+
+@keyframes float {
+
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow {
+
+  0% {
+    text-shadow: 0 0 5px rgba(166, 174, 208, 0.2);
+  }
+
+  50% {
+    text-shadow: 0 0 20px rgba(187, 192, 212, 0.4);
+  }
+
+  100% {
+    text-shadow: 0 0 5px rgba(167, 175, 211, 0.2);
+  }
+}
+
+#about_us_para {
+  animation: float 2.5s ease-in-out infinite, glow 2.5s ease-in-out infinite;
+}
+
 
 
 @tailwind base;

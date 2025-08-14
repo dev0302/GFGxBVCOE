@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@meysam213/iconsax-react": "^1.0.4",
+    "feather-icons": "^4.29.2",
     "locomotive-scroll": "^4.1.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
