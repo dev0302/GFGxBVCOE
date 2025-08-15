@@ -6,6 +6,9 @@ const teamData = [
         position: "Chair Person",
         p0: "Chair Person",
         image: "/src/images/Toshika.webp",
+        email: "toshikagoswami4@gmail.com",
+        instaLink: "nil",
+        linkedinLink: "https://www.linkedin.com/in/toshika-goswami-39791022a",
         timeline: [
       { 
         year: "2025", 
@@ -38,9 +41,7 @@ const teamData = [
         description: "Assisted with content creation and platform testing."
       }
     ]
-        email: "toshikagoswami4@gmail.com",
-        instaLink: "nil",
-        linkedinLink: "https://www.linkedin.com/in/toshika-goswami-39791022a"
+        
     },
     {
         name: "Harsh Bhardwaj",
