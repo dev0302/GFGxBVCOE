@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import logo from "../images/gfgLogo.png";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
@@ -8,7 +8,6 @@ import { SaxInfoCircleLinear } from '@meysam213/iconsax-react'
 import { SaxProfile2UserLinear } from '@meysam213/iconsax-react'
 import { SaxCalendarTickTwotone } from '@meysam213/iconsax-react'
 import { SaxUserTwotone } from '@meysam213/iconsax-react'
-NavLink
 
 
 function Navbar() {
@@ -54,6 +53,8 @@ function Navbar() {
         "-=0.2"
       );
   }, []);
+
+  const isTeamPage = location.pathname === "/team";
 
   return (
     <div

@@ -93,7 +93,7 @@ const contact = () => {
                 />
             </div>
 
-            <div className="relative z-10 max-w-6xl mx-auto">
+            <div className="relative z-10 max-w-6xl mx-auto mt-10">
                 <div className="text-center mb-16">
                     <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 font-audiowide tracking-tight">
                          Get In <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">Touch</span>
