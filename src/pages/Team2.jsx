@@ -7,7 +7,7 @@ import teamData from '../data/teamData';
 function Team2() {
   return (
     <div className='w-[100vw] bg-[#ECF0EF]'>
-      <div className='TEAM_SECTION mt-24 justify-center items-centre flex flex-wrap w-10/12 mx-auto gap-10 pb-12'>
+      <div className='TEAM_SECTION mt-24 justify-center items-centre flex flex-wrap w-10/12 mx-auto gap-10 mb-12'>
       {
         teamData.map ( (member) => {
           return <NewCard {...member} key={member.name}></NewCard>
