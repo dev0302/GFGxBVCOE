@@ -41,6 +41,11 @@ body {
   grid-column: var(--c);
 }
 
+.darkthemebg {
+  background-image: linear-gradient(to bottom right, #1e1e2f, #2c2c3e);
+}
+
+
 /* Shimmer effect: wider and longer travel */
 #about_us_para::before {
   content: '';

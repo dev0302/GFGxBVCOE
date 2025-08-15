@@ -19,19 +19,19 @@ const Gallery = () => {
 
     // Sample image data for three distinct columns
     const column1Images = [
-        { id: 'c1-1', src: 'https://i2.wp.com/thenewcamera.com/wp-content/uploads/2016/01/Nikon-D500-Sample-Image-3.jpg', title: 'Portrait Orientation' },
-        { id: 'c1-2', src: 'https://www.cameraegg.org/wp-content/uploads/2014/09/Nikon-D750-Sample-Images-3.jpg', title: 'Landscape Orientation' },
-        { id: 'c1-3', src: 'https://photographylife.com/wp-content/uploads/2023/05/nikon-z8-00006-1536x1024.jpg', title: 'Square Image' },
+        { id: 'c1-1', src: './gridimg1.webp', title: 'Portrait Orientation' },
+        { id: 'c1-2', src: './gridimg2.webp', title: 'Landscape Orientation' },
+        { id: 'c1-3', src: './gridimg3.webp', title: 'Square Image' },
     ];
     const column2Images = [
-        { id: 'c2-1', src: 'https://th.bing.com/th/id/R.c002f934e1f040498f198a632e6adccc?rik=%2b5GS9jcFjD4KXg&riu=http%3a%2f%2fwww.cameraegg.org%2fwp-content%2fuploads%2f2012%2f09%2fnikon-d600-sample-images.jpg&ehk=711QrJdIO8zFSeTR4V7jZeJVcOjX7jTba0oQ93rP0Mo%3d&risl=&pid=ImgRaw&r=0', title: 'Campus Life' },
-        { id: 'c2-2', src: 'https://nikonrumors.com/wp-content/uploads/2014/03/Nikon-1-V3-sample-photo.jpg', title: 'Coding Session' },
-        { id: 'c2-3', src: 'https://i2.wp.com/thenewcamera.com/wp-content/uploads/2016/01/Nikon-D500-Sample-Image-3.jpg', title: 'Guest Speaker' },
+        { id: 'c2-1', src: './gridimg4.webp', title: 'Campus Life' },
+        { id: 'c2-2', src: './gridimg5.webp', title: 'Coding Session' },
+        { id: 'c2-3', src: './gridimg6.webp', title: 'Guest Speaker' },
     ];
     const column3Images = [
-        { id: 'c3-1', src: 'https://nikonrumors.com/wp-content/uploads/2014/03/Nikon-1-V3-sample-photo.jpg', title: 'Behind the Scenes' },
-        { id: 'c3-2', src: 'https://photographylife.com/wp-content/uploads/2014/06/Nikon-D810-Image-Sample-6.jpg', title: 'Planning Session' },
-        { id: 'c3-3', src: 'https://www.cameraegg.org/wp-content/uploads/2014/09/Nikon-D750-Sample-Images-3.jpg', title: 'Community Meetup' },
+        { id: 'c3-1', src: './gridimg7.webp', title: 'Behind the Scenes' },
+        { id: 'c3-2', src: './gridimg8.webp', title: 'Planning Session' },
+        { id: 'c3-3', src: './gridimg9.webp', title: 'Community Meetup' },
     ];
 
     // GSAP animations for vertical auto-scrolling

@@ -55,11 +55,10 @@ function Navbar() {
       );
   }, []);
   
-  const darkRoutes = ["/events"];
-  const isDarkNavbar = darkRoutes.includes(location.pathname);
+
 
   
-
+  const isDarkNavbar = true;
   return (
     <div
       ref={navMain}

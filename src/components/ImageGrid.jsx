@@ -44,7 +44,7 @@ function ImageGrid() {
         .timeline({
           scrollTrigger: {
             trigger: image,
-            start: "top 0%",
+            start: "top 20%",
             end: "bottom top",
             scrub: true,
             // markers: true,
@@ -75,7 +75,7 @@ function ImageGrid() {
   });
 
   return (
-    <div className="w-full bg-zinc-900 relative">
+    <div className="w-full bg-[#161629] pt-20 relative">
       <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-10">
         <NavLink to="/gallery"><button>
           <h1 className="text-5xl mb-4">Click to View All Images</h1>
