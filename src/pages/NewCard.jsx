@@ -14,7 +14,7 @@ function NewCard({name,branch,year,position,p0,image,p1,p2,email,instaLink,linke
   return (
     // bg-[#ECF0EF]
     
-    <div className='flex justify-center items-center  font-poppins text-[#111827]'>
+    <div className='mt-2 flex justify-center items-center  font-poppins text-[#111827]'>
         
       <div className="ring-1 ring-black/30 rounded-[32px] w-[300px] h-[460px] bg-white shadow-md overflow-hidden">
         <img
