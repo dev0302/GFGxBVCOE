@@ -5,6 +5,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef } from "react";
 import Footer from "../components/Footer";
+import ImageGrid from "../components/ImageGrid";
 
 
 
@@ -147,6 +148,9 @@ function Home() {
       {/* <div className="relative z-10">
         <TeamSection />
       </div> */}
+
+      {/* image grid */}
+      <ImageGrid className="w-full bg-zinc-900"></ImageGrid>
 
 
       {/* footer */}

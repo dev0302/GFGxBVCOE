@@ -7,40 +7,40 @@ const teamData = [
         p0: "Chair Person",
         image: "/src/images/Toshika.webp",
         timeline: [
-      { 
-        year: "2025", 
-        role: "Chairperson", 
-        project: "Geeks For Geeks", 
-        description: "College Chapter, BVCOE, New Delhi" 
-      },
-      { 
-        year: "2025", 
-        role: "Intern", 
-        project: "Front End Development at Surefy.AI", 
-        description: "Developed and maintained user-facing features."
-      },
-      { 
-        year: "2025", 
-        role: "Intern", 
-        project: "Web Development at The Wise Tortoise", 
-        description: "Built responsive web pages and components."
-      },
-      { 
-        year: "2023", 
-        role: "Social Media Lead", 
-        project: "Geeks For Geeks", 
-        description: "College Chapter, BVCOE, New Delhi" 
-      },
-      { 
-        year: "2021", 
-        role: "Intern", 
-        project: "EduIITians", 
-        description: "Assisted with content creation and platform testing."
-      }
-    ]
-        email: "toshikagoswami4@gmail.com",
-        instaLink: "nil",
-        linkedinLink: "https://www.linkedin.com/in/toshika-goswami-39791022a"
+            {
+                year: "2025",
+                role: "Chairperson",
+                project: "Geeks For Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
+                year: "2025",
+                role: "Intern",
+                project: "Front End Development at Surefy.AI",
+                description: "Developed and maintained user-facing features."
+            },
+            {
+                year: "2025",
+                role: "Intern",
+                project: "Web Development at The Wise Tortoise",
+                description: "Built responsive web pages and components."
+            },
+            {
+                year: "2023",
+                role: "Social Media Lead",
+                project: "Geeks For Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
+                year: "2021",
+                role: "Intern",
+                project: "EduIITians",
+                description: "Assisted with content creation and platform testing."
+            }
+        ]
+        // email: "toshikagoswami4@gmail.com",
+        // instaLink: "nil",
+        // linkedinLink: "https://www.linkedin.com/in/toshika-goswami-39791022a"
     },
     {
         name: "Harsh Bhardwaj",

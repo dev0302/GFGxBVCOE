@@ -35,6 +35,12 @@ body {
   display: inline-block;
 }
 
+/* this is for grid images ko yha vha fainkne ke liye */
+.my-grid-item {
+  grid-row: var(--r);
+  grid-column: var(--c);
+}
+
 /* Shimmer effect: wider and longer travel */
 #about_us_para::before {
   content: '';

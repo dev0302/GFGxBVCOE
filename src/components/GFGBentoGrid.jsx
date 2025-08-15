@@ -4,72 +4,85 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router-dom";
 
-// Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
 
 const GFGBentoGrid = () => {
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const containerRef = useRef();
+  const containerRef = useRef(null);
   const cardsRef = useRef([]);
   const navigate = useNavigate();
 
-  // Simple image loading without GSAP
+  // Track gsap context for cleanup
+  const gsapCtx = useRef(null);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setImagesLoaded(true);
       setIsLoading(false);
     }, 100);
-
     return () => clearTimeout(timer);
   }, []);
 
-  // GSAP animations for smooth entrance
-  useGSAP(() => {
-    // Set initial states - images start from infinity
-    gsap.set(cardsRef.current, {
-      x: (i) => (i % 2 === 0 ? 1000 : -1000), // Alternate left/right infinity
-      y: (i) => (i % 3 === 0 ? 500 : -500),    // Alternate top/bottom infinity
-      opacity: 0,
-      scale: 0.5,
-      rotation: (i) => (i % 2 === 0 ? 45 : -45) // Alternate rotation
-    });
+  useGSAP(
+    () => {
+      if (!imagesLoaded) return;
 
-    // Animate images to their positions with stagger and scrub
-    gsap.to(cardsRef.current, {
-      x: 0,
-      y: 0,
-      opacity: 1,
-      scale: 1,
-      rotation: 0,
-      duration: 1,
-      ease: "power2.out",
-      stagger: 0.1,
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: "top 50%",
-        end: "bottom 10%",
-        scrub: 2,
-        toggleActions: "play none none none"
+      // Kill any old context if it exists
+      if (gsapCtx.current) {
+        gsapCtx.current.revert();
       }
-    });
 
-    // Pin the section after animation completes so images stick in place
-    ScrollTrigger.create({
-      trigger: containerRef.current,
-      start: "bottom 10%",
-      end: "bottom -20%",
-      pin: true,
-      pinSpacing: true
-    });
+      // Create a scoped GSAP context so animations don't leak globally
+      gsapCtx.current = gsap.context(() => {
+        gsap.set(cardsRef.current, {
+          x: (i) => (i % 2 === 0 ? 1000 : -1000),
+          y: (i) => (i % 3 === 0 ? 500 : -500),
+          opacity: 0,
+          scale: 0.5,
+          rotation: (i) => (i % 2 === 0 ? 45 : -45),
+        });
 
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [imagesLoaded]);
+        gsap.to(cardsRef.current, {
+          x: 0,
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          rotation: 0,
+          duration: 1,
+          ease: "power2.out",
+          stagger: 0.1,
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top 50%",
+            end: "bottom 10%",
+            scrub: 2,
+            toggleActions: "play none none none",
+          },
+        });
+
+        ScrollTrigger.create({
+          trigger: containerRef.current,
+          start: "bottom 10%",
+          end: "bottom -20%",
+        });
+
+        ScrollTrigger.refresh();
+      }, containerRef);
+
+      return () => {
+        // Cleanup GSAP context + triggers
+        if (gsapCtx.current) {
+          gsapCtx.current.revert();
+          gsapCtx.current = null;
+        }
+      };
+    },
+    { dependencies: [imagesLoaded], scope: containerRef }
+  );
 
   const handleViewAllEvents = () => {
-    navigate('/events');
+    navigate("/events");
   };
 
   // Loading skeleton while images are loading

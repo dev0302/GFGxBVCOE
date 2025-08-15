@@ -10,6 +10,7 @@ import { SaxCalendarTickTwotone } from '@meysam213/iconsax-react'
 import { SaxUserTwotone } from '@meysam213/iconsax-react'
 
 
+
 function Navbar() {
   const navMain = useRef();
   const navList = useRef();
@@ -53,13 +54,20 @@ function Navbar() {
         "-=0.2"
       );
   }, []);
+  
+  const darkRoutes = ["/events"];
+  const isDarkNavbar = darkRoutes.includes(location.pathname);
 
   
 
   return (
     <div
       ref={navMain}
-      className="NAVBAR_CONTAINER fixed top-0 left-0 right-0 z-50 w-full flex items-center justify-between px-6 py-3 bg-gradient-to-r from-green-900/95 via-green-800/95 to-emerald-800/95 backdrop-blur-xl border-b border-green-400/30 shadow-2xl"
+      className={`NAVBAR_CONTAINER fixed top-0 left-0 right-0 z-50 w-full flex items-center justify-between px-6 py-3 
+    ${isDarkNavbar 
+      ? "bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e]" 
+      : "bg-gradient-to-r from-green-900/95 via-green-800/95 to-emerald-800/95"} 
+    backdrop-blur-xl border-b border-green-400/30 shadow-2xl`}
     >
       <div ref={logoRef} className="flex items-center gap-3">
         <NavLink to="/" className="block">
