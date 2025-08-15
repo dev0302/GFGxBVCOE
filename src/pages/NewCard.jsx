@@ -14,9 +14,10 @@ function NewCard({name,branch,year,position,p0,image,p1,p2,email,instaLink,linke
   return (
     // bg-[#ECF0EF]
     
-    <div className='flex justify-center items-center  font-poppins text-[#111827]'>
+    <div className='mt-2 flex justify-center items-center  font-poppins text-[#111827]'>
         
-      <div className="ring-1 ring-black/30 rounded-[32px] w-[300px] h-[460px] bg-white shadow-md overflow-hidden">
+      <div className="ring-2 ring-green-500/30
+ rounded-[32px] w-[300px] h-[460px] bg-white shadow-md overflow-hidden">
         <img
           src={image}
           alt="Sophie Bennett"
@@ -47,7 +48,7 @@ function NewCard({name,branch,year,position,p0,image,p1,p2,email,instaLink,linke
                  
               
             </div>
-            <button className='bg-[#e3e2e16f] px-2 py-1 rounded-full border text-xs font-medium hover:bg-blue-600 transition flex gap-1'>
+            <button className='bg-[#e3e2e16f] px-2 py-1 rounded-full border text-xs font-medium hover:bg-green-200 transition flex gap-1'>
               View Timeline <img src={activity} className='h-4' alt="nf" />
             </button>
           </div>
