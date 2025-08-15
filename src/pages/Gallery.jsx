@@ -6,7 +6,7 @@ import { ScrollTrigger } from 'https://esm.sh/gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 // Easily change the scroll speed here. Higher number = slower scroll.
-const SCROLL_DURATION = 20;
+const SCROLL_DURATION = 15;
 
 const Gallery = () => {
     const containerRef = useRef(null);
@@ -44,9 +44,9 @@ const Gallery = () => {
                 if (!column) return;
 
                 gsap.fromTo(column, 
-                    { yPercent: -25 },
+                    { yPercent: -50 },
                     { 
-                        yPercent: 100,
+                        yPercent: -25,
                         duration: SCROLL_DURATION,
                         ease: 'none',
                         repeat: -1,
@@ -71,11 +71,11 @@ const Gallery = () => {
     const ImageColumn = ({ images, columnRef }) => (
         <div ref={columnRef} className="flex flex-col gap-4">
             {[...images, ...images, ...images, ...images].map((image, index) => (
-                <div key={`${image.id}-${index}`} className="w-[400px] group relative ">
+                <div key={`${image.id}-${index}`} className="w-[400px] rounded-2xl shadow-lg group relative">
                     <img 
                         src={image.src} 
                         alt={image.title} 
-                        className="w-full h-auto rounded-2xl shadow-lg object-cover transition-transform duration-500  "
+                        className="w-full h-auto rounded-2xl object-cover transition-transform duration-500 "
                         onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/600x400/000000/ffffff?text=Image+Failed+to+Load`; }}
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-end p-4 rounded-2xl">
@@ -87,7 +87,7 @@ const Gallery = () => {
     );
 
     return (
-        <div ref={containerRef} className="min-h-screen w-full bg-gradient-to-b from-black via-green-950 to-black overflow-hidden text-white font-nunito">
+        <div ref={containerRef} className="relative min-h-screen w-full bg-gradient-to-b from-black via-green-950 to-black overflow-hidden text-white font-nunito">
             {/* Hero Section */}
             <section ref={heroRef} className="pt-32 pb-20 relative text-center z-20">
                 <div className="relative z-10 max-w-4xl mx-auto px-4">
@@ -100,8 +100,8 @@ const Gallery = () => {
                 </div>
             </section>
 
-            {/* Scrolling Gallery Section */}
-            <div className="absolute inset-0 h-full w-full flex justify-center gap-4 py-10">
+            {/* Scrolling Gallery Section - No longer absolute */}
+            <div className="flex justify-center gap-4">
                 <ImageColumn images={column1Images} columnRef={column1Ref} />
                 <ImageColumn images={column2Images} columnRef={column2Ref} />
                 <ImageColumn images={column3Images} columnRef={column3Ref} />
