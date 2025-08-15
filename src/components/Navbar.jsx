@@ -54,7 +54,7 @@ function Navbar() {
       );
   }, []);
 
-  const isTeamPage = location.pathname === "/team";
+  
 
   return (
     <div
