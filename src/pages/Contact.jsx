@@ -180,13 +180,13 @@ const contact = () => {
                                         <p className="text-green-200">BVCOE, New Delhi, India</p>
                                     </div>
                                 </a>
-                                <a href="mailto:contact@gfg-bvcoe.com" className="flex items-center space-x-4 group">
+                                <a href="mailto:geeksforgeeksbvp@gmail.com" className="flex items-center space-x-4 group">
                                     <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                                         <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-bold text-white group-hover:text-teal-300 transition-colors duration-300">Email Us</h3>
-                                        <p className="text-green-200">contact@gfg-bvcoe.com</p>
+                                        <p className="text-green-200">geeksforgeeksbvp@gmail.com</p>
                                     </div>
                                 </a>
                             </div>
