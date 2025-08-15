@@ -2,7 +2,8 @@ import { useGSAP } from "@gsap/react";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useRef } from "react";
+import { useRef , useState } from "react";
+import EventModal from "./EventModal";
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -13,69 +14,185 @@ const Events = () => {
   const eventsRef = useRef();
   const navigate = useNavigate();
 
+
+  // State to manage the selected event for the modal
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
+
   // Sample events data
   const events = [
-    {
-      id: 1,
-      title: "Web Development Workshop",
-      date: "March 15, 2024",
-      time: "2:00 PM - 5:00 PM",
-      location: "Room 301, Block A",
-      description: "Learn modern web development techniques with hands-on projects using React, Node.js, and MongoDB.",
-      category: "Workshop",
-      image: "/src/images/gfg1.jpg"
-    },
-    {
-      id: 2,
-      title: "Hackathon 2024",
-      date: "March 22-23, 2024",
-      time: "24 Hours",
-      location: "Main Auditorium",
-      description: "Join our annual hackathon and build innovative solutions. Great prizes and networking opportunities!",
-      category: "Hackathon",
-      image: "/src/images/gfg2.jpg"
-    },
-    {
-      id: 3,
-      title: "DSA Masterclass",
-      date: "March 30, 2024",
-      time: "10:00 AM - 1:00 PM",
-      location: "Computer Lab 2",
-      description: "Master Data Structures and Algorithms with our expert-led session. Perfect for interview preparation.",
-      category: "Masterclass",
-      image: "/src/images/gfg3.jpg"
-    },
-    {
-      id: 4,
-      title: "AI & Machine Learning",
-      date: "April 5, 2024",
-      time: "3:00 PM - 6:00 PM",
-      location: "Room 205, Block B",
-      description: "Explore the world of Artificial Intelligence and Machine Learning with practical examples.",
-      category: "Workshop",
-      image: "/src/images/gfg4.jpg"
-    },
-    {
-      id: 5,
-      title: "Code Review Session",
-      date: "April 12, 2024",
-      time: "4:00 PM - 6:00 PM",
-      location: "Online (Zoom)",
-      description: "Get your code reviewed by industry professionals and learn best practices.",
-      category: "Session",
-      image: "/src/images/gfg5.jpg"
-    },
-    {
-      id: 6,
-      title: "Career Fair",
-      date: "April 20, 2024",
-      time: "10:00 AM - 4:00 PM",
-      location: "Main Campus",
-      description: "Connect with top tech companies and explore internship and job opportunities.",
-      category: "Career",
-      image: "/src/images/gfgLogo.png"
-    }
-  ];
+  {
+    id: 1,
+    title: "InnoVogue",
+    date: "March 5, 2024",
+    time: "10:00",
+    location: "BVCOE, New Delhi",
+    category: "Ideathon",
+    description: "Participants in the Ideathon collaborated to develop innovative solutions for real-world challenges.", // Short description for the card
+    modalDescription: "The Geeks for Geeks Ideathon, in a unique collaboration with Venuva, our college's esteemed fashion society, was a dynamic event that brought together a diverse group of innovators and problem-solvers. This fusion of technology and creative design challenged participants to develop groundbreaking solutions at the intersection of their fields. Attendees engaged in intensive brainstorming, received invaluable guidance from industry mentors, and pitched their final concepts to a panel of expert judges, successfully fostering a spirit of cross-disciplinary innovation and community.", // Detailed description for the modal
+    galleryImages: [
+      "", // Main image
+      "",
+      "",
+      ""
+    ],
+    speakers: [
+      { name: "Mohit Tiwari", title: "Judge" },
+    ],
+    agenda: [
+      "Team Formation & Ideation",
+      "Mentorship Round",
+      "Idea & Business Pitching",
+      "Certificate Distribution & Closing",
+    ],
+    prerequisites: [
+      "A passion for problem-solving and a drive to create innovative solutions.",
+      "A collaborative mindset with a willingness to contribute skills and learn from others in a team environment.",
+      "An interest in the intersection of technology and creative fields like fashion and design.",
+    ],
+    targetAudience: "Aspiring Entrepreneurs"
+  },
+  {
+    id: 2,
+    title: "Pyhunt",
+    date: "March 6, 2024",
+    time: "10:00",
+    location: "BVCOE, New Delhi",
+    category: "Quizzing",
+    description: "PYHUNT was a competitive event that tested participants' Python skills through a challenging technical quiz and a final tech-themed Bingo round.",
+    modalDescription: "PYHUNT was a highly engaging event designed to challenge and celebrate the Python 🐍 proficiency of our student community. With an impressive turnout of approximately 100 participants, the event aimed to test a wide range of skills through a unique two-round format: a comprehensive technical quiz followed by a fun, interactive Bingo round. The structure was crafted to engage enthusiasts of all levels, from beginners to advanced coders, while fostering a strong sense of community and encouraging critical thinking.",
+    galleryImages: [
+      "", // Main image
+      "",
+      "",
+      ""
+    ],
+    speakers: [
+      { name: "Dr. Shristi Vashishtha", title: "Faculty Advisor" }
+    ],
+    agenda: [
+      "The Python Quiz",
+      "Tech Bingo",
+      "Feedback Session & Closing",
+    ],
+    prerequisites: [
+      "Basic knowledge of Python",
+    ],
+    targetAudience: "tech Community looking for a fun and competitive event"
+  },
+  {
+    id: 3,
+    title: "",
+    date: "",
+    time: "",
+    location: "",
+    category: "",
+    description: "",
+    modalDescription: "",
+    galleryImages: [
+      "", // Main image
+      "",
+      "",
+      ""
+    ],
+    speakers: [
+      { name: "", title: "" }
+    ],
+    agenda: [
+      "",
+      "",
+      "",
+    ],
+    prerequisites: [
+      "",
+    ],
+    targetAudience: ""
+  },
+  {
+    id: 4,
+    title: "AI & Machine Learning",
+    date: "",
+    time: "",
+    location: "",
+    category: "Workshop",
+    description: "",
+    modalDescription: "",
+    galleryImages: [
+      "/src/images/gfg4.jpg", // Main image
+      "",
+      "",
+      ""
+    ],
+    speakers: [
+      { name: "", title: "" }
+    ],
+    agenda: [
+      "",
+      "",
+      "",
+    ],
+    prerequisites: [
+      "",
+    ],
+    targetAudience: ""
+  },
+  {
+    id: 5,
+    title: "Code Review Session",
+    date: "",
+    time: "",
+    location: "",
+    category: "Session",
+    description: "",
+    modalDescription: "",
+    galleryImages: [
+      "/src/images/gfg5.jpg", // Main image
+      "",
+      "",
+      ""
+    ],
+    speakers: [
+      { name: "", title: "" }
+    ],
+    agenda: [
+      "",
+      "",
+      "",
+    ],
+    prerequisites: [
+      "",
+    ],
+    targetAudience: ""
+  },
+  {
+    id: 6,
+    title: "Career Fair",
+    date: "",
+    time: "",
+    location: "",
+    category: "Career",
+    description: "",
+    modalDescription: "",
+    galleryImages: [
+      "/src/images/gfgLogo.png", // Main image
+      "",
+      "",
+      ""
+    ],
+    speakers: [
+      { name: "", title: "" }
+    ],
+    agenda: [
+      "",
+      "",
+      "",
+    ],
+    prerequisites: [
+      "",
+    ],
+    targetAudience: ""
+  }
+];
 
   // GSAP animations
   useGSAP(() => {
@@ -115,6 +232,14 @@ const Events = () => {
 
   const handleNavigateToContact = () => {
     navigate('/contact');
+  };
+
+  const handleKnowMoreClick = (event) => {
+    setSelectedEvent(event);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedEvent(null);
   };
 
   return (
@@ -211,7 +336,10 @@ const Events = () => {
                   </p>
 
                   {/* Register Button */}
-                  <button className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-green-500/25">
+                  <button 
+                    onClick={() => handleKnowMoreClick(event)}
+                    className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-green-500/25"
+                  >
                     Know More
                   </button>
                 </div>
@@ -238,6 +366,9 @@ const Events = () => {
           </div>
         </div>
       </section>
+
+    {/* RENDER THE MODAL */}
+      <EventModal event={selectedEvent} onClose={handleCloseModal} />
     </div>
   );
 };
