@@ -4,15 +4,15 @@ import About from "./pages/About"
 import Team from "./pages/Team"
 import Events from "./pages/Events"
 import Navbar from "./components/Navbar"
-<<<<<<< HEAD
 import NotFound from "./components/NotFound"
-=======
 import Contact from "./pages/Contact"
->>>>>>> 4ab432d268e46033adfc9ac8a37430eca3107692
+import Team2 from "./pages/Team2"
+
+
 
 function App() {
   return (
-    <>
+    <div className="min-h-screen flex flex-col overflow-x-hidden">
     
       <Navbar />
       <Routes>
@@ -20,13 +20,11 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/team" element={<Team />} />
         <Route path="/events" element={<Events />} />
-<<<<<<< HEAD
         <Route path="/notfound" element={<NotFound></NotFound>} />
-=======
         <Route path="/contact" element={<Contact />} />
->>>>>>> 4ab432d268e46033adfc9ac8a37430eca3107692
+        <Route path="/team2" element={<Team2></Team2>}></Route>
       </Routes>
-    </>
+    </div>
   )
 }
 export default App
