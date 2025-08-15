@@ -1,18 +1,15 @@
 import React from "react";
 import gfgLogo from "../images/gfgLogo.png";
 import footerBg from "../images/footerbg.jpg"; // Import the background image
-import feather from 'feather-icons';
+import { Instagram } from 'react-feather';
 import { useEffect } from "react";
 
 
 const Footer = () => {
-    useEffect(() => {
-    // Replace all icons after component mounts
-    feather.replace();
-  }, []);
+    
   return (
     <section 
-      className="relative text-[#cbd5e1] font-inter px-4 py-16 md:mt-10 font-sans overflow-hidden"
+      className="relative text-[#cbd5e1] font-inter px-4 pt-12 pb-10 md:mt-10 font-sans overflow-hidden"
       style={{
         backgroundImage: `url(${footerBg})`,
         backgroundSize: 'cover',
@@ -22,7 +19,7 @@ const Footer = () => {
       }}
     >
       {/* Dark overlay for better text contrast */}
-      <div className="absolute inset-0 bg-[#013220]/70 backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-[#013220]/70 backdrop-blur-sm overflow-hidden"></div>
 
       <footer className="max-w-[1200px] mx-auto relative z-10">
         <div className="flex flex-wrap justify-between gap-12 md:gap-16">
@@ -58,11 +55,18 @@ const Footer = () => {
             </h3>
             <div className="flex flex-col gap-3 text-[#cbd5e1] text-base">
               <p className="flex items-center gap-3">
-                <i data-feather="message-square" className="footer-small-icon"></i>
-                 horizon_discord
+                <Instagram className="text-green-500 hover:text-green-400 transition-colors" size={24} />
+                 <a
+                  href="https://discord.gg/6X7Gc7Np"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#38bdf8] hover:text-[#0ea5e9] transition-colors duration-300"
+                >
+                  join us on discord
+                </a>
               </p>
               <p className="flex items-center gap-3">
-                <i data-feather="instagram" className="footer-small-icon"></i>
+                <Instagram className="text-green-500 hover:text-green-400 transition-colors" size={24} />
                 <a
                   href="https://www.instagram.com/gfg_bvcoe?utm_source=qr&igsh=MWZzdTB2dWl5dmt6dQ=="
                   target="_blank"
@@ -75,14 +79,14 @@ const Footer = () => {
               
       
               <p className="flex items-center gap-3">
-                <i data-feather="linkedin" className="footer-small-icon"></i>
+                <Instagram className="text-green-500 hover:text-green-400 transition-colors" size={24} />
                 <a
                   href="https://www.linkedin.com/company/geeksforgeeks-campus-body-bvcoe/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#38bdf8] hover:text-[#7dd3fc] transition-colors duration-300"
                 >
-                  linkedin.com/gfg-bvcoe
+                  linkedin.com/company/gfg-bvcoe
                 </a>
               </p>
             </div>
@@ -91,7 +95,7 @@ const Footer = () => {
 
         {/* Footer Bottom */}
         <div className="mt-12 border-t border-[#80a8813b] pt-6 text-center text-[#cbd5e1] text-sm opacity-70">
-          <p>&copy; 2025 GFG BVCOE. All rights reserved.</p>
+          <p>&copy; 2025 GeeksforGeeks Campus Body - BVCOE. All rights reserved.</p>
           <p className="mt-2 text-white">
             Developed by -{" "}
             <a

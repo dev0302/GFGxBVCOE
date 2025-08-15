@@ -8,6 +8,8 @@ import { SaxInfoCircleLinear } from '@meysam213/iconsax-react'
 import { SaxProfile2UserLinear } from '@meysam213/iconsax-react'
 import { SaxCalendarTickTwotone } from '@meysam213/iconsax-react'
 import { SaxUserTwotone } from '@meysam213/iconsax-react'
+NavLink
+
 
 function Navbar() {
   const navMain = useRef();
@@ -152,12 +154,14 @@ function Navbar() {
         </ul>
       </nav>
 
-      <button
+      <NavLink to="/notfound">
+        <button
         ref={joinBtn}
         className="py-2 px-5 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-xl hover:shadow-green-500/40 border border-green-300/30 text-sm hover:scale-105"
       >
         Join Us
       </button>
+      </NavLink>
     </div>
   );
 }
