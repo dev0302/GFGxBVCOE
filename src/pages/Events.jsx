@@ -243,7 +243,7 @@ const Events = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e]">
+    <div className="min-h-screen darkthemebg">
       {/* Hero Section */}
       <section ref={heroRef} className="pt-32 pb-20 relative overflow-hidden">
         {/* Background Pattern */}
