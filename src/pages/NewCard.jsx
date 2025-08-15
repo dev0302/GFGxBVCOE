@@ -1,6 +1,5 @@
 import React from 'react';
 // import img from "../assets/image.png"
-import { Users, Check } from 'react-feather'; // Feather icons
 import verify from "../assets/verify.svg"
 import profile from "../assets/profile.svg"
 import tick from "../assets/tick-circle.svg"
