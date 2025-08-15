@@ -1,7 +1,6 @@
 import React from "react";
 import gfgLogo from "../images/gfgLogo.png";
 import footerBg from "../images/footerbg.jpg"; // Import the background image
-import { Instagram } from 'react-feather';
 import { useEffect } from "react";
 
 
