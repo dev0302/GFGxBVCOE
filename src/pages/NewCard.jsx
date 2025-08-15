@@ -3,7 +3,7 @@ import verify from "../assets/verify.svg";
 import profile from "../assets/profile.svg";
 import tick from "../assets/tick-circle.svg";
 import activity from "../assets/activity.svg";
-import TimelineModal from './TimelineModal';
+// import TimelineModal from './TimelineModal';
 
 // I've added p0, p1, p2 to receive timeline data
 function NewCard({ name, position, image, p0, p1, p2 }) {
