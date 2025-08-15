@@ -46,7 +46,7 @@ const Gallery = () => {
                 gsap.fromTo(column, 
                     { yPercent: -25 },
                     { 
-                        yPercent: 0,
+                        yPercent: 100,
                         duration: SCROLL_DURATION,
                         ease: 'none',
                         repeat: -1,
