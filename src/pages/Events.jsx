@@ -52,6 +52,7 @@ const Events = () => {
     date: "Feburary 6, 2024",
     time: "10:00 am",
     location: "BVCOE, New Delhi",
+    category: "Speaker Session",
     description: "Celebrating the grand inauguration where we proudly introduced our society’s mission and vision to the college community",
     modalDescription: "The event marked the beginning of an exciting journey, fostering innovation, collaboration, and growth. With an overwhelming response, we set the stage for future achievements and impactful initiatives.",
     galleryImages: [
