@@ -16,6 +16,7 @@ function NewCard({ person }) {
     <>
       <div className='flex justify-center items-center font-nunito text-white'>
         <div className="
+          p-2
           group
           w-[280px] h-[420px] 
           flex flex-col
@@ -29,15 +30,15 @@ function NewCard({ person }) {
           hover:shadow-xl hover:shadow-cyan-500/20
         ">
           
-          <div className='w-full h-[70%] overflow-hidden'>
+          <div className='w-full h-[70%] overflow-hidden rounded-t-3xl'>
             <img 
               src={image} 
               alt={name} 
-              className='w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-105' 
+              className='w-full h-full object-cover object-top rounded-3xl transition-transform duration-300 group-hover:scale-105 hover:rounded-3xl' 
             />
           </div>
 
-          <div className='p-5 flex flex-col flex-grow'>
+          <div className='p-5 py-6 flex flex-col gap-1 flex-grow'>
             <div>
               <p className='text-lg font-bold font-montserrat flex items-center gap-1.5 text-white'>
                 {name}
@@ -48,7 +49,7 @@ function NewCard({ person }) {
               </p>
             </div>
             
-            <div className='flex-grow'></div>
+            <div className='flex-grow py-2'></div>
 
             <div className='flex justify-between items-center text-sm'>
               {/* ✨ CHANGE: Updated icon colors and added a hover glow effect. */}
