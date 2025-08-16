@@ -1,7 +1,6 @@
 import { Route, Routes } from "react-router-dom"
 import Home from "./pages/Home"
 import About from "./pages/About"
-import Team from "./pages/Team"
 import Events from "./pages/Events"
 import Navbar from "./components/Navbar"
 import NotFound from "./components/NotFound"
@@ -22,7 +21,6 @@ function App() {
         <Route path="/notfound" element={<NotFound></NotFound>} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/gallery" element={<Gallery />} />
-        <Route path="/team2" element={<Team></Team>}></Route>
       </Routes>
     </div>
   )

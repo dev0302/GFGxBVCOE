@@ -60,7 +60,7 @@ body {
     min-height: 160px;
     min-width: 160px;
   }
-  
+
   .mobile-grid {
     gap: 1rem !important;
     row-gap: 2rem !important;
@@ -72,7 +72,7 @@ body {
     min-height: 140px;
     min-width: 140px;
   }
-  
+
   .mobile-grid {
     gap: 1.5rem !important;
     row-gap: 2.5rem !important;
@@ -88,24 +88,6 @@ body {
 }
 
 
-/* Shimmer effect: wider and longer travel */
-#about_us_para::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -50%;
-  /* start far left */
-  width: 200%;
-  /* double width for longer sweep */
-  height: 100%;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, 0.15),
-      transparent);
-  transform: translateX(-100%);
-  animation: shimmer 2s linear infinite;
-  /* slightly faster */
-}
 
 /* Bottom underline on hover */
 #about_us_para::after {
@@ -127,21 +109,7 @@ body {
 }
 
 /* Animations */
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
 
-  50% {
-    transform: translateX(100%);
-  }
-
-  100% {
-    transform: translateX(100%);
-  }
-
-  /* travels twice the width */
-}
 
 @keyframes float {
 
@@ -158,20 +126,7 @@ body {
   }
 }
 
-@keyframes glow {
 
-  0% {
-    text-shadow: 0 0 5px rgba(166, 174, 208, 0.2);
-  }
-
-  50% {
-    text-shadow: 0 0 20px rgba(187, 192, 212, 0.4);
-  }
-
-  100% {
-    text-shadow: 0 0 5px rgba(167, 175, 211, 0.2);
-  }
-}
 
 #about_us_para {
   animation: float 2.5s ease-in-out infinite, glow 2.5s ease-in-out infinite;
