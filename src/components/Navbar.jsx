@@ -55,7 +55,8 @@ function Navbar() {
       );
   }, []);
   
-  const darkRoutes = ["/events"];
+  const location = useLocation();
+  const darkRoutes = ["/events", "/contact","/gallery","/notfound"];
   const isDarkNavbar = darkRoutes.includes(location.pathname);
 
   

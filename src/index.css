@@ -39,6 +39,44 @@ body {
 .my-grid-item {
   grid-row: var(--r);
   grid-column: var(--c);
+  min-height: 120px;
+  min-width: 120px;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.my-grid-item img {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.my-grid-item:hover img {
+  opacity: 0.8;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .my-grid-item {
+    min-height: 160px;
+    min-width: 160px;
+  }
+  
+  .mobile-grid {
+    gap: 1rem !important;
+    row-gap: 2rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .my-grid-item {
+    min-height: 140px;
+    min-width: 140px;
+  }
+  
+  .mobile-grid {
+    gap: 1.5rem !important;
+    row-gap: 2.5rem !important;
+  }
 }
 
 .darkthemebg {
