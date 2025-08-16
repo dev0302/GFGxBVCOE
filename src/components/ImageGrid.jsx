@@ -99,9 +99,13 @@ function ImageGrid() {
   return (
     <div className="w-full bg-[#161629] pt-20 relative">
       <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-10">
-        <NavLink to="/gallery"><button>
-          <h1 className="text-5xl mb-4">Click to View All Images</h1>
-        </button></NavLink>
+        <NavLink to="/gallery">
+          <button className="relative overflow-hidden px-8 py-3 rounded-full group transition-all duration-500 ease-in-out font-bold text-lg md:text-2xl text-white backdrop-blur-sm bg-white/20 hover:bg-white/40 border border-transparent hover:border-white/50">
+            <span className="relative z-10">Click to View All Images</span>
+            <span className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+            <span className="absolute inset-0 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-in-out bg-white/10"></span>
+          </button>
+        </NavLink>
       </div>
 
       <div className="grid grid-cols-3 md:grid-cols-8 lg:grid-cols-8 grid-rows-6 gap-2 md:gap-2 mobile-grid relative z-0">
@@ -124,7 +128,7 @@ function ImageGrid() {
           <img src="/gridimg5.webp" alt="Image 5" className="w-full h-full object-cover rounded-lg" />
         </div>
         <div className="elem my-grid-item" style={{ "--r": 4, "--c": 4 }}>
-             <img src="/gridimg6.webp" alt="Image 7" className="w-full h-full object-cover rounded-lg" />
+          <img src="/gridimg6.webp" alt="Image 6" className="w-full h-full object-cover rounded-lg" />
         </div>
 
         <div className="elem my-grid-item" style={{ "--r": 4, "--c": 1 }}>
