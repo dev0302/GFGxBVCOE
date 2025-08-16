@@ -46,67 +46,91 @@ const Events = () => {
 
   // Sample events data
   const events = [
-  {
+   {
     id: 1,
-    title: "InnoVogue",
-    date: "March 5, 2024",
-    time: "10:00",
+    title: "Inaugration Day",
+    date: "Feburary 6, 2024",
+    time: "10:00 am",
     location: "BVCOE, New Delhi",
-    category: "Ideathon",
-    description: "Participants in the Ideathon collaborated to develop innovative solutions for real-world challenges.", // Short description for the card
-    modalDescription: "The Geeks for Geeks Ideathon, in a unique collaboration with Venuva, our college's esteemed fashion society, was a dynamic event that brought together a diverse group of innovators and problem-solvers. This fusion of technology and creative design challenged participants to develop groundbreaking solutions at the intersection of their fields. Attendees engaged in intensive brainstorming, received invaluable guidance from industry mentors, and pitched their final concepts to a panel of expert judges, successfully fostering a spirit of cross-disciplinary innovation and community.", // Detailed description for the modal
+    description: "Celebrating the grand inauguration where we proudly introduced our society’s mission and vision to the college community",
+    modalDescription: "The event marked the beginning of an exciting journey, fostering innovation, collaboration, and growth. With an overwhelming response, we set the stage for future achievements and impactful initiatives.",
     galleryImages: [
-      "", // Main image
+      "",
       "",
       "",
       ""
     ],
     speakers: [
-      { name: "Mohit Tiwari", title: "Judge" },
+      { name: "Dr. Shristi Vashishtha", title: "Faculty Advisor"}
     ],
     agenda: [
-      "Team Formation & Ideation",
-      "Mentorship Round",
-      "Idea & Business Pitching",
-      "Certificate Distribution & Closing",
+      "Forming a community for Tech Enthusiasts"
     ],
     prerequisites: [
-      "A passion for problem-solving and a drive to create innovative solutions.",
-      "A collaborative mindset with a willingness to contribute skills and learn from others in a team environment.",
-      "An interest in the intersection of technology and creative fields like fashion and design.",
+      "",
     ],
-    targetAudience: "Aspiring Entrepreneurs"
-  },
+    targetAudience: "Anyone with a young and curious mind."
+   },
   {
     id: 2,
-    title: "Pyhunt",
-    date: "March 6, 2024",
-    time: "10:00",
-    location: "BVCOE, New Delhi",
-    category: "Quizzing",
-    description: "PYHUNT was a competitive event that tested participants' Python skills through a challenging technical quiz and a final tech-themed Bingo round.",
-    modalDescription: "PYHUNT was a highly engaging event designed to challenge and celebrate the Python 🐍 proficiency of our student community. With an impressive turnout of approximately 100 participants, the event aimed to test a wide range of skills through a unique two-round format: a comprehensive technical quiz followed by a fun, interactive Bingo round. The structure was crafted to engage enthusiasts of all levels, from beginners to advanced coders, while fostering a strong sense of community and encouraging critical thinking.",
+    title: "GeekHunt: A Tech Fiesta",
+    date: "April 12, 2025", // Assumed past date for a major event
+    time: "10:00 AM - 3:00 PM", // Assumed event duration
+    location: "Main Auditorium, Bharati Vidyapeeth, Delhi", // Assumed for a large event
+    category: "Tech Fest / Community Event",
+    description: "A vibrant tech fest designed to foster community and knowledge sharing through fun events like TechMeme and TechQuizzee.",
+    modalDescription: "GeekHunt fosters a vibrant community of tech enthusiasts while promoting creativity and knowledge sharing. Participants learn the importance of engaging with current tech trends and the power of humor in making complex topics relatable. The interactive formats enhance information retention, highlight knowledge gaps, and encourage collaboration. The event underscores effective communication skills and the value of peer feedback, creating a dynamic environment where participants can connect, learn, and grow together.",
     galleryImages: [
-      "", // Main image
       "",
       "",
       ""
+    ],
+    speakers: [
+      { name: "Dr. Shristi Vashishtha", title: "Faculty Advisor"},
+    ],
+    agenda: [
+      "Event Kick-off & Introduction",
+      "TechMeme: Meme Creation & Submission Showcase",
+      "TechQuizzee: Interactive Tech Trivia Challenge",
+      "Winner Announcements & Networking Session"
+    ],
+    prerequisites: [
+      "A love for technology and a good sense of humor."
+    ],
+    targetAudience: "All tech enthusiasts, from beginners to experts, looking to connect, learn, and have fun in a vibrant community setting."
+  },
+  {
+    id: 3,
+    title: "Pyhunt: A Python Challenge",
+    date: "March 6, 2024",
+    time: "10:00 AM - 4:00 PM", // Inferred from registration time
+    location: "C-105, Bharati Vidyapeeth, Delhi",
+    category: "Quiz / Programming Competition",
+    description: "A two-round event designed to test Python proficiency through a challenging traditional quiz and a fun, interactive tech bingo.",
+    modalDescription: "Pyhunt is designed to assess and celebrate Python proficiency through two engaging rounds. The event kicks off with a comprehensive quiz featuring challenging questions, jumbled-code puzzles, and rapid-fire queries. Top teams advance to an exhilarating Bingo round, adding a thrilling and strategic twist to the competition. The event aims to engage participants of all skill levels and foster a sense of community among tech enthusiasts.",
+    galleryImages: [
+      "src/images/Pyhunt.webp", // Main image
+      "src/images/Pyhunt1.webp",
+      "src/images/Pyhunt2.webp",
+      "src/images/Pyhunt3.webp",
+      "src/images/Pyhunt4.webp"
     ],
     speakers: [
       { name: "Dr. Shristi Vashishtha", title: "Faculty Advisor" }
     ],
     agenda: [
-      "The Python Quiz",
-      "Tech Bingo",
-      "Feedback Session & Closing",
+      "Offline Registration (10 AM - 1 PM)",
+      "Round 1: Comprehensive Python Quiz",
+      "Round 2: The Bingo Challenge (Top 9 Teams)",
+      "Feedback Session & Winner Announcements"
     ],
     prerequisites: [
-      "Basic knowledge of Python",
+      "Basic to intermediate knowledge of Python programming concepts.",
     ],
-    targetAudience: "tech Community looking for a fun and competitive event"
+    targetAudience: "Students and programmers of all skill levels looking to test and showcase their Python knowledge in a fun, competitive environment."
   },
   {
-    id: 3,
+    id: 4,
     title: "AI Connect",
     date: "February 22, 2024",
     time: "2:00 PM - 4:00 PM", 
@@ -136,42 +160,47 @@ const Events = () => {
     targetAudience: "Students and tech enthusiasts interested in the fundamentals and applications of Generative AI."
   },
   {
-    id: 4,
-    title: "AI & Machine Learning",
-    date: "",
-    time: "",
-    location: "",
-    category: "Workshop",
-    description: "",
-    modalDescription: "",
+    id: 5,
+    title: "InnoVogue: The Ideathon",
+    date: "March 5, 2024",
+    time: "10:00 AM - 4:00 PM", // Inferred from registration time
+    location: "B-403, Bharati Vidyapeeth, Delhi",
+    category: "Ideathon / Pitching Competition",
+    description: "An exciting Ideathon to foster innovation and problem-solving through creative ideation, collaboration, and mentorship.",
+    modalDescription: "InnoVogue is an Ideathon designed to foster innovation and problem-solving. Participants will engage in dynamic brainstorming sessions, develop creative solutions to real-world challenges, and present their ideas in both idea pitching and business pitching rounds. The event promotes networking, community building, and entrepreneurship, with guidance from seasoned mentors.",
     galleryImages: [
-      "/src/images/gfg4.jpg", // Main image
-      "",
-      "",
-      ""
+      "src/images/Innovogue.webp", // Main image
+      "src/images/Innovogue1.webp",
+      "src/images/Innovogue2.webp",
+      "src/images/Innovogue3.webp",
+      "src/images/Innovogue4.webp",
+      "src/images/Innovogue5.webp"
     ],
     speakers: [
-      { name: "", title: "" }
+      { name: "Charvi", title: "Event Mentor" },
+      { name: "Dhruv", title: "Event Mentor" },
+      { name: "Mohit Tiwari", title: "Guest Judge" }
     ],
     agenda: [
-      "",
-      "",
-      "",
+      "Offline Registration (10 AM - 1 PM)",
+      "Mentorship Round with Industry Experts",
+      "Idea & Business Pitching Rounds",
+      "Winner Announcements & Certificate Distribution"
     ],
     prerequisites: [
-      "",
+      "A creative mindset and a passion for problem-solving.",
     ],
-    targetAudience: ""
+    targetAudience: "Aspiring innovators, student entrepreneurs, and anyone with a passion for developing solutions to real-world problems."
   },
   {
-    id: 5,
-    title: "Code Review Session",
-    date: "",
-    time: "",
-    location: "",
-    category: "Session",
-    description: "",
-    modalDescription: "",
+    id: 6,
+    title: "VichaarX: SDG Innovation Challenge",
+    date: "October 19, 2024",
+    time: "9:00 AM - 5:00 PM", // Assumed full-day event
+    location: "C-103, Bharati Vidyapeeth, Delhi",
+    category: "Innovation Challenge / Hackathon",
+    description: "A multi-round innovation challenge focused on developing feasible and scalable solutions for the UN's Sustainable Development Goals.",
+    modalDescription: "Participants will gain skills in analyzing technical feasibility, aligning solutions with global sustainability goals, and presenting ideas clearly to stakeholders. They will enhance their ability to develop actionable implementation plans and simulate real-world deployments. The event fosters creativity, critical thinking, and collaborative problem-solving within diverse teams.",
     galleryImages: [
       "/src/images/gfg5.jpg", // Main image
       "",
@@ -179,45 +208,18 @@ const Events = () => {
       ""
     ],
     speakers: [
-      { name: "", title: "" }
+      { name: "Vinamra Sharma", title: "Tech Innovator & Hackathon Veteran" }
     ],
     agenda: [
-      "",
-      "",
-      "",
+      "Introduction to UN SDGs & Problem Statements",
+      "Workshop on Technical & Financial Feasibility",
+      "Team Brainstorming & Solution Development",
+      "Final Pitch Presentations & Judging"
     ],
     prerequisites: [
-      "",
+      "A passion for technology and sustainable development.",
     ],
-    targetAudience: ""
-  },
-  {
-    id: 6,
-    title: "Career Fair",
-    date: "",
-    time: "",
-    location: "",
-    category: "Career",
-    description: "",
-    modalDescription: "",
-    galleryImages: [
-      "/src/images/gfgLogo.png", // Main image
-      "",
-      "",
-      ""
-    ],
-    speakers: [
-      { name: "", title: "" }
-    ],
-    agenda: [
-      "",
-      "",
-      "",
-    ],
-    prerequisites: [
-      "",
-    ],
-    targetAudience: ""
+    targetAudience: "Students and innovators eager to tackle global challenges through technology, strategy, and business planning."
   }
 ];
 
@@ -315,7 +317,7 @@ const Events = () => {
             <div
               className="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
               style={{
-                backgroundImage: `url('${event.image}')`,
+                backgroundImage: `url('${event.galleryImages[0]}')`,
               }}
             />
           </div>
