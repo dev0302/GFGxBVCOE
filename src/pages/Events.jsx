@@ -83,9 +83,7 @@ const Events = () => {
     description: "A vibrant tech fest designed to foster community and knowledge sharing through fun events like TechMeme and TechQuizzee.",
     modalDescription: "GeekHunt fosters a vibrant community of tech enthusiasts while promoting creativity and knowledge sharing. Participants learn the importance of engaging with current tech trends and the power of humor in making complex topics relatable. The interactive formats enhance information retention, highlight knowledge gaps, and encourage collaboration. The event underscores effective communication skills and the value of peer feedback, creating a dynamic environment where participants can connect, learn, and grow together.",
     galleryImages: [
-      "",
-      "",
-      ""
+      "/src/images/geekhunt.webp"
     ],
     speakers: [
       { name: "Dr. Shristi Vashishtha", title: "Faculty Advisor"},
