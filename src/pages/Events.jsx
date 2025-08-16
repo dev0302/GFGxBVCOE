@@ -4,15 +4,42 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef , useState } from "react";
 import EventModal from "./EventModal";
+import { useEffect } from "react";
+import Lenis from "lenis";
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
+
 
 const Events = () => {
   const containerRef = useRef();
   const heroRef = useRef();
   const eventsRef = useRef();
   const navigate = useNavigate();
+
+  useEffect(() => {
+      const lenis = new Lenis({
+        duration:4,
+        lerp: 0.1,
+        smoothWheel: true,
+      });
+  
+      // Sync Lenis scroll with ScrollTrigger
+      lenis.on("scroll", ScrollTrigger.update);
+  
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+  
+    
+    
+  
+      return () => {
+        lenis.destroy(); // cleanup on unmount
+      };
+    });
 
 
   // State to manage the selected event for the modal

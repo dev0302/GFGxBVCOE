@@ -47,8 +47,8 @@ function Home() {
   return (
     <div className="relative min-h-screen overflow-x-hidden mt-5">
       {/* Background */}
-      <div className="absolute inset-0 darkthemebg">
-        <div className="absolute inset-0 darkthemebg" ></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900">
+        <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 via-transparent to-emerald-600/20"></div>
         <div className="absolute inset-0 opacity-10">
           <div
             className="absolute inset-0"
@@ -109,7 +109,7 @@ function Home() {
           id="stats-grid"
           className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 text- font-nunito"
         >
-          <div className=" backdrop-blur-sm rounded-2xl p-6  bg-[#2a2a3d] border-2 border-gray-300 border-opacity-20 transition-all duration-300 hover:scale-105">
+          <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-105">
             <div
               id="count-members"
               className="text-3xl font-bold text-green-300 mb-2"
@@ -118,7 +118,7 @@ function Home() {
             </div>
             <div className="text-green-100">Active Members</div>
           </div>
-          <div className="backdrop-blur-sm rounded-2xl p-6 bg-[#2a2a3d] border-2 border-gray-300 border-opacity-20 transition-all duration-300 hover:scale-105">
+          <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-105">
             <div
               id="count-events"
               className="text-3xl font-bold text-emerald-300 mb-2"
@@ -127,7 +127,7 @@ function Home() {
             </div>
             <div className="text-green-100">Events Held</div>
           </div>
-          <div className="backdrop-blur-sm rounded-2xl p-6 bg-[#2a2a3d] border-2 border-gray-300 border-opacity-20 transition-all duration-300 hover:scale-105">
+          <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-105">
             <div
               id="count-workshops"
               className="text-3xl font-bold text-green-300 mb-2"
@@ -150,7 +150,7 @@ function Home() {
       </div> */}
 
       {/* image grid */}
-      <ImageGrid className="w-full backdrop-blur-sm bg-[#2a2a3d]"></ImageGrid>
+      <ImageGrid className="w-full bg-zinc-900"></ImageGrid>
 
 
       {/* footer */}
