@@ -13,7 +13,7 @@ const Footer = () => {
     
   return (
     <section 
-      className="relative text-[#cbd5e1] font-inter px-4 pt-12 pb-10 md:mt-10 font-sans overflow-hidden"
+      className="relative text-[#cbd5e1] font-inter px-4 pt-12 pb-10 font-sans overflow-hidden"
       style={{
         backgroundImage: `url(${footerBg})`,
         backgroundSize: 'cover',

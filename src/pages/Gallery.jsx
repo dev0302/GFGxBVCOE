@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import gsap from 'https://esm.sh/gsap';
 import { ScrollTrigger } from 'https://esm.sh/gsap/ScrollTrigger';
 
@@ -16,6 +16,19 @@ const Gallery = () => {
     const column1Ref = useRef(null);
     const column2Ref = useRef(null);
     const column3Ref = useRef(null);
+
+    const [windowHeight, setWindowHeight] = useState(window.innerHeight);
+
+    useEffect(() => {
+        const handleResize = () => setWindowHeight(window.innerHeight);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    
+    // 👇 ADD THIS NEW useEffect HOOK 👇
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     // Sample image data for three distinct columns
     const column1Images = [
@@ -43,6 +56,11 @@ const Gallery = () => {
                 const column = columnRef.current;
                 if (!column) return;
 
+                const items = column.querySelectorAll('div');
+                const itemHeight = items[0]?.offsetHeight || 0;
+                
+                if (!itemHeight) return;
+
                 gsap.fromTo(column, 
                     { yPercent: -50 },
                     { 
@@ -50,6 +68,7 @@ const Gallery = () => {
                         duration: SCROLL_DURATION,
                         ease: 'none',
                         repeat: -1,
+                        overwrite: 'auto'
                     }
                 );
             };
@@ -65,37 +84,40 @@ const Gallery = () => {
         }, containerRef);
 
         return () => ctx.revert();
-    }, []);
+    }, [windowHeight]);
 
     // Helper component to render a column of images
-    const ImageColumn = ({ images, columnRef }) => (
-        <div ref={columnRef} className="flex flex-col gap-6">
-            {[...images, ...images, ...images, ...images].map((image, index) => (
-                <div key={`${image.id}-${index}`} className="w-[400px] rounded-2xl group relative overflow-hidden">
-                    {/* Enhanced Shadow and Glow */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 via-emerald-500/20 to-teal-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    
-                    <img 
-                        src={image.src} 
-                        alt={image.title} 
-                        className="relative w-full h-auto rounded-2xl object-cover transition-all duration-500 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-green-500/25"
-                        onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/600x400/000000/ffffff?text=Image+Failed+to+Load`; }}
-                    />
-                    
-                    {/* Enhanced Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-6 rounded-2xl">
-                        <div className="w-full">
-                            <h3 className="text-xl font-bold text-white opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 mb-2">{image.title}</h3>
-                            <div className="w-0 group-hover:w-16 h-0.5 bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-500"></div>
+    const ImageColumn = ({ images, columnRef }) => {
+        const duplicates = Math.max(4, Math.ceil((windowHeight * 2) / 500));
+        return (
+            <div ref={columnRef} className="flex flex-col gap-6">
+                {Array(duplicates).fill().map((_, dupIndex) => (
+                    images.map((image, imgIndex) => (
+                        <div key={`${image.id}-${dupIndex}-${imgIndex}`} 
+                             className="w-[400px] rounded-2xl group relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 via-emerald-500/20 to-teal-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            
+                            <img 
+                                src={image.src} 
+                                alt={image.title} 
+                                className="relative w-full h-auto rounded-2xl object-cover transition-all duration-500 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-green-500/25"
+                                onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/600x400/000000/ffffff?text=Image+Failed+to+Load`; }}
+                            />
+                            
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-6 rounded-2xl">
+                                <div className="w-full">
+                                    <h3 className="text-xl font-bold text-white opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 mb-2">{image.title}</h3>
+                                    <div className="w-0 group-hover:w-16 h-0.5 bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-500"></div>
+                                </div>
+                            </div>
+                            
+                            <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-green-400/30 transition-all duration-500"></div>
                         </div>
-                    </div>
-                    
-                    {/* Border Glow on Hover */}
-                    <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-green-400/30 transition-all duration-500"></div>
-                </div>
-            ))}
-        </div>
-    );
+                    ))
+                ))}
+            </div>
+        )
+    }
 
     return (
         <div ref={containerRef} className="relative min-h-screen w-full overflow-hidden text-white font-nunito">
@@ -155,10 +177,12 @@ const Gallery = () => {
             </section>
 
             {/* Scrolling Gallery Section - No longer absolute */}
-            <div className="flex justify-center gap-4">
-                <ImageColumn images={column1Images} columnRef={column1Ref} />
-                <ImageColumn images={column2Images} columnRef={column2Ref} />
-                <ImageColumn images={column3Images} columnRef={column3Ref} />
+            <div className="relative h-screen w-full overflow-hidden">
+                <div className="flex justify-center gap-4 absolute top-0 left-0 w-full">
+                    <ImageColumn images={column1Images} columnRef={column1Ref} />
+                    <ImageColumn images={column2Images} columnRef={column2Ref} />
+                    <ImageColumn images={column3Images} columnRef={column3Ref} />
+                </div>
             </div>
 
             {/* Top and Bottom Fading Gradients */}
