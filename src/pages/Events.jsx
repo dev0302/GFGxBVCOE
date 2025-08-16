@@ -55,10 +55,11 @@ const Events = () => {
     description: "Celebrating the grand inauguration where we proudly introduced our society’s mission and vision to the college community",
     modalDescription: "The event marked the beginning of an exciting journey, fostering innovation, collaboration, and growth. With an overwhelming response, we set the stage for future achievements and impactful initiatives.",
     galleryImages: [
-      "",
-      "",
-      "",
-      ""
+      "/src/images/inaugration.webp",
+      "/src/images/inaugration1.webp",
+      "/src/images/inaugration2.webp",
+      "/src/images/inaugration3.webp",
+      "/src/images/inaugration4.webp"
     ],
     speakers: [
       { name: "Dr. Shristi Vashishtha", title: "Faculty Advisor"}
@@ -139,10 +140,10 @@ const Events = () => {
     description: "Dive into the fascinating world of Generative AI with live demos, expert insights, and engaging discussions.",
     modalDescription: "Embark on a journey through the realm of Generative AI as we kick off with a warm welcome and an introduction to the wonders of artificial creativity. We'll delve into the fundamentals, demystify core concepts, and showcase real-world applications through exciting live demonstrations. This event is a unique opportunity to understand how machines are capable of creating new and innovative content.",
     galleryImages: [
-      "", // Main image
-      "",
-      "",
-      ""
+      "/src/images/aiconnect.webp", // Main image
+      "/src/images/aiconnect1.webp",
+      "/src/images/aiconnect2.webp",
+      "/src/images/aiconnect4.webp"
     ],
     speakers: [
       { name: "Mr. Ritik", title: "Guest Speaker, AI Specialist" },
@@ -202,10 +203,11 @@ const Events = () => {
     description: "A multi-round innovation challenge focused on developing feasible and scalable solutions for the UN's Sustainable Development Goals.",
     modalDescription: "Participants will gain skills in analyzing technical feasibility, aligning solutions with global sustainability goals, and presenting ideas clearly to stakeholders. They will enhance their ability to develop actionable implementation plans and simulate real-world deployments. The event fosters creativity, critical thinking, and collaborative problem-solving within diverse teams.",
     galleryImages: [
-      "/src/images/gfg5.jpg", // Main image
-      "",
-      "",
-      ""
+      "/src/images/vichaarx.webp", // Main image
+      "/src/images/vichaarx1.webp",
+      "/src/images/vichaarx2.webp",
+      "/src/images/vichaarx3.webp",
+      "/src/images/vichaarx4.webp"
     ],
     speakers: [
       { name: "Vinamra Sharma", title: "Tech Innovator & Hackathon Veteran" }
