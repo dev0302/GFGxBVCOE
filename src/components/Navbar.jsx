@@ -8,7 +8,7 @@ import { SaxInfoCircleLinear } from '@meysam213/iconsax-react'
 import { SaxProfile2UserLinear } from '@meysam213/iconsax-react'
 import { SaxCalendarTickTwotone } from '@meysam213/iconsax-react'
 import { SaxUserTwotone } from '@meysam213/iconsax-react'
-
+import { SaxGalleryLinear } from '@meysam213/iconsax-react'
 
 
 function Navbar() {
@@ -144,6 +144,21 @@ function Navbar() {
             >
               <SaxCalendarTickTwotone className="mr-2"/>
               Events
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/gallery"
+              className={({ isActive }) =>
+                `flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
+                  isActive
+                    ? "text-white bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30"
+                    : "text-green-100 hover:text-white hover:bg-green-700/50 backdrop-blur-sm"
+                }`
+              }
+            >
+              <SaxGalleryLinear className="mr-2"/>
+              Gallery
             </NavLink>
           </li>
           <li>
