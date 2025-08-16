@@ -107,13 +107,13 @@ const Events = () => {
   },
   {
     id: 3,
-    title: "",
-    date: "",
-    time: "",
-    location: "",
-    category: "",
-    description: "",
-    modalDescription: "",
+    title: "AI Connect",
+    date: "February 22, 2024",
+    time: "2:00 PM - 4:00 PM", 
+    location: "A-107, Bharati Vidyapeeth, Delhi",
+    category: "Tech Talk / Workshop",
+    description: "Dive into the fascinating world of Generative AI with live demos, expert insights, and engaging discussions.",
+    modalDescription: "Embark on a journey through the realm of Generative AI as we kick off with a warm welcome and an introduction to the wonders of artificial creativity. We'll delve into the fundamentals, demystify core concepts, and showcase real-world applications through exciting live demonstrations. This event is a unique opportunity to understand how machines are capable of creating new and innovative content.",
     galleryImages: [
       "", // Main image
       "",
@@ -121,17 +121,19 @@ const Events = () => {
       ""
     ],
     speakers: [
-      { name: "", title: "" }
+      { name: "Mr. Ritik", title: "Guest Speaker, AI Specialist" },
+      { name: "Ms. Manya", title: "Guest Speaker, AI Specialist" },
     ],
     agenda: [
-      "",
-      "",
-      "",
+      "Welcome & Introduction to Generative AI",
+    "Live Demonstrations of AI Creativity",
+    "Guest Speaker Session with Industry Experts",
+    "Interactive Q&A and Discussion Panel",
     ],
     prerequisites: [
-      "",
+      "An interest in Artificial Intelligence and technology.",
     ],
-    targetAudience: ""
+    targetAudience: "Students and tech enthusiasts interested in the fundamentals and applications of Generative AI."
   },
   {
     id: 4,
