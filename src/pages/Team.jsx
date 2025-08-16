@@ -236,25 +236,25 @@ const Team = () => {
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div 
           ref={modalRef}
-          className="bg-gradient-to-br from-green-900/95 to-emerald-900/95 backdrop-blur-xl border border-green-400/30 rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          className="bg-gradient-to-br from-[#1e1e2f]/95 to-[#2c2c3e]/95 backdrop-blur-xl border border-gray-400/30 rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <img 
-                src={member.image} 
-                alt={member.name}
-                className="w-16 h-16 rounded-full object-cover border-2 border-green-400"
-                onError={(e) => {
-                  e.target.src = '/src/images/gfgLogo.png';
-                  e.target.className = 'w-16 h-16 rounded-full object-contain bg-gray-800 border-2 border-green-400';
-                }}
-              />
-              <div>
-                <h2 className="text-2xl font-bold text-white font-['Inter']">{member.name}</h2>
-                <p className="text-green-300 text-sm">{member.branch} • {member.year} Year</p>
+                          <div className="flex items-center gap-4">
+                <img 
+                  src={member.image} 
+                  alt={member.name}
+                  className="w-16 h-16 rounded-full object-cover border-2 border-cyan-400"
+                  onError={(e) => {
+                    e.target.src = '/src/images/gfgLogo.png';
+                    e.target.className = 'w-16 h-16 rounded-full object-contain bg-gray-800 border-2 border-cyan-400';
+                  }}
+                />
+                <div>
+                  <h2 className="text-2xl font-bold text-white font-['Inter']">{member.name}</h2>
+                  <p className="text-cyan-300 text-sm">{member.branch} • {member.year} Year</p>
+                </div>
               </div>
-            </div>
             <button
               onClick={onClose}
               className="w-8 h-8 bg-red-500/20 hover:bg-red-500/40 rounded-full flex items-center justify-center transition-colors"
@@ -273,7 +273,7 @@ const Team = () => {
             
             <div className="relative">
               {/* Timeline Line */}
-              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-green-400 to-emerald-400"></div>
+              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-cyan-400 to-blue-400"></div>
               
               {/* Timeline Items */}
               <div className="space-y-6">
@@ -285,14 +285,14 @@ const Team = () => {
                     </div>
                     
                     {/* Content */}
-                    <div className="bg-white/10 backdrop-blur-sm border border-green-400/20 rounded-xl p-4 flex-1">
+                    <div className="bg-white/10 backdrop-blur-sm border border-cyan-400/20 rounded-xl p-4 flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="text-lg font-semibold text-white font-['Inter']">{item.position}</h4>
-                        <span className="px-3 py-1 bg-green-500/20 text-green-300 text-xs rounded-full font-medium">
+                        <span className="px-3 py-1 bg-cyan-500/20 text-cyan-300 text-xs rounded-full font-medium">
                           {item.period}
                         </span>
                       </div>
-                      <p className="text-green-200 text-sm">
+                      <p className="text-cyan-200 text-sm">
                         {item.period === "Current" ? "Currently serving as" : 
                          item.period === "Previous" ? "Previously served as" : 
                          "Earlier served as"} {item.position.toLowerCase()}
@@ -356,9 +356,9 @@ const Team = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 overflow-hidden">
+    <div className="min-h-screen darkthemebg overflow-hidden">
       {/* Background Pattern */}
-      <div className="fixed inset-0 opacity-5">
+      <div className="absolute inset-0 opacity-5">
         <div
           className="absolute inset-0"
           style={{
@@ -370,26 +370,39 @@ const Team = () => {
 
       <div className="relative z-10">
         {/* Hero Section */}
-        <section ref={heroRef} className="pt-32 pb-20 px-6">
-          <div className="max-w-6xl mx-auto text-center">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight font-['Inter'] tracking-tight">
-              Meet Our{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">
-                Team
-              </span>
+        <section ref={heroRef} className="pt-32 pb-20 relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `radial-gradient(circle at 25% 25%, #10b981 1px, transparent 1px)`,
+                backgroundSize: "60px 60px",
+              }}
+            />
+          </div>
+
+          <div className="relative z-10 container mx-auto px-6 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] rounded-full border border-gray-400 backdrop-blur-sm mb-6">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-green-300 uppercase tracking-wider">Our Team</span>
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+              Meet Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">Team</span>
             </h1>
-            <p className="text-xl md:text-2xl text-green-100 max-w-4xl mx-auto leading-relaxed font-light">
+            <p className="text-xl text-richblack-100 max-w-3xl mx-auto leading-relaxed font-normal">
               The passionate minds behind GFG BVCOE Student Chapter, driving innovation and fostering a community of learners.
             </p>
           </div>
         </section>
 
         {/* Team Section */}
-        <section ref={teamRef} className="py-20 px-6">
-          <div className="max-w-7xl mx-auto">
+        <section ref={teamRef} className="py-20 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] font-['Inter'] text-white">
+          <div className="container mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {members.map((member, index) => (
-                <div key={index} className="team-card bg-white/10 backdrop-blur-xl border border-green-400/20 rounded-2xl overflow-hidden hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:shadow-green-500/25">
+                <div key={index} className="team-card bg-[#2a2a3d] border-2 border-gray-300 border-opacity-20 rounded-2xl shadow-lg overflow-hidden">
                   {/* Image Section */}
                   <div className="relative">
                     <img 
@@ -415,11 +428,11 @@ const Team = () => {
                       <h3 className="text-xl font-bold text-white font-['Inter']">{member.name}</h3>
                     </div>
                     
-                    <p className="text-green-200 text-sm mb-3 font-['Inter']">
+                    <p className="text-red-400 text-sm mb-3 font-['Inter'] group-hover:text-cyan-400 transition-colors duration-300">
                       {member.position}
                     </p>
                     
-                    <div className="text-gray-300 text-xs mb-4 font-['Inter']">
+                    <div className="text-[#aaa] text-xs mb-4 font-['Inter']">
                       <p>{member.branch} • {member.year} Year</p>
                       {member.p1 && <p className="mt-1">{member.p1}</p>}
                     </div>
@@ -430,10 +443,10 @@ const Team = () => {
                         {member.email && (
                           <a 
                             href={`mailto:${member.email}`}
-                            className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center hover:bg-green-500/40 transition-colors"
+                            className="w-8 h-8 bg-cyan-700/20 rounded-full flex items-center justify-center hover:bg-cyan-700/40 transition-colors"
                             title="Email"
                           >
-                            <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
                               <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                               <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                             </svg>
@@ -472,7 +485,7 @@ const Team = () => {
                       {/* Timeline Button */}
                       <button 
                         onClick={() => openTimelineModal(member)}
-                        className="px-4 py-2 bg-green-500/20 hover:bg-green-500/40 text-green-400 rounded-full text-sm font-medium transition-colors border border-green-400/30 hover:scale-105"
+                        className="px-4 py-2 bg-cyan-700 text-white font-semibold rounded-lg transition-all duration-300 hover:scale-105 hover:opacity-95"
                       >
                         Timeline
                       </button>

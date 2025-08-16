@@ -104,7 +104,7 @@ function ImageGrid() {
         </button></NavLink>
       </div>
 
-      <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-8 grid-rows-6 gap-2 md:gap-2 mobile-grid relative z-0">
+      <div className="grid grid-cols-3 md:grid-cols-8 lg:grid-cols-8 grid-rows-6 gap-2 md:gap-2 mobile-grid relative z-0">
         {/* Your image grid items here */}
         <div className="elem my-grid-item" style={{ "--r": 1, "--c": 3 }}>
           <img src="/gridimg1.webp" alt="Image 1" className="w-full h-full object-cover rounded-lg" />
