@@ -67,7 +67,23 @@ const teamData = [
         p2: "",
         email: "37aartisingh121212@gmail.com",
         instaLink: "https://www.instagram.com/aartiii.60?utm_source=qr&igsh=bWsyajFvMjh2NWli",
-        linkedinLink: "https://www.linkedin.com/in/aarti-singh-b7700b333"
+        linkedinLink: "https://www.linkedin.com/in/aarti-singh-b7700b333",
+        timeline: [
+            {
+                year: "2025",
+                role: "Social Media and Promotion Lead",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
+                year: "2024",
+                role: "Social Media Executive",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            }
+        ]
+
+
     },
     {
         name: "Gaurav Karakoti",
@@ -80,7 +96,28 @@ const teamData = [
         p2: "",
         email: "karakotigaurav12@gmail.com",
         instaLink: "https://instagram.com/gaurav._.karakoti",
-        linkedinLink: "https://linkedin.com/in/gaurav-karakoti"
+        linkedinLink: "https://linkedin.com/in/gaurav-karakoti",
+        timeline: [
+            {
+                year: "2025",
+                role: "Content Writer",
+                project: "CoinDCX, AscendEx, Okto",
+                description: "Crypto Exchanges and DEX Wallet"
+            },
+            {
+                year: "2025",
+                role: "Event & Operations Lead",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, Delhi"
+            },
+            {
+                year: "2024",
+                role: "Technical Executive",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, Delhi"
+            }
+        ]
+
     },
     {
         name: "Kartik Bhattacharya",
@@ -106,7 +143,22 @@ const teamData = [
         p2: "",
         email: "archita770@gmail.com",
         instaLink: "https://www.instagram.com/archiitta.r?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
-        linkedinLink: "https://www.linkedin.com/in/archita-337521376"
+        linkedinLink: "https://www.linkedin.com/in/archita-337521376",
+        timeline: [
+            {
+                year: "2025",
+                role: "Design and Creative Lead",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
+                year: "2024",
+                role: "Design & Marketing Executive",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            }
+        ]
+
     },
     {
         name: "Piyush Kumar Singh",
