@@ -6,10 +6,10 @@ import teamData from '../data/teamData';
 
 function Team2() {
   return (
-    <div className='w-[100vw] bg-gradient-to-tr from-[#0F3D2F] via-[#1B5E3C] to-[#2E7D4F]'>
-      <div className='TEAM_SECTION mt-24 justify-center items-center flex flex-wrap w-10/12 mx-auto gap-10 pb-12'>
-       {/* Hero Section */}
-        <section className="pt-8 pb-16 px-6 font-nunito">
+    <div className='w-[100vw] darkthemebg pt-32'>
+
+      {/* Hero Section */}
+        <section className="pb-10 px-6 font-nunito">
           <div className="max-w-6xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-8 leading-tight  tracking-tight">
               Meet Our{" "}
@@ -17,11 +17,14 @@ function Team2() {
                 Team
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-green-100 max-w-3xl mx-auto leading-relaxed font-light">
+            <p className="text-lg md:text-xl text-richblack-100 max-w-3xl mx-auto leading-relaxed font-light">
               The passionate minds behind GFG BVCOE Student Chapter, driving innovation and fostering a community of learners.
             </p>
           </div>
         </section>
+
+
+      <div className='TEAM_SECTION mt-10 justify-center items-center flex flex-wrap w-10/12 mx-auto gap-10 pb-12'>
         
         {
           teamData.map((person, index) => (

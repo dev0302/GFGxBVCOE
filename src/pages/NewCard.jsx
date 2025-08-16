@@ -15,19 +15,19 @@ function NewCard({ person }) {
   return (
     <>
       <div className='flex justify-center items-center font-poppins text-[#E6F4EA]'>
-        <div className="rounded-[32px] w-[300px] h-[460px] flex flex-col
-          bg-gradient-to-br from-[#1B5E3C] to-[#2E7D4F]
-          shadow-xl ring-1 ring-[#4CAF50]/40 overflow-hidden transition hover:scale-[1.02] duration-300">
+        <div className="rounded-[32px] w-[280px] h-[420px] flex flex-col
+          bg-[#323E4]
+          shadow-xl ring-1 border-2 border-gray-400 border-opacity-50 overflow-hidden transition hover:scale-[1.02] duration-300">
 
-          <img src={image} alt={name} className='w-full h-[60%] object-cover object-top rounded-[32px] p-1' />
+          <img src={image} alt={name} className='w-full h-[70%] object-cover object-top rounded-[32px] p-1' />
 
           <div className='p-6 flex flex-col flex-grow'>
             <div>
-              <p className='text-lg font-semibold flex items-center gap-1 text-[#E6F4EA]'>
+              <p className='text-lg font-semibold flex items-center gap-1 text-gray-200'>
                 {name}
                 <span><img src={verify} className='h-4' alt="verified" /></span>
               </p>
-              <p className='text-sm text-[#CDEED0] mt-1 leading-tight'>
+              <p className='text-sm text-richblack-200 mt-1 leading-tight'>
                 {position}
               </p>
             </div>
