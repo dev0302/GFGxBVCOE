@@ -105,7 +105,7 @@ const GFGBentoGrid = () => {
           </div>
 
           {/* Loading skeleton */}
-          <div className="darkthemebg backdrop-blur-sm border rounded-3xl p-8 mb-12 shadow-2xl">
+          <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 backdrop-blur-sm border border-green-400/20 rounded-3xl p-8 mb-12 shadow-2xl">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
               {[...Array(6)].map((_, i) => (
                 <div
@@ -129,7 +129,7 @@ const GFGBentoGrid = () => {
   }
 
   return (
-    <section ref={containerRef} className="relative py-20 bg-gradient-to-br from-[#12121e] to-[#2c2c3e]">
+    <section ref={containerRef} className="relative py-20 bg-gradient-to-br from-green-950/50 via-green-900/30 to-emerald-900/50">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div
@@ -145,7 +145,7 @@ const GFGBentoGrid = () => {
       <div className="relative z-10 container mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-400/30 backdrop-blur-sm mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-full border border-green-400/30 backdrop-blur-sm mb-6">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span className="text-sm font-medium text-green-300 uppercase tracking-wider">Featured Events</span>
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -159,7 +159,7 @@ const GFGBentoGrid = () => {
         </div>
 
         {/* Bento Grid Container */}
-        <div className="darkthemebg backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-3xl p-8 mb-12 shadow-2xl">
+        <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 backdrop-blur-sm border border-green-400/20 rounded-3xl p-8 mb-12 shadow-2xl">
           <div 
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
             style={{
@@ -237,7 +237,7 @@ const GFGBentoGrid = () => {
 
         {/* Call to Action Section */}
         <div className="text-center font-nunito">
-          <div className="inline-flex flex-col sm:flex-row items-center gap-6 p-8  backdrop-blur-sm border-2 border-gray-300 border-opacity-20 darkthemebg rounded-3xl">
+          <div className="inline-flex flex-col sm:flex-row items-center gap-6 p-8 bg-gradient-to-r from-green-800/30 to-emerald-800/30 backdrop-blur-sm border border-green-400/20 rounded-3xl">
             <div className="text-left sm:text-center">
               <h3 className="text-2xl font-bold text-white mb-2 font-nunito">Ready to Join More Events?</h3>
               <p className="text-green-100 text-lg font-nunito">
