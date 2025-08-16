@@ -2,6 +2,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef, useEffect } from "react";
+import Lenis from "lenis";
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -14,6 +15,31 @@ const About = () => {
   const featuresRef = useRef();
   const benefitsRef = useRef();
   const ctaRef = useRef();
+
+
+  useEffect(() => {
+        const lenis = new Lenis({
+          duration:5,
+          lerp: 0.1,
+          smoothWheel: true,
+        });
+    
+        // Sync Lenis scroll with ScrollTrigger
+        lenis.on("scroll", ScrollTrigger.update);
+    
+        function raf(time) {
+          lenis.raf(time);
+          requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+    
+      
+      
+    
+        return () => {
+          lenis.destroy(); // cleanup on unmount
+        };
+      });
 
 
 
@@ -157,40 +183,34 @@ const About = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 overflow-hidden">
-      {/* Background Pattern */}
-      <div className="fixed inset-0 opacity-5">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `radial-gradient(circle at 25% 25%, #10b981 1px, transparent 1px)`,
-            backgroundSize: "60px 60px",
-          }}
-        />
-      </div>
+    <div className="min-h-screen darkthemebg overflow-hidden">
 
       <div className="relative z-10">
         {/* Hero Section */}
         <section ref={heroRef} className="pt-32 pb-6 px-6 md:pb-10">
           <div className="max-w-6xl mx-auto text-center">
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight font-alfa tracking-tight">
-              {/* GFG TAGLINE?{" "} */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] rounded-full border border-gray-400 backdrop-blur-sm mb-6">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-green-300 uppercase tracking-wider">About GFG BVCOE</span>
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            </div>
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight font-alfa tracking-tight">
               <span id="about_us_para" className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 font-alfa">
-                ABOUT US
+                   ABOUT US    
               </span>
             </h1>
-            <p className="text-sm md:text-lg text-green-100 max-w-2xl mx-auto leading-relaxed text-[2.15rem] font-normal font-nunito">
+            <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-normal font-nunito">
               Empowering students through collaborative learning, innovation, and knowledge sharing in a dynamic tech community.
             </p>
           </div>
         </section>
 
-        <div className="Upper_div flex flex-col gap-0 md:flex-row mx-auto  md:gap-10 md:max-w-[80%]">
+        <div className="Upper_div flex flex-col gap-0 md:flex-row mx-auto md:gap-10 md:max-w-[80%]">
 
           {/* Vision Section */}
         <section ref={visionRef} className="py-8 px-6">
           <div className="max-w-3xl mx-auto">
-            <div className="bg-gradient-to-br from-green-800/20 to-emerald-800/20 backdrop-blur-xl border border-green-400/20 rounded-3xl p-6 md:px-6 py-10">
+            <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-3xl p-6 md:px-6 py-10 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
               <div className="text-center mb-2">
                 <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-400 rounded-3xl flex items-center justify-center mb-8 mx-auto">
                   <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -205,7 +225,7 @@ const About = () => {
                   </span>
                 </h2>
               </div>
-              <p className="text-xs md:text-base text-green-100 leading-relaxed text-center max-w-xl mx-auto font-nunito font-normal">
+              <p className="text-base md:text-lg text-gray-300 leading-relaxed text-center max-w-xl mx-auto font-nunito font-normal">
                 The GFG BVCOE Student Chapter envisions a collaborative and dynamic learning environment where students continuously grow, innovate, and share knowledge. We aim to cultivate a community that fosters curiosity, skill enhancement, and the exchange of ideas, ensuring that every member contributes to a collective journey of learning and discovery.
               </p>
             </div>
@@ -215,7 +235,7 @@ const About = () => {
         {/* Mission Section */}
         <section ref={missionRef} className="py-8 px-6">
           <div className="max-w-3xl mx-auto">
-            <div className="bg-gradient-to-br from-green-800/20 to-emerald-800/20 backdrop-blur-xl border border-green-400/20 rounded-3xl p-6 md:px-6 py-10">
+            <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-3xl p-6 md:px-6 py-10 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
               <div className="text-center mb-2">
                 <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-3xl flex items-center justify-center mb-8 mx-auto">
                   <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -229,7 +249,7 @@ const About = () => {
                   </span>
                 </h2>
               </div>
-              <p className="text-xs md:text-base text-green-100 leading-relaxed text-center max-w-xl mx-auto font-nunito font-normal">
+              <p className="text-base md:text-lg text-gray-300 leading-relaxed text-center max-w-xl mx-auto font-nunito font-normal">
                 Our mission is to provide a supportive and engaging platform where students can learn, teach, and grow through seminars, workshops, talks, competitions, and project showcases. We are dedicated to fostering peer-driven learning, equipping students with the necessary guidance and resources to excel in their chosen fields while embracing the spirit of continuous innovation and teamwork.
               </p>
             </div>
@@ -253,8 +273,8 @@ const About = () => {
                   Apart?
                 </span>
               </h2>
-              <div className="bg-gradient-to-br from-green-700/20 to-emerald-700/20 backdrop-blur-xl border border-green-400/20 rounded-3xl p-6 max-w-4xl mx-auto md:p-12">
-                <p className="text-base md:text-2xl text-green-100 leading-relaxed font-nunito font-normal">
+              <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-3xl p-6 max-w-4xl mx-auto md:p-12 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
+                <p className="text-base md:text-2xl text-gray-300 leading-relaxed font-nunito font-normal">
                   Our dedication to create a society where anyone can work on their goals by learning and teaching while getting the guidance they need.
                 </p>
               </div>
@@ -275,50 +295,50 @@ const About = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 benefits-grid">
-              <div className="bg-gradient-to-br from-green-800/20 to-emerald-800/20 backdrop-blur-xl border border-green-400/20 rounded-2xl p-8 hover:scale-105 transition-transform duration-300 flex flex-col items-center justify-center">
+              <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-2xl p-8 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group flex flex-col items-center justify-center">
                 <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-400 rounded-2xl flex items-center justify-center mb-6 mx-auto">
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-white mb-4 font-montserrat">Project Showcases</h3>
-                <p className="text-center text-green-100 leading-relaxed">
+                <p className="text-center text-gray-300 leading-relaxed">
                   Engage in impactful project showcases, gaining recognition within our dynamic community.
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-emerald-800/20 to-teal-800/20 backdrop-blur-xl border border-emerald-400/20 rounded-2xl p-8 hover:scale-105 transition-transform duration-300 flex flex-col items-center justify-center">
+              <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-2xl p-8 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group flex flex-col items-center justify-center">
                 <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-2xl flex items-center justify-center mb-6 mx-auto">
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>
                 <h3 className="text-center text-xl font-bold text-white mb-4 font-montserrat">Personalized Mentorship</h3>
-                <p className="text-center text-green-100 leading-relaxed font-nunito">
+                <p className="text-center text-gray-300 leading-relaxed font-nunito">
                   Receive personalized mentorship tailored to your individual technical journey from experienced members.
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-teal-800/20 to-cyan-800/20 backdrop-blur-xl border border-teal-400/20 rounded-2xl p-8 hover:scale-105 transition-transform duration-300 flex flex-col items-center justify-center">
+              <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-2xl p-8 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group flex flex-col items-center justify-center">
                 <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-cyan-400 rounded-2xl flex items-center justify-center mb-6 mx-auto">
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
                 <h3 className="text-center text-xl font-bold text-white mb-4 font-montserrat">Community Connections</h3>
-                <p className="text-center text-green-100 leading-relaxed font-nunito">
+                <p className="text-center text-gray-300 leading-relaxed font-nunito">
                   Cultivate lasting connections within a close-knit community where collaboration and shared learning thrive.
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-cyan-800/20 to-blue-800/20 backdrop-blur-xl border border-cyan-400/20 rounded-2xl p-8 hover:scale-105 transition-transform duration-300 flex flex-col items-center justify-center">
+              <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-2xl p-8 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group flex flex-col items-center justify-center">
                 <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-2xl flex items-center justify-center mb-6 mx-auto">
                   <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
                 </div>
                 <h3 className="text-center text-xl font-bold text-white mb-4 font-montserrat">Exclusive Events</h3>
-                <p className="text-center text-green-100 leading-relaxed font-nunito">
+                <p className="text-center text-gray-300 leading-relaxed font-nunito">
                   Access exclusive events, workshops, and seminars for hands-on experiences and valuable networking opportunities.
                 </p>
               </div>
@@ -329,14 +349,14 @@ const About = () => {
         {/* CTA Section */}
         <section ref={ctaRef} className="py-6 mt-12 mb-12 px-6">
           <div className="max-w-6xl mx-auto">
-            <div className="bg-gradient-to-br from-green-700/20 via-emerald-700/20 to-teal-700/20 backdrop-blur-xl border border-green-400/20 rounded-3xl p-8 md:p-12 text-center">
+            <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-3xl p-8 md:p-12 text-center transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
               <h2 className="text-2xl md:text-4xl font-bold text-white mb-8 font-nunito">
                 Want to Join{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">
                   Geeks for Geeks?
                 </span>
               </h2>
-              <p className="text-lg md:text-xl text-green-100 mb-12 leading-relaxed font-alfa font-light">
+              <p className="text-lg md:text-xl text-gray-300 mb-12 leading-relaxed font-alfa font-light">
                 Connect with our team today to become a part of a society where you are the protagonist of your technical journey!
               </p>
               <button className="px-8 py-4 md:px-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold text-lg rounded-full border border-green-300/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-500/25 font-nunito md:text-xl">

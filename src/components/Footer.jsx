@@ -1,18 +1,19 @@
 import React from "react";
 import gfgLogo from "../images/gfgLogo.png";
-import footerBg from "../images/footerbg.jpg"; // Import the background image
-import feather from 'feather-icons';
+import footerBg from "../images/footerbg.jpg";
+import { Instagram } from 'react-feather';
+import { Linkedin } from 'react-feather';
+import { Monitor } from 'react-feather';
 import { useEffect } from "react";
+import dev from "../images/dev.png"
+import himank from "../images/himank.png"
 
 
 const Footer = () => {
-    useEffect(() => {
-    // Replace all icons after component mounts
-    feather.replace();
-  }, []);
+    
   return (
     <section 
-      className="relative text-[#cbd5e1] font-inter px-4 py-16 md:mt-10 font-sans overflow-hidden"
+      className="relative text-[#cbd5e1] font-inter px-4 pt-12 pb-10 md:mt-10 font-sans overflow-hidden"
       style={{
         backgroundImage: `url(${footerBg})`,
         backgroundSize: 'cover',
@@ -22,7 +23,7 @@ const Footer = () => {
       }}
     >
       {/* Dark overlay for better text contrast */}
-      <div className="absolute inset-0 bg-[#013220]/70 backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-[#013220]/70 backdrop-blur-sm overflow-hidden"></div>
 
       <footer className="max-w-[1200px] mx-auto relative z-10">
         <div className="flex flex-wrap justify-between gap-12 md:gap-16">
@@ -58,31 +59,39 @@ const Footer = () => {
             </h3>
             <div className="flex flex-col gap-3 text-[#cbd5e1] text-base">
               <p className="flex items-center gap-3">
-                <i data-feather="message-square" className="footer-small-icon"></i>
-                 horizon_discord
+                <Monitor className="text-green-500 hover:text-blue-400 transition-colors" size={22} />
+                 <a
+                  href="https://discord.gg/6X7Gc7Np"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-green-400 hover:text-[#0ea5e9] transition-colors duration-300"
+                >
+                  join us on discord
+                </a>
               </p>
+              {/* INSTAGRAM */}
               <p className="flex items-center gap-3">
-                <i data-feather="instagram" className="footer-small-icon"></i>
+                <Instagram className="text-green-500 hover:text-blue-400 transition-colors" size={22} />
                 <a
                   href="https://www.instagram.com/gfg_bvcoe?utm_source=qr&igsh=MWZzdTB2dWl5dmt6dQ=="
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#38bdf8] hover:text-[#0ea5e9] transition-colors duration-300"
+                  className="text-green-400 hover:text-[#0ea5e9] transition-colors duration-300"
                 >
                   @gfg_bvcoe
                 </a>
               </p>
               
-      
+              {/* LINKEDIN */}
               <p className="flex items-center gap-3">
-                <i data-feather="linkedin" className="footer-small-icon"></i>
+                <Linkedin className="text-green-500 hover:text-blue-400 transition-colors" size={22} />
                 <a
                   href="https://www.linkedin.com/company/geeksforgeeks-campus-body-bvcoe/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#38bdf8] hover:text-[#7dd3fc] transition-colors duration-300"
+                  className="text-green-400 hover:text-[#7dd3fc] transition-colors duration-300"
                 >
-                  linkedin.com/gfg-bvcoe
+                  linkedin.com/company/gfg-bvcoe
                 </a>
               </p>
             </div>
@@ -91,16 +100,18 @@ const Footer = () => {
 
         {/* Footer Bottom */}
         <div className="mt-12 border-t border-[#80a8813b] pt-6 text-center text-[#cbd5e1] text-sm opacity-70">
-          <p>&copy; 2025 GFG BVCOE. All rights reserved.</p>
-          <p className="mt-2 text-white">
+          <p>&copy; 2025 GeeksforGeeks Campus Body - BVCOE. All rights reserved.</p>
+          <p className="mt-2 text-white flex justify-center items-center gap-4">
             Developed by -{" "}
-            <a
+            <a 
               href="https://www.linkedin.com/in/dev-malik-976230311/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#38bdf8] hover:text-[#7dd3fc] transition-colors duration-300 inline-block relative hover:-translate-y-0.5"
-            >
+            > <div className="flex gap-1 justify-center items-center">
+              <img src={dev} alt="nf" className="h-5 w-5 border-2 border-white o object-cover rounded-full" />
               Dev
+            </div>
             </a>
             <a
               href="https://www.linkedin.com/in/himank-pandoh-58a0b52b1/"
@@ -108,7 +119,10 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="text-[#38bdf8] hover:text-[#7dd3fc] transition-colors duration-300 inline-block relative hover:-translate-y-0.5"
             >
-               , Himank
+               <div className="flex gap-1 justify-center items-center">
+              <img src={himank} alt="nf" className="h-5 w-5 border-2 border-white object-cover rounded-full" />
+              Himank
+            </div>
             </a>
           </p>
         </div>
