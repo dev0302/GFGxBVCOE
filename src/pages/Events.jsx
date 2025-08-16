@@ -223,6 +223,37 @@ const Events = () => {
       "A passion for technology and sustainable development.",
     ],
     targetAudience: "Students and innovators eager to tackle global challenges through technology, strategy, and business planning."
+  },
+  {
+    id: 7,
+    title: "GFG HQ Visit",
+    date: "January 11, 2025",
+    time: "10::00 ",
+    location: "GFG HQ, Noida",
+    category: "HQ Visit",
+    description: "An exclusive opportunity to explore the Geeks for Geeks headquarters, meet the team, and get a behind-the-scenes look at a leading tech company.",
+    modalDescription: "Join us for an inspiring industrial visit to the heart of Geeks for Geeks. This exclusive tour offers a unique chance to witness the inner workings of a top ed-tech company, from its innovative work culture to its state-of-the-art infrastructure. You'll have the opportunity to interact with GFG's talented professionals, gain insights into various tech roles, and understand the real-world processes behind their renowned platform.",
+    galleryImages: [
+      "/src/images/hqvisit.webp",
+      "/src/images/hqvisit1.webp",
+      "/src/images/hqvisit2.webp",
+      "/src/images/hqvisit3.webp",
+      "/src/images/hqvisit4.webp",
+      "/src/images/hqvisit5.webp",
+    ],
+    speakers: [
+      {name: "Sandeep Jain", title:"Founder & CEO, GFG"}
+    ],
+    agenda:[
+      "Arrival & Welcome Reception",
+      "Guided Tour of the GFG Campus",
+      "Interactive Session with the GFG Tech Team",
+      "Networking Lunch & Q&A Session"
+    ],
+    prerequisites: [
+      "Must be a registered member of the GFG BVCOE society."
+    ],
+    targetAudience: "Students passionate about software development and ed-tech, eager to understand the culture and operations of a leading tech company."
   }
 ];
 
