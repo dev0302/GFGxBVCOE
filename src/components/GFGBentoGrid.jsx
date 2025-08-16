@@ -3,10 +3,37 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router-dom";
+import Lenis from "lenis";
 
 gsap.registerPlugin(ScrollTrigger);
 
+
+
 const GFGBentoGrid = () => {
+
+  useEffect(() => {
+        const lenis = new Lenis({
+          lerp: 0.05,
+          smoothWheel: true,
+        });
+    
+        // Sync Lenis scroll with ScrollTrigger
+        lenis.on("scroll", ScrollTrigger.update);
+    
+        function raf(time) {
+          lenis.raf(time);
+          requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+    
+      
+      
+    
+        return () => {
+          lenis.destroy(); // cleanup on unmount
+        };
+      });
+
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const containerRef = useRef(null);
