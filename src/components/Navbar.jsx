@@ -66,9 +66,9 @@ function Navbar() {
       ref={navMain}
       className={`NAVBAR_CONTAINER fixed top-0 left-0 right-0 z-50 w-full flex items-center justify-between px-6 py-3 
     ${isDarkNavbar 
-      ? "bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e]" 
-      : "bg-gradient-to-r from-green-900/95 via-green-800/95 to-emerald-800/95"} 
-    backdrop-blur-xl border-b border-green-400/30 shadow-2xl`}
+      ? "bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] border-gray-500 border-b-2 border-opacity-40" 
+      : "bg-gradient-to-r from-green-900/95 via-green-800/95 to-emerald-800/95 border-b border-green-400/30"} 
+    backdrop-blur-xl  shadow-2xl`}
     >
       <div ref={logoRef} className="flex items-center gap-3">
         <NavLink to="/" className="block">

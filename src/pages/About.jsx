@@ -195,7 +195,7 @@ const About = () => {
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight font-alfa tracking-tight">
-              <span id="about_us_para" className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 font-alfa">
+              <span id="about_us_para" className=" bg-clip-text  font-alfa text-richblack-25">
                    ABOUT US    
               </span>
             </h1>
