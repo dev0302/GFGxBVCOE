@@ -56,7 +56,7 @@ function Navbar() {
   }, []);
   
   const location = useLocation();
-  const darkRoutes = ["/events", "/contact","/gallery","/notfound"];
+  const darkRoutes = ["/events", "/contact","/gallery","/notfound","/team","/about","/team2"];
   const isDarkNavbar = darkRoutes.includes(location.pathname);
 
   
