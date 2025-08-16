@@ -19,8 +19,8 @@ const About = () => {
 
   useEffect(() => {
         const lenis = new Lenis({
-          duration:5,
-          lerp: 0.1,
+          // duration:5,
+          lerp: 0.05,
           smoothWheel: true,
         });
     

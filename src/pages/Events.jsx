@@ -19,8 +19,8 @@ const Events = () => {
 
   useEffect(() => {
       const lenis = new Lenis({
-        duration:4,
-        lerp: 0.1,
+        // duration:4,
+        lerp: 0.05,
         smoothWheel: true,
       });
   
@@ -32,8 +32,6 @@ const Events = () => {
         requestAnimationFrame(raf);
       }
       requestAnimationFrame(raf);
-  
-    
     
   
       return () => {
