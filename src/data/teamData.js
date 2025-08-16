@@ -54,7 +54,28 @@ const teamData = [
         p2: "Marketing Head",
         email: "itzharsh045@gmail.com",
         instaLink: "https://www.instagram.com/mystic_harsh_45?igsh=d2Q3ZWdqd3FhazNu",
-        linkedinLink: "https://www.linkedin.com/in/harsh-bhardwaj-255357292"
+        linkedinLink: "https://www.linkedin.com/in/harsh-bhardwaj-255357292",
+        timeline: [
+            {
+                year: "2025",
+                role: "SDE Intern",
+                project: "Bluestock Fintech",
+                description: "IPO Web Application and REST API Development"
+            },
+            {
+                year: "2025",
+                role: "Marketing Lead",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, Delhi"
+            },
+            {
+                year: "2024",
+                role: "Marketing Head",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, Delhi"
+            }
+        ]
+
     },
     {
         name: "Aarti Singh",
