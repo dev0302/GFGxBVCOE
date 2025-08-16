@@ -1,7 +1,9 @@
 import React, { useRef } from 'react';
 import NewCard from './NewCard';
 import teamData from '../data/teamData';
-import FacultyIncharge from "../images/RachnaNarula.jpeg"
+import FacultyIncharge from "../images/RachnaNarula.jpeg";
+import Lenis from "lenis";
+import { useEffect } from 'react';
 
 // THEME: Import GSAP for animations
 import { useGSAP } from "@gsap/react";
@@ -11,6 +13,29 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 function Team2() {
+
+  useEffect(() => {
+    const lenis = new Lenis({
+      // duration:4,
+      lerp: 0.05,
+      smoothWheel: true,
+    });
+
+    // Sync Lenis scroll with ScrollTrigger
+    lenis.on("scroll", ScrollTrigger.update);
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+  
+
+    return () => {
+      lenis.destroy(); // cleanup on unmount
+    };
+  });
+
   // THEME: Add refs for animating sections
   const containerRef = useRef(null);
   const heroRef = useRef(null);
