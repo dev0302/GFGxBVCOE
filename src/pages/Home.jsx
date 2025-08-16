@@ -10,6 +10,7 @@ import ImageGrid from "../components/ImageGrid";
 
 
 function Home() {
+  
   const navigate = useNavigate();
   const titleRef = useRef();
   const descRef = useRef();
