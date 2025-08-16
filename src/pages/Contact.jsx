@@ -94,9 +94,9 @@ const contact = () => {
         e.preventDefault();
         setStatus('sending');
 
-        const serviceID = 'YOUR_SERVICE_ID';
-        const templateID = 'YOUR_TEMPLATE_ID';
-        const userID = 'YOUR_USER_ID';
+        const serviceID = 'service_yi2am22';
+        const templateID = 'template_snruy8d';
+        const userID = 'UrKEChN91ZCXCMKm7';
 
         emailjs.send(serviceID, templateID, formData, userID)
             .then((response) => {
