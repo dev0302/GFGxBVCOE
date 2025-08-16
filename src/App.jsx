@@ -6,21 +6,25 @@ import Events from "./pages/Events"
 import Navbar from "./components/Navbar"
 import NotFound from "./components/NotFound"
 import Contact from "./pages/Contact"
+import Gallery from "./pages/Gallery"
+import Team2 from "./pages/Team2"
 
 function App() {
   return (
-    <>
+    <div className="min-h-screen flex flex-col overflow-x-hidden">
     
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
-        <Route path="/team" element={<Team />} />
+        <Route path="/team" element={<Team2 />} />
         <Route path="/events" element={<Events />} />
         <Route path="/notfound" element={<NotFound></NotFound>} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/gallery" element={<Gallery />} />
+        <Route path="/team2" element={<Team></Team>}></Route>
       </Routes>
-    </>
+    </div>
   )
 }
 export default App

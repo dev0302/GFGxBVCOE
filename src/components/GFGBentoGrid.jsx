@@ -4,72 +4,85 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router-dom";
 
-// Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
 
 const GFGBentoGrid = () => {
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const containerRef = useRef();
+  const containerRef = useRef(null);
   const cardsRef = useRef([]);
   const navigate = useNavigate();
 
-  // Simple image loading without GSAP
+  // Track gsap context for cleanup
+  const gsapCtx = useRef(null);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setImagesLoaded(true);
       setIsLoading(false);
     }, 100);
-
     return () => clearTimeout(timer);
   }, []);
 
-  // GSAP animations for smooth entrance
-  useGSAP(() => {
-    // Set initial states - images start from infinity
-    gsap.set(cardsRef.current, {
-      x: (i) => (i % 2 === 0 ? 1000 : -1000), // Alternate left/right infinity
-      y: (i) => (i % 3 === 0 ? 500 : -500),    // Alternate top/bottom infinity
-      opacity: 0,
-      scale: 0.5,
-      rotation: (i) => (i % 2 === 0 ? 45 : -45) // Alternate rotation
-    });
+  useGSAP(
+    () => {
+      if (!imagesLoaded) return;
 
-    // Animate images to their positions with stagger and scrub
-    gsap.to(cardsRef.current, {
-      x: 0,
-      y: 0,
-      opacity: 1,
-      scale: 1,
-      rotation: 0,
-      duration: 1,
-      ease: "power2.out",
-      stagger: 0.1,
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: "top 50%",
-        end: "bottom 10%",
-        scrub: 2,
-        toggleActions: "play none none none"
+      // Kill any old context if it exists
+      if (gsapCtx.current) {
+        gsapCtx.current.revert();
       }
-    });
 
-    // Pin the section after animation completes so images stick in place
-    ScrollTrigger.create({
-      trigger: containerRef.current,
-      start: "bottom 10%",
-      end: "bottom -20%",
-      pin: true,
-      pinSpacing: true
-    });
+      // Create a scoped GSAP context so animations don't leak globally
+      gsapCtx.current = gsap.context(() => {
+        gsap.set(cardsRef.current, {
+          x: (i) => (i % 2 === 0 ? 1000 : -1000),
+          y: (i) => (i % 3 === 0 ? 500 : -500),
+          opacity: 0,
+          scale: 0.5,
+          rotation: (i) => (i % 2 === 0 ? 45 : -45),
+        });
 
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [imagesLoaded]);
+        gsap.to(cardsRef.current, {
+          x: 0,
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          rotation: 0,
+          duration: 1,
+          ease: "power2.out",
+          stagger: 0.1,
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top 50%",
+            end: "bottom 10%",
+            scrub: 2,
+            toggleActions: "play none none none",
+          },
+        });
+
+        ScrollTrigger.create({
+          trigger: containerRef.current,
+          start: "bottom 10%",
+          end: "bottom -20%",
+        });
+
+        ScrollTrigger.refresh();
+      }, containerRef);
+
+      return () => {
+        // Cleanup GSAP context + triggers
+        if (gsapCtx.current) {
+          gsapCtx.current.revert();
+          gsapCtx.current = null;
+        }
+      };
+    },
+    { dependencies: [imagesLoaded], scope: containerRef }
+  );
 
   const handleViewAllEvents = () => {
-    navigate('/events');
+    navigate("/events");
   };
 
   // Loading skeleton while images are loading
@@ -156,7 +169,7 @@ const GFGBentoGrid = () => {
             {/* Hero Card - Large */}
             <div 
               ref={el => cardsRef.current[0] = el}
-              className="card hero-card relative overflow-hidden rounded-2xl col-span-2 row-span-2"
+              className="card hero-card relative overflow-hidden rounded-2xl col-span-2 row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
                 backgroundImage: `url('/src/images/gfg1.jpg')`,
                 backgroundSize: 'cover',
@@ -167,7 +180,7 @@ const GFGBentoGrid = () => {
             {/* Vertical Card */}
             <div 
               ref={el => cardsRef.current[1] = el}
-              className="card vertical-card relative overflow-hidden rounded-2xl row-span-2"
+              className="card vertical-card relative overflow-hidden rounded-2xl row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
                 backgroundImage: `url('/src/images/gfg2.jpg')`,
                 backgroundSize: 'cover',
@@ -178,7 +191,7 @@ const GFGBentoGrid = () => {
             {/* Small Square Card */}
             <div 
               ref={el => cardsRef.current[2] = el}
-              className="card square-card relative overflow-hidden rounded-2xl aspect-square"
+              className="card square-card relative overflow-hidden rounded-2xl aspect-square transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
                 backgroundImage: `url('/src/images/gfg3.jpg')`,
                 backgroundSize: 'cover',
@@ -189,7 +202,7 @@ const GFGBentoGrid = () => {
             {/* Wide Card */}
             <div 
               ref={el => cardsRef.current[3] = el}
-              className="card wide-card relative overflow-hidden rounded-2xl col-span-2"
+              className="card wide-card relative overflow-hidden rounded-2xl col-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
                 backgroundImage: `url('/src/images/gfg4.jpg')`,
                 backgroundSize: 'cover',
@@ -200,7 +213,7 @@ const GFGBentoGrid = () => {
             {/* Tall Card */}
             <div 
               ref={el => cardsRef.current[4] = el}
-              className="card tall-card relative overflow-hidden rounded-2xl row-span-2"
+              className="card tall-card relative overflow-hidden rounded-2xl row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
                 backgroundImage: `url('/src/images/gfg5.jpg')`,
                 backgroundSize: 'cover',
@@ -211,7 +224,7 @@ const GFGBentoGrid = () => {
             {/* Small Square Card */}
             <div 
               ref={el => cardsRef.current[5] = el}
-              className="card square-card relative overflow-hidden rounded-2xl aspect-square"
+              className="card square-card relative overflow-hidden rounded-2xl aspect-square transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
                 backgroundImage: `url('/src/images/gfgLogo.png')`,
                 backgroundSize: 'contain',

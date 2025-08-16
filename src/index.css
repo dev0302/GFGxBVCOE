@@ -1,8 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@400;700&family=Nunito:wght@400;700&family=Alfa+Slab+One&display=swap');
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+
+  background: linear-gradient(135deg, #064e3b, #065f46, #047857);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,8 +24,8 @@ html {
 body {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
   overflow-x: hidden;
-  background: linear-gradient(135deg, #064e3b, #065f46, #047857);
 }
 
 #about_us_para {
@@ -31,6 +34,59 @@ body {
   will-change: transform, text-shadow;
   display: inline-block;
 }
+
+/* this is for grid images ko yha vha fainkne ke liye */
+.my-grid-item {
+  grid-row: var(--r);
+  grid-column: var(--c);
+  min-height: 120px;
+  min-width: 120px;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.my-grid-item img {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.my-grid-item:hover img {
+  opacity: 0.8;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .my-grid-item {
+    min-height: 160px;
+    min-width: 160px;
+  }
+  
+  .mobile-grid {
+    gap: 1rem !important;
+    row-gap: 2rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .my-grid-item {
+    min-height: 140px;
+    min-width: 140px;
+  }
+  
+  .mobile-grid {
+    gap: 1.5rem !important;
+    row-gap: 2.5rem !important;
+  }
+}
+
+.darkthemebg {
+  background-image: linear-gradient(to bottom right, #1e1e2f, #2c2c3e);
+}
+
+.darkthemebg2 {
+  background-color: #2a2a3d;
+}
+
 
 /* Shimmer effect: wider and longer travel */
 #about_us_para::before {
