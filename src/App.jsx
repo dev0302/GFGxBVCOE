@@ -9,8 +9,6 @@ import Contact from "./pages/Contact"
 import Gallery from "./pages/Gallery"
 import Team2 from "./pages/Team2"
 
-
-
 function App() {
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">
