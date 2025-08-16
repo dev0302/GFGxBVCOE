@@ -87,7 +87,7 @@ function Team2() {
       </section>
 
       {/* Faculty Card -*/}
-      <div className=" font-nunito darkthemebg2 rounded-2xl px-8 py-6 max-w-4xl mx-auto border-2 border-gray-300 border-opacity-20 transition-shadow duration-300 hover:shadow-xl">
+      <div className=" darkthemebg2 rounded-2xl px-8 py-6 max-w-4xl mx-auto border-2 border-gray-300 border-opacity-20 transition-shadow duration-300 hover:shadow-xl w-10/12 md:py-10 md:px-12">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
           
           {/* Image Section */}
@@ -102,9 +102,9 @@ function Team2() {
 
           {/* Content Section */}
           <div className="text-left md:text-left flex-1">
-            <h2 className="text-2xl font-semibold text-white mb-1">Ms. Rachna Narula</h2>
-            <h3 className="text-indigo-400 text-base font-medium mb-3">Faculty Incharge, GFGxBVCOE</h3>
-            <p className="text-gray-300 text-[15px] leading-relaxed">
+            <h2 className=" text-white mb-1 text-center md:text-left text-lg font-bold font-montserrat ">Ms. Rachna Narula</h2>
+            <h3 className="text-indigo-400 text-base font-medium mb-3 text-center md:text-left">Faculty Incharge, GFGxBVCOE</h3>
+            <p className="text-[12px] md:text-sm leading-relaxed text-center md:text-left text-gray-300 mt-1  ">
               Empowering students with mentorship that blends wisdom, empathy, and creativity. Her guidance fosters a culture of growth, collaboration, and emotional intelligence—making every student feel seen and supported.
             </p>
           </div>
