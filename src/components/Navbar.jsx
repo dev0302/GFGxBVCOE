@@ -96,7 +96,6 @@ function Navbar() {
           </p>
         </div>
 
-        {/* Desktop Navigation */}
         <nav className="hidden sm:flex items-center gap-6">
           <ul ref={navList} className="flex gap-6 text-sm">
             <li><NavLink to="/" className={navLinkClass}><SaxHome2Linear className="mr-2" /><span>Home</span></NavLink></li>
@@ -119,7 +118,6 @@ function Navbar() {
           </div>
         </nav>
 
-        {/* Mobile Hamburger Button */}
         <div className="sm:hidden z-50">
           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-green-100 focus:outline-none">
             {isMenuOpen ? (
@@ -131,7 +129,6 @@ function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
       <div className={`fixed inset-0 z-40 transform ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out sm:hidden bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e]`}>
         <ul className="flex flex-col items-center justify-center h-full gap-8">
             <li><NavLink to="/" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>Home</NavLink></li>
