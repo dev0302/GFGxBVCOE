@@ -57,8 +57,8 @@ function Home() {
           scrollTrigger: {
             trigger: section,
             start: "top 85%",
-            toggleActions: "play none none none",
             markers: true,
+            toggleActions: "play none none none"
           }
         });
       }

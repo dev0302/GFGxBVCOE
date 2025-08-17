@@ -83,6 +83,7 @@ const GFGBentoGrid = () => {
             trigger: containerRef.current,
             start: "top 50%",
             end: "bottom 10%",
+            markers:true,
             scrub: 2,
             toggleActions: "play none none none",
             markers: true,
