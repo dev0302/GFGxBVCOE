@@ -92,7 +92,6 @@ function ImageGrid() {
           trigger: containerRef.current,
           start: "top 80%",
           toggleActions: "play none none none",
-           
         },
         opacity: 0,
         scale: 0.5,
@@ -104,12 +103,12 @@ function ImageGrid() {
       gsap.from(".elem", {
         scrollTrigger: {
           trigger: containerRef.current,
-          start: "top 70%",
+          start: "top 75%",
           toggleActions: "play none none none",
-           
         },
         opacity: 0,
         scale: 0.8,
+        y: 30,
         duration: 1,
         ease: "power3.out",
         stagger: 0.05,
