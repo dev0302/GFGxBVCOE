@@ -104,7 +104,7 @@ function ImageGrid() {
           trigger: containerRef.current,
           start: "top 75%",
           toggleActions: "play none none none",
-          end=+1,
+          end=+100,
       
         },
         opacity: 0,
