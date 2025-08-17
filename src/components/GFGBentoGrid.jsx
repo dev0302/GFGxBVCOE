@@ -86,7 +86,7 @@ const GFGBentoGrid = () => {
             markers:true,
             scrub: 2,
             toggleActions: "play none none none",
-            markers: true,
+             
           },
         });
 
