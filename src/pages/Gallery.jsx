@@ -1,31 +1,26 @@
 import React, { useRef, useEffect, useState } from 'react';
-import gsap from 'gsap';
+import gsap from 'https://esm.sh/gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Register GSAP plugins
-gsap.registerPlugin(ScrollTrigger);
+// It's good practice to import plugins once
+// import { ScrollTrigger } from 'https://esm.sh/gsap/ScrollTrigger';
+// gsap.registerPlugin(ScrollTrigger);
 
 // Easily change the scroll speed here. Higher number = slower scroll.
-const SCROLL_DURATION = 40;
+const SCROLL_SPEED_FAST = 10;
+const SCROLL_SPEED_SLOW = 40;
 
 const Gallery = () => {
     const containerRef = useRef(null);
     const heroRef = useRef(null);
 
-    // Refs for each of the three scrolling columns
-    const column1Ref = useRef(null);
-    const column2Ref = useRef(null);
-    const column3Ref = useRef(null);
-
-    const [windowHeight, setWindowHeight] = useState(window.innerHeight);
-
-    useEffect(() => {
-        const handleResize = () => setWindowHeight(window.innerHeight);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    // Refs for each of the three scrolling rows
+    const row1Ref = useRef(null);
+    const row2Ref = useRef(null);
+    const row3Ref = useRef(null);
     
     useEffect(() => {
+        // Set scroll to top on mount
         window.scrollTo(0, 0);
     }, []);
 
@@ -74,31 +69,38 @@ const Gallery = () => {
     const column2Images = allImages.filter((_, index) => index % 3 === 1);
     const column3Images = allImages.filter((_, index) => index % 3 === 2);
 
-    // GSAP animations for vertical auto-scrolling
+    // GSAP animations for horizontal auto-scrolling
     useEffect(() => {
         const ctx = gsap.context(() => {
             gsap.from(heroRef.current, { opacity: 0, y: 50, duration: 1, ease: "power3.out" });
             
-            const setupScroller = (columnRef, startYPercent, endYPercent) => {
-                const column = columnRef.current;
-                if (!column) return;
+            // Reusable function to set up a horizontal scroller
+            const setupScroller = (rowRef, duration, direction = 'forward') => {
+                const row = rowRef.current;
+                if (!row) return;
 
-                gsap.fromTo(column, 
-                    { yPercent: startYPercent },
+                // For a seamless loop, the content is duplicated.
+                // We animate the xPercent from 0 to -50 (for forward) or -50 to 0 (for backward)
+                // because at -50%, the start of the duplicated content aligns perfectly with the start of the container.
+                const startX = direction === 'forward' ? 0 : -50;
+                const endX = direction === 'forward' ? -50 : 0;
+
+                gsap.fromTo(row, 
+                    { xPercent: startX },
                     { 
-                        yPercent: endYPercent,
-                        duration: SCROLL_DURATION,
+                        xPercent: endX,
+                        duration: duration,
                         ease: 'none',
-                        repeat: -1,
-                        overwrite: 'auto'
+                        repeat: -1, // Infinite loop
                     }
                 );
             };
             
+            // Use a short timeout to ensure all elements are rendered before starting animations
             const timeoutId = setTimeout(() => {
-                setupScroller(column1Ref, 0, -50);
-                setupScroller(column2Ref, -25, -75);
-                setupScroller(column3Ref, 0, -50);
+                setupScroller(row1Ref, SCROLL_SPEED_FAST, 'forward');
+                setupScroller(row2Ref, SCROLL_SPEED_SLOW, 'backward'); // Middle row scrolls backward
+                setupScroller(row3Ref, SCROLL_SPEED_FAST, 'forward');
             }, 100);
 
             return () => clearTimeout(timeoutId);
@@ -106,23 +108,28 @@ const Gallery = () => {
         }, containerRef);
 
         return () => ctx.revert();
-    }, [windowHeight]);
+    }, []);
 
-    // Helper component to render a column of images
-    const ImageColumn = ({ images, columnRef }) => {
+    // Helper component to render a row of images
+    const ImageRow = ({ images, rowRef }) => {
+        // We duplicate the images to create a seamless loop
+        const repeatedImages = [...images, ...images];
+
         return (
-            <div ref={columnRef} className="flex flex-col gap-6 w-[30vw] max-w-[400px]">
-                {[...images, ...images].map((image, index) => (
-                    <div key={`${image.id}-${index}`} 
-                         className="rounded-2xl group relative overflow-hidden">
+            <div ref={rowRef} className="flex gap-4 md:gap-6 flex-shrink-0">
+                {repeatedImages.map((image, index) => (
+                    <div 
+                        key={`${image.id}-${index}`} 
+                        className="h-64 md:h-72 w-auto rounded-2xl group relative overflow-hidden flex-shrink-0"
+                    >
                         <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 via-emerald-500/20 to-teal-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                         
                         <img 
                             src={image.src} 
                             alt={image.title} 
-                            className="relative w-full h-auto rounded-2xl object-cover transition-all duration-500 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-green-500/25"
-                            loading="lazy"
-                            onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/400x400/1e293b/a7f3d0?text=Image+Missing`; }}
+                            // Set a fixed height and let width be auto for responsive aspect ratio
+                            className="relative h-full w-auto object-cover rounded-2xl transition-all duration-500 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-green-500/25"
+                            onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/600x400/0a0a0a/16a34a?text=Image+Not+Found`; }}
                         />
                         
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-6 rounded-2xl">
@@ -140,8 +147,8 @@ const Gallery = () => {
     }
 
     return (
-        <div ref={containerRef} className="relative min-h-screen w-full overflow-hidden text-white font-nunito">
-            {/* Enhanced Dark Theme Background */}
+        <div ref={containerRef} className="relative w-full overflow-x-hidden text-white font-nunito bg-[#0a0a0a]">
+            {/* Using a simplified dark background for clarity */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e]"></div>
             
             <div className="absolute inset-0">
@@ -156,12 +163,11 @@ const Gallery = () => {
             {/* Hero Section */}
             <section ref={heroRef} className="pt-32 pb-20 relative text-center z-20">
                 <div className="relative z-10 max-w-4xl mx-auto px-4">
-                    <div className="absolute -inset-16 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 blur-3xl rounded-full opacity-30"></div>
-                    
+                    <div className="absolute -inset-10 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 blur-3xl rounded-full opacity-30"></div>
                     <h1 className="relative text-5xl md:text-6xl font-bold text-white mb-6 font-audiowide tracking-tight">
                         Society <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 drop-shadow-lg">Scrapbook</span>
                     </h1>
-                    <p className="relative text-lg md:text-xl text-green-100 leading-relaxed mb-8">
+                    <p className="relative text-lg md:text-xl text-green-100 leading-relaxed">
                         A continuous stream of our favorite moments, memories, and milestones.
                     </p>
                     
@@ -173,17 +179,16 @@ const Gallery = () => {
                 </div>
             </section>
 
-            <div className="relative h-screen w-full overflow-hidden">
-                <div className="flex justify-center gap-6 absolute top-0 left-1/2 -translate-x-1/2 w-full">
-                    <ImageColumn images={column1Images} columnRef={column1Ref} />
-                    <ImageColumn images={column2Images} columnRef={column2Ref} />
-                    <ImageColumn images={column3Images} columnRef={column3Ref} />
-                </div>
+            {/* Scrolling Gallery Section */}
+            <div className="relative flex flex-col gap-4 md:gap-6 py-10">
+                <ImageRow images={row1Images} rowRef={row1Ref} />
+                <ImageRow images={row2Images} rowRef={row2Ref} />
+                <ImageRow images={row3Images} rowRef={row3Ref} />
             </div>
 
             {/* Top and Bottom Fading Gradients */}
-            <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#111827] to-transparent z-10 pointer-events-none"></div>
-            <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#111827] to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#0a0a0a] to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-[#0a0a0a] to-transparent z-10 pointer-events-none"></div>
         </div>
     );
 };
