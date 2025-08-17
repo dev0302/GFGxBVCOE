@@ -271,20 +271,17 @@ const GFGBentoGrid = () => {
                 Explore our full calendar of workshops, hackathons, and community meetups
               </p>
             </div>
-            <button
-              onClick={handleViewAllEvents}
-              className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-full text-lg border border-green-300/30 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-green-500/25 flex items-center gap-3 group"
-            >
-              <span>View All Events</span>
-              <svg 
-                className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
+            <div className="glowing-btn-wrapper blue rounded-full">
+              <button
+                onClick={handleViewAllEvents}
+                className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-full text-lg transition-all duration-300 flex items-center gap-3 group"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
+                <span>View All Events</span>
+                <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
