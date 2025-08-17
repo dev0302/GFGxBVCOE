@@ -46,6 +46,7 @@ function ImageGrid() {
           .timeline({
             scrollTrigger: {
               trigger: image,
+              markers:true,
               start: isMobile ? "top 15%" : "top 20%",
               end: "bottom top",
               scrub: true,
