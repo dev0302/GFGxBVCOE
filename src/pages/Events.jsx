@@ -40,11 +40,11 @@ const Events = () => {
     description: "Celebrating the grand inauguration where we proudly introduced our society’s mission and vision to the college community",
     modalDescription: "The event marked the beginning of an exciting journey, fostering innovation, collaboration, and growth. With an overwhelming response, we set the stage for future achievements and impactful initiatives.",
     galleryImages: [
-      "/src/images/inaugration.webp",
-      "/src/images/inaugration1.webp",
-      "/src/images/inaugration2.webp",
-      "/src/images/inaugration3.webp",
-      "/src/images/inaugration4.webp"
+      "/images/Inaugration.webp",
+      "/images/Inaugration1.webp",
+      "/images/Inaugration2.webp",
+      "/images/Inaugration3.webp",
+      "/images/Inaugration4.webp"
     ],
     speakers: [
       { name: "Dr. Shristi Vashishtha", title: "Faculty Advisor"}
@@ -67,7 +67,7 @@ const Events = () => {
     description: "A vibrant tech fest designed to foster community and knowledge sharing through fun events like TechMeme and TechQuizzee.",
     modalDescription: "GeekHunt fosters a vibrant community of tech enthusiasts while promoting creativity and knowledge sharing. Participants learn the importance of engaging with current tech trends and the power of humor in making complex topics relatable. The interactive formats enhance information retention, highlight knowledge gaps, and encourage collaboration. The event underscores effective communication skills and the value of peer feedback, creating a dynamic environment where participants can connect, learn, and grow together.",
     galleryImages: [
-      "/src/images/geekhunt.webp"
+      "/images/geekhunt.webp"
     ],
     speakers: [
       { name: "Dr. Shristi Vashishtha", title: "Faculty Advisor"},
@@ -93,11 +93,11 @@ const Events = () => {
     description: "A two-round event designed to test Python proficiency through a challenging traditional quiz and a fun, interactive tech bingo.",
     modalDescription: "Pyhunt is designed to assess and celebrate Python proficiency through two engaging rounds. The event kicks off with a comprehensive quiz featuring challenging questions, jumbled-code puzzles, and rapid-fire queries. Top teams advance to an exhilarating Bingo round, adding a thrilling and strategic twist to the competition. The event aims to engage participants of all skill levels and foster a sense of community among tech enthusiasts.",
     galleryImages: [
-      "src/images/Pyhunt.webp", // Main image
-      "src/images/Pyhunt1.webp",
-      "src/images/Pyhunt2.webp",
-      "src/images/Pyhunt3.webp",
-      "src/images/Pyhunt4.webp"
+      "images/Pyhunt.webp", // Main image
+      "images/Pyhunt1.webp",
+      "images/Pyhunt2.webp",
+      "images/Pyhunt3.webp",
+      "images/Pyhunt4.webp"
     ],
     speakers: [
       { name: "Dr. Shristi Vashishtha", title: "Faculty Advisor" }
@@ -123,10 +123,10 @@ const Events = () => {
     description: "Dive into the fascinating world of Generative AI with live demos, expert insights, and engaging discussions.",
     modalDescription: "Embark on a journey through the realm of Generative AI as we kick off with a warm welcome and an introduction to the wonders of artificial creativity. We'll delve into the fundamentals, demystify core concepts, and showcase real-world applications through exciting live demonstrations. This event is a unique opportunity to understand how machines are capable of creating new and innovative content.",
     galleryImages: [
-      "/src/images/aiconnect.webp", // Main image
-      "/src/images/aiconnect1.webp",
-      "/src/images/aiconnect2.webp",
-      "/src/images/aiconnect4.webp"
+      "/images/aiconnect.webp", // Main image
+      "/images/aiconnect1.webp",
+      "/images/aiconnect2.webp",
+      "/images/aiconnect4.webp"
     ],
     speakers: [
       { name: "Mr. Ritik", title: "Guest Speaker, AI Specialist" },
@@ -153,12 +153,12 @@ const Events = () => {
     description: "An exciting Ideathon to foster innovation and problem-solving through creative ideation, collaboration, and mentorship.",
     modalDescription: "InnoVogue is an Ideathon designed to foster innovation and problem-solving. Participants will engage in dynamic brainstorming sessions, develop creative solutions to real-world challenges, and present their ideas in both idea pitching and business pitching rounds. The event promotes networking, community building, and entrepreneurship, with guidance from seasoned mentors.",
     galleryImages: [
-      "src/images/Innovogue.webp", // Main image
-      "src/images/Innovogue1.webp",
-      "src/images/Innovogue2.webp",
-      "src/images/Innovogue3.webp",
-      "src/images/Innovogue4.webp",
-      "src/images/Innovogue5.webp"
+      "images/Innovogue.webp", // Main image
+      "images/Innovogue1.webp",
+      "images/Innovogue2.webp",
+      "images/Innovogue3.webp",
+      "images/Innovogue4.webp",
+      "images/Innovogue5.webp"
     ],
     speakers: [
       { name: "Charvi", title: "Event Mentor" },
@@ -186,11 +186,11 @@ const Events = () => {
     description: "A multi-round innovation challenge focused on developing feasible and scalable solutions for the UN's Sustainable Development Goals.",
     modalDescription: "Participants will gain skills in analyzing technical feasibility, aligning solutions with global sustainability goals, and presenting ideas clearly to stakeholders. They will enhance their ability to develop actionable implementation plans and simulate real-world deployments. The event fosters creativity, critical thinking, and collaborative problem-solving within diverse teams.",
     galleryImages: [
-      "/src/images/vichaarx.webp", // Main image
-      "/src/images/vichaarx1.webp",
-      "/src/images/vichaarx2.webp",
-      "/src/images/vichaarx3.webp",
-      "/src/images/vichaarx4.webp"
+      "/images/vichaarx.webp", // Main image
+      "/images/vichaarx1.webp",
+      "/images/vichaarx2.webp",
+      "/images/vichaarx3.webp",
+      "/images/vichaarx4.webp"
     ],
     speakers: [
       { name: "Vinamra Sharma", title: "Tech Innovator & Hackathon Veteran" }
@@ -216,12 +216,12 @@ const Events = () => {
     description: "An exclusive opportunity to explore the Geeks for Geeks headquarters, meet the team, and get a behind-the-scenes look at a leading tech company.",
     modalDescription: "Join us for an inspiring industrial visit to the heart of Geeks for Geeks. This exclusive tour offers a unique chance to witness the inner workings of a top ed-tech company, from its innovative work culture to its state-of-the-art infrastructure. You'll have the opportunity to interact with GFG's talented professionals, gain insights into various tech roles, and understand the real-world processes behind their renowned platform.",
     galleryImages: [
-      "/src/images/hqvisit.webp",
-      "/src/images/hqvisit1.webp",
-      "/src/images/hqvisit2.webp",
-      "/src/images/hqvisit3.webp",
-      "/src/images/hqvisit4.webp",
-      "/src/images/hqvisit5.webp",
+      "/images/hqvisit.webp",
+      "/images/hqvisit1.webp",
+      "/images/hqvisit2.webp",
+      "/images/hqvisit3.webp",
+      "/images/hqvisit4.webp",
+      "/images/hqvisit5.webp",
     ],
     speakers: [
       {name: "Sandeep Jain", title:"Founder & CEO, GFG"}

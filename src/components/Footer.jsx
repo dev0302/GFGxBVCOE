@@ -1,10 +1,8 @@
-import React from "react";
 import gfgLogo from "../images/gfgLogo.png";
 import footerBg from "../images/footerbg.jpg";
 import { Instagram } from 'react-feather';
 import { Linkedin } from 'react-feather';
 import { Monitor } from 'react-feather';
-import { useEffect } from "react";
 import dev from "../images/dev.png"
 import himank from "../images/himank.png"
 import gaurav from "../images/gaurav.jpg"
@@ -101,18 +99,20 @@ const Footer = () => {
 
         {/* Footer Bottom */}
         <div className="mt-12 border-t border-[#80a8813b] pt-6 text-center text-[#cbd5e1] text-sm opacity-70">
-          <p>&copy; 2025 GeeksforGeeks Campus Body - BVCOE. All rights reserved.</p>
-          <p className="mt-2 text-white flex justify-center items-center gap-4">
+          <p>&copy; {new Date().getFullYear()} GeeksforGeeks Campus Body - BVCOE. All rights reserved.</p>
+          {/* Changed the wrapping <p> to a <div> to fix the nesting error */}
+          <div className="mt-2 text-white flex justify-center items-center gap-4">
             Developed by -{" "}
             <a 
               href="https://www.linkedin.com/in/dev-malik-976230311/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#38bdf8] hover:text-[#7dd3fc] transition-colors duration-300 inline-block relative hover:-translate-y-0.5"
-            > <div className="flex gap-1 justify-center items-center">
-              <img src={dev} alt="nf" className="h-5 w-5 border-2 border-white o object-cover rounded-full" />
-              Dev
-            </div>
+            > 
+              <div className="flex gap-1 justify-center items-center">
+                <img src={dev} alt="Dev Malik" className="h-5 w-5 border-2 border-white object-cover rounded-full" />
+                Dev
+              </div>
             </a>
             <a
               href="https://www.linkedin.com/in/himank-pandoh-58a0b52b1/"
@@ -120,10 +120,10 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="text-[#38bdf8] hover:text-[#7dd3fc] transition-colors duration-300 inline-block relative hover:-translate-y-0.5"
             >
-               <div className="flex gap-1 justify-center items-center">
-              <img src={himank} alt="nf" className="h-5 w-5 border-2 border-white object-cover rounded-full" />
-              Himank
-            </div>
+              <div className="flex gap-1 justify-center items-center">
+                <img src={himank} alt="Himank Pandoh" className="h-5 w-5 border-2 border-white object-cover rounded-full" />
+                Himank
+              </div>
             </a>
             <a
               href="https://www.linkedin.com/in/gaurav-karakoti/"
@@ -131,25 +131,14 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="text-[#38bdf8] hover:text-[#7dd3fc] transition-colors duration-300 inline-block relative hover:-translate-y-0.5"
             >
-               <div className="flex gap-1 justify-center items-center">
-              <img src={gaurav} alt="nf" className="h-5 w-5 border-2 border-white object-cover rounded-full" />
-              Gaurav
-            </div>
+              <div className="flex gap-1 justify-center items-center">
+                <img src={gaurav} alt="Gaurav Karakoti" className="h-5 w-5 border-2 border-white object-cover rounded-full" />
+                Gaurav
+              </div>
             </a>
-          </p>
+          </div>
         </div>
       </footer>
-
-      <style jsx>{`
-        @keyframes flowingLine {
-          0% {
-            background-position: 200% 0;
-          }
-          100% {
-            background-position: -200% 0;
-          }
-        }
-      `}</style>
     </section>
   );
 };
