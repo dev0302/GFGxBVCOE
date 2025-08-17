@@ -85,7 +85,7 @@ const GFGBentoGrid = () => {
             end: "bottom 10%",
             scrub: 2,
             toggleActions: "play none none none",
-            markers: true,
+             
           },
         });
 
