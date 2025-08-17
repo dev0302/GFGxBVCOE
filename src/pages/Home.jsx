@@ -58,7 +58,7 @@ function Home() {
             trigger: section,
             start: "top 85%",
             toggleActions: "play none none none",
-            markers: true,
+             
           }
         });
       }

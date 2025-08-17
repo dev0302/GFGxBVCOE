@@ -63,7 +63,7 @@ const About = () => {
           start: "top 80%",
           end: "bottom 20%",
           toggleActions: "play none none none",
-          markers: true,
+           
         }
       }
     );
@@ -82,7 +82,7 @@ const About = () => {
           start: "top 80%",
           end: "bottom 20%",
           toggleActions: "play none none none",
-          markers: true,
+           
         }
       }
     );
@@ -101,7 +101,7 @@ const About = () => {
           start: "top 80%",
           end: "bottom 20%",
           toggleActions: "play none none none",
-          markers: true,
+           
         }
       }
     );
@@ -119,7 +119,7 @@ const About = () => {
           start: "top 80%",
           end: "bottom 20%",
           toggleActions: "play none none none",
-          markers: true,
+           
         }
       }
     );
@@ -137,7 +137,7 @@ const About = () => {
           start: "top 80%",
           end: "bottom 20%",
           toggleActions: "play none none none",
-          markers: true,
+           
         }
       }
     );
@@ -159,7 +159,7 @@ const About = () => {
             start: "top 80%",
             end: "bottom 20%",
             toggleActions: "play none none none",
-            markers: true,
+             
           }
         }
       );
@@ -179,7 +179,7 @@ const About = () => {
           start: "top 80%",
           end: "bottom 20%",
           toggleActions: "play none none none",
-          markers: true,
+           
         }
       }
     );
