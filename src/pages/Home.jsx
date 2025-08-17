@@ -2,7 +2,7 @@ import GFGBentoGrid from "../components/GFGBentoGrid";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useRef } from "react";
+import { useRef, useState } from "react"; // Import useState
 import Footer from "../components/Footer";
 import ImageGrid from "../components/ImageGrid";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -17,29 +17,55 @@ function Home() {
   const aboutSectionRef = useRef();
   const teamSectionRef = useRef();
 
+  // State for the counters
+  const [memberCount, setMemberCount] = useState(0);
+  const [eventCount, setEventCount] = useState(0);
+  const [workshopCount, setWorkshopCount] = useState(0);
+
   // GSAP animations for smooth entrance
   useGSAP(() => {
-    const animateFrom = (elem, y = 50) => {
-      gsap.from(elem, {
-        opacity: 0,
-        y: y,
-        duration: 1,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: elem,
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-      });
-    };
+    // Title animation
+    gsap.from(titleRef.current, {
+      y: 50,
+      opacity: 0,
+      duration: 1.2,
+      ease: "power2.out",
+    });
 
-    gsap.from(titleRef.current, { y: 50, opacity: 0, duration: 1.2, ease: "power2.out" });
-    gsap.from(descRef.current, { y: 40, opacity: 0, duration: 1, ease: "power2.out", delay: 0.3 });
-    gsap.from(btnRef.current, { y: 30, opacity: 0, duration: 0.8, ease: "power2.out", delay: 0.6 });
+    // Description animation
+    gsap.from(descRef.current, {
+      y: 40,
+      opacity: 0,
+      duration: 1,
+      ease: "power2.out",
+      delay: 0.3,
+    });
 
-    animateFrom(aboutSectionRef.current);
-    animateFrom(teamSectionRef.current);
+    // Buttons animation
+    gsap.from(btnRef.current, {
+      y: 30,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power2.out",
+      delay: 0.6,
+    });
 
+    // --- NEW: Number Counting Animation ---
+    const counters = { members: 0, events: 0, workshops: 0 };
+    gsap.to(counters, {
+      duration: 2, // How long the animation takes
+      ease: "power2.out",
+      delay: 0.8, // Start after the main content appears
+      members: 50,
+      events: 10,
+      workshops: 10,
+      onUpdate: () => {
+        // Update the state on each "tick" of the animation
+        setMemberCount(Math.ceil(counters.members));
+        setEventCount(Math.ceil(counters.events));
+        setWorkshopCount(Math.ceil(counters.workshops));
+      },
+    });
   }, []);
 
   return (
@@ -91,8 +117,8 @@ function Home() {
           <div ref={btnRef} className="flex flex-col sm:flex-row gap-6 mt-12 font-nunito items-center">
             <div className="glowing-btn-wrapper blue rounded-full">
               <NavLink to="notfound">
-                <button 
-                  id="btn-join" 
+                <button
+                  id="btn-join"
                   className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300"
                 >
                   Join Now
@@ -100,9 +126,9 @@ function Home() {
               </NavLink>
             </div>
             <div className="glowing-btn-wrapper green rounded-full">
-              <button 
-                id="btn-about" 
-                onClick={() => navigate('/about')} 
+              <button
+                id="btn-about"
+                onClick={() => navigate("/about")}
                 className="px-8 py-4 bg-transparent text-green-100 font-semibold rounded-full text-lg border-2 border-green-300/40 backdrop-blur-sm hover:bg-green-300/10 transition-all duration-300 font-nunito"
               >
                 About Us
@@ -120,7 +146,8 @@ function Home() {
                 id="count-members"
                 className="text-3xl font-bold text-green-300 mb-2"
               >
-                50+
+                {/* UPDATED */}
+                {memberCount}+
               </div>
               <div className="text-green-100">Active Members</div>
             </div>
@@ -129,7 +156,8 @@ function Home() {
                 id="count-events"
                 className="text-3xl font-bold text-emerald-300 mb-2"
               >
-                10+
+                {/* UPDATED */}
+                {eventCount}+
               </div>
               <div className="text-green-100">Events Held</div>
             </div>
@@ -138,7 +166,8 @@ function Home() {
                 id="count-workshops"
                 className="text-3xl font-bold text-green-300 mb-2"
               >
-                10+
+                {/* UPDATED */}
+                {workshopCount}+
               </div>
               <div className="text-green-100">Workshops Conducted</div>
             </div>
