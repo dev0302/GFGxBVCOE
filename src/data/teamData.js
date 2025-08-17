@@ -227,11 +227,41 @@ const teamData = [
                 description: "College Chapter, BVCOE, New Delhi"
             },
             {
+                year: "2025",
+                role: "Designing Head",
+                project: "Enactus",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
                 year: "2024",
                 role: "Technical Executive",
                 project: "Geeks for Geeks",
                 description: "College Chapter, BVCOE, New Delhi"
-            }
+            },
+            {
+                year: "2023",
+                role: "Citizen Space Scientist",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
+                year: "2024",
+                role: "Technical Executive",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
+                year: "2024",
+                role: "Technical Executive",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
+                year: "2024",
+                role: "Technical Executive",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
         ]
     }
 ];
