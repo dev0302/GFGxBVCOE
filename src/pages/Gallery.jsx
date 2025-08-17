@@ -7,7 +7,7 @@ import gsap from 'https://esm.sh/gsap';
 
 // Easily change the scroll speed here. Higher number = slower scroll.
 const SCROLL_SPEED_FAST = 10;
-const SCROLL_SPEED_SLOW = 40;
+const SCROLL_SPEED_SLOW = 10;
 
 const Gallery = () => {
     const containerRef = useRef(null);
