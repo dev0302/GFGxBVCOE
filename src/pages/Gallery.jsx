@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import gsap from 'https://esm.sh/gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 // It's good practice to import plugins once
 // import { ScrollTrigger } from 'https://esm.sh/gsap/ScrollTrigger';
@@ -23,28 +24,50 @@ const Gallery = () => {
         window.scrollTo(0, 0);
     }, []);
 
-    // Sample image data for three distinct rows
-    const row1Images = [
-        { id: 'r1-1', src: './gridimg1.webp', title: 'Portrait Orientation' },
-        { id: 'r1-2', src: './gridimg2.webp', title: 'Landscape Orientation' },
-        { id: 'r1-3', src: './gridimg3.webp', title: 'Square Image' },
-        { id: 'r1-4', src: './gridimg4.webp', title: 'Campus Life' },
-        { id: 'r1-5', src: './gridimg5.webp', title: 'Coding Session' },
-    ];
-    const row2Images = [
-        { id: 'r2-1', src: './gridimg6.webp', title: 'Guest Speaker' },
-        { id: 'r2-2', src: './gridimg7.webp', title: 'Behind the Scenes' },
-        { id: 'r2-3', src: './gridimg8.webp', title: 'Planning Session' },
-        { id: 'r2-4', src: './gridimg9.webp', title: 'Community Meetup' },
-        { id: 'r2-5', src: './gridimg1.webp', title: 'Team Huddle' },
-    ];
-    const row3Images = [
-        { id: 'r3-1', src: './gridimg2.webp', title: 'Workshop Action' },
-        { id: 'r3-2', src: './gridimg3.webp', title: 'Networking Event' },
-        { id: 'r3-3', src: './gridimg4.webp', title: 'Project Showcase' },
-        { id: 'r3-4', src: './gridimg5.webp', title: 'Hackathon Night' },
-        { id: 'r3-5', src: './gridimg6.webp', title: 'Celebration' },
-    ];
+    const allImages = [
+      ...Array.from({ length: 20 }, (_, i) => ({ id: `grid-${i + 1}`, src: `/gridimg${i + 1}.webp`, title: `Event Highlight #${i + 1}` })),
+      { id: 'inaug-1', src: '/images/Inaugration.webp', title: 'Inauguration' },
+      { id: 'inaug-2', src: '/images/Inaugration1.webp', title: 'Inauguration' },
+      { id: 'inaug-3', src: '/images/Inaugration2.webp', title: 'Inauguration' },
+      { id: 'inaug-4', src: '/images/Inaugration3.webp', title: 'Inauguration' },
+      { id: 'inaug-5', src: '/images/Inaugration4.webp', title: 'Inauguration' },
+      { id: 'geekhunt-1', src: '/images/geekhunt.webp', title: 'GeekHunt Tech Fiesta' },
+      { id: 'pyhunt-1', src: '/images/Pyhunt.webp', title: 'Pyhunt Challenge' },
+      { id: 'pyhunt-2', src: '/images/Pyhunt1.webp', title: 'Pyhunt Challenge' },
+      { id: 'pyhunt-3', src: '/images/Pyhunt2.webp', title: 'Pyhunt Challenge' },
+      { id: 'pyhunt-4', src: '/images/Pyhunt3.webp', title: 'Pyhunt Challenge' },
+      { id: 'pyhunt-5', src: '/images/Pyhunt4.webp', title: 'Pyhunt Challenge' },
+      { id: 'aiconnect-1', src: '/images/aiconnect.webp', title: 'AI Connect Workshop' },
+      { id: 'aiconnect-2', src: '/images/aiconnect1.webp', title: 'AI Connect Workshop' },
+      { id: 'aiconnect-3', src: '/images/aiconnect2.webp', title: 'AI Connect Workshop' },
+      { id: 'aiconnect-4', src: '/images/aiconnect4.webp', title: 'AI Connect Workshop' },
+      { id: 'innovogue-1', src: '/images/Innovogue.webp', title: 'InnoVogue Ideathon' },
+      { id: 'innovogue-2', src: '/images/Innovogue1.webp', title: 'InnoVogue Ideathon' },
+      { id: 'innovogue-3', src: '/images/Innovogue2.webp', title: 'InnoVogue Ideathon' },
+      { id: 'innovogue-4', src: '/images/Innovogue3.webp', title: 'InnoVogue Ideathon' },
+      { id: 'innovogue-5', src: '/images/Innovogue4.webp', title: 'InnoVogue Ideathon' },
+      { id: 'innovogue-6', src: '/images/Innovogue5.webp', title: 'InnoVogue Ideathon' },
+      { id: 'vichaarx-1', src: '/images/vichaarx.webp', title: 'VichaarX Challenge' },
+      { id: 'vichaarx-2', src: '/images/vichaarx1.webp', title: 'VichaarX Challenge' },
+      { id: 'vichaarx-3', src: '/images/vichaarx2.webp', title: 'VichaarX Challenge' },
+      { id: 'vichaarx-4', src: '/images/vichaarx3.webp', title: 'VichaarX Challenge' },
+      { id: 'vichaarx-5', src: '/images/vichaarx4.webp', title: 'VichaarX Challenge' },
+      { id: 'hqvisit-1', src: '/images/hqvisit.webp', title: 'GFG HQ Visit' },
+      { id: 'hqvisit-2', src: '/images/hqvisit1.webp', title: 'GFG HQ Visit' },
+      { id: 'hqvisit-3', src: '/images/hqvisit2.webp', title: 'GFG HQ Visit' },
+      { id: 'hqvisit-4', src: '/images/hqvisit3.webp', title: 'GFG HQ Visit' },
+      { id: 'hqvisit-5', src: '/images/hqvisit4.webp', title: 'GFG HQ Visit' },
+      { id: 'hqvisit-6', src: '/images/hqvisit5.webp', title: 'GFG HQ Visit' },
+      { id: 'gfg-1', src: '/images/gfg1.jpg', title: 'Community Moment' },
+      { id: 'gfg-2', src: '/images/gfg2.jpg', title: 'Community Moment' },
+      { id: 'gfg-3', src: '/images/gfg3.jpg', title: 'Community Moment' },
+      { id: 'gfg-4', src: '/images/gfg4.jpg', title: 'Community Moment' },
+      { id: 'gfg-5', src: '/images/gfg5.jpg', title: 'Community Moment' },
+  ];
+
+    const column1Images = allImages.filter((_, index) => index % 3 === 0);
+    const column2Images = allImages.filter((_, index) => index % 3 === 1);
+    const column3Images = allImages.filter((_, index) => index % 3 === 2);
 
     // GSAP animations for horizontal auto-scrolling
     useEffect(() => {
@@ -128,8 +151,14 @@ const Gallery = () => {
             {/* Using a simplified dark background for clarity */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e]"></div>
             
-            {/* Your animated background elements can stay here */}
-            {/* ... */}
+            <div className="absolute inset-0">
+                 <div className="absolute inset-0 opacity-5">
+                    <div className="w-full h-full" style={{
+                        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(34, 197, 94, 0.3) 1px, transparent 0)`,
+                        backgroundSize: '40px 40px'
+                    }}></div>
+                </div>
+            </div>
             
             {/* Hero Section */}
             <section ref={heroRef} className="pt-32 pb-20 relative text-center z-20">
@@ -141,6 +170,12 @@ const Gallery = () => {
                     <p className="relative text-lg md:text-xl text-green-100 leading-relaxed">
                         A continuous stream of our favorite moments, memories, and milestones.
                     </p>
+                    
+                    <div className="relative flex justify-center items-center gap-4 mb-8">
+                        <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-green-400 to-transparent"></div>
+                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                        <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-green-400 to-transparent"></div>
+                    </div>
                 </div>
             </section>
 
