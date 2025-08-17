@@ -6,8 +6,8 @@ import gsap from 'https://esm.sh/gsap';
 // gsap.registerPlugin(ScrollTrigger);
 
 // Easily change the scroll speed here. Higher number = slower scroll.
-const SCROLL_SPEED_FAST = 10;
-const SCROLL_SPEED_SLOW = 20;
+const SCROLL_SPEED_FAST = 60;
+const SCROLL_SPEED_SLOW = 60;
 
 const Gallery = () => {
     const containerRef = useRef(null);
@@ -32,8 +32,35 @@ const Gallery = () => {
         { id: 'r1-5', src: '/src/Images/gridimg5.webp', title: 'Coding Session' },
         { id: 'r1-6', src: '/src/Images/gridimg6.webp', title: 'Coding Session' },
         { id: 'r1-7', src: '/src/Images/gridimg7.webp', title: 'Coding Session' },
+        { id: 'r1-1', src: '/src/Images/gridimg1.webp', title: 'Portrait Orientation' },
+        { id: 'r1-2', src: '/src/Images/gridimg2.webp', title: 'Landscape Orientation' },
+        { id: 'r1-3', src: '/src/Images/gridimg3.webp', title: 'Square Image' },
+        { id: 'r1-4', src: '/src/Images/gridimg4.webp', title: 'Campus Life' },
+        { id: 'r1-5', src: '/src/Images/gridimg5.webp', title: 'Coding Session' },
+        { id: 'r1-6', src: '/src/Images/gridimg6.webp', title: 'Coding Session' },
+        { id: 'r1-7', src: '/src/Images/gridimg7.webp', title: 'Coding Session' },
+        { id: 'r1-1', src: '/src/Images/gridimg1.webp', title: 'Portrait Orientation' },
+        { id: 'r1-2', src: '/src/Images/gridimg2.webp', title: 'Landscape Orientation' },
+        { id: 'r1-3', src: '/src/Images/gridimg3.webp', title: 'Square Image' },
+        { id: 'r1-4', src: '/src/Images/gridimg4.webp', title: 'Campus Life' },
+        { id: 'r1-5', src: '/src/Images/gridimg5.webp', title: 'Coding Session' },
+        { id: 'r1-6', src: '/src/Images/gridimg6.webp', title: 'Coding Session' },
+        { id: 'r1-7', src: '/src/Images/gridimg7.webp', title: 'Coding Session' },
+        
     ];
     const row2Images = [
+        { id: 'r2-1', src: '/src/Images/gridimg8.webp', title: 'Guest Speaker' },
+        { id: 'r2-2', src: '/src/Images/gridimg9.webp', title: 'Behind the Scenes' },
+        { id: 'r2-3', src: '/src/Images/gridimg10.webp', title: 'Planning Session' },
+        { id: 'r2-4', src: '/src/Images/gridimg11.webp', title: 'Community Meetup' },
+        { id: 'r2-5', src: '/src/Images/gridimg12.webp', title: 'Team Huddle' },
+        { id: 'r2-6', src: '/src/Images/gridimg13.webp', title: 'Coding Session' },
+        { id: 'r2-1', src: '/src/Images/gridimg8.webp', title: 'Guest Speaker' },
+        { id: 'r2-2', src: '/src/Images/gridimg9.webp', title: 'Behind the Scenes' },
+        { id: 'r2-3', src: '/src/Images/gridimg10.webp', title: 'Planning Session' },
+        { id: 'r2-4', src: '/src/Images/gridimg11.webp', title: 'Community Meetup' },
+        { id: 'r2-5', src: '/src/Images/gridimg12.webp', title: 'Team Huddle' },
+        { id: 'r2-6', src: '/src/Images/gridimg13.webp', title: 'Coding Session' },
         { id: 'r2-1', src: '/src/Images/gridimg8.webp', title: 'Guest Speaker' },
         { id: 'r2-2', src: '/src/Images/gridimg9.webp', title: 'Behind the Scenes' },
         { id: 'r2-3', src: '/src/Images/gridimg10.webp', title: 'Planning Session' },
@@ -49,12 +76,26 @@ const Gallery = () => {
         { id: 'r3-5', src: '/src/Images/gridimg18.webp', title: 'Celebration' },
         { id: 'r3-6', src: '/src/Images/gridimg19.webp', title: 'Coding Session' },
         { id: 'r3-7', src: '/src/Images/gridimg20.webp', title: 'Coding Session' },
+        { id: 'r3-1', src: '/src/Images/gridimg14.webp', title: 'Workshop Action' },
+        { id: 'r3-2', src: '/src/Images/gridimg15.webp', title: 'Networking Event' },
+        { id: 'r3-3', src: '/src/Images/gridimg16.webp', title: 'Project Showcase' },
+        { id: 'r3-4', src: '/src/Images/gridimg17.webp', title: 'Hackathon Night' },
+        { id: 'r3-5', src: '/src/Images/gridimg18.webp', title: 'Celebration' },
+        { id: 'r3-6', src: '/src/Images/gridimg19.webp', title: 'Coding Session' },
+        { id: 'r3-7', src: '/src/Images/gridimg20.webp', title: 'Coding Session' },
+        { id: 'r3-1', src: '/src/Images/gridimg14.webp', title: 'Workshop Action' },
+        { id: 'r3-2', src: '/src/Images/gridimg15.webp', title: 'Networking Event' },
+        { id: 'r3-3', src: '/src/Images/gridimg16.webp', title: 'Project Showcase' },
+        { id: 'r3-4', src: '/src/Images/gridimg17.webp', title: 'Hackathon Night' },
+        { id: 'r3-5', src: '/src/Images/gridimg18.webp', title: 'Celebration' },
+        { id: 'r3-6', src: '/src/Images/gridimg19.webp', title: 'Coding Session' },
+        { id: 'r3-7', src: '/src/Images/gridimg20.webp', title: 'Coding Session' },
     ];
 
     // GSAP animations for horizontal auto-scrolling
     useEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.from(heroRef.current, { opacity: 0, y: 50, duration: 1, ease: "power3.out" });
+            gsap.from(heroRef.current, { opacity: 0, y: 25, duration: 1, ease: "power3.out" });
             
             // Reusable function to set up a horizontal scroller
             const setupScroller = (rowRef, duration, direction = 'forward') => {
@@ -64,8 +105,8 @@ const Gallery = () => {
                 // For a seamless loop, the content is duplicated.
                 // We animate the xPercent from 0 to -50 (for forward) or -50 to 0 (for backward)
                 // because at -50%, the start of the duplicated content aligns perfectly with the start of the container.
-                const startX = direction === 'forward' ? 0 : -50;
-                const endX = direction === 'forward' ? -50 : 0;
+                const startX = direction === 'forward' ? 0 : -1000;
+                const endX = direction === 'forward' ? -1000 : 0;
 
                 gsap.fromTo(row, 
                     { xPercent: startX },
