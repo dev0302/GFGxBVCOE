@@ -2,14 +2,11 @@ import { useGSAP } from "@gsap/react";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useRef , useState } from "react";
+import { useRef , useState, useEffect } from "react";
 import EventModal from "./EventModal";
-import { useEffect } from "react";
 import Lenis from "lenis";
 
-// Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
-
 
 const Events = () => {
   const containerRef = useRef();
@@ -17,32 +14,19 @@ const Events = () => {
   const eventsRef = useRef();
   const navigate = useNavigate();
 
+  // Your Lenis useEffect, events data, and other logic remains the same...
   useEffect(() => {
-      const lenis = new Lenis({
-        // duration:4,
-        lerp: 0.05,
-        smoothWheel: true,
-      });
-  
-      // Sync Lenis scroll with ScrollTrigger
+      const lenis = new Lenis({ lerp: 0.05, smoothWheel: true });
       lenis.on("scroll", ScrollTrigger.update);
-  
       function raf(time) {
         lenis.raf(time);
         requestAnimationFrame(raf);
       }
       requestAnimationFrame(raf);
-    
-  
-      return () => {
-        lenis.destroy(); // cleanup on unmount
-      };
+      return () => { lenis.destroy(); };
     });
 
-
-  // State to manage the selected event for the modal
   const [selectedEvent, setSelectedEvent] = useState(null);
-
 
   // Sample events data
   const events = [
@@ -336,80 +320,71 @@ const Events = () => {
       </section>
 
       {/* Events Grid */}
-<section ref={eventsRef} className="py-20 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] font-['Inter'] text-white">
-  <div className="container mx-auto px-6">
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {events.map((event) => (
-        <div
-          key={event.id}
-          className="bg-[#2a2a3d] border-2 border-gray-300 border-opacity-20 rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
-        >
-          {/* Event Image */}
-          <div className="h-48 overflow-hidden">
-            <div
-              className="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
-              style={{
-                backgroundImage: `url('${event.galleryImages[0]}')`,
-              }}
-            />
-          </div>
+      <section ref={eventsRef} className="py-20 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] font-['Inter'] text-white">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {events.map((event) => (
+              <div key={event.id} className="glowing-container" style={{ width: '100%', height: '100%', borderRadius: '1.25rem' }}>
+                <div className="bg-[#2a2a3d] rounded-2xl shadow-lg overflow-hidden transition-all duration-300 group h-full w-full flex flex-col">
+                  <div className="h-48 overflow-hidden flex-shrink-0">
+                    <div
+                      className="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
+                      style={{ backgroundImage: `url('${event.galleryImages[0]}')` }}
+                    />
+                  </div>
 
-          {/* Event Content */}
-          <div className="p-6">
-            {/* Category Badge */}
-            <div className="inline-flex items-center px-3 py-1 bg-[#444] rounded-full border border-gray-500/30 mb-4">
-              <span className="text-sm font-medium text-[#ccc]">{event.category}</span>
-            </div>
+                  <div className="p-6 flex flex-col flex-grow">
+                    <div className="inline-flex items-center px-3 py-1 bg-[#444] rounded-full border border-gray-500/30 mb-4">
+                      <span className="text-sm font-medium text-[#ccc]">{event.category}</span>
+                    </div>
 
-            {/* Event Title */}
-            <h3 className="text-xl font-bold text-red-400 mb-3 group-hover:text-cyan-400 transition-colors duration-300">
-              {event.title}
-            </h3>
+                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors duration-300">
+                      {event.title}
+                    </h3>
+                    
+                    <div className="space-y-2 mb-4 text-[#aaa]">
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="text-sm">{event.date}</span>
+                      </div>
 
-            {/* Event Details */}
-            <div className="space-y-2 mb-4 text-[#aaa]">
-              <div className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span className="text-sm">{event.date}</span>
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-sm">{event.time}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span className="text-sm">{event.location}</span>
+                      </div>
+                    </div>
+
+                    <p className="text-sm text-[#aaa] leading-relaxed mb-6 flex-grow">
+                      {event.description}
+                    </p>
+
+                    <div className="glowing-btn-wrapper green rounded-lg w-full mt-auto">
+                      <button 
+                        onClick={() => handleKnowMoreClick(event)}
+                        className="w-full px-6 py-3 bg-cyan-700 text-white font-semibold rounded-lg transition-all duration-300 hover:opacity-95"
+                      >
+                        Know More
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-
-              <div className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-sm">{event.time}</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span className="text-sm">{event.location}</span>
-              </div>
-            </div>
-
-            {/* Event Description */}
-            <p className="text-sm text-[#aaa] leading-relaxed mb-6">
-              {event.description}
-            </p>
-
-            {/* Register Button */}
-            <button 
-              onClick={() => handleKnowMoreClick(event)}
-              className="w-full px-6 py-3 bg-cyan-700 text-white font-semibold rounded-lg transition-all duration-300 hover:scale-105 hover:opacity-95"
-            >
-              Know More
-            </button>
+            ))}
           </div>
         </div>
-      ))}
-    </div>
-  </div>
-</section>
-
+      </section>
 
       {/* Call to Action */}
       <section className="py-20 relative">
@@ -419,17 +394,19 @@ const Events = () => {
             <p className="text-green-100 text-lg mb-8 max-w-2xl mx-auto">
               Have an idea for a workshop or event? We'd love to hear from you! Let's collaborate to create amazing learning experiences.
             </p>
-            <button
-              onClick={handleNavigateToContact}
-              className="px-8 py-4 bg-cyan-700 text-white hover:from-green-600 hover:to-emerald-600 font-semibold rounded-full text-lg border border-green-300/30 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-green-500/25"
-            >
-              Contact Us
-            </button>
+            <div className="glowing-btn-wrapper green rounded-full">
+              <button
+                onClick={handleNavigateToContact}
+                className="px-8 py-4 bg-cyan-700 text-white hover:from-green-600 hover:to-emerald-600 font-semibold rounded-full text-lg transition-all duration-300"
+              >
+                Contact Us
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
-    {/* RENDER THE MODAL */}
+      {/* RENDER THE MODAL */}
       <EventModal event={selectedEvent} onClose={handleCloseModal} />
     </div>
   );
