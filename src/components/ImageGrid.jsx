@@ -69,7 +69,7 @@ function ImageGrid() {
           ease: "none",
           scrollTrigger: {
             trigger: image,
-            start: isMobile ? "top 15%" : "top bottom",
+            start: isMobile ? "top bottom" : "top bottom",
             end: "bottom top",
             scrub: true,
              
