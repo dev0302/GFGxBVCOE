@@ -241,26 +241,26 @@ const teamData = [
             {
                 year: "2023",
                 role: "Citizen Space Scientist",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, New Delhi"
+                project: "IASC",
+                description: "NASA, United States"
             },
             {
                 year: "2024",
-                role: "Technical Executive",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, New Delhi"
+                role: "Co-Founder",
+                project: "SLOOT",
+                description: ""
             },
             {
-                year: "2024",
-                role: "Technical Executive",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, New Delhi"
+                year: "2022",
+                role: "Top 10 innovators of India",
+                project: "YI2022",
+                description: "MEPSC Niti Aayog, New Delhi "
             },
             {
-                year: "2024",
-                role: "Technical Executive",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, New Delhi"
+                year: "2022",
+                role: "Sports Secratary ",
+                project: "Bbpsmv, New Delhi",
+                description: ""
             },
         ]
     }
