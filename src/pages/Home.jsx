@@ -46,21 +46,7 @@ function Home() {
     });
 
     // Animate sections on scroll
-    const sections = [aboutSectionRef.current, teamSectionRef.current];
-    sections.forEach(section => {
-      if (section) {
-        gsap.from(section, {
-          opacity: 0,
-          y: 50,
-          duration: 1,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: section,
-            start: "top 85%",
-            toggleActions: "play none none none",
-          }
-        });
-      }
+    
     });
 
   }, []);
