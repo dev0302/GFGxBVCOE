@@ -151,7 +151,33 @@ const teamData = [
         p2: "",
         email: "kartikbhattacharya10@gmail.com",
         instaLink: "https://www.instagram.com/_kafiltafish_21_/",
-        linkedinLink: "https://linkedin.com/in/kafiltafish21"
+        linkedinLink: "https://linkedin.com/in/kafiltafish21",
+        timeline: [
+            {
+                year: "2025",
+                role: "Intern",
+                project: "Gurugram Cyber Police",
+                description: "CyberSecurity and Digital Forensics"
+            },
+            {
+                year: "2025",
+                role: "Vice-Chairman and Technical Lead",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
+                year: "2024",
+                role: "Cyber Security Trainer",
+                project: "The Techunique Academy",
+                description: "Trained Cyber Security"
+            },
+            {
+                year: "2024",
+                role: "Technical executive",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            }
+        ]
     },
     {
         name: "Archita",
@@ -192,7 +218,21 @@ const teamData = [
         p2: "",
         email: "piyushksbvp@gmail.com",
         instaLink: "https://www.instagram.com/thepiyushks/",
-        linkedinLink: "https://in.linkedin.com/in/piyush-kumar-singh1"
+        linkedinLink: "https://in.linkedin.com/in/piyush-kumar-singh1",
+        timeline: [
+            {
+                year: "2025",
+                role: "Public Relations and Outreach Lead",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
+                year: "2024",
+                role: "Technical Executive",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            }
+        ]
     }
 ];
 

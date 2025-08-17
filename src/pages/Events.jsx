@@ -139,6 +139,7 @@ const Events = () => {
     }
   ];
 
+
   // GSAP scroll-triggered animations
   useGSAP(() => {
     const sections = [heroRef.current, eventsRef.current];

@@ -7,7 +7,7 @@ import gsap from 'https://esm.sh/gsap';
 
 // Easily change the scroll speed here. Higher number = slower scroll.
 const SCROLL_SPEED_FAST = 10;
-const SCROLL_SPEED_SLOW = 10;
+const SCROLL_SPEED_SLOW = 20;
 
 const Gallery = () => {
     const containerRef = useRef(null);
@@ -25,25 +25,30 @@ const Gallery = () => {
 
     // Sample image data for three distinct rows
     const row1Images = [
-        { id: 'r1-1', src: './gridimg1.webp', title: 'Portrait Orientation' },
-        { id: 'r1-2', src: './gridimg2.webp', title: 'Landscape Orientation' },
-        { id: 'r1-3', src: './gridimg3.webp', title: 'Square Image' },
-        { id: 'r1-4', src: './gridimg4.webp', title: 'Campus Life' },
-        { id: 'r1-5', src: './gridimg5.webp', title: 'Coding Session' },
+        { id: 'r1-1', src: '/src/Images/gridimg1.webp', title: 'Portrait Orientation' },
+        { id: 'r1-2', src: '/src/Images/gridimg2.webp', title: 'Landscape Orientation' },
+        { id: 'r1-3', src: '/src/Images/gridimg3.webp', title: 'Square Image' },
+        { id: 'r1-4', src: '/src/Images/gridimg4.webp', title: 'Campus Life' },
+        { id: 'r1-5', src: '/src/Images/gridimg5.webp', title: 'Coding Session' },
+        { id: 'r1-6', src: '/src/Images/gridimg6.webp', title: 'Coding Session' },
+        { id: 'r1-7', src: '/src/Images/gridimg7.webp', title: 'Coding Session' },
     ];
     const row2Images = [
-        { id: 'r2-1', src: './gridimg6.webp', title: 'Guest Speaker' },
-        { id: 'r2-2', src: './gridimg7.webp', title: 'Behind the Scenes' },
-        { id: 'r2-3', src: './gridimg8.webp', title: 'Planning Session' },
-        { id: 'r2-4', src: './gridimg9.webp', title: 'Community Meetup' },
-        { id: 'r2-5', src: './gridimg1.webp', title: 'Team Huddle' },
+        { id: 'r2-1', src: '/src/Images/gridimg8.webp', title: 'Guest Speaker' },
+        { id: 'r2-2', src: '/src/Images/gridimg9.webp', title: 'Behind the Scenes' },
+        { id: 'r2-3', src: '/src/Images/gridimg10.webp', title: 'Planning Session' },
+        { id: 'r2-4', src: '/src/Images/gridimg11.webp', title: 'Community Meetup' },
+        { id: 'r2-5', src: '/src/Images/gridimg12.webp', title: 'Team Huddle' },
+        { id: 'r2-6', src: '/src/Images/gridimg13.webp', title: 'Coding Session' },
     ];
     const row3Images = [
-        { id: 'r3-1', src: './gridimg2.webp', title: 'Workshop Action' },
-        { id: 'r3-2', src: './gridimg3.webp', title: 'Networking Event' },
-        { id: 'r3-3', src: './gridimg4.webp', title: 'Project Showcase' },
-        { id: 'r3-4', src: './gridimg5.webp', title: 'Hackathon Night' },
-        { id: 'r3-5', src: './gridimg6.webp', title: 'Celebration' },
+        { id: 'r3-1', src: '/src/Images/gridimg14.webp', title: 'Workshop Action' },
+        { id: 'r3-2', src: '/src/Images/gridimg15.webp', title: 'Networking Event' },
+        { id: 'r3-3', src: '/src/Images/gridimg16.webp', title: 'Project Showcase' },
+        { id: 'r3-4', src: '/src/Images/gridimg17.webp', title: 'Hackathon Night' },
+        { id: 'r3-5', src: '/src/Images/gridimg18.webp', title: 'Celebration' },
+        { id: 'r3-6', src: '/src/Images/gridimg19.webp', title: 'Coding Session' },
+        { id: 'r3-7', src: '/src/Images/gridimg20.webp', title: 'Coding Session' },
     ];
 
     // GSAP animations for horizontal auto-scrolling
