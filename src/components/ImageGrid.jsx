@@ -30,7 +30,7 @@ function ImageGrid() {
     }, 50);
 
     return () => {
-     // lenis.destroy();
+      lenis.destroy()
     };
   }, []);
 
@@ -91,10 +91,7 @@ function ImageGrid() {
   useGSAP(
     () => {
       gsap.from("button", {
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 80%",
-        },
+        
         opacity: 0,
         scale: 0.5,
         y: 50,
@@ -106,6 +103,7 @@ function ImageGrid() {
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top 75%",
+          toggleActions: "play none none none"
       
         },
         opacity: 0,
