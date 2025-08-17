@@ -91,20 +91,26 @@ function Home() {
           </p>
 
           {/* CTAs */}
-          <div ref={btnRef} className="flex flex-col sm:flex-row gap-6 mt-12 font-nunito">
-            <NavLink to="notfound"><button
-              id="btn-join"
-              className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg border border-green-300/30 hover:from-green-600 hover:to-emerald-600 hover:scale-105 transition-all duration-300"
-            >
-              Join Now
-            </button ></NavLink>
-            <button
-              id="btn-about"
-              onClick={() => navigate('/about')}
-              className="px-8 py-4 bg-transparent text-green-100 font-semibold rounded-full text-lg border-2 border-green-300/40 backdrop-blur-sm hover:bg-green-300/10 hover:scale-105 transition-all duration-300 font-nunito"
-            >
-              About Us
-            </button>
+          <div ref={btnRef} className="flex flex-col sm:flex-row gap-6 mt-12 font-nunito items-center">
+            <div className="glowing-btn-wrapper blue rounded-full">
+              <NavLink to="notfound">
+                <button 
+                  id="btn-join" 
+                  className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300"
+                >
+                  Join Now
+                </button>
+              </NavLink>
+            </div>
+            <div className="glowing-btn-wrapper green rounded-full">
+              <button 
+                id="btn-about" 
+                onClick={() => navigate('/about')} 
+                className="px-8 py-4 bg-transparent text-green-100 font-semibold rounded-full text-lg border-2 border-green-300/40 backdrop-blur-sm hover:bg-green-300/10 transition-all duration-300 font-nunito"
+              >
+                About Us
+              </button>
+            </div>
           </div>
 
           {/* Stats */}
