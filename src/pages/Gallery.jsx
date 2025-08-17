@@ -6,7 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 // Easily change the scroll speed here. Higher number = slower scroll.
-const SCROLL_DURATION = 40; // Increased duration for a smoother scroll with more images
+const SCROLL_DURATION = 40;
 
 const Gallery = () => {
     const containerRef = useRef(null);
@@ -95,9 +95,7 @@ const Gallery = () => {
                 );
             };
             
-            // Wait a moment for images to load before calculating heights
             const timeoutId = setTimeout(() => {
-                // Stagger the animations for a parallax effect
                 setupScroller(column1Ref, 0, -50);
                 setupScroller(column2Ref, -25, -75);
                 setupScroller(column3Ref, 0, -50);
@@ -112,7 +110,6 @@ const Gallery = () => {
 
     // Helper component to render a column of images
     const ImageColumn = ({ images, columnRef }) => {
-        // Duplicate images to ensure seamless looping
         return (
             <div ref={columnRef} className="flex flex-col gap-6 w-[30vw] max-w-[400px]">
                 {[...images, ...images].map((image, index) => (
@@ -147,7 +144,6 @@ const Gallery = () => {
             {/* Enhanced Dark Theme Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e]"></div>
             
-            {/* Animated Background Elements & Grid */}
             <div className="absolute inset-0">
                  <div className="absolute inset-0 opacity-5">
                     <div className="w-full h-full" style={{
@@ -177,7 +173,6 @@ const Gallery = () => {
                 </div>
             </section>
 
-            {/* Scrolling Gallery Section */}
             <div className="relative h-screen w-full overflow-hidden">
                 <div className="flex justify-center gap-6 absolute top-0 left-1/2 -translate-x-1/2 w-full">
                     <ImageColumn images={column1Images} columnRef={column1Ref} />

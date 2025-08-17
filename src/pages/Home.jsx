@@ -151,7 +151,6 @@ function Home() {
         <GFGBentoGrid />
       </div>
 
-      {/* About Us Section */}
       <section ref={aboutSectionRef} className="py-20 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 text-white text-center">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">

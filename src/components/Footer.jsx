@@ -100,7 +100,6 @@ const Footer = () => {
         {/* Footer Bottom */}
         <div className="mt-12 border-t border-[#80a8813b] pt-6 text-center text-[#cbd5e1] text-sm opacity-70">
           <p>&copy; {new Date().getFullYear()} GeeksforGeeks Campus Body - BVCOE. All rights reserved.</p>
-          {/* Changed the wrapping <p> to a <div> to fix the nesting error */}
           <div className="mt-2 text-white flex justify-center items-center gap-4">
             Developed by -{" "}
             <a 
