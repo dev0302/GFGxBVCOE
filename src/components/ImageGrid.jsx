@@ -100,20 +100,20 @@ function ImageGrid() {
       });
 
       gsap.from(".elem", {
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 75%",
-          toggleActions: "play none none none",
-          end: "+=100"
-      
-        },
-        opacity: 0,
-        scale: 0.8,
-        y: 30,
-        duration: 1,
-        ease: "power3.out",
-        stagger: 0.05,
-      });
+  scrollTrigger: {
+    trigger: containerRef.current,
+    start: "top 75%",
+    end: "bottom 75%",   // gives a whole range, not a single pixel
+    toggleActions: "play none none none",
+    once: true           // GSAP will kill it after first run
+  },
+  opacity: 0,
+  scale: 0.8,
+  y: 30,
+  duration: 1,
+  ease: "power3.out",
+  stagger: 0.05,
+});
     },
     { scope: containerRef }
   );
