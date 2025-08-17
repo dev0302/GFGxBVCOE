@@ -198,7 +198,7 @@ const GFGBentoGrid = () => {
               ref={el => cardsRef.current[0] = el}
               className="card hero-card relative overflow-hidden rounded-2xl col-span-2 row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/src/images/gfg1.jpg')`,
+                backgroundImage: `url('/public/images/gfg1.jpg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
@@ -209,7 +209,7 @@ const GFGBentoGrid = () => {
               ref={el => cardsRef.current[1] = el}
               className="card vertical-card relative overflow-hidden rounded-2xl row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/src/images/gfg2.jpg')`,
+                backgroundImage: `url('/public/images/gfg2.jpg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
@@ -220,7 +220,7 @@ const GFGBentoGrid = () => {
               ref={el => cardsRef.current[2] = el}
               className="card square-card relative overflow-hidden rounded-2xl aspect-square transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/src/images/gfg3.jpg')`,
+                backgroundImage: `url('/public/images/gfg3.jpg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
@@ -231,7 +231,7 @@ const GFGBentoGrid = () => {
               ref={el => cardsRef.current[3] = el}
               className="card wide-card relative overflow-hidden rounded-2xl col-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/src/images/gfg4.jpg')`,
+                backgroundImage: `url('/public/images/gfg4.jpg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
@@ -242,7 +242,7 @@ const GFGBentoGrid = () => {
               ref={el => cardsRef.current[4] = el}
               className="card tall-card relative overflow-hidden rounded-2xl row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/src/images/gfg5.jpg')`,
+                backgroundImage: `url('/public/images/gfg5.jpg')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}
