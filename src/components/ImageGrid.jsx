@@ -50,6 +50,7 @@ function ImageGrid() {
               start: isMobile ? "top 15%" : "top 20%",
               end: "bottom top",
               scrub: true,
+              markers: true,
             },
           })
           .set(image, {
@@ -68,6 +69,7 @@ function ImageGrid() {
             start: isMobile ? "top 15%" : "top bottom",
             end: "bottom top",
             scrub: true,
+            markers: true,
           },
         });
       });
@@ -90,6 +92,7 @@ function ImageGrid() {
           trigger: containerRef.current,
           start: "top 80%",
           toggleActions: "play none none none",
+          markers: true,
         },
         opacity: 0,
         scale: 0.5,
@@ -103,6 +106,7 @@ function ImageGrid() {
           trigger: containerRef.current,
           start: "top 70%",
           toggleActions: "play none none none",
+          markers: true,
         },
         opacity: 0,
         scale: 0.8,
