@@ -134,14 +134,14 @@ function ImageGrid() {
         {/* Your image grid items here */}
         <div className="elem my-grid-item" style={{ "--r": 1, "--c": 3 }}>
           <img
-            src="src/Images/gridimg1.webp"
+            src="/gridimg1.webp"
             alt="Image 1"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
         <div className="elem my-grid-item" style={{ "--r": 1, "--c": 7 }}>
           <img
-            src="src/Images/gridimg2.webp"
+            src="/gridimg2.webp"
             alt="Image 2"
             className="w-full h-full object-cover rounded-lg"
           />
@@ -149,14 +149,14 @@ function ImageGrid() {
 
         <div className="elem my-grid-item" style={{ "--r": 2, "--c": 1 }}>
           <img
-            src="src/Images/gridimg3.webp"
+            src="/gridimg3.webp"
             alt="Image 3"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
         <div className="elem my-grid-item" style={{ "--r": 2, "--c": 6 }}>
           <img
-            src="src/Images/gridimg4.webp"
+            src="/gridimg4.webp"
             alt="Image 4"
             className="w-full h-full object-cover rounded-lg"
           />
@@ -164,14 +164,14 @@ function ImageGrid() {
 
         <div className="elem my-grid-item" style={{ "--r": 3, "--c": 2 }}>
           <img
-            src="src/Images/gridimg5.webp"
+            src="/gridimg5.webp"
             alt="Image 5"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
         <div className="elem my-grid-item" style={{ "--r": 4, "--c": 4 }}>
           <img
-            src="src/Images/gridimg6.webp"
+            src="/gridimg6.webp"
             alt="Image 6"
             className="w-full h-full object-cover rounded-lg"
           />
@@ -179,14 +179,14 @@ function ImageGrid() {
 
         <div className="elem my-grid-item" style={{ "--r": 4, "--c": 1 }}>
           <img
-            src="src/Images/gridimg7.webp"
+            src="/gridimg7.webp"
             alt="Image 7"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
         <div className="elem my-grid-item" style={{ "--r": 2, "--c": 5 }}>
           <img
-            src="src/Images/gridimg8.webp"
+            src="/gridimg8.webp"
             alt="Image 8"
             className="w-full h-full object-cover rounded-lg"
           />
@@ -194,14 +194,14 @@ function ImageGrid() {
 
         <div className="elem my-grid-item" style={{ "--r": 5, "--c": 1 }}>
           <img
-            src="src/Images/gridimg9.webp"
+            src="/gridimg9.webp"
             alt="Image 9"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
         <div className="elem my-grid-item" style={{ "--r": 5, "--c": 6 }}>
           <img
-            src="src/Images/gridimg10.webp"
+            src="/gridimg10.webp"
             alt="Image 1"
             className="w-full h-full object-cover rounded-lg"
           />
@@ -209,14 +209,14 @@ function ImageGrid() {
 
         <div className="elem my-grid-item" style={{ "--r": 6, "--c": 3 }}>
           <img
-            src="src/Images/gridimg11.webp"
+            src="/gridimg11.webp"
             alt="Image 2"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
         <div className="elem my-grid-item" style={{ "--r": 6, "--c": 7 }}>
           <img
-            src="src/Images/gridimg12.webp"
+            src="/gridimg12.webp"
             alt="Image 3"
             className="w-full h-full object-cover rounded-lg"
           />
@@ -224,14 +224,14 @@ function ImageGrid() {
 
         <div className="elem my-grid-item" style={{ "--r": 7, "--c": 2 }}>
           <img
-            src="src/Images/gridimg13.webp"
+            src="/gridimg13.webp"
             alt="Image 4"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
         <div className="elem my-grid-item" style={{ "--r": 7, "--c": 5 }}>
           <img
-            src="src/Images/gridimg14.webp"
+            src="/gridimg14.webp"
             alt="Image 5"
             className="w-full h-full object-cover rounded-lg"
           />
@@ -239,14 +239,14 @@ function ImageGrid() {
 
         <div className="elem my-grid-item" style={{ "--r": 8, "--c": 1 }}>
           <img
-            src="src/Images/gridimg15.webp"
+            src="/gridimg15.webp"
             alt="Image 6"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
         <div className="elem my-grid-item" style={{ "--r": 8, "--c": 8 }}>
           <img
-            src="src/Images/gridimg16.webp"
+            src="/gridimg16.webp"
             alt="Image 7"
             className="w-full h-full object-cover rounded-lg"
           />
@@ -254,14 +254,14 @@ function ImageGrid() {
 
         <div className="elem my-grid-item" style={{ "--r": 9, "--c": 4 }}>
           <img
-            src="src/Images/gridimg17.webp"
+            src="/gridimg17.webp"
             alt="Image 8"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
         <div className="elem my-grid-item" style={{ "--r": 9, "--c": 6 }}>
           <img
-            src="src/Images/gridimg18.webp"
+            src="/gridimg18.webp"
             alt="Image 9"
             className="w-full h-full object-cover rounded-lg"
           />
@@ -269,14 +269,14 @@ function ImageGrid() {
 
         <div className="elem my-grid-item" style={{ "--r": 10, "--c": 3 }}>
           <img
-            src="src/Images/gridimg19.webp"
+            src="/gridimg19.webp"
             alt="Image 1"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
         <div className="elem my-grid-item" style={{ "--r": 10, "--c": 7 }}>
           <img
-            src="src/Images/gridimg20.webp"
+            src="/gridimg20.webp"
             alt="Image 2"
             className="w-full h-full object-cover rounded-lg"
           />
