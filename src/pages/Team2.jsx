@@ -54,6 +54,7 @@ function Team2() {
         scrollTrigger: {
           trigger: heroRef.current,
           start: "top 85%",
+          markers: true,
         }
       }
     );
@@ -73,6 +74,7 @@ function Team2() {
         scrollTrigger: {
           trigger: teamGridRef.current,
           start: "top 80%",
+          markers: true,
         }
       }
     );
