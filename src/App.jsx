@@ -21,7 +21,7 @@ function App() {
         <Route path="/events" element={<Events />} />
         <Route path="/notfound" element={<NotFound></NotFound>} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/gallery" element={<Gallery />} />
+        <Route path="/gallery" element={<GFGBentoGrid />} />
         <Route path="/bentogrid" element={<GFGBentoGrid />} />
       </Routes>
     </div>
