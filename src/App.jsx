@@ -7,6 +7,7 @@ import NotFound from "./components/NotFound"
 import Contact from "./pages/Contact"
 import Gallery from "./pages/Gallery"
 import Team2 from "./pages/Team2"
+import GFGBentoGrid from "./components/GFGBentoGrid";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/notfound" element={<NotFound></NotFound>} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/bentogrid" element={<GFGBentoGrid />} />
       </Routes>
     </div>
   )
