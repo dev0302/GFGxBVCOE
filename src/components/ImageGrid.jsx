@@ -94,7 +94,6 @@ function ImageGrid() {
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top 80%",
-          toggleActions: "play reset play reset",
         },
         opacity: 0,
         scale: 0.5,
@@ -107,7 +106,7 @@ function ImageGrid() {
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top 75%",
-          toggleActions: "play reset play reset",
+      
         },
         opacity: 0,
         scale: 0.8,
