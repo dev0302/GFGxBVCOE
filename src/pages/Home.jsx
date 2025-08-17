@@ -1,48 +1,45 @@
 import GFGBentoGrid from "../components/GFGBentoGrid";
-import TeamSection from "../components/TeamSection";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef } from "react";
 import Footer from "../components/Footer";
 import ImageGrid from "../components/ImageGrid";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-
+gsap.registerPlugin(ScrollTrigger);
 
 function Home() {
-  
   const navigate = useNavigate();
   const titleRef = useRef();
   const descRef = useRef();
   const btnRef = useRef();
+  const aboutSectionRef = useRef();
+  const teamSectionRef = useRef();
 
   // GSAP animations for smooth entrance
   useGSAP(() => {
-    // Title animation
-    gsap.from(titleRef.current, {
-      y: 50,
-      opacity: 0,
-      duration: 1.2,
-      ease: "power2.out"
-    });
+    const animateFrom = (elem, y = 50) => {
+      gsap.from(elem, {
+        opacity: 0,
+        y: y,
+        duration: 1,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: elem,
+          start: "top 85%",
+          toggleActions: "play none none none",
+        },
+      });
+    };
 
-    // Description animation
-    gsap.from(descRef.current, {
-      y: 40,
-      opacity: 0,
-      duration: 1,
-      ease: "power2.out",
-      delay: 0.3
-    });
+    gsap.from(titleRef.current, { y: 50, opacity: 0, duration: 1.2, ease: "power2.out" });
+    gsap.from(descRef.current, { y: 40, opacity: 0, duration: 1, ease: "power2.out", delay: 0.3 });
+    gsap.from(btnRef.current, { y: 30, opacity: 0, duration: 0.8, ease: "power2.out", delay: 0.6 });
 
-    // Buttons animation
-    gsap.from(btnRef.current, {
-      y: 30,
-      opacity: 0,
-      duration: 0.8,
-      ease: "power2.out",
-      delay: 0.6
-    });
+    animateFrom(aboutSectionRef.current);
+    animateFrom(teamSectionRef.current);
+
   }, []);
 
   return (
@@ -154,10 +151,46 @@ function Home() {
         <GFGBentoGrid />
       </div>
 
+      {/* About Us Section */}
+      <section ref={aboutSectionRef} className="py-20 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 text-white text-center">
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            Who We <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">Are</span>
+          </h2>
+          <p className="text-lg md:text-xl text-green-100 max-w-3xl mx-auto leading-relaxed font-light font-nunito mb-12">
+            GFG BVCOE is a community of tech enthusiasts dedicated to fostering a culture of learning, innovation, and collaboration. We organize workshops, hackathons, and speaker sessions to help students grow their skills and connect with like-minded peers.
+          </p>
+          <div className="glowing-btn-wrapper blue rounded-full inline-block">
+            <button
+              onClick={() => navigate('/about')}
+              className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-300"
+            >
+              Learn More About Us
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Team Section */}
-      {/* <div className="relative z-10">
-        <TeamSection />
-      </div> */}
+      <section ref={teamSectionRef} className="py-20 bg-[#161629] text-white text-center">
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            Meet Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Team</span>
+          </h2>
+          <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-light font-nunito mb-12">
+            We are a group of passionate students and faculty dedicated to guiding our community. Our diverse team works together to create impactful events and provide mentorship for all members.
+          </p>
+          <div className="glowing-btn-wrapper green rounded-full inline-block">
+            <button
+              onClick={() => navigate('/team')}
+              className="px-8 py-4 bg-transparent text-green-100 font-semibold rounded-full text-lg border-2 border-green-300/40 backdrop-blur-sm hover:bg-green-300/10 transition-all duration-300 font-nunito"
+            >
+              See the Full Team
+            </button>
+          </div>
+        </div>
+      </section>
+
 
       {/* Image Grid */}
       <ImageGrid />
