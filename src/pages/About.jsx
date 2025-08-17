@@ -62,7 +62,8 @@ const About = () => {
           trigger: heroRef.current,
           start: "top 80%",
           end: "bottom 20%",
-          toggleActions: "play none none none"
+          toggleActions: "play none none none",
+          markers: true,
         }
       }
     );
@@ -80,7 +81,8 @@ const About = () => {
           trigger: visionRef.current,
           start: "top 80%",
           end: "bottom 20%",
-          toggleActions: "play none none none"
+          toggleActions: "play none none none",
+          markers: true,
         }
       }
     );
@@ -98,7 +100,8 @@ const About = () => {
           trigger: missionRef.current,
           start: "top 80%",
           end: "bottom 20%",
-          toggleActions: "play none none none"
+          toggleActions: "play none none none",
+          markers: true,
         }
       }
     );
@@ -115,7 +118,8 @@ const About = () => {
           trigger: featuresRef.current,
           start: "top 80%",
           end: "bottom 20%",
-          toggleActions: "play none none none"
+          toggleActions: "play none none none",
+          markers: true,
         }
       }
     );
@@ -132,7 +136,8 @@ const About = () => {
           trigger: benefitsRef.current,
           start: "top 80%",
           end: "bottom 20%",
-          toggleActions: "play none none none"
+          toggleActions: "play none none none",
+          markers: true,
         }
       }
     );
@@ -153,7 +158,8 @@ const About = () => {
             trigger: benefitsRef.current,
             start: "top 80%",
             end: "bottom 20%",
-            toggleActions: "play none none none"
+            toggleActions: "play none none none",
+            markers: true,
           }
         }
       );
@@ -172,7 +178,8 @@ const About = () => {
           trigger: ctaRef.current,
           start: "top 80%",
           end: "bottom 20%",
-          toggleActions: "play none none none"
+          toggleActions: "play none none none",
+          markers: true,
         }
       }
     );

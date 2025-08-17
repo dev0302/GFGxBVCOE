@@ -70,7 +70,8 @@ const contact = () => {
                         scrollTrigger: {
                             trigger: el,
                             start: "top 85%",
-                            toggleActions: "play none none none"
+                            toggleActions: "play none none none",
+                            markers: true,
                         }
                     }
                 );
