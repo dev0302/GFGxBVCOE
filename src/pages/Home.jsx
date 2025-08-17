@@ -57,6 +57,7 @@ function Home() {
           scrollTrigger: {
             trigger: section,
             start: "top 85%",
+            markers: true,
             toggleActions: "play none none none"
           }
         });
