@@ -10,6 +10,30 @@ gsap.registerPlugin(ScrollTrigger);
 function ImageGrid() {
   const containerRef = useRef(null);
 
+  useEffect(() => {
+    const lenis = new Lenis({
+      lerp : 0.1,
+      smoothWheel: true,
+    });
+
+    
+
+    function raf(time) {
+      lenis.raf(time);
+      ScrollTrigger.update(); // 🔥
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 50);
+
+    return () => {
+     // lenis.destroy();
+    };
+  }, []);
+
   
 
   useGSAP(() => {
