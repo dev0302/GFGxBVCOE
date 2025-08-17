@@ -12,7 +12,7 @@ function ImageGrid() {
 
   useEffect(() => {
     const lenis = new Lenis({
-      lerp : 0.1,
+      lerp : 1,
       smoothWheel: true,
     });
 
