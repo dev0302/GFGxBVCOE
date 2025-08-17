@@ -16,10 +16,11 @@ function ImageGrid() {
       smoothWheel: true,
     });
 
-    lenis.on("scroll", ScrollTrigger.update);
+    
 
     function raf(time) {
       lenis.raf(time);
+      ScrollTrigger.update(); // 🔥
       requestAnimationFrame(raf);
     }
     requestAnimationFrame(raf);
