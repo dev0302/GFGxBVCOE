@@ -196,7 +196,7 @@ const contact = () => {
                     <div ref={infoRef} className="md:col-span-2 flex flex-col justify-center">
                         <div className="darkthemebg2 backdrop-blur-xl border-2 border-gray-300 border-opacity-20  rounded-3xl p-8 h-full flex flex-col justify-center">
                             <img 
-                                src="src/Images/bvcoebuilding.webp" 
+                                src="/bvcoebuilding.webp" 
                                 alt="BVCOE College Building" 
                                 className="w-full h-48 object-cover rounded-2xl mb-8 shadow-lg"
                                 onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/600x400/1a2e2a/ffffff?text=Image+Not+Found'; }}
