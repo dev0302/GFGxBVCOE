@@ -63,7 +63,7 @@ function Home() {
       {/* Hero Section with Background */}
       <div className="relative min-h-screen">
         {/* Background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900">
           <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 via-transparent to-emerald-600/20"></div>
           <div className="absolute inset-0 opacity-10">
             <div
@@ -75,14 +75,13 @@ function Home() {
             />
           </div>
         </div>
-       
 
         {/* Hero Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 pt-16 text-center">
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 pt-20 pb-20 text-center">
           {/* Title */}
           <h1
             ref={titleRef}
-            className="text-2xl md:text-5xl font-bold text-white mb-8 tracking-tight pt-8 leading-tight md:leading-tight pb-1"
+            className="text-3xl md:text-5xl font-bold text-white mb-8 tracking-tight pt-8 leading-tight md:leading-tight pb-1"
             style={{
               background: "linear-gradient(135deg, #22c55e, #10b981, #059669)",
               backgroundClip: "text",
@@ -220,6 +219,7 @@ function Home() {
       {/* Footer */}
       <Footer />
     </div>
+
   );
 }
 
