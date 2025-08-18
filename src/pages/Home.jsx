@@ -162,9 +162,9 @@ function Home() {
       </div>
 
       {/* Bento Grid Section */}
-      {/* <div className="relative z-10">
+      <div className="relative z-10">
         <GFGBentoGrid />
-      </div> */}
+      </div>
 
       {/* About Section */}
       <section className="py-20 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 text-white text-center">
