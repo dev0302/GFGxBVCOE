@@ -106,7 +106,6 @@ function ImageGrid() {
     end: "bottom 75%",   // gives a whole range, not a single pixel
     toggleActions: "play none none none",
     once: true,
-    markers:true,// GSAP will kill it after first run
   },
   opacity: 0,
   scale: 0.8,
