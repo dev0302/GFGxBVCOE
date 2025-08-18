@@ -96,7 +96,7 @@ function Navbar() {
           </p>
         </div>
 
-        <nav className="hidden sm:flex items-center gap-6">
+        <nav className="hidden sm:flex items-center">
           <ul ref={navList} className="flex gap-6 text-sm">
             <li><NavLink to="/" className={navLinkClass}><SaxHome2Linear className="mr-2" /><span>Home</span></NavLink></li>
             <li><NavLink to="/about" className={navLinkClass}><SaxInfoCircleLinear className="mr-2"/><span>About</span></NavLink></li>
@@ -106,17 +106,15 @@ function Navbar() {
             <li><NavLink to="/contact" className={navLinkClass}><SaxUserTwotone className="mr-2" />Contact</NavLink></li>
           </ul>
         </nav>
-        <nav className="hidden sm:flex items-center gap-6">
-          <div ref={joinBtn} className="glowing-btn-wrapper blue rounded-full">
-            <NavLink to="/notfound">
-              <button
-                className="py-2 px-5 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-xl hover:shadow-green-500/40 text-sm"
-              >
-                Join Us
-              </button>
-            </NavLink>
-          </div>
-        </nav>
+        <div ref={joinBtn} className="hidden sm:block">
+          <a href="https://forms.gle/2gSJCp5T7VYUV7MA7" target="_blank" rel="noopener noreferrer">
+            <button
+              className="py-2 px-5 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-xl hover:shadow-green-500/40 text-sm"
+            >
+              Join Us
+            </button>
+          </a>
+        </div>
 
         <div className="sm:hidden z-50">
           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-green-100 focus:outline-none">
@@ -139,13 +137,18 @@ function Navbar() {
             <li><NavLink to="/contact" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>Contact</NavLink></li>
             <li className="mt-8">
               <div className="glowing-btn-wrapper blue rounded-full">
-                <NavLink to="/notfound" onClick={() => setIsMenuOpen(false)}>
+                <a 
+                  href="https://forms.gle/2gSJCp5T7VYUV7MA7" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  onClick={() => setIsMenuOpen(false)}
+                >
                   <button
                     className="py-3 px-8 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg"
                   >
                     Join Us
                   </button>
-                </NavLink>
+                </a>
               </div>
             </li>
         </ul>
