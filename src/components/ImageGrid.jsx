@@ -82,10 +82,10 @@ function ImageGrid() {
     const handleResize = () => createAnimations();
     window.addEventListener("resize", handleResize);
 
-    // return () => {
-    //   window.removeEventListener("resize", handleResize);
-    //   ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    // };
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+    };
   });
 
   useGSAP(
