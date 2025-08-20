@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import Lenis from "lenis";
+//import Lenis from "lenis";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/all";
@@ -10,29 +10,29 @@ gsap.registerPlugin(ScrollTrigger);
 function ImageGrid() {
   const containerRef = useRef(null);
 
-  useEffect(() => {
-    const lenis = new Lenis({
-      lerp : 0.1,
-      smoothWheel: true,
-    });
+  //useEffect(() => {
+    //const lenis = new Lenis({
+      //lerp : 0.1,
+     // smoothWheel: true,
+    //});
 
     
 
-    function raf(time) {
-      lenis.raf(time);
-      ScrollTrigger.update(); // 🔥
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
+    //function raf(time) {
+      //lenis.raf(time);
+      //ScrollTrigger.update(); // 🔥
+     // requestAnimationFrame(raf);
+   // }
+   // requestAnimationFrame(raf);
 
-    setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 50);
+   // setTimeout(() => {
+   //   ScrollTrigger.refresh();
+   // }, 50);
 
-    return () => {
-      lenis.destroy()
-    };
-  }, []);
+   //return () => {
+   //   lenis.destroy()
+ //   };
+//  }, []);
 
   
 
