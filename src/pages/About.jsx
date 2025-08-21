@@ -366,9 +366,14 @@ const About = () => {
               <p className="text-lg md:text-xl text-gray-300 mb-12 leading-relaxed font-alfa font-light">
                 Connect with our team today to become a part of a society where you are the protagonist of your technical journey!
               </p>
-              <button href="https://chat.whatsapp.com/Dr1gPgzmQgtJyFoXAvAnDC" className="px-8 py-4 md:px-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold text-lg rounded-full border border-green-300/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-500/25 font-nunito md:text-xl">
-                Get Started Today
-              </button>
+              <button
+  onClick={() =>
+    window.open("https://chat.whatsapp.com/Dr1gPgzmQgtJyFoXAvAnDC", "_blank")
+  }
+  className="px-8 py-4 md:px-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold text-lg rounded-full border border-green-300/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-500/25 font-nunito md:text-xl"
+>
+  Get Started Today
+</button>
             </div>
           </div>
         </section>
