@@ -107,7 +107,7 @@ function Navbar() {
           </ul>
         </nav>
         <div ref={joinBtn} className="hidden sm:block">
-          <a href="https://forms.gle/2gSJCp5T7VYUV7MA7" target="_blank" rel="noopener noreferrer">
+          <a href="https://forms.gle/UWCTHc2CFY6ouGX18" target="_blank" rel="noopener noreferrer">
             <button
               className="py-2 px-5 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-xl hover:shadow-green-500/40 text-sm"
             >
