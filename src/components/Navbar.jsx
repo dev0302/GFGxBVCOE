@@ -138,7 +138,7 @@ function Navbar() {
             <li className="mt-8">
               <div className="glowing-btn-wrapper blue rounded-full">
                 <a 
-                  href="https://forms.gle/2gSJCp5T7VYUV7MA7" 
+                  href="https://forms.gle/UWCTHc2CFY6ouGX18" 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   onClick={() => setIsMenuOpen(false)}
