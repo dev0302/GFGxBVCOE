@@ -10,7 +10,7 @@ const IMAGE_URLS = [
   "/gridimg15.webp",
   "/gridimg18.webp",
   "/gridimg3.webp",
-  "/gridimgo.webp",
+  "/gridimg9.webp",
   "/gfgLogo.png",
 ];
 
