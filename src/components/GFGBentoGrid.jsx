@@ -240,7 +240,7 @@ const GFGBentoGrid = () => {
               ref={(el) => (cardsRef.current[1] = el)}
               className="card vertical-card relative overflow-hidden rounded-2xl md:row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/gfg2.jpg')`,
+                backgroundImage: `url('/gridimg15.webp')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 minHeight: "220px",
@@ -251,7 +251,7 @@ const GFGBentoGrid = () => {
               ref={(el) => (cardsRef.current[2] = el)}
               className="card square-card relative overflow-hidden rounded-2xl aspect-square transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/gfg3.jpg')`,
+                backgroundImage: `url('/gridimg18.webp')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
@@ -261,7 +261,7 @@ const GFGBentoGrid = () => {
               ref={(el) => (cardsRef.current[3] = el)}
               className="card wide-card relative overflow-hidden rounded-2xl md:col-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/gfg4.jpg')`,
+                backgroundImage: `url('/gridimg3.webp')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 minHeight: "160px",
@@ -272,7 +272,7 @@ const GFGBentoGrid = () => {
               ref={(el) => (cardsRef.current[4] = el)}
               className="card tall-card relative overflow-hidden rounded-2xl md:row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/gfg5.jpg')`,
+                backgroundImage: `url('/gridimg9.webp')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 minHeight: "220px",
