@@ -38,7 +38,7 @@ function ImageGrid() {
 
   useGSAP(() => {
     const createAnimations = () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      //ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 
       document.querySelectorAll(".elem").forEach((elem) => {
         let image = elem.querySelector("img");
@@ -83,8 +83,8 @@ function ImageGrid() {
     window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      //window.removeEventListener("resize", handleResize);
+      //ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
   });
 
