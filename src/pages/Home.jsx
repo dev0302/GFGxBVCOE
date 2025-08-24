@@ -11,37 +11,39 @@ import Lenis from "lenis";
 gsap.registerPlugin(ScrollTrigger);
 
 function Home() {
-  // Lenis smooth scroll setup
+
   useEffect(() => {
-    const lenis = new Lenis({ lerp: 0.05, smoothWheel: true });
+  const lenis = new Lenis({ lerp: 0.05, smoothWheel: true });
 
-    lenis.on("scroll", ScrollTrigger.update);
+  lenis.on("scroll", ScrollTrigger.update);
 
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
+  function raf(time) {
+    lenis.raf(time);
     requestAnimationFrame(raf);
+  }
+  requestAnimationFrame(raf);
 
-    ScrollTrigger.refresh();
+  ScrollTrigger.refresh();
 
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
+  return () => {
+    lenis.destroy();
+  };
+}, []);
 
+  
   const navigate = useNavigate();
   const titleRef = useRef();
   const descRef = useRef();
   const btnRef = useRef();
 
-  // State for counters
+  // State for the counters
   const [memberCount, setMemberCount] = useState(0);
   const [eventCount, setEventCount] = useState(0);
   const [workshopCount, setWorkshopCount] = useState(0);
 
   // GSAP animations
   useGSAP(() => {
+    // Hero entrance animations
     gsap.from(titleRef.current, {
       y: 50,
       opacity: 0,
@@ -63,6 +65,7 @@ function Home() {
       delay: 0.6,
     });
 
+    // Number counting animation
     const counters = { members: 0, events: 0, workshops: 0 };
     gsap.to(counters, {
       duration: 2,
@@ -81,53 +84,166 @@ function Home() {
 
   return (
     <div className="relative overflow-x-hidden">
-      {/* Hero Section */}
-      <div className="relative min-h-screen flex flex-col items-center justify-center text-center px-6">
-        <h1
-          ref={titleRef}
-          className="text-5xl md:text-6xl font-bold text-gray-900 mb-6"
-        >
-          Welcome to Horizon BVCOE 🚀
-        </h1>
-
-        <p
-          ref={descRef}
-          className="text-lg md:text-xl text-gray-600 max-w-2xl mb-8"
-        >
-          A vibrant community of learners, leaders, and creators. Join us to
-          explore, grow, and make an impact.
-        </p>
-
-        <button
-          ref={btnRef}
-          onClick={() => navigate("/events")}
-          className="bg-indigo-600 text-white px-6 py-3 rounded-2xl shadow-md hover:bg-indigo-700 transition"
-        >
-          Explore Events
-        </button>
-
-        {/* Counters Section */}
-        <div className="mt-16 flex gap-12 text-center">
-          <div>
-            <h2 className="text-4xl font-bold text-indigo-600">{memberCount}+</h2>
-            <p className="text-gray-500">Active Members</p>
+      {/* Hero Section with Background */}
+      <div className="relative min-h-screen">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900">
+          <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 via-transparent to-emerald-600/20"></div>
+          <div className="absolute inset-0 opacity-10">
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `radial-gradient(circle at 25% 25%, #10b981 1px, transparent 1px)`,
+                backgroundSize: "60px 60px",
+              }}
+            />
           </div>
-          <div>
-            <h2 className="text-4xl font-bold text-indigo-600">{eventCount}+</h2>
-            <p className="text-gray-500">Events Hosted</p>
+        </div>
+
+        {/* Hero Content */}
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 pt-20 pb-20 text-center">
+          {/* Title */}
+          <h1
+            ref={titleRef}
+            className="text-3xl md:text-5xl font-bold text-white mb-8 tracking-tight pt-8 leading-tight md:leading-tight pb-1"
+            style={{
+              background: "linear-gradient(135deg, #22c55e, #10b981, #059669)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Empowering Students for
+            <br />
+            a Brighter Future
+          </h1>
+
+          {/* Description */}
+          <p
+            ref={descRef}
+            id="home-desc"
+            className="text-lg md:text-xl text-green-100 max-w-3xl leading-relaxed font-light font-nunito"
+          >
+            Join GFG BVCOE - learn, teach, and collaborate through workshops, events, project showcases and mentorship.
+          </p>
+
+          {/* CTAs */}
+          <div
+            ref={btnRef}
+            className="flex flex-col sm:flex-row gap-6 mt-12 font-nunito items-center"
+          >
+            <NavLink to="https://forms.gle/UWCTHc2CFY6ouGX18">
+              <button
+                id="btn-join"
+                className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/40"
+              >
+                Join Now
+              </button>
+            </NavLink>
+            <button
+              id="btn-about"
+              onClick={() => navigate("/about")}
+              className="px-8 py-4 bg-transparent text-green-100 font-semibold rounded-full text-lg border-2 border-green-300/40 backdrop-blur-sm transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:bg-green-400/20 hover:border-green-300"
+            >
+              About Us
+            </button>
           </div>
-          <div>
-            <h2 className="text-4xl font-bold text-indigo-600">{workshopCount}+</h2>
-            <p className="text-gray-500">Workshops</p>
+
+          {/* Stats */}
+          <div
+            id="stats-grid"
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 font-nunito"
+          >
+            <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
+              <div
+                id="count-members"
+                className="text-3xl font-bold text-green-300 mb-2"
+              >
+                {memberCount}+
+              </div>
+              <div className="text-green-100">Active Members</div>
+            </div>
+            <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
+              <div
+                id="count-events"
+                className="text-3xl font-bold text-emerald-300 mb-2"
+              >
+                {eventCount}+
+              </div>
+              <div className="text-green-100">Events Held</div>
+            </div>
+            <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
+              <div
+                id="count-workshops"
+                className="text-3xl font-bold text-green-300 mb-2"
+              >
+                {workshopCount}+
+              </div>
+              <div className="text-green-100">Workshops Conducted</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Other Sections */}
-      <GFGBentoGrid />
+      {/* Bento Grid Section */}
+      <div className="relative z-10">
+        <GFGBentoGrid />
+      </div>
+
+      {/* About Section */}
+      <section className="py-20 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 text-white text-center">
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            Who We{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
+              Are
+            </span>
+          </h2>
+          <p className="text-lg md:text-xl text-green-100 max-w-3xl mx-auto leading-relaxed font-light font-nunito mb-12">
+            GFG BVCOE is a community of tech enthusiasts dedicated to fostering
+            a culture of learning, innovation, and collaboration. We organize
+            workshops, hackathons, and speaker sessions to help students grow
+            their skills and connect with like-minded peers.
+          </p>
+          <button
+            onClick={() => navigate("/about")}
+            className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/40"
+          >
+            Learn More About Us
+          </button>
+        </div>
+      </section>
+
+      {/* Team Section */}
+      <section className="py-20 bg-[#161629] text-white text-center">
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            Meet Our{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
+              Team
+            </span>
+          </h2>
+          <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-light font-nunito mb-12">
+            We are a group of passionate students and faculty dedicated to
+            guiding our community. Our diverse team works together to create
+            impactful events and provide mentorship for all members.
+          </p>
+          <button
+            onClick={() => navigate("/team")}
+            className="px-8 py-4 bg-transparent text-green-100 font-semibold rounded-full text-lg border-2 border-green-300/40 backdrop-blur-sm transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:bg-green-400/20 hover:border-green-300"
+          >
+            See the Full Team
+          </button>
+        </div>
+      </section>
+
+      {/* Image Grid */}
       <ImageGrid />
+
+      {/* Footer */}
       <Footer />
     </div>
+
   );
 }
 
