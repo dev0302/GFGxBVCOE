@@ -6,11 +6,11 @@ import { useNavigate } from "react-router-dom";
 gsap.registerPlugin(ScrollTrigger);
 
 const IMAGE_URLS = [
-  "/gfg1.jpg",
-  "/gfg2.jpg",
-  "/gfg3.jpg",
-  "/gfg4.jpg",
-  "/gfg5.jpg",
+  "/gridimg12.webp",
+  "/gridimg15.webp",
+  "/gridimg18.webp",
+  "/gridimg3.webp",
+  "/gridimgo.webp",
   "/gfgLogo.png",
 ];
 
