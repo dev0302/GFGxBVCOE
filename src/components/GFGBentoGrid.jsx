@@ -229,7 +229,7 @@ const GFGBentoGrid = () => {
               ref={(el) => (cardsRef.current[0] = el)}
               className="card hero-card relative overflow-hidden rounded-2xl md:col-span-2 md:row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/gfg1.jpg')`,
+                backgroundImage: `url('/gridimg12.webp')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 minHeight: "220px",
