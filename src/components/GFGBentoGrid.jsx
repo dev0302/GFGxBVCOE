@@ -283,7 +283,7 @@ const GFGBentoGrid = () => {
               ref={(el) => (cardsRef.current[5] = el)}
               className="card square-card relative overflow-hidden rounded-2xl aspect-square transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/gfgLogo.png')`,
+                backgroundImage: `url('/vichaarx.webp')`,
                 backgroundSize: "contain",
                 backgroundPosition: "center",
                 backgroundColor: "rgba(255, 255, 255, 0.03)",
