@@ -16,6 +16,10 @@
 * {
   scroll-behavior: smooth;
 }
+html, body, #root {
+  background-color: #0f172a; /* same as your dark gradient */
+
+}
 
 html {
   scroll-behavior: smooth;
