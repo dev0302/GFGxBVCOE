@@ -13,7 +13,7 @@ gsap.registerPlugin(ScrollTrigger);
 function Home() {
 
   useEffect(() => {
-  const lenis = new Lenis({ lerp: 0.01, smoothWheel: true });
+  const lenis = new Lenis({ lerp: 0.05, smoothWheel: true });
 
   lenis.on("scroll", ScrollTrigger.update);
 
