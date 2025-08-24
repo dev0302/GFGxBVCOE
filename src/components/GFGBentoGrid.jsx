@@ -11,7 +11,7 @@ const IMAGE_URLS = [
   "/gridimg18.webp",
   "/gridimg3.webp",
   "/gridimg9.webp",
-  "/gfgLogo.png",
+  "/vichaarx.webp",
 ];
 
 const debounce = (fn, wait = 150) => {
