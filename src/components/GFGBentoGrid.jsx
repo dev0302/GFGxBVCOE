@@ -7,7 +7,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const IMAGE_URLS = [
   "/gridimg12.webp",
-  "/gridimg15.webp",
+  "/gfg4.jpg",
   "/gridimg18.webp",
   "/gridimg3.webp",
   "/gridimg9.webp",
@@ -240,7 +240,7 @@ const GFGBentoGrid = () => {
               ref={(el) => (cardsRef.current[1] = el)}
               className="card vertical-card relative overflow-hidden rounded-2xl md:row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/gridimg15.webp')`,
+                backgroundImage: `url('/gfg4.jpg')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 minHeight: "220px",
