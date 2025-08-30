@@ -141,16 +141,17 @@ function Navbar() {
             <li className="mt-8">
               <div className="glowing-btn-wrapper blue rounded-full">
                 <a 
-                  href="https://forms.gle/UWCTHc2CFY6ouGX18" 
-                  target="_blank" 
+                
                   rel="noopener noreferrer" 
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <button
+                  <NavLink to="/notfound">
+                    <button
                     className="py-3 px-8 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg"
                   >
                     Join Us
                   </button>
+                  </NavLink>
                 </a>
               </div>
             </li>

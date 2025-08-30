@@ -14,7 +14,7 @@ const ResultOut = () => {
         <img
           src={notfoundimg}
           alt="Cute Bear"
-          className="h-[220px] absolute -top-[105px] left-[90px] md:left-[120px] md:-top-[95px]  pointer-events-none animate-bounce"
+          className="h-[220px] absolute -top-[115px] left-[90px] md:left-[120px] md:-top-[115px]  pointer-events-none animate-bounce"
         />
         
         {/* Title */}
@@ -23,11 +23,16 @@ const ResultOut = () => {
         </h2>
         
         {/* Description */}
-        <p className="text-base text-[#aaa] mb-6 text-center">
+        <p className="text-base text-[#aaa] text-center">
          Checkout here....
          <a className='text-blue-400 text-base flex items-center gap-2' href="https://www.instagram.com/stories/gfg_bvcoe/?hl=en">" Click here to see results on
          <Instagram className="text-green-500 hover:text-blue-400 transition-colors" size={16}/>"</a>
         </p>
+
+        <p className="text-base text-[#aaa] mb-6 text-center">
+         Declared on 31 Aug, 2025
+        </p>
+        
         
         {/* Buttons */}
         <div className="flex justify-between w-full gap-3">
