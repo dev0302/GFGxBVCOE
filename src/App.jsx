@@ -27,7 +27,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/bentogrid" element={<GFGBentoGrid />} />
-        <Route path="/timer" element={<Timer />} />
+        <Route path="/timer" element={<ResultOut />} />
         <Route path="/results" element={<ResultOut />} />
       </Routes>
     </div>
