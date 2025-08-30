@@ -1,5 +1,5 @@
 import React from 'react';
-import notfoundimg from "../images/notFound.png";
+import notfoundimg from "../images/result.png";
 import { NavLink } from 'react-router-dom';
 
 
@@ -12,7 +12,7 @@ const ResultOut = () => {
         <img
           src={notfoundimg}
           alt="Cute Bear"
-          className="h-[180px] absolute -top-[125px] left-[30px] md:left-[60px] md:-top-[95px]  pointer-events-none animate-bounce"
+          className="h-[220px] absolute -top-[125px] left-[30px] md:left-[120px] md:-top-[95px]  pointer-events-none animate-bounce"
         />
         
         {/* Title */}
