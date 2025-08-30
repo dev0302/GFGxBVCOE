@@ -6,7 +6,7 @@ const Timer = () => {
   function calculateTimeLeft() {
     const now = new Date();
     const target = new Date();
-    target.setHours(24, 35, 0, 0); // 11:58 PM
+    target.setHours(24, 38, 0, 0); // 11:58 PM
     
     // If it's already past 11:58 PM, set target to next day
     if (now > target) {
