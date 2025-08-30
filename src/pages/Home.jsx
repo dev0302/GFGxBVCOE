@@ -8,6 +8,7 @@ import Footer from "../components/Footer";
 import ImageGrid from "../components/ImageGrid";
 import Lenis from "lenis";
 
+
 gsap.registerPlugin(ScrollTrigger);
 
 function Home() {
