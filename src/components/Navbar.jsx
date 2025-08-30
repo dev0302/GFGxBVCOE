@@ -9,6 +9,8 @@ import { SaxProfile2UserLinear } from '@meysam213/iconsax-react'
 import { SaxCalendarTickTwotone } from '@meysam213/iconsax-react'
 import { SaxUserTwotone } from '@meysam213/iconsax-react'
 import { SaxGalleryLinear } from '@meysam213/iconsax-react'
+import Timer from "../pages/Timer";
+
 
 
 function Navbar() {
@@ -103,7 +105,7 @@ function Navbar() {
             <li><NavLink to="/team" className={navLinkClass}><SaxProfile2UserLinear className="mr-2" />Team</NavLink></li>
             <li><NavLink to="/events" className={navLinkClass}><SaxCalendarTickTwotone className="mr-2"/>Events</NavLink></li>
             <li><NavLink to="/gallery" className={navLinkClass}><SaxGalleryLinear className="mr-2"/>Gallery</NavLink></li>
-            <li><NavLink to="/contact" className={navLinkClass}><SaxUserTwotone className="mr-2" />Contact</NavLink></li>
+            <li><NavLink to="/timer" className={navLinkClass}><SaxUserTwotone className="mr-2" />Contact</NavLink></li>
           </ul>
         </nav>
         <div ref={joinBtn} className="hidden sm:block">
