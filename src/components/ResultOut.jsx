@@ -1,11 +1,13 @@
 import React from 'react';
 import notfoundimg from "../images/result.png";
 import { NavLink } from 'react-router-dom';
+import ResultImages from './ResultImages';
+
 
 
 const ResultOut = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] font-['Inter'] text-white">
+    <div className="min-h-screen pt-36 flex-col items-center justify-center bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] font-['Inter'] text-white">
       {/* Dialog Card */}
       <div className="relative mt-10 bg-[#2a2a3d] rounded-2xl border-2 border-opacity-20 border-gray-300 shadow-lg p-6 max-w-[360px] min-h-[250px] flex flex-col items-center justify-end animate-fadeIn w-10/12 mx-auto">
         {/* Bear Image */}
@@ -36,6 +38,8 @@ const ResultOut = () => {
           </button>
         </div>
       </div>
+
+      <ResultImages></ResultImages>
     </div>
   );
 };
