@@ -45,7 +45,7 @@ const ResultImages = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] py-12 px-4">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-2xl md:text-4xl font-bold text-center text-white mb-4">
-          Excecutives Selection
+          Executives Selection
         </h1>
         <p className="text-center text-gray-300 mb-10">
           Congratulations to all
@@ -75,7 +75,7 @@ const ResultImages = () => {
         </div>
         
         <div className="mt-12 text-center text-gray-400">
-          <p>{images.length} images displayed</p>
+          <p>~ Team Gfg</p>
         </div>
       </div>
     </div>
