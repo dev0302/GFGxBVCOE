@@ -222,12 +222,12 @@ const GFGBentoGrid = () => {
         {/* Cards Grid */}
         <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 backdrop-blur-sm border border-green-400/20 rounded-3xl p-8 mb-12 shadow-2xl">
           <div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto "
             style={{ gridAutoRows: "minmax(150px, auto)" }}
           >
             <div
               ref={(el) => (cardsRef.current[0] = el)}
-              className="card hero-card relative overflow-hidden rounded-2xl md:col-span-2 md:row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
+              className="card hero-card relative overflow-hidden rounded-2xl md:col-span-2 md:row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group "
               style={{
                 backgroundImage: `url('/gridimg12.webp')`,
                 backgroundSize: "cover",
@@ -240,7 +240,7 @@ const GFGBentoGrid = () => {
               ref={(el) => (cardsRef.current[1] = el)}
               className="card vertical-card relative overflow-hidden rounded-2xl md:row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/gfg4.jpg')`,
+                backgroundImage: `url('FreshersMeet.webp')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 minHeight: "220px",
@@ -249,11 +249,12 @@ const GFGBentoGrid = () => {
 
             <div
               ref={(el) => (cardsRef.current[2] = el)}
-              className="card square-card relative overflow-hidden rounded-2xl aspect-square transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
+              className="card square-card relative overflow-hidden rounded-2xl  transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
                 backgroundImage: `url('/gridimg18.webp')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
+                minHeight: "180px",
               }}
             />
 
@@ -264,7 +265,7 @@ const GFGBentoGrid = () => {
                 backgroundImage: `url('/gridimg3.webp')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
-                minHeight: "160px",
+                minHeight: "300px",
               }}
             />
 
@@ -272,23 +273,37 @@ const GFGBentoGrid = () => {
               ref={(el) => (cardsRef.current[4] = el)}
               className="card tall-card relative overflow-hidden rounded-2xl md:row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/gridimg9.webp')`,
+                backgroundImage: `url('/FreshersMeet8.webp')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
-                minHeight: "220px",
+                maxHeight: "300px",
               }}
             />
 
             <div
               ref={(el) => (cardsRef.current[5] = el)}
-              className="card square-card relative overflow-hidden rounded-2xl aspect-square transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
+              className="card hero-card relative overflow-hidden rounded-2xl md:col-span-2 md:row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/gfg2.jpg')`,
-                backgroundSize: "contain",
+                backgroundImage: `url('/FreshersMeet7.webp')`,
+                backgroundSize: "cover",
                 backgroundPosition: "center",
-                backgroundColor: "rgba(255, 255, 255, 0.03)",
+                maxHeight: "300px",
+                maxWidth: "480px",
+                // backgroundColor: "rgba(255, 255, 255, 0.03)",
               }}
             />
+{/* 
+            <div
+              ref={(el) => (cardsRef.current[5] = el)}
+              className="card  relative overflow-hidden rounded-2xl  transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
+              style={{
+                backgroundImage: `url('/FreshersMeet3.webp')`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                minHeight: "300px",
+                // backgroundColor: "rgba(255, 255, 255, 0.03)",
+              }}
+            /> */}
           </div>
         </div>
 

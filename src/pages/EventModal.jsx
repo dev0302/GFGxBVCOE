@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
 
+
 const EventModal = ({ event, onClose }) => {
   const modalRef = useRef(null);
   // State to manage the currently displayed image in the gallery
