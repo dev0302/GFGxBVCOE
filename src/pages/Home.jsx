@@ -215,7 +215,7 @@ function Home() {
       </section>
 
       {/* Team Section */}
-      <section className="py-20 bg-[#161629] text-white text-center">
+      <section className="py-20 bg-[#161629] text-white text-center border-b-2 border-gray-600 border-opacity-40">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Meet Our{" "}
