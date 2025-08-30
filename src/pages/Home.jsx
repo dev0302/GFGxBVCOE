@@ -133,13 +133,27 @@ function Home() {
             ref={btnRef}
             className="flex flex-col sm:flex-row gap-6 mt-12 font-nunito items-center"
           >
-            <NavLink to="/notfound">
+            <NavLink to="/results">
               <button
-                id="btn-join"
-                className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/40"
-              >
-                Join Now
-              </button>
+            id="btn-join"
+            class="relative px-5 py-2 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 
+                   text-white font-bold text- rounded-full transition-all duration-500 ease-in-out 
+                   transform hover:-translate-y-2 hover:scale-110 
+                   shadow-lg hover:shadow-2xl hover:shadow-emerald-500/50
+                   border-2 border-white/20
+                   overflow-hidden group
+                   animate-pulse hover:animate-none"
+        >
+            <span class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
+            
+          
+            <span class="relative z-10 flex items-center justify-center">
+                <span class="mr-3">2025 Execoms Result out</span>
+                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+            </span>
+        </button>
             </NavLink>
             <button
               id="btn-about"
