@@ -27,9 +27,11 @@ const NotFound = () => {
         
         {/* Buttons */}
         <div className="flex justify-between w-full gap-3">
-          <button className="flex-1 py-2.5 px-4 rounded-lg bg-[#444] text-[#ccc] text-sm transition-all duration-300 hover:scale-105 hover:opacity-95">
-            Go Back
+          <NavLink to="/results">
+            <button className="flex-1 py-2.5 px-4 rounded-lg bg-[#a540b9] text-[#ccc] text-sm transition-all duration-300 hover:scale-105 hover:opacity-95">
+            See Results
           </button>
+          </NavLink>
           <button className="flex-1 py-2.5 px-4 rounded-lg bg-cyan-700 text-white text-sm transition-all duration-300 hover:scale-105 hover:opacity-95">
             <NavLink to="/contact">Contact us</NavLink>
           </button>
