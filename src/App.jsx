@@ -9,6 +9,8 @@ import Gallery from "./pages/Gallery"
 import Team2 from "./pages/Team2"
 import GFGBentoGrid from "./components/GFGBentoGrid";
 import Timer from "./pages/Timer"
+import ResultOut from "./components/ResultOut"
+
 
 
 function App() {
@@ -26,6 +28,7 @@ function App() {
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/bentogrid" element={<GFGBentoGrid />} />
         <Route path="/timer" element={<Timer />} />
+        <Route path="/results" element={<ResultOut />} />
       </Routes>
     </div>
   )
