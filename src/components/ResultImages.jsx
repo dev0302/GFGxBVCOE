@@ -56,10 +56,10 @@ const ResultImages = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] py-12 px-4">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-2xl md:text-4xl font-bold text-center text-white mb-4">
-          Executives Selection
+        <h1 className="text-xl md:text-4xl font-bold text-center text-blue-100 mb-4 font-alfa tracking-wide">
+          ------ Executives Selected ------
         </h1>
-        <p className="text-center text-gray-300 mb-10">
+        <p className="text-center text-gray-300 mb-10 font-nunito">
           Congratulations to all
         </p>
         
@@ -67,7 +67,7 @@ const ResultImages = () => {
           {images.map((image) => (
             <div 
               key={image.id} 
-              className="w-[90%] overflow-hidden rounded-xl shadow-2xl transition-all duration-300 hover:scale-[1.02]"
+              className="w-[90%] overflow-hidden rounded-xl shadow-2xl transition-all duration-300 hover:scale-[1.02] "
             >
               <div className="relative group">
                 <img 

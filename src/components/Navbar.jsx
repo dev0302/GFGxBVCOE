@@ -59,7 +59,7 @@ function Navbar() {
   }, []);
   
   const location = useLocation();
-  const darkRoutes = ["/events", "/contact","/gallery","/notfound","/team","/about","/team2"];
+  const darkRoutes = ["/events", "/contact","/gallery","/notfound","/team","/about","/team2","/results"];
   const isDarkNavbar = darkRoutes.includes(location.pathname);
 
   const navLinkClass = ({ isActive }) =>
