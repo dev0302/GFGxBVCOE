@@ -12,43 +12,43 @@ const ResultImages = () => {
     {
       id: 2,
       url: "/result3.png",
-      title: "Ocean View",
+      title: "Technical",
       description: ""
     },
     {
       id: 3,
       url: "/result4.png",
-      title: "Forest Path",
+      title: "Event Management",
       description: ""
     },
     {
       id: 4,
       url: "/result5.png",
-      title: "Rocky Beach",
+      title: "Public Relation and Outreach",
       description: ""
     },
     {
       id: 5,
       url: "/result6.png",
-      title: "Flower Field",
+      title: "Design",
       description: ""
     },
     {
       id: 6,
       url: "/result7.png",
-      title: "Mountain Lake",
+      title: "Content and Documentation",
       description: ""
     },
     {
       id: 7,
       url: "/result8.png",
-      title: "Flower Field",
+      title: "Photography and Videogrpahy",
       description: ""
     },
     {
       id: 8,
       url: "/result9.png",
-      title: "Mountain Lake",
+      title: "Sponsorship and Marketing",
       description: ""
     }
   ]);
