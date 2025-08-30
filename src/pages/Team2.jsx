@@ -141,7 +141,7 @@ function Team2() {
 
 
       {/* rendering of card data of all members */}
-      <div ref={teamGridRef} className='TEAM_SECTION mt-10 justify-center items-center flex flex-wrap w-10/12 mx-auto gap-10 pb-12'>
+      <div ref={teamGridRef} className='TEAM_SECTION mt-16 justify-center items-center flex flex-wrap w-10/12 mx-auto gap-16 pb-12 md:gap-y-20'>
         {
           teamData.map((person, index) => (
             <NewCard key={index} person={person} />

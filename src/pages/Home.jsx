@@ -132,7 +132,7 @@ function Home() {
             ref={btnRef}
             className="flex flex-col sm:flex-row gap-6 mt-12 font-nunito items-center"
           >
-            <NavLink to="https://forms.gle/UWCTHc2CFY6ouGX18">
+            <NavLink to="/notfound">
               <button
                 id="btn-join"
                 className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/40"

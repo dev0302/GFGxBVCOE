@@ -14,11 +14,11 @@ function NewCard({ person }) {
   return (
     <>
       <div className='flex justify-center items-center font-nunito text-white'>
-        <div className="glowing-container">
+        <div className="glowing-container w-[280px] h-[420px]">
           <div className="
             p-2
             group
-            w-full h-full  /* Changed to w-full h-full to fit the container */
+            w-full h-full 
             flex flex-col
             rounded-3xl 
             overflow-hidden 

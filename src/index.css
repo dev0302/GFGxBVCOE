@@ -16,8 +16,12 @@
 * {
   scroll-behavior: smooth;
 }
-html, body, #root {
-  background-color: #0f172a; /* same as your dark gradient */
+
+html,
+body,
+#root {
+  background-color: #0f172a;
+  /* same as your dark gradient */
 
 }
 
@@ -258,49 +262,63 @@ body {
 .glowing-container {
   --angle: 0deg;
   position: relative;
-  width: 280px;
-  height: 420px;
   border-radius: 1.5rem;
+  isolation: isolate;
+  /* prevents blending glitches */
 }
 
 .glowing-container::before {
   content: '';
   position: absolute;
-  inset: -3px; 
-  z-index: -1;
+  inset: -3px;
   border-radius: inherit;
-  
-  background: conic-gradient(
-    from var(--angle),
-    #1e1e2f,
-    #0ea5e9,
-    #ec4899,
-    #0ea5e9,
-    #1e1e2f,
-    #1e1e2f
-  );
-  
-  animation: rotate-glow 4s linear infinite;
+  z-index: -1;
 
-  filter: blur(10px);
+  background: conic-gradient(from var(--angle),
+      #1e1e2f 0deg,
+      #0ea5e9 90deg,
+      #ec4899 180deg,
+      #0ea5e9 270deg,
+      #1e1e2f 360deg);
+
+  animation: rotate-glow 6s linear infinite;
+  filter: blur(8px);
+  will-change: transform, background;
+  /* optimize GPU usage */
 }
+
+@keyframes rotate-glow {
+  to {
+    --angle: 360deg;
+  }
+}
+
 
 .glowing-btn-wrapper {
   --angle: 0deg;
   position: relative;
   display: inline-block;
-  padding: 2px;   
-  overflow: hidden;    
-  width: fit-content; 
+  padding: 2px;
+  overflow: hidden;
+  width: fit-content;
   transition: transform 0.3s ease;
 }
+
 .glowing-btn-wrapper:hover {
-  transform: scale(1.05); 
+  transform: scale(1.05);
 }
 
-.glowing-btn-wrapper.rounded-full { border-radius: 9999px; }
-.glowing-btn-wrapper.rounded-lg { border-radius: 0.5rem; }
-.glowing-btn-wrapper.rounded-2xl { border-radius: 1rem; }
+.glowing-btn-wrapper.rounded-full {
+  border-radius: 9999px;
+}
+
+.glowing-btn-wrapper.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.glowing-btn-wrapper.rounded-2xl {
+  border-radius: 1rem;
+}
 
 .glowing-btn-wrapper.green::before {
   content: '';
@@ -308,13 +326,11 @@ body {
   inset: 0;
   z-index: 1;
   border-radius: inherit;
-  background: conic-gradient(
-    from var(--angle),
-    transparent 40%,
-    #4ade80, 
-    #22c55e, 
-    transparent 60%
-  );
+  background: conic-gradient(from var(--angle),
+      transparent 40%,
+      #4ade80,
+      #22c55e,
+      transparent 60%);
   animation: rotate-glow 4s linear infinite;
   filter: blur(2px);
 }
@@ -325,24 +341,22 @@ body {
   inset: 0;
   z-index: 1;
   border-radius: inherit;
-  background: conic-gradient(
-    from var(--angle),
-    transparent 40%,
-    #4a51de, 
-    #af22c5, 
-    transparent 60%
-  );
+  background: conic-gradient(from var(--angle),
+      transparent 40%,
+      #4a51de,
+      #af22c5,
+      transparent 60%);
   animation: rotate-glow 4s linear infinite;
   filter: blur(2px);
 }
 
-.glowing-btn-wrapper > * {
+.glowing-btn-wrapper>* {
   position: relative;
   z-index: 2;
   display: inline-block;
   width: 100%;
   height: 100%;
-  border-radius: inherit; 
+  border-radius: inherit;
   border: none !important;
 }
 

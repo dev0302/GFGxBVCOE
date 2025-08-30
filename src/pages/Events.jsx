@@ -5,6 +5,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef, useState, useEffect } from "react";
 import EventModal from "./EventModal";
 import Lenis from "lenis";
+import events from "../data/eventData";
+
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -31,113 +33,7 @@ const Events = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   // Sample events data (remains the same)
-  const events = [
-    {
-      id: 1,
-      title: "Inaugration Day",
-      date: "Feburary 6, 2024",
-      time: "10:00 am",
-      location: "BVCOE, New Delhi",
-      category: "Speaker Session",
-      description: "Celebrating the grand inauguration where we proudly introduced our society’s mission and vision to the college community",
-      modalDescription: "The event marked the beginning of an exciting journey, fostering innovation, collaboration, and growth. With an overwhelming response, we set the stage for future achievements and impactful initiatives.",
-      galleryImages: ["/Inaugration.webp","/Inaugration1.webp","/Inaugration2.webp","/Inaugration3.webp","/Inaugration4.webp"],
-      speakers: [{ name: "Dr. Shristi Vashishtha", title: "Faculty Advisor"}],
-      agenda: ["Forming a community for Tech Enthusiasts"],
-      prerequisites: [""],
-      targetAudience: "Anyone with a young and curious mind."
-    },
-    {
-      id: 2,
-      title: "GeekHunt: A Tech Fiesta",
-      date: "April 12, 2025",
-      time: "10:00 AM - 3:00 PM",
-      location: "Main Auditorium, Bharati Vidyapeeth, Delhi",
-      category: "Tech Fest / Community Event",
-      description: "A vibrant tech fest designed to foster community and knowledge sharing through fun events like TechMeme and TechQuizzee.",
-      modalDescription: "GeekHunt fosters a vibrant community of tech enthusiasts while promoting creativity and knowledge sharing. Participants learn the importance of engaging with current tech trends and the power of humor in making complex topics relatable. The interactive formats enhance information retention, highlight knowledge gaps, and encourage collaboration. The event underscores effective communication skills and the value of peer feedback, creating a dynamic environment where participants can connect, learn, and grow together.",
-      galleryImages: ["/geekhunt.webp"],
-      speakers: [{ name: "Dr. Shristi Vashishtha", title: "Faculty Advisor"}],
-      agenda: ["Event Kick-off & Introduction","TechMeme: Meme Creation & Submission Showcase","TechQuizzee: Interactive Tech Trivia Challenge","Winner Announcements & Networking Session"],
-      prerequisites: ["A love for technology and a good sense of humor."],
-      targetAudience: "All tech enthusiasts, from beginners to experts, looking to connect, learn, and have fun in a vibrant community setting."
-    },
-    {
-      id: 3,
-      title: "Pyhunt: A Python Challenge",
-      date: "March 6, 2024",
-      time: "10:00 AM - 4:00 PM",
-      location: "C-105, Bharati Vidyapeeth, Delhi",
-      category: "Quiz / Programming Competition",
-      description: "A two-round event designed to test Python proficiency through a challenging traditional quiz and a fun, interactive tech bingo.",
-      modalDescription: "Pyhunt is designed to assess and celebrate Python proficiency through two engaging rounds. The event kicks off with a comprehensive quiz featuring challenging questions, jumbled-code puzzles, and rapid-fire queries. Top teams advance to an exhilarating Bingo round, adding a thrilling and strategic twist to the competition. The event aims to engage participants of all skill levels and foster a sense of community among tech enthusiasts.",
-      galleryImages: ["/Pyhunt.webp","/Pyhunt1.webp","/Pyhunt2.webp","/Pyhunt3.webp","/Pyhunt4.webp"],
-      speakers: [{ name: "Dr. Shristi Vashishtha", title: "Faculty Advisor" }],
-      agenda: ["Offline Registration (10 AM - 1 PM)","Round 1: Comprehensive Python Quiz","Round 2: The Bingo Challenge (Top 9 Teams)","Feedback Session & Winner Announcements"],
-      prerequisites: ["Basic to intermediate knowledge of Python programming concepts."],
-      targetAudience: "Students and programmers of all skill levels looking to test and showcase their Python knowledge in a fun, competitive environment."
-    },
-    {
-      id: 4,
-      title: "AI Connect",
-      date: "February 22, 2024",
-      time: "2:00 PM - 4:00 PM",
-      location: "A-107, Bharati Vidyapeeth, Delhi",
-      category: "Tech Talk / Workshop",
-      description: "Dive into the fascinating world of Generative AI with live demos, expert insights, and engaging discussions.",
-      modalDescription: "Embark on a journey through the realm of Generative AI as we kick off with a warm welcome and an introduction to the wonders of artificial creativity. We'll delve into the fundamentals, demystify core concepts, and showcase real-world applications through exciting live demonstrations. This event is a unique opportunity to understand how machines are capable of creating new and innovative content.",
-      galleryImages: ["/aiconnect.webp","/aiconnect1.webp","/aiconnect2.webp","/aiconnect4.webp"],
-      speakers: [{ name: "Mr. Ritik", title: "Guest Speaker, AI Specialist" },{ name: "Ms. Manya", title: "Guest Speaker, AI Specialist" },],
-      agenda: ["Welcome & Introduction to Generative AI","Live Demonstrations of AI Creativity","Guest Speaker Session with Industry Experts","Interactive Q&A and Discussion Panel",],
-      prerequisites: ["An interest in Artificial Intelligence and technology."],
-      targetAudience: "Students and tech enthusiasts interested in the fundamentals and applications of Generative AI."
-    },
-    {
-      id: 5,
-      title: "InnoVogue: The Ideathon",
-      date: "March 5, 2024",
-      time: "10:00 AM - 4:00 PM",
-      location: "B-403, Bharati Vidyapeeth, Delhi",
-      category: "Ideathon / Pitching Competition",
-      description: "An exciting Ideathon to foster innovation and problem-solving through creative ideation, collaboration, and mentorship.",
-      modalDescription: "InnoVogue is an Ideathon designed to foster innovation and problem-solving. Participants will engage in dynamic brainstorming sessions, develop creative solutions to real-world challenges, and present their ideas in both idea pitching and business pitching rounds. The event promotes networking, community building, and entrepreneurship, with guidance from seasoned mentors.",
-      galleryImages: ["/Innovogue.webp","/Innovogue1.webp","/Innovogue2.webp","/Innovogue3.webp","/Innovogue4.webp","/Innovogue5.webp"],
-      speakers: [{ name: "Charvi", title: "Event Mentor" },{ name: "Dhruv", title: "Event Mentor" },{ name: "Mohit Tiwari", title: "Guest Judge" }],
-      agenda: ["Offline Registration (10 AM - 1 PM)","Mentorship Round with Industry Experts","Idea & Business Pitching Rounds","Winner Announcements & Certificate Distribution"],
-      prerequisites: ["A creative mindset and a passion for problem-solving."],
-      targetAudience: "Aspiring innovators, student entrepreneurs, and anyone with a passion for developing solutions to real-world problems."
-    },
-    {
-      id: 6,
-      title: "VichaarX: SDG Innovation Challenge",
-      date: "October 19, 2024",
-      time: "9:00 AM - 5:00 PM",
-      location: "C-103, Bharati Vidyapeeth, Delhi",
-      category: "Innovation Challenge / Hackathon",
-      description: "A multi-round innovation challenge focused on developing feasible and scalable solutions for the UN's Sustainable Development Goals.",
-      modalDescription: "Participants will gain skills in analyzing technical feasibility, aligning solutions with global sustainability goals, and presenting ideas clearly to stakeholders. They will enhance their ability to develop actionable implementation plans and simulate real-world deployments. The event fosters creativity, critical thinking, and collaborative problem-solving within diverse teams.",
-      galleryImages: ["/vichaarx.webp","/vichaarx1.webp","/vichaarx2.webp","/vichaarx3.webp","/vichaarx4.webp"],
-      speakers: [{ name: "Vinamra Sharma", title: "Tech Innovator & Hackathon Veteran" }],
-      agenda: ["Introduction to UN SDGs & Problem Statements","Workshop on Technical & Financial Feasibility","Team Brainstorming & Solution Development","Final Pitch Presentations & Judging"],
-      prerequisites: ["A passion for technology and sustainable development."],
-      targetAudience: "Students and innovators eager to tackle global challenges through technology, strategy, and business planning."
-    },
-    {
-      id: 7,
-      title: "GFG HQ Visit",
-      date: "January 11, 2025",
-      time: "10::00 ",
-      location: "GFG HQ, Noida",
-      category: "HQ Visit",
-      description: "An exclusive opportunity to explore the Geeks for Geeks headquarters, meet the team, and get a behind-the-scenes look at a leading tech company.",
-      modalDescription: "Join us for an inspiring industrial visit to the heart of Geeks for Geeks. This exclusive tour offers a unique chance to witness the inner workings of a top ed-tech company, from its innovative work culture to its state-of-the-art infrastructure. You'll have the opportunity to interact with GFG's talented professionals, gain insights into various tech roles, and understand the real-world processes behind their renowned platform.",
-      galleryImages: ["/hqvisit.webp","/hqvisit1.webp","/hqvisit2.webp","/hqvisit3.webp","/hqvisit4.webp","/hqvisit5.webp",],
-      speakers: [{name: "Sandeep Jain", title:"Founder & CEO, GFG"}],
-      agenda:["Arrival & Welcome Reception","Guided Tour of the GFG Campus","Interactive Session with the GFG Tech Team","Networking Lunch & Q&A Session"],
-      prerequisites: ["Must be a registered member of the GFG BVCOE society."],
-      targetAudience: "Students passionate about software development and ed-tech, eager to understand the culture and operations of a leading tech company."
-    }
-  ];
+  
 
 
   // GSAP scroll-triggered animations
@@ -190,7 +86,7 @@ const Events = () => {
             }}
           />
         </div>
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6  text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] rounded-full border border-gray-400 backdrop-blur-sm mb-6">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             <span className="text-sm font-medium text-green-300 uppercase tracking-wider">Previous Events</span>
@@ -206,9 +102,9 @@ const Events = () => {
       </section>
 
       {/* Events Grid */}
-      <section ref={eventsRef} className="py-16 md:py-20 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] font-['Inter'] text-white">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+      <section ref={eventsRef} className="py-16 md:py-18 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] font-['Inter'] text-white">
+        <div className="container mx-auto w-full px-4 sm:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-20">
             {events.map((event) => (
               <div 
                 key={event.id} 
