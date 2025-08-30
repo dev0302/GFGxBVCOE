@@ -23,7 +23,7 @@ const ResultOut = () => {
         {/* Description */}
         <p className="text-sm text-[#aaa] mb-6 text-center">
          Checkout here....
-         <a className='text-blue-400 text-base' href="https://www.instagram.com/gfg_bvcoe/?hl=en">Click here to see results</a>
+         <a className='text-blue-400 text-base' href="https://www.instagram.com/stories/gfg_bvcoe/?hl=en">Click here to see results</a>
         </p>
         
         {/* Buttons */}
