@@ -6,38 +6,50 @@ const ResultImages = () => {
     {
       id: 1,
       url:"/result2.png",
-      title: "Mountain Landscape",
-      description: "Beautiful mountain scenery at sunset"
+      title: "Social Media",
+      description: ""
     },
     {
       id: 2,
       url: "/result3.png",
       title: "Ocean View",
-      description: "Crystal clear blue ocean waters"
+      description: ""
     },
     {
       id: 3,
       url: "/result4.png",
       title: "Forest Path",
-      description: "Serene forest pathway in autumn"
+      description: ""
     },
     {
       id: 4,
       url: "/result5.png",
       title: "Rocky Beach",
-      description: "Sunset over a rocky shoreline"
+      description: ""
     },
     {
       id: 5,
       url: "/result6.png",
       title: "Flower Field",
-      description: "Colorful flowers in a vast field"
+      description: ""
     },
     {
       id: 6,
       url: "/result7.png",
       title: "Mountain Lake",
-      description: "Calm lake reflecting mountain peaks"
+      description: ""
+    },
+    {
+      id: 7,
+      url: "/result8.png",
+      title: "Flower Field",
+      description: ""
+    },
+    {
+      id: 8,
+      url: "/result9.png",
+      title: "Mountain Lake",
+      description: ""
     }
   ]);
 
