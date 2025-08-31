@@ -69,10 +69,10 @@ function Home() {
     // Number counting animation
     const counters = { members: 0, events: 0, workshops: 0 };
     gsap.to(counters, {
-      duration: 2,
+      duration: 4,
       ease: "power2.out",
       delay: 0.8,
-      members: 50,
+      members: 100,
       events: 10,
       workshops: 10,
       onUpdate: () => {
@@ -136,7 +136,7 @@ function Home() {
             <NavLink to="/results">
               <button
             id="btn-join"
-            class="relative px-5 py-2 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 
+            class="relative px-5 py-4 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 
                    text-white font-bold text- rounded-full transition-all duration-500 ease-in-out 
                    transform hover:-translate-y-2 hover:scale-110 
                    shadow-lg hover:shadow-2xl hover:shadow-emerald-500/50

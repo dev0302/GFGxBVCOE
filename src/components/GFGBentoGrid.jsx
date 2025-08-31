@@ -312,17 +312,16 @@ const GFGBentoGrid = () => {
           <div className="inline-flex flex-col sm:flex-row items-center gap-6 p-8 bg-gradient-to-r from-green-800/30 to-emerald-800/30 backdrop-blur-sm border border-green-400/20 rounded-3xl">
             <div className="text-left sm:text-center">
               <h3 className="text-2xl font-bold text-white mb-2 font-nunito">
-                Ready to Join More Events?
+                Explore all events in our Events section.
               </h3>
               <p className="text-green-100 text-lg font-nunito">
-                Explore our full calendar of workshops, hackathons, and community
-                meetups
+                Explore our full calendar of workshops, Events, and meetups.
               </p>
             </div>
             <div className="glowing-btn-wrapper blue rounded-full">
               <button
                 onClick={handleViewAllEvents}
-                className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-full text-lg transition-all duration-300 flex items-center gap-3 group"
+                className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-full text-lg transition-all duration-300 flex justify-center items-center group"
               >
                 <span>View All Events</span>
                 <svg
