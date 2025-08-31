@@ -4,111 +4,99 @@ import { ScrollTrigger } from 'https://esm.sh/gsap/ScrollTrigger';
 import emailjs from 'https://esm.sh/emailjs-com';
 import Lenis from "lenis";
 
-// Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
 
+const Contact = () => {
+  const containerRef = useRef();
+  const formRef = useRef();
+  const infoRef = useRef();
 
-const contact = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: ""
+  });
 
-    useEffect(() => {
-      const lenis = new Lenis({
-        // duration:8,
-        lerp: 0.1,
-        smoothWheel: true,
-      });
-  
-      // Sync Lenis scroll with ScrollTrigger
-      lenis.on("scroll", ScrollTrigger.update);
-  
-      function raf(time) {
-        lenis.raf(time);
-        requestAnimationFrame(raf);
-      }
+  const [status, setStatus] = useState("");
+
+  // Smooth scroll setup
+  useEffect(() => {
+    const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+    lenis.on("scroll", ScrollTrigger.update);
+
+    function raf(time) {
+      lenis.raf(time);
       requestAnimationFrame(raf);
-  
-    
-    
-  
-      return () => {
-        lenis.destroy(); // cleanup on unmount
-      };
-    });
+    }
+    requestAnimationFrame(raf);
 
+    return () => lenis.destroy();
+  }, []);
 
-    // Refs for elements
-    const containerRef = useRef();
-    const formRef = useRef();
-    const infoRef = useRef();
+  // GSAP Animations
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const elementsToAnimate = [formRef.current, infoRef.current].filter(Boolean);
+      gsap.set(elementsToAnimate, { opacity: 0, y: 50 });
 
-    // State for form inputs
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        message: ''
-    });
+      elementsToAnimate.forEach((el) => {
+        gsap.fromTo(
+          el,
+          { opacity: 0, y: 60, scale: 0.95 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 1.2,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 85%",
+              toggleActions: "play none none none"
+            }
+          }
+        );
+      });
+    }, containerRef);
 
-    // State for submission status
-    const [status, setStatus] = useState(''); // e.g., 'sending', 'sent', 'error'
+    return () => ctx.revert();
+  }, []);
 
-    // GSAP animations using useEffect
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            const elementsToAnimate = [formRef.current, infoRef.current].filter(Boolean);
+  // Handle input
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-            gsap.set(elementsToAnimate, { opacity: 0, y: 50 });
+  // Handle submit
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setStatus("sending");
 
-            elementsToAnimate.forEach(el => {
-                if (!el) return;
-                gsap.fromTo(el,
-                    { opacity: 0, y: 60, scale: 0.95 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        duration: 1.2,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: el,
-                            start: "top 85%",
-                            toggleActions: "play none none none",
-                             
-                        }
-                    }
-                );
-            });
-        }, containerRef);
+    const serviceID = "service_yi2am22";
+    const templateID = "template_snruy8d";
+    const userID = "UrKEChN91ZCXCMKm7";
 
-        return () => ctx.revert();
-    }, []);
-
-    // Handle input changes
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prevState => ({
-            ...prevState,
-            [name]: value
-        }));
-    };
-
-    // Handle form submission
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setStatus('sending');
-
-        const serviceID = 'service_yi2am22';
-        const templateID = 'template_snruy8d';
-        const userID = 'UrKEChN91ZCXCMKm7';
-
-        emailjs.send(serviceID, templateID, formData, userID)
-            .then((response) => {
-                console.log('SUCCESS!', response.status, response.text);
-                setStatus('sent');
-                setFormData({ name: '', email: '', message: '' });
-            }, (err) => {
-                console.log('FAILED...', err);
-                setStatus('error');
-            });
-    };
+    emailjs
+      .send(
+        serviceID,
+        templateID,
+        {
+          name: formData.name,
+          email: formData.email, // user’s email
+          message: formData.message,
+          to_email: "geeksforgeeksbvp@gmail.com", // your official inbox
+        },
+        userID
+      )
+      .then(
+        () => {
+          setStatus("sent");
+          setFormData({ name: "", email: "", message: "" });
+        },
+        () => setStatus("error")
+      );
+  };
 
     return (
         <div ref={containerRef} className="min-h-screen darkthemebg overflow-hidden text-white font-nunito py-20 px-4 sm:px-6 lg:px-8">
@@ -147,7 +135,7 @@ const contact = () => {
                                     onChange={handleChange}
                                     required
                                     className="w-full bg-slate-400 bg-opacity-10 rounded-lg px-4 py-3 text-white placeholder-richblack-100 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all duration-300"
-                                    placeholder="naam mei kya rkha hai"
+                                    placeholder="Your Name"
                                 />
                             </div>
                             <div>
@@ -243,4 +231,4 @@ const contact = () => {
     );
 };
 
-export default contact;
+export default Contact;
