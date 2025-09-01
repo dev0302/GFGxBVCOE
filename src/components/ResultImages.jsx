@@ -73,6 +73,7 @@ const ResultImages = () => {
                 <img 
                   src={image.url} 
                   alt={image.title}
+                  loading="eager"
                   className="w-full h-auto object-cover max-h-[70vh]"
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-end">
