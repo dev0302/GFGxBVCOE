@@ -58,7 +58,7 @@ const TeamSection = () => {
       name: "Kartik Bhattacharya",
       branch: "CSE",
       year: "3rd",
-      position: "Vice-chairman and technical lead",
+      position: "Vice-chairperson and technical lead",
       p0: "Vice-chairman and technical lead",
       image: "/Kartik.webp",
       p1: "Technical executive",
