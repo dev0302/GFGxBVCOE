@@ -140,20 +140,19 @@ function Navbar() {
             <li><NavLink to="/contact" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>Contact</NavLink></li>
             <li className="mt-8">
               <div className="glowing-btn-wrapper blue rounded-full">
-                <a 
-                
-                  rel="noopener noreferrer" 
-                  onClick={() => setIsMenuOpen(false)}
+                <NavLink 
+                  to="/notfound" 
+                  onClick={() => setIsMenuOpen(false)} 
+                  className="inline-block"
                 >
-                  <NavLink to="/notfound">
-                    <button
+                  <button
                     className="py-3 px-8 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg"
                   >
                     Join Us
                   </button>
-                  </NavLink>
-                </a>
+                </NavLink>
               </div>
+
             </li>
         </ul>
       </div>

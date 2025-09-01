@@ -9,7 +9,8 @@ import Gallery from "./pages/Gallery"
 import Team2 from "./pages/Team2"
 import GFGBentoGrid from "./components/GFGBentoGrid";
 import Timer from "./pages/Timer"
-import ResultOut from "./components/ResultOut"
+import ResultPage from "./pages/ResultPage"
+
 
 
 
@@ -27,8 +28,8 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/bentogrid" element={<GFGBentoGrid />} />
-        <Route path="/timer" element={<ResultOut />} />
-        <Route path="/results" element={<ResultOut />} />
+        <Route path="/timer" element={<ResultPage />} />
+        <Route path="/results" element={<ResultPage />} />
       </Routes>
     </div>
   )
