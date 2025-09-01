@@ -46,7 +46,7 @@ const teamData = [
         name: "Kartik Bhattacharya",
         branch: "CSE",
         year: "3rd",
-        position: "Vice-Chairman and Technical Lead",
+        position: "Vice-Chairperson and Technical Lead",
         p0: "Vice-Chairman and Technical Lead",
         image: "/Kartik.webp",
         p1: "Technical Executive",
