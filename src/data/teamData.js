@@ -63,7 +63,7 @@ const teamData = [
             },
             {
                 year: "2025",
-                role: "Vice-Chairman and Technical Lead",
+                role: "Vice-Chairperson and Technical Lead",
                 project: "Geeks for Geeks",
                 description: "College Chapter, BVCOE, New Delhi"
             },
