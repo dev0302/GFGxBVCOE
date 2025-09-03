@@ -37,29 +37,29 @@ const Events = () => {
 
 
   // GSAP scroll-triggered animations
-  useGSAP(() => {
-    const sections = [heroRef.current, eventsRef.current];
-    sections.forEach(section => {
-      if (section) {
-        gsap.from(section, {
-          opacity: 0,
-          y: 50,
-          duration: 1,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: section,
-            start: "top 85%",
-            toggleActions: "play none none none",
+  // useGSAP(() => {
+  //   const sections = [heroRef.current, eventsRef.current];
+  //   sections.forEach(section => {
+  //     if (section) {
+  //       gsap.from(section, {
+  //         opacity: 0,
+  //         y: 50,
+  //         duration: 1,
+  //         ease: "power2.out",
+  //         scrollTrigger: {
+  //           trigger: section,
+  //           start: "top 85%",
+  //           toggleActions: "play none none none",
              
-          }
-        });
-      }
-    });
+  //         }
+  //       });
+  //     }
+  //   });
 
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, []);
+  //   return () => {
+  //     ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+  //   };
+  // }, []);
 
   const handleNavigateToContact = () => {
     navigate('/contact');

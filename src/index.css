@@ -265,6 +265,8 @@ body {
   border-radius: 1.5rem;
   isolation: isolate;
   /* prevents blending glitches */
+  will-change: transform;
+  /* hint for GPU */
 }
 
 .glowing-container::before {
@@ -283,8 +285,12 @@ body {
 
   animation: rotate-glow 6s linear infinite;
   filter: blur(8px);
-  will-change: transform, background;
-  /* optimize GPU usage */
+  will-change: transform, filter;
+  /* reduced from background to just what's animating */
+  transform: translateZ(0);
+  /* force GPU acceleration */
+  backface-visibility: hidden;
+  /* reduce repaint */
 }
 
 @keyframes rotate-glow {
@@ -292,6 +298,7 @@ body {
     --angle: 360deg;
   }
 }
+
 
 
 .glowing-btn-wrapper {
