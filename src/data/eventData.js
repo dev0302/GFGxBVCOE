@@ -1,6 +1,29 @@
 const events = [
     {
         id: 1,
+        title: "PW GATE CAMP X FFT Speaker Session",
+        date: "September 4, 2025",
+        time: "3:00 PM - 5:00 PM",
+        location: "Library, BVCOE",
+        category: "Speaker Session",
+        description: "A collaborative session by PW GATE CAMP and FFT, offering valuable insights, mentorship, and peer support for students.",
+        modalDescription: "The PW GATE CAMP X FFT Speaker Session brought together Physics Wallah and FFT to empower students with knowledge, mentorship, and practical strategies. FFT, known for guiding juniors with notes and support, joined hands with PW to inspire attendees. The session included speaker talks, an interactive game segment by the GFG team where participants guessed memes, and fun goodies for winners. It provided a perfect mix of learning, laughter, and networking.",
+        galleryImages: ["/pwgatefft.webp", "/pwgatefft_vid1.mp4", "/pwgatefft1.webp", "/pwgatefft2.webp", "/pwgatefft3.webp", "/pwgatefft4.webp", "/pwgatefft5.webp"],
+        speakers: [
+            // Speaker details can be added here later
+        ],
+        agenda: [
+            "Welcome & Introduction",
+            "Speaker Sessions by PW & FFT",
+            "Interactive Game: Guess the Meme (by GFG Team)",
+            "Goodies Distribution for Winners",
+            "Closing Remarks & Networking"
+        ],
+        prerequisites: ["Curiosity to learn and engage with peers."],
+        targetAudience: "Students preparing for GATE and those seeking peer-to-peer learning and mentorship support."
+    },
+    {
+        id: 2,
         title: "Freshers Meet 2025",
         date: "August 25, 2025",
         time: "10:00 AM",
@@ -15,7 +38,7 @@ const events = [
         targetAudience: "First-year students and new members of the BVCOE community."
     },
     {
-        id: 2,
+        id: 3,
         title: "GeekHunt: A Tech Fiesta",
         date: "April 12, 2025",
         time: "10:00 AM - 3:00 PM",
@@ -30,7 +53,7 @@ const events = [
         targetAudience: "All tech enthusiasts, from beginners to experts, looking to connect, learn, and have fun in a vibrant community setting."
     },
     {
-        id: 3,
+        id: 4,
         title: "GFG HQ Visit",
         date: "January 11, 2025",
         time: "10:00 AM",
@@ -45,7 +68,7 @@ const events = [
         targetAudience: "Students passionate about software development and ed-tech, eager to understand the culture and operations of a leading tech company."
     },
     {
-        id: 4,
+        id: 5,
         title: "VichaarX: SDG Innovation Challenge",
         date: "October 19, 2024",
         time: "9:00 AM - 5:00 PM",
@@ -60,7 +83,7 @@ const events = [
         targetAudience: "Students and innovators eager to tackle global challenges through technology, strategy, and business planning."
     },
     {
-        id: 5,
+        id: 6,
         title: "Pyhunt: A Python Challenge",
         date: "March 6, 2024",
         time: "10:00 AM - 4:00 PM",
@@ -75,7 +98,7 @@ const events = [
         targetAudience: "Students and programmers of all skill levels looking to test and showcase their Python knowledge in a fun, competitive environment."
     },
     {
-        id: 6,
+        id: 7,
         title: "InnoVogue: The Ideathon",
         date: "March 5, 2024",
         time: "10:00 AM - 4:00 PM",
@@ -90,7 +113,7 @@ const events = [
         targetAudience: "Aspiring innovators, student entrepreneurs, and anyone with a passion for developing solutions to real-world problems."
     },
     {
-        id: 7,
+        id: 8,
         title: "AI Connect",
         date: "February 22, 2024",
         time: "2:00 PM - 4:00 PM",
@@ -105,7 +128,7 @@ const events = [
         targetAudience: "Students and tech enthusiasts interested in the fundamentals and applications of Generative AI."
     },
     {
-        id: 8,
+        id: 9,
         title: "Inauguration Day",
         date: "February 6, 2024",
         time: "10:00 AM",

@@ -17,7 +17,7 @@ function Team2() {
   useEffect(() => {
     const lenis = new Lenis({
       // duration:4,
-      lerp: 0.05,
+      lerp: 0.1,
       smoothWheel: true,
     });
 
