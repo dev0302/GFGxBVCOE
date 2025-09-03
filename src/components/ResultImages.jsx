@@ -5,49 +5,49 @@ const ResultImages = () => {
   const [images] = useState([
     {
       id: 1,
-      url:"/result2.png",
+      url:"/result2.webp",
       title: "Social Media",
       description: ""
     },
     {
       id: 2,
-      url: "/result3.png",
+      url: "/result3.webp",
       title: "Technical",
       description: ""
     },
     {
       id: 3,
-      url: "/result4.png",
+      url: "/result4.webp",
       title: "Event Management",
       description: ""
     },
     {
       id: 4,
-      url: "/result5.png",
+      url: "/result5.webp",
       title: "Public Relation and Outreach",
       description: ""
     },
     {
       id: 5,
-      url: "/result6.png",
+      url: "/result6.webp",
       title: "Design",
       description: ""
     },
     {
       id: 6,
-      url: "/result7.png",
+      url: "/result7.webp",
       title: "Content and Documentation",
       description: ""
     },
     {
       id: 7,
-      url: "/result8.png",
+      url: "/result8.webp",
       title: "Photography and Videogrpahy",
       description: ""
     },
     {
       id: 8,
-      url: "/result9.png",
+      url: "/result9.webp",
       title: "Sponsorship and Marketing",
       description: ""
     }
