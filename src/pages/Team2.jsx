@@ -258,13 +258,8 @@ function Team2() {
 
       {/* Tabs + Content wrapped in a modern component card */}
       <div className="mt-12 w-10/12 max-w-6xl mx-auto">
-        <div className="relative rounded-2xl border border-gray-300/20 bg-gradient-to-b from-[#161625] to-[#1f1f32] backdrop-blur-md shadow-[0_10px_40px_rgba(0,0,0,0.35)] overflow-visible">
-          {/* soft cyan glowing border */}
-          <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-cyan-400/35 shadow-[0_0_60px_8px_rgba(34,211,238,0.18)]"></div>
-          {/* subtle top accent line */}
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent"></div>
-          {/* soft inner cyan glow */}
-          <div className="pointer-events-none absolute inset-2 sm:inset-3 rounded-[1.5rem] bg-[radial-gradient(ellipse_at_center,rgba(34,211,238,0.18)_0%,rgba(34,211,238,0.10)_30%,transparent_70%)] blur-xl opacity-80"></div>
+        <div className="relative rounded-2xl border-blue-400 border-2 border-opacity-15 bg-gradient-to-b from-[#1e1e33] to-[#1f1f32] backdrop-blur-md shadow-[0_10px_40px_rgba(0,0,0,0.35)] overflow-visible">
+          
 
           {/* Tabs: Core | Heads */}
           <div className="relative z-10 px-4 sm:px-6 pt-5 sm:pt-6 pb-3 flex justify-center">
