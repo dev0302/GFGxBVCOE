@@ -72,7 +72,7 @@ function Team2() {
 
     };
 
-  });
+  }, []);
 
 
 
@@ -83,6 +83,31 @@ function Team2() {
   const heroRef = useRef(null);
 
   const teamGridRef = useRef(null);
+
+  // Preload images (faculty + team) and reveal page only after ready
+  const [isPageReady, setIsPageReady] = useState(false);
+
+  useEffect(() => {
+    const imageUrls = [
+      FacultyIncharge,
+      ...teamData.map((member) => member.image).filter(Boolean),
+    ];
+
+    const loadImage = (src) => new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = src;
+    });
+
+    Promise.all(imageUrls.map(loadImage)).then(() => {
+      setIsPageReady(true);
+      // Ensure ScrollTrigger recalculates positions after content is visible
+      if (typeof ScrollTrigger !== 'undefined') {
+        setTimeout(() => ScrollTrigger.refresh(), 0);
+      }
+    });
+  }, []);
 
 
 
@@ -144,9 +169,17 @@ function Team2() {
 
 
 
+    <>
+    {!isPageReady && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center darkthemebg">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin"></div>
+          <p className="text-gray-300 font-nunito">Loading team…</p>
+        </div>
+      </div>
+    )}
 
-
-    <div ref={containerRef} className='w-full min-h-screen darkthemebg pt-32 overflow-hidden'>
+    <div ref={containerRef} className={`w-full min-h-screen darkthemebg pt-32 overflow-hidden ${isPageReady ? '' : 'opacity-0'}`}>
 
 
 
@@ -306,6 +339,7 @@ function Team2() {
       </div>
 
     </div>
+    </>
 
   );
 
