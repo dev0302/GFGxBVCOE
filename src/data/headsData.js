@@ -39,6 +39,19 @@ const headsData = [
         linkedinLink: "https://www.linkedin.com/in/dhruv-kapoor-3391b0358?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
     },
     {
+        name: "Saksham Chandela",
+        branch: "CSE",
+        year: "2nd",
+        position: "Photography Head",
+        p0: "Photography Head",
+        image: "/Saksham.webp",
+        p1: "No",
+        p2: "No",
+        email: "saksham101105@gmail.com",
+        instaLink: "https://www.instagram.com/dude_saksham?igsh=djZtbnMzNTBucHVy",
+        linkedinLink: "https://www.linkedin.com/in/saksham-chandela-48b983305?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+    },
+    {
         name: "Bharti",
         branch: "CSE",
         year: "2nd",
@@ -65,7 +78,20 @@ const headsData = [
         linkedinLink: "https://www.linkedin.com/in/rameshwar-7b8905292?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
     },
     {
-        name: "Shreyans",
+        name: "Dev",
+        branch: "CSE",
+        year: "2nd",
+        position: "Technical Head",
+        p0: "Technical Head",
+        image: "/Dev.webp",
+        p1: "Technical Executive",
+        p2: "",
+        email: "devmalik9953@gmail.com",
+        instaLink: "https://www.instagram.com/devmalik.0302/",
+        linkedinLink: "https://www.linkedin.com/in/dev-malik-976230311?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+    },
+    {
+        name: "Shreyans Kumar Singh",
         branch: "ECE",
         year: "2nd",
         position: "Design Head",
