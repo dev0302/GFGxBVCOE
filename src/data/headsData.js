@@ -65,7 +65,7 @@ const headsData = [
         linkedinLink: "https://www.linkedin.com/in/rameshwar-7b8905292?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
     },
     {
-        name: "Shreyans Kumar Singh",
+        name: "Shreyans",
         branch: "ECE",
         year: "2nd",
         position: "Design Head",
@@ -89,6 +89,19 @@ const headsData = [
         email: "pururajsingh76@gmail.com",
         instaLink: "https://www.instagram.com/pururajsinghrajput/",
         linkedinLink: "https://www.linkedin.com/in/pururaj-singh-9b91a22bb/"
+    },
+    {
+        name: "Radhika Trivedi",
+        branch: "ECE",
+        year: "2nd",
+        position: "Social Media & Promotion Head",
+        p0: "Head",
+        image: "/Radhika.webp",
+        p1: "",
+        p2: "",
+        email: "radhikatriv0712@gmail.com",
+        instaLink: "https://www.instagram.com/radhika_triv_07?igsh=dW9xb2o5Z3BjOXJv",
+        linkedinLink: "https://www.linkedin.com/in/radhika-trivedi-078703327?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
     },
     {
         name: "Krishna Bansal",
