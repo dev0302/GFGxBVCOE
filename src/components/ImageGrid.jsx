@@ -269,7 +269,7 @@ function ImageGrid() {
 
         <div className="elem my-grid-item" style={{ "--r": 10, "--c": 3 }}>
           <img
-            src="/gridimg19.webp"
+            src="/pwgatefft1.webp"
             alt="Image 1"
             className="w-full h-full object-cover rounded-lg"
           />
