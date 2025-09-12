@@ -65,6 +65,19 @@ const headsData = [
         linkedinLink: "https://www.linkedin.com/in/bharti-a86b8b36b?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
     },
     {
+        name: "Kanishka Bhatt",
+        branch: "ECE",
+        year: "3rd",
+        position: "EM Head",
+        p0: "EM Head",
+        image: "/Kanishka.webp", // <-- attach your image here in .webp format
+        p1: "Not any",
+        p2: "Not any",
+        email: "kanishkabhatt001010@gmail.com",
+        instaLink: "Not available",
+        linkedinLink: "https://www.linkedin.com/in/kanishka-bhatt-363ab3291?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+    },
+    {
         name: "Rameshwar",
         branch: "CSE",
         year: "3rd",
