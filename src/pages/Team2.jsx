@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
-import NewCard from './NewCard';
 import teamData from '../data/teamData';
+import NewCard from '../components/NewCard';
 import headsData from '../data/headsData';
 import FacultyIncharge from "../images/RachnaNarula.jpeg";
 import Lenis from "lenis";
@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -64,23 +65,23 @@ function Team2() {
 
     // 2. Staggered Team Card Animation
     // This makes the cards appear one after the other
-    const cards = teamGridRef.current.children;
-    gsap.fromTo(cards,
-      { opacity: 0, y: 40, scale: 0.95 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.8,
-        ease: "power2.out",
-        stagger: 0.15, // The magic property for the cascade effect
-        scrollTrigger: {
-          trigger: teamGridRef.current,
-          start: "top 80%",
+    // const cards = teamGridRef.current.children;
+    // gsap.fromTo(cards,
+    //   { opacity: 0, y: 40, scale: 0.95 },
+    //   {
+    //     opacity: 1,
+    //     y: 0,
+    //     scale: 1,
+    //     duration: 0.8,
+    //     ease: "power2.out",
+    //     stagger: 0.15, // The magic property for the cascade effect
+    //     scrollTrigger: {
+    //       trigger: teamGridRef.current,
+    //       start: "top 80%",
            
-        }
-      }
-    );
+    //     }
+    //   }
+    // );
 
   }, { scope: containerRef });
 
