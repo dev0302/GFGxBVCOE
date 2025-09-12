@@ -74,7 +74,7 @@ const headsData = [
         p1: "No",
         p2: "",
         email: "rameshwar.bvcoe092@gmail.com",
-        instaLink: "",
+        instaLink: "https://www.instagram.com/rebel_sibbu_0037?igsh=cXd2emwwc3hsaTI=",
         linkedinLink: "https://www.linkedin.com/in/rameshwar-7b8905292?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
     },
     {
@@ -91,7 +91,7 @@ const headsData = [
         linkedinLink: "https://www.linkedin.com/in/dev-malik-976230311?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
     },
     {
-        name: "Shreyans Kumar Singh",
+        name: "Shreyans",
         branch: "ECE",
         year: "2nd",
         position: "Design Head",
