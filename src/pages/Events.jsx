@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef, useState, useEffect } from "react";
-import EventModal from "./EventModal";
 import Lenis from "lenis";
 import events from "../data/eventData";
+import EventModal from "../components/EventModal";
 
 
 gsap.registerPlugin(ScrollTrigger);
