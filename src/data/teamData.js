@@ -46,8 +46,8 @@ const teamData = [
         name: "Kartik Bhattacharya",
         branch: "CSE",
         year: "3rd",
-        position: "Vice-Chairperson and Technical Lead",
-        p0: "Vice-Chairman and Technical Lead",
+        position: "Vice-Chairperson",
+        p0: "Vice-Chairperson",
         image: "/Kartik.webp",
         p1: "Technical Executive",
         p2: "",
@@ -63,7 +63,7 @@ const teamData = [
             },
             {
                 year: "2025",
-                role: "Vice-Chairperson and Technical Lead",
+                role: "Vice-Chairperson",
                 project: "Geeks for Geeks",
                 description: "College Chapter, BVCOE, New Delhi"
             },
@@ -80,6 +80,20 @@ const teamData = [
                 description: "College Chapter, BVCOE, New Delhi"
             }
         ]
+    },
+    {
+        name: "Siddhant Mahapatra",
+        branch: "IT",
+        year: "3rd",
+        position: "Tech Core",
+        p0: "Tech Core",
+        image: "/Siddhant.webp",
+        p1: "NA",
+        p2: "NA",
+        email: "siddhantofficialmax@gmail.com",
+        instaLink: "https://www.instagram.com/siddhazntx?igsh=MWE2emVxZ3MwczF5aw==",
+        linkedinLink: "https://www.linkedin.com/in/siddhantmahapatra23?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+        timeline: []
     },
     {
         name: "Piyush Kumar Singh",
