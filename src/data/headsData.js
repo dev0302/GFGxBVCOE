@@ -1,108 +1,5 @@
 const headsData = [
-  {
-    name: "Priyanshu Tiwari",
-    branch: "ECE",
-    year: "2nd",
-    position: "C &D Head",
-    p0: "C &D Head",
-    image: "/Priyanshu.webp",
-    p1: "Executive last year",
-    p2: "",
-    email: "priyanshutiwari1710@gmail.com",
-    instaLink: "https://www.instagram.com/priyanshu_btdb/",
-    linkedinLink: "https://www.linkedin.com/in/priyanshu-tiwari-8b79b5328"
-  },
-  {
-    name: "Niharika Arora",
-    branch: "CSE",
-    year: "2nd",
-    position: "Videography Head",
-    p0: "Videography Head",
-    image: "/Niharika.webp",
-    p1: "",
-    p2: "",
-    email: "Niharikaarora224@gmail.com",
-    instaLink: "@_nihar1ka_",
-    linkedinLink: "https://www.linkedin.com/in/niharika-arora-22n442"
-  },
-  {
-    name: "Dhruv Kapoor",
-    branch: "ECE",
-    year: "2nd",
-    position: "Videography and Editing Head",
-    p0: "Videography and Editing Head",
-    image: "/Dhruv.webp",
-    p1: "nil",
-    p2: "nil",
-    email: "kapoordhruv014@gmail.com",
-    instaLink: "@dhrruuvvv",
-    linkedinLink: "https://www.linkedin.com/in/dhruv-kapoor-3391b0358"
-  },
-  {
-    name: "Saksham Chandela",
-    branch: "CSE",
-    year: "2nd",
-    position: "Photography Head",
-    p0: "Photography Head",
-    image: "/Saksham.webp",
-    p1: "",
-    p2: "",
-    email: "sakshamchandela20@gmail.com",
-    instaLink: "https://www.instagram.com/saksham.chandela/",
-    linkedinLink: "https://www.linkedin.com/in/saksham-chandela"
-  },
-  {
-    name: "Bharti",
-    branch: "CSE",
-    year: "2nd",
-    position: "EM Head",
-    p0: "EM Head",
-    image: "/Bharti.webp",
-    p1: "Executive",
-    p2: "",
-    email: "bhartib.2109@gmail.com",
-    instaLink: "https://www.instagram.com/bharti.2831",
-    linkedinLink: "https://www.linkedin.com/in/bharti-a86b8b36b"
-  },
-  {
-    name: "Kanishka Bhatt",
-    branch: "CSE",
-    year: "2nd",
-    position: "EM Head",
-    p0: "EM Head",
-    image: "/Kanishka.webp",
-    p1: "",
-    p2: "",
-    email: "kanishkabhatt1605@gmail.com",
-    instaLink: "",
-    linkedinLink: "https://www.linkedin.com/in/kanishka-bhatt-245896311"
-  },
-  {
-    name: "Rameshwar",
-    branch: "CSE",
-    year: "3rd",
-    position: "Tech Head",
-    p0: "Tech Head",
-    image: "/Rameshwar.webp",
-    p1: "No",
-    p2: "",
-    email: "rameshwar.bvcoe092@gmail.com",
-    instaLink: "",
-    linkedinLink: "https://www.linkedin.com/in/rameshwar-7b8905292"
-  },
-  {
-    name: "Dev",
-    branch: "CSE",
-    year: "2nd",
-    position: "Technical Head",
-    p0: "Technical Head",
-    image: "/Dev.webp",
-    p1: "",
-    p2: "",
-    email: "devnigam1812@gmail.com",
-    instaLink: "https://www.instagram.com/_devnigam18",
-    linkedinLink: "https://www.linkedin.com/in/devnigam18"
-  },
+  // 🎨 Design & Creative
   {
     name: "Shreyans",
     branch: "ECE",
@@ -129,6 +26,105 @@ const headsData = [
     instaLink: "https://www.instagram.com/pururajsinghrajput/",
     linkedinLink: "https://www.linkedin.com/in/pururaj-singh-9b91a22bb/"
   },
+
+  // 🎥 Videography & Photography
+  {
+    name: "Niharika Arora",
+    branch: "CSE",
+    year: "2nd",
+    position: "Videography Head",
+    p0: "Videography Head",
+    image: "/Niharika.webp",
+    p1: "",
+    p2: "",
+    email: "Niharikaarora224@gmail.com",
+    instaLink: "https://www.instagram.com/_nihar1ka_/#",
+    linkedinLink: "https://www.linkedin.com/in/niharika-arora-22n442"
+  },
+  {
+    name: "Dhruv Kapoor",
+    branch: "ECE",
+    year: "2nd",
+    position: "Videography and Editing Head",
+    p0: "Videography and Editing Head",
+    image: "/Dhruv.webp",
+    p1: "nil",
+    p2: "nil",
+    email: "kapoordhruv014@gmail.com",
+    instaLink: "https://www.instagram.com/dhrruuvvv",
+    linkedinLink: "https://www.linkedin.com/in/dhruv-kapoor-3391b0358"
+  },
+  {
+    name: "Saksham Chandela",
+    branch: "CSE",
+    year: "2nd",
+    position: "Photography Head",
+    p0: "Photography Head",
+    image: "/Saksham.webp",
+    p1: "",
+    p2: "",
+    email: "sakshamchandela20@gmail.com",
+    instaLink: "https://www.instagram.com/saksham.chandela/",
+    linkedinLink: "https://www.linkedin.com/in/saksham-chandela"
+  },
+
+  // 🎪 Event Management
+  {
+    name: "Bharti",
+    branch: "CSE",
+    year: "2nd",
+    position: "EM Head",
+    p0: "EM Head",
+    image: "/Bharti.webp",
+    p1: "Executive",
+    p2: "",
+    email: "bhartib.2109@gmail.com",
+    instaLink: "https://www.instagram.com/bharti.2831",
+    linkedinLink: "https://www.linkedin.com/in/bharti-a86b8b36b"
+  },
+  {
+    name: "Kanishka Bhatt",
+    branch: "CSE",
+    year: "2nd",
+    position: "EM Head",
+    p0: "EM Head",
+    image: "/Kanishka.webp",
+    p1: "",
+    p2: "",
+    email: "kanishkabhatt1605@gmail.com",
+    instaLink: "",
+    linkedinLink: "https://www.linkedin.com/in/kanishka-bhatt-245896311"
+  },
+
+  // 💻 Tech
+  {
+    name: "Rameshwar",
+    branch: "CSE",
+    year: "3rd",
+    position: "Tech Head",
+    p0: "Tech Head",
+    image: "/Rameshwar.webp",
+    p1: "No",
+    p2: "",
+    email: "rameshwar.bvcoe092@gmail.com",
+    instaLink: "",
+    linkedinLink: "https://www.linkedin.com/in/rameshwar-7b8905292"
+  },
+  {
+    name: "Dev",
+    branch: "CSE",
+    year: "2nd",
+    position: "Technical Head",
+    p0: "Technical Head",
+    image: "/Dev.webp",
+    p1: "",
+    p2: "",
+    email: "devnigam1812@gmail.com",
+    instaLink: "https://www.instagram.com/_devnigam18",
+    linkedinLink: "https://www.linkedin.com/in/devnigam18"
+  },
+
+  // 📱 Social Media & Promotion
   {
     name: "Radhika Trivedi",
     branch: "ECE",
@@ -142,6 +138,23 @@ const headsData = [
     instaLink: "https://www.instagram.com/radhika_triv_07",
     linkedinLink: "https://www.linkedin.com/in/radhika-trivedi-078703327"
   },
+
+  // 💰 Marketing & Sponsorship
+  {
+    name: "Uneeb Hasan",
+    branch: "CSE",
+    year: "3rd",
+    position: "Marketing & Sponsorship Head",
+    p0: "Marketing & Sponsorship Head",
+    image: "/Uneeb.webp",
+    p1: "",
+    p2: "",
+    email: "uneebhasan18@gmail.com",
+    instaLink: "https://www.instagram.com/uneeb_hasan18",
+    linkedinLink: "https://www.linkedin.com/in/uneeb-hasan-424a97322/"
+  },
+
+  // 📢 PR & Outreach
   {
     name: "Krishna Bansal",
     branch: "CSE",
@@ -155,18 +168,20 @@ const headsData = [
     instaLink: "https://www.instagram.com/krishnaa.ww",
     linkedinLink: "https://www.linkedin.com/in/krishna-bansal-814252317/"
   },
+
+  // 📰 Content & Documentation
   {
-    name: "Uneeb Hasan",
-    branch: "CSE",
-    year: "3rd",
-    position: "Marketing & Sponsorship Head",
-    p0: "Marketing & Sponsorship Head",
-    image: "/Uneeb.webp",
-    p1: "",
+    name: "Priyanshu Tiwari",
+    branch: "ECE",
+    year: "2nd",
+    position: "C &D Head",
+    p0: "C &D Head",
+    image: "/Priyanshu.webp",
+    p1: "Executive last year",
     p2: "",
-    email: "uneebhasan18@gmail.com",
-    instaLink: "https://www.instagram.com/uneeb_hasan18",
-    linkedinLink: "https://www.linkedin.com/in/uneeb-hasan-424a97322/"
+    email: "priyanshutiwari1710@gmail.com",
+    instaLink: "https://www.instagram.com/priyanshu_btdb/",
+    linkedinLink: "https://www.linkedin.com/in/priyanshu-tiwari-8b79b5328"
   }
 ];
 
