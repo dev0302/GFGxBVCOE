@@ -50,6 +50,7 @@ function NewCard({ person }) {
             <div className="w-full h-[70%] overflow-hidden rounded-t-3xl">
               <img
                 src={image}
+                loading="eager"
                 alt={name}
                 className="w-full h-full object-cover object-top rounded-3xl transition-transform duration-300 group-hover:scale-105 hover:rounded-3xl"
               />
