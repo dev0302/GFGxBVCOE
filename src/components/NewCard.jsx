@@ -20,11 +20,11 @@ function NewCard({ person }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    // Delay glow until card has mounted
-    const t = setTimeout(() => setLoaded(true), 200);
-    return () => clearTimeout(t);
-  }, []);
+  // useEffect(() => {
+  //   // Delay glow until card has mounted
+  //   const t = setTimeout(() => setLoaded(true), 200);
+  //   return () => clearTimeout(t);
+  // }, []);
 
   return (
     <>
