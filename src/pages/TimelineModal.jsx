@@ -1,6 +1,5 @@
 // TimelineModal.jsx
 import React, { useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 
 const TimelineModal = ({ person, onClose }) => {
@@ -19,17 +18,8 @@ const TimelineModal = ({ person, onClose }) => {
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
-    // Close on Escape key
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        handleClose();
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-
     return () => {
       document.body.style.overflow = prevOverflow || '';
-      window.removeEventListener('keydown', onKeyDown);
     };
   }, []);
 
@@ -49,7 +39,7 @@ const TimelineModal = ({ person, onClose }) => {
 
   if (!person) return null;
 
-  return createPortal(
+  return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-md"
       onClick={handleClose}
@@ -106,8 +96,7 @@ const TimelineModal = ({ person, onClose }) => {
           ✕
         </button>
       </div>
-    </div>,
-    document.body
+    </div>
   );
 };
 
