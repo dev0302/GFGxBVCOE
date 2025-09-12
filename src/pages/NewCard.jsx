@@ -28,8 +28,9 @@ function NewCard({ person }) {
 
   return (
     <>
+    {/* glowing-container */}
       <div className="flex justify-center items-center font-nunito text-white">
-        <div className={`glowing-container ${loaded ? "loaded" : ""} w-[280px] h-[420px]`}>
+        <div className={` ${loaded ? "loaded" : ""} w-[280px] h-[420px]`}> 
           <div
             className="
               p-2
