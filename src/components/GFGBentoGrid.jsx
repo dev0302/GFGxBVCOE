@@ -284,7 +284,7 @@ const GFGBentoGrid = () => {
               ref={(el) => (cardsRef.current[5] = el)}
               className="card hero-card relative overflow-hidden rounded-2xl md:col-span-2 md:row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
               style={{
-                backgroundImage: `url('/FreshersMeet7.webp')`,
+                backgroundImage: `url('/pwgatefft.webp')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 maxHeight: "300px",
