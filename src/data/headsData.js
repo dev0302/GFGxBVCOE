@@ -11,7 +11,20 @@ const headsData = [
     p2: "",
     email: "mshrayans@gmail.com",
     instaLink: "https://www.instagram.com/shrayans.02/",
-    linkedinLink: "https://www.linkedin.com/in/shrayans-kumar-singh-2a8293325/"
+    linkedinLink: "https://www.linkedin.com/in/shreyans-kumar-singh-2a8293325/",
+    timeline: [
+      {
+        year: "2025",
+        role: "Design Head, GFG BVCOE",
+        description:
+          "Worked on multiple designs using Canva & Figma. Basics of C++, participated in Codeforces contests. Learning web dev and created projects like a To-Do List."
+      },
+      {
+        year: "2024",
+        role: "Executive, GFG BVCOE",
+        description: "Explored various fields, practiced C language."
+      }
+    ]
   },
   {
     name: "Pururaj Singh",
@@ -52,7 +65,24 @@ const headsData = [
     p2: "nil",
     email: "kapoordhruv014@gmail.com",
     instaLink: "https://www.instagram.com/dhrruuvvv",
-    linkedinLink: "https://www.linkedin.com/in/dhruv-kapoor-3391b0358"
+    linkedinLink: "https://www.linkedin.com/in/dhruv-kapoor-3391b0358",
+    timeline: [
+      {
+        year: "2025",
+        role: "Videography & Editing Head, GFG BVCOE",
+        description: "Handled video editing and production for society events."
+      },
+      {
+        year: "2025",
+        role: "VE Executive, EduMinerva",
+        description: "Contributed to content production and editing."
+      },
+      {
+        year: "2024",
+        role: "Executive, BVP-OPTICA",
+        description: "Worked in team execution and video roles."
+      }
+    ]
   },
   {
     name: "Saksham Chandela",
@@ -80,7 +110,19 @@ const headsData = [
     p2: "",
     email: "bhartib.2109@gmail.com",
     instaLink: "https://www.instagram.com/bharti.2831",
-    linkedinLink: "https://www.linkedin.com/in/bharti-a86b8b36b"
+    linkedinLink: "https://www.linkedin.com/in/bharti-a86b8b36b",
+    timeline: [
+      {
+        year: "2025",
+        role: "EM Head, GFG BVCOE",
+        description: "Managing event operations and team execution."
+      },
+      {
+        year: "2024",
+        role: "Executive, GFG BVCOE",
+        description: "Assisted in event coordination."
+      }
+    ]
   },
   {
     name: "Kanishka Bhatt",
@@ -92,8 +134,45 @@ const headsData = [
     p1: "",
     p2: "",
     email: "kanishkabhatt1605@gmail.com",
-    instaLink: "",
-    linkedinLink: "https://www.linkedin.com/in/kanishka-bhatt-245896311"
+    instaLink: "insta_acc_hai_hi_nhi",
+    linkedinLink: "https://www.linkedin.com/in/kanishka-bhatt-245896311",
+    timeline: [
+      {
+        year: "2025",
+        role: "EM Head, GFG BVCOE",
+        description: "Managed EM operations for GFG student chapter."
+      },
+      {
+        year: "2025",
+        role: "Chairperson, BVPINC BVCOE",
+        description: "Led student chapter activities."
+      },
+      {
+        year: "2025",
+        role: "Corporal, NCC GGSIPU Main Campus",
+        description: "Active cadet, leadership & discipline training."
+      },
+      {
+        year: "2024",
+        role: "EM Executive, Techinnovate BVCOE",
+        description: "Helped in execution of Techinnovate events."
+      },
+      {
+        year: "2024",
+        role: "EM Executive, BVPINC BVCOE",
+        description: "Supported event coordination in BVPINC."
+      },
+      {
+        year: "2023",
+        role: "SM & Publicity Volunteer, GDSC BVCOE",
+        description: "Volunteered for GDSC campaigns."
+      },
+      {
+        year: "2023",
+        role: "Women's Department Volunteer, Horizon BVCOE",
+        description: "Assisted in Horizon events."
+      }
+    ]
   },
 
   // 💻 Tech
@@ -107,7 +186,7 @@ const headsData = [
     p1: "No",
     p2: "",
     email: "rameshwar.bvcoe092@gmail.com",
-    instaLink: "",
+    instaLink: "https://www.instagram.com/rebel_sibbu_0037?igsh=cXd2emwwc3hsaTI=",
     linkedinLink: "https://www.linkedin.com/in/rameshwar-7b8905292"
   },
   {
@@ -166,7 +245,19 @@ const headsData = [
     p2: "Marketing Executive",
     email: "bansalkrishnaa835@gmail.com",
     instaLink: "https://www.instagram.com/krishnaa.ww",
-    linkedinLink: "https://www.linkedin.com/in/krishna-bansal-814252317/"
+    linkedinLink: "https://www.linkedin.com/in/krishna-bansal-814252317/",
+    timeline: [
+      {
+        year: "2025",
+        role: "PR & Outreach Head, GFG BVCOE",
+        description: "Managing outreach and public relations."
+      },
+      {
+        year: "2024",
+        role: "Marketing Executive, GFG BVCOE",
+        description: "Worked in marketing & promotional activities."
+      }
+    ]
   },
 
   // 📰 Content & Documentation
@@ -182,6 +273,19 @@ const headsData = [
     email: "priyanshutiwari1710@gmail.com",
     instaLink: "https://www.instagram.com/priyanshu_btdb/",
     linkedinLink: "https://www.linkedin.com/in/priyanshu-tiwari-8b79b5328"
+  },
+  {
+    name: "Lalit Goswami",
+    branch: "CSE",
+    year: "3rd",
+    position: "Content and Documentation Head",
+    p0: "CnD Head",
+    image: "/Lalit.webp",
+    p1: "Sponsorship Executive",
+    p2: "No",
+    email: "lalitggoswami360@gmail.com",
+    instaLink: "https://www.instagram.com/_lalit_0000/",
+    linkedinLink: "https://www.linkedin.com/in/lalit-goswami-8811a01b2/"
   }
 ];
 

@@ -20,19 +20,22 @@ function NewCard({ person }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  // useEffect(() => {
-  //   // Delay glow until card has mounted
-  //   const t = setTimeout(() => setLoaded(true), 200);
-  //   return () => clearTimeout(t);
-  // }, []);
+  useEffect(() => {
+    // Delay glow until card has mounted
+    const t = setTimeout(() => setLoaded(true), 200);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <>
-    {/* glowing-container */}
       <div className="flex justify-center items-center font-nunito text-white">
-        <div className={` ${loaded ? "loaded" : ""} w-[280px] h-[420px]`}> 
+        <div className={`relative ${loaded ? "loaded" : ""} w-[280px] h-[420px]`}> 
+          {/* Glowing border effect */}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-3xl opacity-20 blur-sm transition-opacity duration-300 group-hover:opacity-40"></div>
+          
           <div
             className="
+              relative
               p-2
               group
               w-full h-full 
@@ -45,6 +48,7 @@ function NewCard({ person }) {
               transition-all duration-300
               hover:scale-[1.03] 
               hover:shadow-xl hover:shadow-cyan-500/20
+              z-10
             "
           >
             <div className="w-full h-[70%] overflow-hidden rounded-t-3xl">
