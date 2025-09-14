@@ -254,7 +254,7 @@ const GFGBentoGrid = () => {
                 backgroundImage: `url('/gridimg18.webp')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
-                minHeight: "180px",
+                minHeight: "240px",
               }}
             />
 
@@ -265,7 +265,33 @@ const GFGBentoGrid = () => {
                 backgroundImage: `url('/gridimg3.webp')`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
-                minHeight: "300px",
+                minHeight: "260px",
+              }}
+            />
+            <div
+              ref={(el) => (cardsRef.current[6] = el)}
+              className="card hero-card relative overflow-hidden rounded-2xl md:col-span-2 md:row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
+              style={{
+                backgroundImage: `url('teampic_2.webp')`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                maxHeight: "300px",
+                minHeight: "220px",
+                // maxWidth: "440px",
+                // backgroundColor: "rgba(255, 255, 255, 0.03)",
+              }}
+            />
+
+            <div
+              ref={(el) => (cardsRef.current[7] = el)}
+              className="card tall-card relative overflow-hidden rounded-2xl md:row-span-2 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group"
+              style={{
+                backgroundImage: `url('/teampic_1.webp')`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                minHeight: "220px",
+                // maxHeight: "300px",
+                // width: "400px"
               }}
             />
 
@@ -277,6 +303,7 @@ const GFGBentoGrid = () => {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 maxHeight: "300px",
+                minHeight: "260px",
               }}
             />
 
@@ -288,10 +315,14 @@ const GFGBentoGrid = () => {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 maxHeight: "300px",
-                maxWidth: "480px",
+                minHeight: "260px",
+                // maxWidth: "480px",
                 // backgroundColor: "rgba(255, 255, 255, 0.03)",
               }}
             />
+
+            
+            
 {/* 
             <div
               ref={(el) => (cardsRef.current[5] = el)}

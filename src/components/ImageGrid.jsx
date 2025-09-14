@@ -50,7 +50,7 @@ function ImageGrid() {
             scrollTrigger: {
               trigger: image,
                
-              start: isMobile ? "top 15%" : "top 20%",
+              start: isMobile ? "top 9%" : "top 20%",
               end: "bottom top",
               scrub: true,
                
@@ -131,8 +131,9 @@ function ImageGrid() {
       </div>
 
       <div className="grid grid-cols-3 md:grid-cols-8 lg:grid-cols-8 grid-rows-6 gap-2 md:gap-2 mobile-grid relative z-0">
+
         {/* Your image grid items here */}
-        <div className="elem my-grid-item" style={{ "--r": 1, "--c": 3 }}>
+        <div className="elem my-grid-item" style={{ "--r": 1, "--c": 2 }}>
           <img
             src="/gridimg1.webp"
             alt="Image 1"
@@ -146,6 +147,13 @@ function ImageGrid() {
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
+        <div className="elem my-grid-item" style={{ "--r": 1, "--c": 5 }}>
+          <img
+            src="/pwgatefft5.webp"
+            alt="Image 2"
+            className="w-full h-full object-cover rounded-lg"
+          />
+        </div>
 
         <div className="elem my-grid-item" style={{ "--r": 2, "--c": 1 }}>
           <img
@@ -154,7 +162,7 @@ function ImageGrid() {
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
-        <div className="elem my-grid-item" style={{ "--r": 2, "--c": 6 }}>
+        <div className="elem my-grid-item" style={{ "--r": 2, "--c": 3 }}>
           <img
             src="/gridimg4.webp"
             alt="Image 4"
@@ -162,7 +170,7 @@ function ImageGrid() {
           />
         </div>
 
-        <div className="elem my-grid-item" style={{ "--r": 3, "--c": 2 }}>
+        <div className="elem my-grid-item" style={{ "--r": 3, "--c": 7 }}>
           <img
             src="/gridimg5.webp"
             alt="Image 5"
@@ -229,7 +237,7 @@ function ImageGrid() {
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
-        <div className="elem my-grid-item" style={{ "--r": 7, "--c": 5 }}>
+        <div className="elem my-grid-item" style={{ "--r": 7, "--c": 4 }}>
           <img
             src="/gridimg14.webp"
             alt="Image 5"
@@ -281,6 +289,41 @@ function ImageGrid() {
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
+
+        <div className="elem my-grid-item" style={{ "--r": 7, "--c": 6 }}>
+          <img
+            src="/teampic_1.webp"
+            alt="Image 2"
+            className="w-full h-full object-cover rounded-lg"
+          />
+        </div>
+
+        <div className="elem my-grid-item" style={{ "--r": 11, "--c": 2 }}>
+          <img
+            src="/corepic_1.webp"
+            alt="Image 2"
+            className="w-full h-full object-cover rounded-lg"
+          />
+        </div>
+
+        <div className="elem my-grid-item" style={{ "--r": 11, "--c": 5 }}>
+          <img
+            src="/FreshersMeet7.webp"
+            alt="Image 2"
+            className="w-full h-full object-cover rounded-lg"
+          />
+        </div>
+
+        <div className="elem my-grid-item" style={{ "--r": 11, "--c": 8 }}>
+          <img
+            src="/FreshersMeet8.webp"
+            alt="Image 2"
+            className="w-full h-full object-cover rounded-lg"
+          />
+        </div>
+
+
+
       </div>
     </div>
   );
