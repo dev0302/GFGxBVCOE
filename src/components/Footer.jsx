@@ -14,7 +14,7 @@ const Footer = () => {
     <section 
       className="relative text-[#cbd5e1] font-inter px-4 pt-12 pb-10 font-sans overflow-hidden"
       style={{
-        backgroundImage: `url(${footerBg})`,
+        backgroundImage: `url('/corepic_1.webp')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -22,7 +22,7 @@ const Footer = () => {
       }}
     >
       {/* Dark overlay for better text contrast */}
-      <div className="absolute inset-0 bg-[#013220]/70 backdrop-blur-sm overflow-hidden"></div>
+      <div className="absolute inset-0 bg-[#161629]/85 backdrop-blur-0 md:backdrop-blur-sm overflow-hidden"></div>
 
       <footer className="max-w-[1200px] mx-auto relative z-10">
         <div className="flex flex-wrap justify-between gap-12 md:gap-16">
