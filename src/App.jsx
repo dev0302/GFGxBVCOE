@@ -10,6 +10,9 @@ import Team2 from "./pages/Team2"
 import GFGBentoGrid from "./components/GFGBentoGrid";
 import Timer from "./pages/Timer"
 import ResultPage from "./pages/ResultPage"
+import Quiz from "./pages/Quiz"
+import Leaderboard from "./pages/Leaderboard"
+import QuizResult from "./pages/QuizResult"
 
 
 
@@ -30,6 +33,9 @@ function App() {
         <Route path="/bentogrid" element={<GFGBentoGrid />} />
         <Route path="/timer" element={<ResultPage />} />
         <Route path="/results" element={<ResultPage />} />
+        <Route path="/quiz" element={<Quiz />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/quiz/result" element={<QuizResult />} />
       </Routes>
     </div>
   )
