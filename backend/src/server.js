@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
 import Team from './models/Team.js';
+import Settings from './models/Settings.js';
 import Submission from './models/Submission.js';
 import { QUESTIONS } from './questions.js';
 
@@ -33,6 +34,22 @@ mongoose
   });
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
+// global settings endpoints
+app.get('/api/settings', async (_req, res) => {
+  const s = await Settings.findOne({ key: 'global' }).lean();
+  res.json({ leaderboardEnabled: !!s?.leaderboardEnabled });
+});
+
+app.post('/api/settings/leaderboard', async (req, res) => {
+  const { enabled } = req.body || {};
+  if (typeof enabled !== 'boolean') return res.status(400).json({ error: 'enabled boolean required' });
+  const updated = await Settings.findOneAndUpdate(
+    { key: 'global' },
+    { $set: { leaderboardEnabled: enabled } },
+    { upsert: true, new: true }
+  ).lean();
+  res.json({ leaderboardEnabled: !!updated.leaderboardEnabled });
+});
 
 app.get('/api/health/db', (req, res) => {
   const state = mongoose.connection.readyState; // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
