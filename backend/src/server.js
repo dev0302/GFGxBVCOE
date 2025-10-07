@@ -11,10 +11,45 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: (process.env.CORS_ORIGIN?.split(',')) || ['http://localhost:5173'] }));
+// Simple request logger
+app.use((req, _res, next) => { console.log(`${req.method} ${req.url}`); next(); });
 
-mongoose.connect(process.env.MONGO_URI, { dbName: process.env.MONGO_DB || 'gfgquiz' });
+// Robust Mongo connection with clear logging
+const mongoUri = process.env.MONGO_URI;
+if (!mongoUri) {
+  console.error('Missing MONGO_URI env var. Set it to your MongoDB connection string.');
+  process.exit(1);
+}
+
+mongoose
+  .connect(mongoUri, {
+    dbName: process.env.MONGO_DB || 'gfgquiz',
+    serverSelectionTimeoutMS: 10000,
+  })
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch((err) => {
+    console.error('❌ MongoDB connection error:', err?.message || err);
+    process.exit(1);
+  });
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
+
+app.get('/api/health/db', (req, res) => {
+  const state = mongoose.connection.readyState; // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+  res.json({ mongoState: state });
+});
+
+// 404 handler for unknown routes
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not Found', path: req.path });
+});
+
+// Global error handler to avoid blank responses
+// eslint-disable-next-line no-unused-vars
+app.use((err, _req, res, _next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal Server Error', message: err?.message });
+});
 
 app.post('/api/auth/team/verify', async (req, res) => {
   const { teamId } = req.body || {};
