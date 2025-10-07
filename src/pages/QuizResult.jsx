@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useFeatureFlags } from "../context/FeatureFlags.jsx";
 
 function fmt(ms) {
   const total = Math.floor((ms || 0) / 1000);
@@ -11,6 +12,7 @@ function QuizResult() {
   const navigate = useNavigate();
   const { state } = useLocation();
   const data = state || {};
+  const { leaderboardEnabled } = useFeatureFlags();
 
   return (
     <div className="pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto text-white">
@@ -58,7 +60,13 @@ function QuizResult() {
             <div className="font-semibold text-gray-300">{data.unansweredCount ?? 0}</div>
           </div>
         </div>
-        {/* Post-submit actions hidden per requirements */}
+        <div className="mt-10 flex flex-wrap gap-4 justify-center">
+          <button onClick={() => navigate('/')} className="py-3 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-xl hover:shadow-green-500/40">Home</button>
+          <button onClick={() => navigate('/team')} className="py-3 px-6 bg-white/10 border border-white/20 text-white font-semibold rounded-full hover:bg-white/15 transition-all">Team</button>
+          {leaderboardEnabled && (
+            <button onClick={() => navigate('/leaderboard')} className="py-3 px-6 bg-white/10 border border-white/20 text-white font-semibold rounded-full hover:bg-white/15 transition-all">View Leaderboard</button>
+          )}
+        </div>
       </div>
     </div>
   );

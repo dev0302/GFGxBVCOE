@@ -32,4 +32,20 @@ export async function getLeaderboard() {
   return res.json(); // { entries }
 }
 
+export async function getSettings() {
+  const res = await fetch(`${BASE}/api/settings`);
+  if (!res.ok) throw new Error('Failed to fetch settings');
+  return res.json(); // { leaderboardEnabled }
+}
+
+export async function setLeaderboardEnabled(enabled) {
+  const res = await fetch(`${BASE}/api/settings/leaderboard`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled })
+  });
+  if (!res.ok) throw new Error('Failed to update settings');
+  return res.json(); // { leaderboardEnabled }
+}
+
 

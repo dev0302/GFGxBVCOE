@@ -7,11 +7,13 @@ import { useRef, useState, useEffect } from "react";
 import Footer from "../components/Footer";
 import ImageGrid from "../components/ImageGrid";
 import Lenis from "lenis";
+import { useFeatureFlags } from "../context/FeatureFlags.jsx";
 
 
 gsap.registerPlugin(ScrollTrigger);
 
 function Home() {
+  const { leaderboardEnabled } = useFeatureFlags();
 
   useEffect(() => {
   const lenis = new Lenis({ lerp: 0.05, smoothWheel: true });
@@ -162,6 +164,14 @@ function Home() {
             >
               About Us
             </button>
+            {leaderboardEnabled && (
+              <button
+                onClick={() => navigate('/leaderboard')}
+                className="px-8 py-4 bg-white/10 border border-white/20 text-white font-semibold rounded-full hover:bg-white/15 transition-all"
+              >
+                View Leaderboard
+              </button>
+            )}
           </div>
 
           {/* Stats */}
