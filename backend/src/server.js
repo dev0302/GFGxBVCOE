@@ -39,24 +39,41 @@ app.get('/api/health/db', (req, res) => {
   res.json({ mongoState: state });
 });
 
-// 404 handler for unknown routes
-app.use((req, res) => {
-  res.status(404).json({ error: 'Not Found', path: req.path });
-});
-
-// Global error handler to avoid blank responses
-// eslint-disable-next-line no-unused-vars
-app.use((err, _req, res, _next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Internal Server Error', message: err?.message });
-});
-
+// primary verify route
 app.post('/api/auth/team/verify', async (req, res) => {
+  console.log("verifyiiiiiiiiiiiiiiiiiing");
   const { teamId } = req.body || {};
   if (!teamId) return res.status(400).json({ error: 'teamId required' });
-  const team = await Team.findOne({ teamId }).lean();
-  if (!team) return res.status(404).json({ error: 'Team not found' });
-  res.json({ teamId: team.teamId, teamName: team.teamName, teamLead: team.teamLead });
+  try {
+    const normalizedTeamId = String(teamId).trim();
+    const alreadySubmitted = await Submission.findOne({ teamId: normalizedTeamId }).lean();
+    if (alreadySubmitted) {
+      return res.status(409).json({ error: 'This team has already submitted the quiz.' });
+    }
+    const team = await Team.findOne({ teamId: normalizedTeamId }).lean();
+    if (!team) return res.status(404).json({ error: 'Team not found' });
+    return res.json({ teamId: team.teamId, teamName: team.teamName, teamLead: team.teamLead });
+  } catch (e) {
+    return res.status(500).json({ error: 'Verification failed' });
+  }
+});
+
+// compatibility alias for misspelled path
+app.post(['/api/auth/teamer/verify', '/api/auth/team/validate'], async (req, res) => {
+  const { teamId } = req.body || {};
+  if (!teamId) return res.status(400).json({ error: 'teamId required' });
+  try {
+    const normalizedTeamId = String(teamId).trim();
+    const alreadySubmitted = await Submission.findOne({ teamId: normalizedTeamId }).lean();
+    if (alreadySubmitted) {
+      return res.status(409).json({ error: 'This team has already submitted the quiz.' });
+    }
+    const team = await Team.findOne({ teamId: normalizedTeamId }).lean();
+    if (!team) return res.status(404).json({ error: 'Team not found' });
+    return res.json({ teamId: team.teamId, teamName: team.teamName, teamLead: team.teamLead });
+  } catch (e) {
+    return res.status(500).json({ error: 'Verification failed' });
+  }
 });
 
 app.get('/api/quiz/questions', (req, res) => {
@@ -64,19 +81,40 @@ app.get('/api/quiz/questions', (req, res) => {
 });
 
 function computeScore(serverQuestions, answers) {
-  let score = 0;
-  for (let i = 0; i < serverQuestions.length; i++) {
-    if (answers?.[i] === serverQuestions[i].answerIndex) score++;
-  }
-  return score;
-}
-
-function computePoints(serverQuestions, answers, perCorrect = 4) {
+  // Returns number of correct answers (for compatibility)
   let correct = 0;
   for (let i = 0; i < serverQuestions.length; i++) {
     if (answers?.[i] === serverQuestions[i].answerIndex) correct++;
   }
-  return { points: correct * perCorrect, correctCount: correct };
+  return correct;
+}
+
+function computePoints(
+  serverQuestions,
+  answers,
+  perCorrect = 4,
+  perWrong = -1,
+  perUnanswered = 0
+) {
+  let points = 0;
+  let correctCount = 0;
+  let wrongCount = 0;
+  let unansweredCount = 0;
+  for (let i = 0; i < serverQuestions.length; i++) {
+    const given = answers?.[i];
+    const correctIndex = serverQuestions[i].answerIndex;
+    if (given == null) {
+      points += perUnanswered;
+      unansweredCount += 1;
+    } else if (given === correctIndex) {
+      points += perCorrect;
+      correctCount += 1;
+    } else {
+      points += perWrong;
+      wrongCount += 1;
+    }
+  }
+  return { points, correctCount, wrongCount, unansweredCount };
 }
 
 app.post('/api/quiz/submit', async (req, res) => {
@@ -84,19 +122,20 @@ app.post('/api/quiz/submit', async (req, res) => {
   if (!teamId || !Array.isArray(answers) || typeof timeMs !== 'number') {
     return res.status(400).json({ error: 'Invalid payload' });
   }
-  const team = await Team.findOne({ teamId }).lean();
+  const normalizedTeamId = String(teamId).trim();
+  const team = await Team.findOne({ teamId: normalizedTeamId }).lean();
   if (!team) return res.status(404).json({ error: 'Team not found' });
 
-  const score = computeScore(QUESTIONS, answers);
-  const { points, correctCount } = computePoints(QUESTIONS, answers);
-  await Submission.create({ teamId, score, timeMs, points, correctCount });
+  const { points, correctCount, wrongCount, unansweredCount } = computePoints(QUESTIONS, answers);
+  const score = points; // unify score with points
+  await Submission.create({ teamId: normalizedTeamId, score, timeMs, correctCount });
 
-  res.json({ score, timeMs, teamId, teamName: team.teamName, teamLead: team.teamLead, points, correctCount });
+  res.json({ score, timeMs, teamId, teamName: team.teamName, teamLead: team.teamLead, correctCount, wrongCount, unansweredCount });
 });
 
 app.get('/api/leaderboard', async (req, res) => {
   const latest = await Submission.aggregate([
-    { $sort: { score: -1, timeMs: 1, submittedAt: 1 } },
+    { $sort: { score: -1, timeMs: 1 } },
     { $group: { _id: '$teamId', teamId: { $first: '$teamId' }, score: { $first: '$score' }, timeMs: { $first: '$timeMs' } } },
     { $sort: { score: -1, timeMs: 1 } },
     { $limit: 200 }
@@ -111,11 +150,23 @@ app.get('/api/leaderboard', async (req, res) => {
     teamId: r.teamId,
     teamName: teamMap.get(r.teamId)?.teamName || '',
     teamLead: teamMap.get(r.teamId)?.teamLead || '',
-    score: r.score,
+    points: r.score, // expose as points on leaderboard
     timeMs: r.timeMs
   }));
 
   res.json({ entries });
+});
+
+// 404 handler for unknown routes (MUST be after all routes)
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not Found', path: req.path });
+});
+
+// Global error handler to avoid blank responses (MUST be last)
+// eslint-disable-next-line no-unused-vars
+app.use((err, _req, res, _next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal Server Error', message: err?.message });
 });
 
 const port = process.env.PORT || 8080;

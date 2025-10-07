@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { QUIZ_META } from "../data/quizQuestions";
 import { getLeaderboard } from "../services/api";
 
 function Leaderboard() {
@@ -25,7 +24,7 @@ function Leaderboard() {
     );
   }, [entries, query]);
 
-  const scoreMax = QUIZ_META?.totalQuestions ?? 15;
+  // We display absolute points only (no "/max" formatting)
   const fmt = (ms) => {
     const total = Math.floor((ms || 0) / 1000);
     const mm = String(Math.floor(total / 60)).padStart(2, "0");
@@ -50,7 +49,7 @@ function Leaderboard() {
               <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 via-green-300 to-teal-200">Leaderboard</span>
               </h1>
-              <p className="text-gray-300 mt-2">Top scores for the Tech Quiz • out of {scoreMax}</p>
+              <p className="text-gray-300 mt-2">Top points for the Tech Quiz</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -109,7 +108,7 @@ function Leaderboard() {
               ) : (
                 filtered.map((row) => {
                   const medal = medalFor(row.rank);
-                  const pct = Math.round((row.score / scoreMax) * 100);
+                // percentage bar removed; we only show absolute points
                   return (
                     <tr key={row.rank} className="border-t border-gray-800 group hover:bg-[#0f172a]/60 transition-colors">
                       <td className="px-6 py-4 align-middle">
@@ -140,12 +139,7 @@ function Leaderboard() {
                         </span>
                       </td>
                   <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="text-emerald-400 font-semibold min-w-[64px]">{row.score}/{scoreMax}</div>
-                          <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
-                            <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400" style={{ width: `${pct}%` }} />
-                          </div>
-                        </div>
+                        <div className="text-emerald-400 font-semibold min-w-[64px]">{row.points}</div>
                       </td>
                   <td className="px-6 py-4 text-gray-300">{fmt(row.timeMs)}</td>
                     </tr>
@@ -173,7 +167,7 @@ function Leaderboard() {
         ) : (
           filtered.map((row) => {
             const medal = medalFor(row.rank);
-            const pct = Math.round((row.score / scoreMax) * 100);
+            // percentage bar removed; we only show absolute points
             return (
               <div key={row.rank} className="rounded-2xl p-4 bg-[#0b1220]/60 border border-gray-800 backdrop-blur">
                 <div className="flex items-center justify-between">
@@ -185,7 +179,7 @@ function Leaderboard() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-emerald-400 font-semibold">{row.score}/{scoreMax}</div>
+                    <div className="text-emerald-400 font-semibold">{row.points}</div>
                     <div className="text-xs text-gray-400">{fmt(row.timeMs)}</div>
                   </div>
                 </div>
@@ -193,9 +187,7 @@ function Leaderboard() {
                   <span className="w-2 h-2 rounded-full bg-emerald-400" />
                   {row.teamLead}
                 </div>
-                <div className="mt-3 h-2 bg-gray-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400" style={{ width: `${pct}%` }} />
-                </div>
+                {/* Progress bar removed */}
               </div>
             );
           })
