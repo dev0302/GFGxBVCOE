@@ -8,7 +8,7 @@ export const QUESTIONS = [
   {
     id: 2,
     question: "In BGMI, if your gun has no ammo, that's like",
-    options: ["Empty array", "Null pointer exception", "Stack overflow.", "Deadlock"],
+    options: ["Empty array", "Null pointer exception", "Stack overflow", "Deadlock"],
     answerIndex: 0,
   },
   {
