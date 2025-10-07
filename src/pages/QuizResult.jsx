@@ -35,23 +35,30 @@ function QuizResult() {
           </div>
         </div>
         <div className="mt-6 bg-white/5 border border-white/10 rounded-xl p-4">
-          <div className="text-sm text-gray-400">Score</div>
+          <div className="text-sm text-gray-400">Score (correct answers)</div>
           <div className="text-2xl font-extrabold text-emerald-400">{data.score}</div>
         </div>
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-            <div className="text-sm text-gray-400">Correct Answers</div>
-            <div className="font-semibold">{data.correctCount}</div>
+            <div className="text-sm text-gray-400">Correct Answers (+4)</div>
+            <div className="font-semibold text-emerald-300">{data.correctCount}</div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-            <div className="text-sm text-gray-400">Points</div>
+            <div className="text-sm text-gray-400">Points (4/-1/0)</div>
             <div className="font-semibold text-emerald-300">{data.points}</div>
           </div>
         </div>
-        <div className="mt-8 flex gap-4">
-          <button onClick={() => navigate('/leaderboard')} className="py-3 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-xl hover:shadow-green-500/40">View Leaderboard</button>
-          <button onClick={() => navigate('/quiz')} className="py-3 px-6 bg-white/10 border border-white/20 text-white font-semibold rounded-full hover:bg-white/15 transition-all">Retake</button>
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+            <div className="text-sm text-gray-400">Wrong Answers (-1)</div>
+            <div className="font-semibold text-red-300">{data.wrongCount ?? 0}</div>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+            <div className="text-sm text-gray-400">Unanswered (0)</div>
+            <div className="font-semibold text-gray-300">{data.unansweredCount ?? 0}</div>
+          </div>
         </div>
+        {/* Post-submit actions hidden per requirements */}
       </div>
     </div>
   );

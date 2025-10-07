@@ -107,7 +107,6 @@ function Navbar() {
             <li><NavLink to="/gallery" className={navLinkClass}><SaxGalleryLinear className="mr-2"/>Gallery</NavLink></li>
             <li><NavLink to="/contact" className={navLinkClass}><SaxUserTwotone className="mr-2" />Contact</NavLink></li>
             <li><NavLink to="/quiz" className={navLinkClass}>Quiz</NavLink></li>
-            <li><NavLink to="/leaderboard" className={navLinkClass}>Leaderboard</NavLink></li>
           </ul>
         </nav>
         <div ref={joinBtn} className="hidden sm:block">
@@ -141,7 +140,6 @@ function Navbar() {
             <li><NavLink to="/gallery" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>Gallery</NavLink></li>
             <li><NavLink to="/contact" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>Contact</NavLink></li>
             <li><NavLink to="/quiz" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>Quiz</NavLink></li>
-            <li><NavLink to="/leaderboard" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>Leaderboard</NavLink></li>
             <li className="mt-8">
               <div className="glowing-btn-wrapper blue rounded-full">
                 <NavLink 

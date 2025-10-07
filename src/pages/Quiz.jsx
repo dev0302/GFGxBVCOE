@@ -130,26 +130,7 @@ function Quiz() {
       </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8">
-        <input
-          value={teamId}
-          onChange={(e) => setTeamId(e.target.value)}
-          placeholder="Team ID"
-          className="md:col-span-1 col-span-1 bg-[#1f2937] border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        />
-        <input
-          value={teamName}
-          onChange={(e) => setTeamName(e.target.value)}
-          placeholder="Team Name (optional now)"
-          className="md:col-span-1 col-span-1 bg-[#1f2937] border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        />
-        <input
-          value={teamLead}
-          onChange={(e) => setTeamLead(e.target.value)}
-          placeholder="Team Lead Name"
-          className="md:col-span-1 col-span-1 bg-[#1f2937] border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        />
-      </div>
+      {/* Removed redundant inputs with undefined state to prevent runtime error */}
 
       {step === 'quiz' && (
       <div className="space-y-6">
