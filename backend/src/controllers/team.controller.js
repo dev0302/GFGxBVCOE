@@ -1,6 +1,6 @@
-import Team from "../models/Team";
+import Team from "../models/Team.js";
 
-const checkTeam = async (req, res)=>{
+export const checkTeam = async (req, res)=>{
     const {teamId} = req.body;
 
     if(!teamId){
