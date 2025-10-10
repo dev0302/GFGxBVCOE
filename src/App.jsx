@@ -15,9 +15,6 @@ import Quiz from "./pages/Quiz"
 import Leaderboard from "./pages/Leaderboard"
 import QuizResult from "./pages/QuizResult"
 
-
-
-
 function App() {
   return (
     <FeatureFlagsProvider>
