@@ -354,8 +354,10 @@ const GFGBentoGrid = () => {
                 onClick={handleViewAllEvents}
                 className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-full text-lg transition-all duration-300 flex justify-center items-center group"
               >
-                <span>View All Events</span>
-                <svg
+                <span className="flex items-center justify-center">
+                  View All Events 
+
+                  <svg
                   className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300"
                   fill="none"
                   stroke="currentColor"
@@ -368,6 +370,9 @@ const GFGBentoGrid = () => {
                     d="M13 7l5 5m0 0l-5 5m5-5H6"
                   />
                 </svg>
+
+                </span>
+                
               </button>
             </div>
           </div>
