@@ -118,9 +118,16 @@ function Home() {
       {/* Hero Section with Background */}
       <div className="relative min-h-screen">
         {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900">
-          <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 via-transparent to-emerald-600/20"></div>
-          <div className="absolute inset-0 opacity-10">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('/landingpage_img.png')`,
+          }}
+        >
+          {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/30 to-black/50"></div>
+          {/* Subtle pattern overlay */}
+          <div className="absolute inset-0 opacity-5">
             <div
               className="absolute inset-0"
               style={{
