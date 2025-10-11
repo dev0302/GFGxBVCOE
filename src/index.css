@@ -36,6 +36,15 @@ body {
   overflow-x: hidden;
 }
 
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(200%) rotate(25deg);
+  }
+}
+
 #about_us_para {
   position: relative;
   overflow: hidden;

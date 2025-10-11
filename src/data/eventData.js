@@ -6,7 +6,7 @@ const events = [
         time: "10:00 AM - 3:00 PM",
         location: "A-405, BVCOE",
         category: "BVEST Gaming Event",
-        description: "It is a gaming event of BVCOE 2025 in which GFG and Athena collaborated to conduct the event.",
+        description: "It is a gaming event of BVCOE 2025 in which GFG and Athena collaborated to conduct the event. Quiz LeaderBoard : ",
         modalDescription: "HACN N FRAG 2025 was a thrilling gaming event organized as part of BVEST 2025, where GFG and Athena came together to create an electrifying gaming experience. The event brought out the competitive spirit of students through exciting matches, teamwork, and strategy-based gameplay, fostering a fun and energetic environment.",
         galleryImages: [
             "/Hacknfrag1.webp",
