@@ -44,6 +44,7 @@ export default {
       animation: {
         fadeIn: 'fadeIn 0.6s ease-out',
         bounce: 'bounce 2s infinite ease-in-out',
+        shine: 'shine 2s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -53,7 +54,11 @@ export default {
         bounce: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-10px)' },
-        }
+        },
+        shine: {
+          '0%': { transform: 'translateX(-100%) rotate(25deg)' },
+          '100%': { transform: 'translateX(200%) rotate(25deg)' },
+        },
       }
     }
   },

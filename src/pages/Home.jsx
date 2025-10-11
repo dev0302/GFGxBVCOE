@@ -121,7 +121,8 @@ function Home() {
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url('/landingpage_img.png')`,
+            backgroundImage: `url('/landingpage_img2.jpg')`,
+            filter: "blur(1px)", // stronger blur if you like
           }}
         >
           {/* Dark overlay for better text readability */}
@@ -172,26 +173,43 @@ function Home() {
           >
             <NavLink to="/results">
               <button
-            id="btn-join"
-            class="relative px-5 py-4 bg-gradient-to-r
-                   text-white font-bold text- rounded-full transition-all duration-500 ease-in-out 
-                   transform hover:-translate-y-2 hover:scale-110 
-                   shadow-lg 
-                   border-2 border-white/20
-                   overflow-hidden group
-                   "
-        >
-            <span class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
-            
-          
-            <span class="relative z-10 flex items-center justify-center">
-                <span class="mr-3">2025 Execoms Result out</span>
-                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                </svg>
-            </span>
-        </button>
+                id="btn-join"
+                className="relative px-6 py-4 bg-gradient-to-r 
+             from-green-500/50 via-emerald-400/50 to-teal-500/50
+             text-white font-bold rounded-full transition-all duration-500 ease-in-out
+             transform hover:-translate-y-2 hover:scale-110
+             shadow-[0_0_20px_rgba(16,185,129,0.6)]
+             hover:shadow-[0_0_35px_rgba(16,185,129,0.8)]
+             border-2 border-white/20
+             overflow-hidden group"
+              >
+                {/* Shining sweep overlay */}
+                <span
+                  className="absolute top-0 left-0 w-1/3 h-full bg-white/30 blur-md transform -skew-x-12 animate-shine hover:shadow-[0_0_35px_rgba(16,185,129,0.8)]"
+                ></span>
+
+                {/* Text + icon */}
+                <span className="relative z-10 flex items-center justify-center">
+                  <span className="mr-3">2025 Execoms Result out</span>
+                  <svg
+                    className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    ></path>
+                  </svg>
+                </span>
+              </button>
             </NavLink>
+
+
             <button
               id="btn-about"
               onClick={() => navigate("/about")}

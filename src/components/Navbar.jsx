@@ -106,7 +106,7 @@ function Navbar() {
             <li><NavLink to="/events" className={navLinkClass}><SaxCalendarTickTwotone className="mr-2"/>Events</NavLink></li>
             <li><NavLink to="/gallery" className={navLinkClass}><SaxGalleryLinear className="mr-2"/>Gallery</NavLink></li>
             <li><NavLink to="/contact" className={navLinkClass}><SaxUserTwotone className="mr-2" />Contact</NavLink></li>
-            <li><NavLink to="/quiz" className={navLinkClass}>Quiz</NavLink></li>
+            {/* <li><NavLink to="/quiz" className={navLinkClass}>Quiz</NavLink></li> */}
           </ul>
         </nav>
         <div ref={joinBtn} className="hidden sm:block">
