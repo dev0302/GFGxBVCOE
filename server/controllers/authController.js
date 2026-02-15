@@ -173,7 +173,7 @@ exports.signup = async (req, res) => {
       expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "none", // 🔥 REQUIRED for cross-site
     };
     res.cookie("Token", token, options);
     return res.status(201).json({
@@ -234,7 +234,7 @@ exports.login = async (req, res) => {
       expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "none", // 🔥 REQUIRED for cross-site
     };
     res.cookie("Token", token, options).status(200).json({
       success: true,
