@@ -1,8 +1,13 @@
 {
     "rewrites": [
       {
-        "source": "/(.*)",
+        "source": "/api/(.*)",
+        "destination": "https://gfgxbvcoe.onrender.com/api/$1"
+      },
+      {
+        "source": "/((?!assets|favicon.ico|robots.txt|manifest.webmanifest).*)",
         "destination": "/index.html"
       }
     ]
   }
+  
