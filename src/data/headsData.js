@@ -233,7 +233,7 @@ const headsData = [
     year: "2nd",
     position: "Technical Head",
     image: "Dev.webp",
-    email: "devnigam1812@gmail.com",
+    email: "devmalik838400@gmail.com",
     instaLink: "https://www.instagram.com/devmalik.0302",
     linkedinLink: "https://www.linkedin.com/in/dev-malik-976230311/",
     timeline: [
