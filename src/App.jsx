@@ -32,6 +32,7 @@ import QuizResult from "./pages/QuizResult"
 import ManageTeam from "./pages/ManageTeam"
 import ManageSociety from "./pages/ManageSociety"
 import JoinTeamByLink from "./pages/JoinTeamByLink"
+import AuthAwareLayout from "./components/AuthAwareLayout"
 
 function App() {
   return (
@@ -49,7 +50,8 @@ function App() {
         />
         <Navbar />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route element={<AuthAwareLayout />}>
+            <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/team" element={<Team2 />} />
           <Route path="/events" element={<Events />} />
@@ -82,6 +84,7 @@ function App() {
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/quiz/result" element={<QuizResult />} />
+          </Route>
         </Routes>
       </div>
       </AuthProvider>
