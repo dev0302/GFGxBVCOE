@@ -1,13 +1,7 @@
 {
-    "rewrites": [
-      {
-        "source": "/api/(.*)",
-        "destination": "https://gfgxbvcoe.onrender.com/api/$1"
-      },
-      {
-        "source": "/((?!assets/|favicon.ico|robots.txt|manifest.webmanifest).*)",
-        "destination": "/"
-      }
+    "routes": [
+      { "handle": "filesystem" },
+      { "src": "/(.*)", "dest": "/index.html" }
     ]
   }
   
