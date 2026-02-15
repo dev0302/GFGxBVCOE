@@ -100,7 +100,10 @@ exports.getDepartmentRoster = async (req, res) => {
         .populate("additionalDetails")
         .select("-password")
         .lean();
-      const predefined = await PredefinedProfile.findOne({ email: emailNorm }).lean();
+      const emailEscaped = emailNorm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const predefined = await PredefinedProfile.findOne({
+        email: { $regex: new RegExp(`^${emailEscaped}$`, "i") },
+      }).lean();
       const registered = !!userDoc && userDoc.accountType === department;
       roster.push({
         email: emailNorm,

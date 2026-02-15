@@ -16,6 +16,14 @@ const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
 
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
 
+/** Find PredefinedProfile by email (case-insensitive) so stored casing never causes "not found". */
+function findPredefinedByEmail(email) {
+  const trimmed = (email || "").trim();
+  if (!trimmed) return null;
+  const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return PredefinedProfile.findOne({ email: { $regex: new RegExp(`^${escaped}$`, "i") } }).lean();
+}
+
 exports.sendOTP = async (req, res) => {
   try {
     const { email, department } = req.body;
@@ -563,7 +571,7 @@ exports.enrichProfile = async (req, res) => {
     }
 
     sendSSE(res, "checking_predefined", "Fetching details…");
-    const predefined = await PredefinedProfile.findOne({ email: userEmail.toLowerCase().trim() });
+    const predefined = await findPredefinedByEmail(userEmail);
 
     if (!predefined) {
       sendSSE(res, "no_predefined", "No predefined profile found.");
@@ -843,7 +851,7 @@ exports.sendSignupInvite = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email is required." });
     }
 
-    const predefined = await PredefinedProfile.findOne({ email: emailNorm }).lean();
+    const predefined = await findPredefinedByEmail(emailNorm);
     if (!predefined) {
       return res.status(404).json({ success: false, message: "No predefined profile found for this email." });
     }
