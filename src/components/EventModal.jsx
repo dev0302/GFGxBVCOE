@@ -42,7 +42,7 @@ const EventModal = ({ event, onClose }) => {
   };
 
   const renderMedia = (src, isActive = false) => {
-    const isVideo = src.endsWith('.mp4');
+    const isVideo = src.endsWith('.mp4') || (typeof src === 'string' && src.includes('/video/upload/'));
 
     if (isVideo) {
       return (

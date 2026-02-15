@@ -4,8 +4,10 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef, useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
 import ImageGrid from "../components/ImageGrid";
+import UpcomingEventSection from "../components/UpcomingEventSection";
 import Lenis from "lenis";
 import { useFeatureFlags } from "../context/FeatureFlags.jsx";
 
@@ -13,6 +15,7 @@ import { useFeatureFlags } from "../context/FeatureFlags.jsx";
 gsap.registerPlugin(ScrollTrigger);
 
 function Home() {
+  const { user } = useAuth();
   const { leaderboardEnabled } = useFeatureFlags();
 
   useEffect(() => {
@@ -166,6 +169,8 @@ function Home() {
             Join GFG BVCOE - learn, teach, and collaborate through workshops, events, project showcases and mentorship.
           </p>
 
+          
+
           {/* CTAs */}
           <div
             ref={btnRef}
@@ -262,6 +267,8 @@ function Home() {
           </div>
         </div>
       </div>
+
+      <UpcomingEventSection variant="home" />
 
       {/* Bento Grid Section */}
       <div className="relative z-10">

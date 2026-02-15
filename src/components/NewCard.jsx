@@ -15,9 +15,17 @@ const InstagramIcon = () => (
   </svg>
 );
 
+const EmailIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+    <polyline points="22,6 12,13 2,6" />
+  </svg>
+);
+
 function NewCard({ person }) {
-  const { name, position, image, instaLink, linkedinLink } = person;
+  const { name, position, image, instaLink, linkedinLink, email } = person;
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -75,13 +83,24 @@ function NewCard({ person }) {
 
               <div className="flex justify-between items-center text-sm">
                 <div className="flex gap-3 items-center text-cyan-400">
-                  {linkedinLink && (
+                  {email && (
+                    <button
+                      type="button"
+                      onClick={() => setEmailModalOpen(true)}
+                      className="transition-all hover:text-white hover:[filter:drop-shadow(0_0_4px_theme(colors.cyan.400))] p-0.5 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
+                      title="Show email"
+                      aria-label="Show email"
+                    >
+                      <EmailIcon />
+                    </button>
+                  )}
+                  {linkedinLink && linkedinLink !== "nil" && (
                     <a href={linkedinLink} target="_blank" rel="noopener noreferrer"
                        className="transition-all hover:text-white hover:[filter:drop-shadow(0_0_4px_theme(colors.cyan.400))]">
                       <LinkedInIcon />
                     </a>
                   )}
-                  {instaLink && (
+                  {instaLink && instaLink !== "nil" && (
                     <a href={instaLink} target="_blank" rel="noopener noreferrer"
                        className="transition-all hover:text-white hover:[filter:drop-shadow(0_0_4px_theme(colors.cyan.400))]">
                       <InstagramIcon />
@@ -114,6 +133,33 @@ function NewCard({ person }) {
       </div>
 
       {isModalOpen && <TimelineModal person={person} onClose={() => setIsModalOpen(false)} />}
+
+      {emailModalOpen && email && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setEmailModalOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="email-modal-title"
+        >
+          <div
+            className="darkthemebg rounded-2xl border border-gray-500/30 p-6 shadow-xl max-w-sm w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 id="email-modal-title" className="text-sm font-semibold text-cyan-400/90 uppercase tracking-wider mb-3">
+              Email
+            </h3>
+            <p className="text-white font-medium break-all">{email}</p>
+            <button
+              type="button"
+              onClick={() => setEmailModalOpen(false)}
+              className="mt-4 w-full py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

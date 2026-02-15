@@ -6,6 +6,8 @@ import { useRef, useState, useEffect } from "react";
 import Lenis from "lenis";
 import events from "../data/eventData";
 import EventModal from "../components/EventModal";
+import UpcomingEventSection from "../components/UpcomingEventSection";
+import { getEvents } from "../services/api";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,6 +16,35 @@ const Events = () => {
   const heroRef = useRef();
   const eventsRef = useRef();
   const navigate = useNavigate();
+  const [uploadedEvents, setUploadedEvents] = useState([]);
+
+  useEffect(() => {
+    getEvents()
+      .then((res) => {
+        if (res.success && Array.isArray(res.data)) {
+          setUploadedEvents(res.data);
+        }
+      })
+      .catch(() => setUploadedEvents([]));
+  }, []);
+
+  const formatDate = (dateStr) => {
+    if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    const d = new Date(dateStr + "T12:00:00");
+    return d.toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" });
+  };
+
+  const allEvents = [
+    ...uploadedEvents.map((e) => ({
+      ...e,
+      id: e._id || e.id,
+      date: formatDate(e.date) || e.date,
+      speakers: e.speakers?.length ? e.speakers : [],
+      agenda: e.agenda?.length ? e.agenda : [],
+      prerequisites: e.prerequisites?.length ? e.prerequisites : [],
+    })),
+    ...events,
+  ];
 
   // Lenis smooth scroll
   useEffect(() => {
@@ -80,6 +111,8 @@ const Events = () => {
         </div>
       </section>
 
+      <UpcomingEventSection variant="events" />
+
       {/* Events Grid */}
       <section
         ref={eventsRef}
@@ -87,7 +120,7 @@ const Events = () => {
       >
         <div className="container mx-auto w-full px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 gap-y-16 md:gap-20">
-            {events.map((event) => (
+            {allEvents.map((event) => (
               <div
                 key={event.id}
                 className="glowing-container w-86% mx-auto md:w-full"
