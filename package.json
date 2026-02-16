@@ -12,6 +12,7 @@
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "@meysam213/iconsax-react": "^1.0.4",
+    "blueimp-load-image": "^5.16.0",
     "browser-image-compression": "^2.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

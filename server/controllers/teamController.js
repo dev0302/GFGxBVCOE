@@ -360,13 +360,17 @@ exports.downloadTemplate = async (req, res) => {
   }
 };
 
+function randomImageName() {
+  return `img_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
+}
+
 exports.uploadTeamPhoto = async (req, res) => {
   try {
     if (!req.files?.photo) {
       return res.status(400).json({ success: false, message: "No photo file provided." });
     }
     const file = req.files.photo;
-    const result = await imageUpload(file, "gfg-team-photos", 85);
+    const result = await imageUpload(file, "membersImages", 85, randomImageName());
     return res.status(200).json({
       success: true,
       url: result.secure_url,
@@ -439,7 +443,7 @@ exports.uploadTeamPhotoByInviteLink = async (req, res) => {
       return res.status(400).json({ success: false, message: "No photo file provided." });
     }
     const file = req.files.photo;
-    const result = await imageUpload(file, "gfg-team-photos", 85);
+    const result = await imageUpload(file, "membersImages", 85, randomImageName());
     return res.status(200).json({
       success: true,
       url: result.secure_url,
