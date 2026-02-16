@@ -75,7 +75,7 @@ exports.sendOTP = async (req, res) => {
     }
 
     const htmlContent = emailVerificationTemplate(otp);
-    // await mailSender(emailNorm, "GFGxBVCOE – Signup OTP", htmlContent);
+    await mailSender(emailNorm, "GFGxBVCOE – Signup OTP", htmlContent);
 
     return res.status(200).json({
       success: true,
