@@ -5,6 +5,7 @@ import { useRef, useEffect } from "react";
 import { useFeatureFlags } from "../context/FeatureFlags.jsx";
 import Lenis from "lenis";
 
+
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
 
@@ -208,9 +209,11 @@ const About = () => {
                    ABOUT US    
               </span>
             </h1>
+            
+            
             <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-normal font-nunito">
               Empowering students through collaborative learning, innovation, and knowledge sharing in a dynamic tech community.
-            </p>
+            </p> 
           </div>
         </section>
 

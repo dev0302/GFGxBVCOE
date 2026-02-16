@@ -3,6 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { getEventUploadAllowed, addEventUploadDepartment, removeEventUploadDepartment, AUTH_DEPARTMENTS, getAccountTypeLabel, getMe } from "../../services/api";
 import { toast } from "sonner";
 import { SectionTitle } from "../../components/EventDashboard/SectionTitle";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function DepartmentsAllowed() {
   const { user, setUser } = useAuth();
@@ -64,7 +65,7 @@ export default function DepartmentsAllowed() {
         <section className="bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">
           <SectionTitle icon="👥">Allowed departments</SectionTitle>
           {loadingAllowed ? (
-            <p className="text-gray-500 py-4">Loading…</p>
+            <p className="text-gray-500 py-4"><Spinner className="size-4 text-gray-400" /></p>
           ) : allowedConfig ? (
             <div className="space-y-4">
               <div>
