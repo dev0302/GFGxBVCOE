@@ -43,7 +43,7 @@ export function MemberDetailModal({ member, onClose }) {
       aria-label="Member details"
     >
       <div
-        className="bg-[#1e1e2f] rounded-2xl border border-gray-500/40 shadow-2xl w-full max-w-lg h-[calc(100vh-2rem)] flex flex-col overflow-hidden shrink-0"
+        className="bg-[#1e1e2f] rounded-2xl border border-gray-500/40 shadow-2xl w-full max-w-lg h-5/6 flex flex-col overflow-hidden shrink-0"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 z-10 shrink-0">
@@ -279,7 +279,7 @@ export function UserDetailModal({ user, onClose }) {
       aria-label="User profile details"
     >
       <div
-        className="bg-[#1e1e2f] rounded-2xl border border-gray-500/40 shadow-2xl w-full max-w-2xl h-[calc(100vh-2rem)] flex flex-col overflow-hidden shrink-0"
+        className="bg-[#1e1e2f] rounded-2xl border border-gray-500/40 shadow-2xl w-full max-w-2xl h-5/6 flex flex-col overflow-hidden shrink-0"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 z-10 shrink-0">
