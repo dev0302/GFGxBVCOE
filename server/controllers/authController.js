@@ -177,11 +177,13 @@ exports.signup = async (req, res) => {
     userObj.token = token;
     userObj.password = undefined;
 
+    const isProduction = process.env.NODE_ENV === "production";
     const options = {
       expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      // sameSite: "none", // 🔥 REQUIRED for cross-site
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax", // "none" for cross-site in production, "lax" for same-site in dev
+      path: "/",
     };
     res.cookie("Token", token, options);
     return res.status(201).json({
@@ -238,11 +240,13 @@ exports.login = async (req, res) => {
     const eventUploadAllowed = await getEventUploadAllowedList();
     user.canManageEvents = eventUploadAllowed.includes(user.accountType);
 
+    const isProduction = process.env.NODE_ENV === "production";
     const options = {
       expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      // sameSite: "none", // 🔥 REQUIRED for cross-site
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax", // "none" for cross-site in production, "lax" for same-site in dev
+      path: "/",
     };
     res.cookie("Token", token, options).status(200).json({
       success: true,
@@ -439,10 +443,13 @@ exports.me = async (req, res) => {
 };
 
 exports.logout = (req, res) => {
+  const isProduction = process.env.NODE_ENV === "production";
   res
     .clearCookie("Token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production"
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax", // Must match the options used when setting the cookie
+      path: "/",
     })
     .status(200)
     .json({ success: true, message: "Logged out." });
@@ -918,7 +925,13 @@ exports.deleteAccount = async (req, res) => {
     }
     await User.findByIdAndDelete(userId);
 
-    res.clearCookie("Token", { path: "/" });
+    const isProduction = process.env.NODE_ENV === "production";
+    res.clearCookie("Token", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax", // Must match the options used when setting the cookie
+      path: "/",
+    });
     return res.status(200).json({
       success: true,
       message: "Account deleted successfully.",
