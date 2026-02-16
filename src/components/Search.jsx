@@ -6,6 +6,9 @@ import { getSearchPeople, getAccountTypeLabel, sendSignupInvite } from "../servi
 import { driveLinkToImageUrl, avatarPlaceholder } from "../utils/teamMemberUtils";
 import { Search as SearchIcon, X, Mail } from "react-feather";
 import "./Search.css";
+import { Spinner } from "./ui/spinner";
+
+
 
 const TEAM_FIELDS = [
   "name",
@@ -551,8 +554,11 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
               </div>
             </div>
             <div className="search-member-list">
-              {loading ? (
-                <div className="px-2 py-4 text-center text-gray-400 text-sm">Loading…</div>
+              {loading ?  (
+                <div className="flex items-center justify-center gap-2 px-2 py-4 text-sm text-gray-400">
+                  <Spinner className="size-4 text-gray-400" />
+                  <span>Loading...</span>
+                </div>
               ) : totalCount === 0 ? (
                 <div className="px-2 py-4 text-center text-gray-500 text-sm">No results</div>
               ) : (

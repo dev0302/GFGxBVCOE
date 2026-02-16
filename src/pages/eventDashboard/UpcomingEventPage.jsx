@@ -8,6 +8,7 @@ import {
 import { toast } from "sonner";
 import { SectionTitle } from "../../components/EventDashboard/SectionTitle";
 import { Calendar, Plus, Edit3, Trash2, X } from "react-feather";
+import { Spinner } from "@/components/ui/spinner";
 
 const initialForm = {
   title: "",
@@ -19,6 +20,7 @@ const initialForm = {
   otherLinks: "",
   otherDocs: "",
 };
+
 
 export default function UpcomingEventPage() {
   const [list, setList] = useState([]);
@@ -138,6 +140,7 @@ export default function UpcomingEventPage() {
 
         <section className="bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">
           <SectionTitle icon="📅">Upcoming events</SectionTitle>
+          
           <button
             type="button"
             onClick={openAdd}
@@ -147,7 +150,7 @@ export default function UpcomingEventPage() {
             Add upcoming event
           </button>
           {loading ? (
-            <p className="text-gray-500 py-6">Loading…</p>
+            <p className="text-gray-500 py-6"><Spinner className="size-4 text-gray-400" /></p>
           ) : list.length === 0 ? (
             <p className="text-gray-500 py-6 mt-4 rounded-xl bg-[#252536]/50 border border-gray-500/20">No upcoming events. Add one to show it on Home and Events page.</p>
           ) : (

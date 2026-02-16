@@ -30,6 +30,8 @@ import imageCompression from "browser-image-compression";
 import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { uploadTeamPhoto } from "../services/api";
+import { Spinner } from "@/components/ui/spinner";
+
 
 const COLS = [
   "name",
@@ -492,7 +494,7 @@ export default function ManageTeam({ department: propDepartment, isSociety, onBa
   if (authLoading) {
     return (
       <div className="min-h-screen darkthemebg pt-24 flex items-center justify-center">
-        <p className="text-gray-400">Loading…</p>
+        <p className="text-gray-400"><Spinner className="size-4 text-gray-400" /></p>
       </div>
     );
   }
@@ -618,7 +620,7 @@ export default function ManageTeam({ department: propDepartment, isSociety, onBa
 
         <div className="rounded-2xl border border-gray-500/30 bg-[#1e1e2f]/80 overflow-hidden">
           {loading ? (
-            <div className="p-12 text-center text-gray-400">Loading…</div>
+            <div className="p-12 text-center text-gray-400"><Spinner className="size-4 text-gray-400" /></div>
           ) : (() => {
             const rosterEmails = new Set((roster || []).map((r) => (r.email || "").toLowerCase()));
             const extraMembers = (members || []).filter(
@@ -1052,7 +1054,7 @@ export default function ManageTeam({ department: propDepartment, isSociety, onBa
             </ReactCrop>
             <div className="flex gap-2 mt-3">
               <button type="button" onClick={() => { URL.revokeObjectURL(cropImageSrc); setCropImageSrc(null); setCrop(null); }} className="flex-1 py-2 rounded-xl border border-gray-500/50 text-gray-300">Cancel</button>
-              <button type="button" onClick={handleCropApply} disabled={photoUploading} className="flex-1 py-2 rounded-xl bg-cyan-600 text-white font-medium disabled:opacity-50">{photoUploading ? "Uploading…" : "Apply & upload"}</button>
+              <button type="button" onClick={handleCropApply} disabled={photoUploading} className="flex-1 py-2 rounded-xl bg-cyan-600 text-white font-medium disabled:opacity-50">{photoUploading ? <Spinner className="size-4 text-gray-400" /> : "Apply & upload"}</button>
             </div>
           </div>
         </div>
@@ -1282,9 +1284,11 @@ export default function ManageTeam({ department: propDepartment, isSociety, onBa
               </button>
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2" style={{ WebkitOverflowScrolling: "touch" }}>
-              {wholeTeamLoading ? (
-                <div className="py-12 text-center text-gray-400">Loading…</div>
-              ) : wholeTeamList.length === 0 ? (
+              {wholeTeamLoading ?  (
+                <div className="flex items-center justify-center py-12">
+                  <Spinner className="size-4 text-gray-400" />
+                </div>
+              ): wholeTeamList.length === 0 ? (
                 <div className="py-12 text-center text-gray-500">No one in the list.</div>
               ) : (
                 <ul className="space-y-1">

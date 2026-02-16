@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getSignupConfigs, addSignupEmail, removeSignupEmail, getAccountTypeLabel, isSocietyRole } from "../services/api";
 import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 const AdminSignupConfig = () => {
   const { user, loading: authLoading } = useAuth();
@@ -86,7 +87,7 @@ const AdminSignupConfig = () => {
         </div>
 
         {loading ? (
-          <p className="text-gray-400">Loading…</p>
+          <p className="text-gray-400"><Spinner className="size-4 text-gray-400" /></p>
         ) : (
           <div className="space-y-6">
             {configs.map((config) => (

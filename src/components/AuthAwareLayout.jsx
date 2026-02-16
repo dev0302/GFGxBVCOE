@@ -1,5 +1,6 @@
 import { Outlet, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { Spinner } from "./ui/spinner";
 
 /**
  * Routes that require a logged-in user. All other routes (login, signup, join-team, etc.) are public.
@@ -29,7 +30,7 @@ export default function AuthAwareLayout() {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <p className="text-gray-400">Loading…</p>
+        <p className="text-gray-400"><Spinner className="text-gray-200" /></p>
       </div>
     );
   }

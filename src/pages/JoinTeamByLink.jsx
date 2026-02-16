@@ -7,6 +7,8 @@ import { photoPreviewUrl, avatarPlaceholder } from "../utils/teamMemberUtils";
 import loadImage from "blueimp-load-image";
 import ReactCrop, { centerCrop, makeAspectCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
+import { Spinner } from "@/components/ui/spinner";
+
 
 const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB
 
@@ -335,7 +337,7 @@ export default function JoinTeamByLink() {
             </ReactCrop>
             <div className="flex gap-2 mt-3">
               <button type="button" onClick={() => { URL.revokeObjectURL(cropImageSrc); setCropImageSrc(null); setCrop(null); }} className="flex-1 py-2 rounded-xl border border-gray-500/50 text-gray-300">Cancel</button>
-              <button type="button" onClick={handleCropApply} disabled={photoUploading} className="flex-1 py-2 rounded-xl bg-cyan-600 text-white font-medium disabled:opacity-50">{photoUploading ? "Uploading…" : "Apply & upload"}</button>
+              <button type="button" onClick={handleCropApply} disabled={photoUploading} className="flex-1 py-2 rounded-xl bg-cyan-600 text-white font-medium disabled:opacity-50">{photoUploading ? <Spinner className="size-4 text-gray-400" /> : "Apply & upload"}</button>
             </div>
           </div>
         </div>

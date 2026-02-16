@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import { getMe, updateProfile, updateAvatar, changePassword, deleteAccount } from "../services/api";
 import { toast } from "sonner";
 import { Trash2, X } from "react-feather";
+import { Spinner } from "@/components/ui/spinner";
+
 
 const Profile = () => {
   const { user, setUser, logout } = useAuth();
@@ -194,9 +196,12 @@ const Profile = () => {
           <p className="text-gray-400 text-sm">Manage your details and display picture</p>
         </div>
 
-        {loading ? (
-          <p className="text-gray-400">Loading…</p>
-        ) : (
+        {loading ?  (
+            <div className="flex items-center gap-2 text-gray-400">
+              <span>Loading your profile</span>
+              <Spinner className="size-4 text-gray-400" />
+            </div>
+          ) : (
           <div className="bg-gradient-to-br from-[#1e1e2f]/90 to-[#2c2c3e]/90 border border-gray-500/30 rounded-2xl p-6 md:p-8 shadow-xl space-y-8">
             {/* Avatar */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">

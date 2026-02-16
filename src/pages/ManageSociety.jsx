@@ -9,12 +9,14 @@ import { Users, ChevronRight, Printer, FileText, X, Download, List, Mail } from 
 import { avatarPlaceholder, photoPreviewUrl } from "../utils/teamMemberUtils";
 import ManageTeam from "./ManageTeam";
 import Search from "../components/Search";
+
 import { UserDetailModal, PredefinedOnlyDetailModal, MemberDetailModal } from "../components/Search";
 import {
   downloadTeamListPDF,
   downloadAllDepartmentsPDF,
   downloadAllDepartmentsExcel,
 } from "../utils/teamListExport";
+import { Spinner } from "@/components/ui/spinner";
 
 const EXPORT_COLS = ["name", "year", "branch", "section", "email", "contact", "non_tech_society"];
 const EXPORT_LABELS = {
@@ -229,7 +231,7 @@ export default function ManageSociety() {
   if (authLoading) {
     return (
       <div className="min-h-screen darkthemebg pt-24 flex items-center justify-center">
-        <p className="text-gray-400">Loading…</p>
+        <p className="text-gray-400"><Spinner className="size-4 text-gray-400" /></p>
       </div>
     );
   }
@@ -333,7 +335,7 @@ export default function ManageSociety() {
             aria-label="All people list"
           >
             <div
-              className="bg-[#1e1e2f] rounded-2xl border border-gray-500/40 shadow-2xl w-full max-w-2xl max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden shrink-0"
+              className="bg-[#1e1e2f] rounded-2xl border border-gray-500/40 shadow-2xl w-full max-w-2xl h-5/6 flex flex-col overflow-hidden shrink-0"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 shrink-0">
@@ -349,7 +351,10 @@ export default function ManageSociety() {
               </div>
               <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2" style={{ WebkitOverflowScrolling: "touch" }}>
                 {allPeopleLoading ? (
-                  <div className="py-12 text-center text-gray-400">Loading…</div>
+                  <div className="flex items-center justify-center gap-2 py-12 text-center text-gray-400 flex-col">
+                    <Spinner className="size-4 text-gray-400" />
+                    <span>Loading...</span>
+                  </div>
                 ) : allPeopleList.length === 0 ? (
                   <div className="py-12 text-center text-gray-500">No one in the list.</div>
                 ) : (

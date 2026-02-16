@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { createEvent, getEventsForManage, deleteEvent, cancelScheduledDelete, updateEvent, userCanManageEvents, canManageEventUploadConfig, getEventUploadAllowed, addEventUploadDepartment, removeEventUploadDepartment, createUploadLink, AUTH_DEPARTMENTS, getAccountTypeLabel, getMe } from "../services/api";
 import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 const VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg", "video/quicktime"];
 const isVideo = (file) => file?.type?.startsWith("video/") || VIDEO_TYPES.includes(file?.type);
@@ -329,7 +330,7 @@ const UploadEvent = () => {
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1e1e2f]">
-        <p className="text-gray-400">Loading…</p>
+        <p className="text-gray-400"><Spinner className="size-4 text-gray-400" /></p>
       </div>
     );
   }
@@ -863,7 +864,7 @@ const UploadEvent = () => {
             Faculty Incharge, Chairperson, Vice-Chairperson and Event Management are always allowed. Add or remove other departments below. Added departments will see &quot;Manage Events&quot; in their profile dropdown.
           </p>
           {loadingAllowed ? (
-            <p className="text-gray-500 py-4">Loading…</p>
+            <p className="text-gray-500 py-4"><Spinner className="size-4 text-gray-400" /></p>
           ) : allowedConfig ? (
             <div className="space-y-4">
               <div>
