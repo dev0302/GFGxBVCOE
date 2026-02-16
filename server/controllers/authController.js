@@ -75,7 +75,7 @@ exports.sendOTP = async (req, res) => {
     }
 
     const htmlContent = emailVerificationTemplate(otp);
-    await mailSender(emailNorm, "GFGxBVCOE – Signup OTP", htmlContent);
+    // await mailSender(emailNorm, "GFGxBVCOE – Signup OTP", htmlContent);
 
     return res.status(200).json({
       success: true,
@@ -577,6 +577,8 @@ exports.enrichProfile = async (req, res) => {
     const predefined = await findPredefinedByEmail(userEmail);
 
     if (!predefined) {
+      console.log("No predefined profile found");
+      
       sendSSE(res, "no_predefined", "No predefined profile found.");
       sendSSE(res, "done", "");
       return res.end();
@@ -624,6 +626,11 @@ exports.enrichProfile = async (req, res) => {
       await profile.save();
     }
 
+    console.log("profile populated?", !!user.additionalDetails);
+    console.log("profile type:", typeof user.additionalDetails);
+    console.log("profile id:", user.additionalDetails?._id);
+
+
     const imagePath = (predefined.image || "").trim();
     if (imagePath) {
       sendSSE(res, "uploading_image", "Uploading image…");
@@ -636,6 +643,9 @@ exports.enrichProfile = async (req, res) => {
         console.error("enrichProfile image upload error:", err);
       }
     }
+
+    console.log("All fineeeeee");
+    
 
     sendSSE(res, "done", "Profile updated.");
     res.end();
