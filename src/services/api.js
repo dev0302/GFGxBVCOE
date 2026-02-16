@@ -1,5 +1,29 @@
 const BASE = import.meta.env.VITE_API_BASE_URL;
 
+const AUTH_TOKEN_KEY = "gfg_auth_token";
+
+/** Get stored auth token (survives refresh; works when cookies are blocked in production). */
+export function getAuthToken() {
+  try {
+    return sessionStorage.getItem(AUTH_TOKEN_KEY) || null;
+  } catch {
+    return null;
+  }
+}
+
+/** Store token after login/signup so requests can use Authorization header. */
+export function setAuthToken(token) {
+  try {
+    if (token) sessionStorage.setItem(AUTH_TOKEN_KEY, token);
+    else sessionStorage.removeItem(AUTH_TOKEN_KEY);
+  } catch (_) {}
+}
+
+/** Clear stored token on logout. */
+export function clearAuthToken() {
+  setAuthToken(null);
+}
+
 export async function verifyTeam(teamId) {
   const res = await fetch(`${BASE}/api/auth/team/verify`, {
     method: 'POST',
@@ -66,9 +90,13 @@ export async function getUpcomingEvents() {
 
 /** Create upcoming event (auth + event upload). FormData: title, date (required); poster (file), location, time, targetAudience, otherLinks, otherDocs (optional). */
 export async function createUpcomingEvent(formData) {
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/events/upcoming`, {
     method: 'POST',
     credentials: 'include',
+    headers,
     body: formData,
   });
   const data = await res.json().catch(() => ({}));
@@ -78,9 +106,13 @@ export async function createUpcomingEvent(formData) {
 
 /** Update upcoming event (auth + event upload). FormData: same fields, poster (file) optional. */
 export async function updateUpcomingEvent(id, formData) {
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/events/upcoming/${id}`, {
     method: 'PUT',
     credentials: 'include',
+    headers,
     body: formData,
   });
   const data = await res.json().catch(() => ({}));
@@ -211,13 +243,16 @@ export async function removeEventUploadDepartment(department) {
 }
 
 const authFetch = (url, options = {}) => {
+  const token = getAuthToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   return fetch(`${BASE}${url}`, {
     ...options,
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
   });
 };
 
@@ -285,6 +320,7 @@ export async function signup(body) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Signup failed');
+  if (data.token) setAuthToken(data.token);
   return data;
 }
 
@@ -295,6 +331,7 @@ export async function login({ email, password }) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Login failed');
+  if (data.token) setAuthToken(data.token);
   return data;
 }
 
@@ -346,7 +383,10 @@ export async function getMe() {
 
 /** Stream enrich-profile SSE events; onMessage({ event, message }) for each event; resolves when stream ends. */
 export function enrichProfileSSE({ onMessage }) {
-  return fetch(`${BASE}/api/v1/auth/enrich-profile`, { credentials: 'include' }).then((res) => {
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return fetch(`${BASE}/api/v1/auth/enrich-profile`, { credentials: 'include', headers }).then((res) => {
     if (!res.ok) throw new Error('Enrich failed');
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
@@ -373,10 +413,14 @@ export function enrichProfileSSE({ onMessage }) {
 }
 
 export async function logout() {
-  const res = await authFetch('/api/v1/auth/logout', { method: 'POST' });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Logout failed');
-  return data;
+  try {
+    const res = await authFetch('/api/v1/auth/logout', { method: 'POST' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Logout failed');
+    return data;
+  } finally {
+    clearAuthToken();
+  }
 }
 
 // Admin: signup config (allowed emails per department)
@@ -421,9 +465,13 @@ export async function updateProfile(payload) {
 export async function updateAvatar(file) {
   const formData = new FormData();
   formData.append('avatar', file);
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/auth/profile/avatar`, {
     method: 'POST',
     credentials: 'include',
+    headers,
     body: formData,
   });
   const data = await res.json().catch(() => ({}));
@@ -509,9 +557,13 @@ export async function addTeamMember(payload) {
 export async function uploadTeamPhoto(file) {
   const formData = new FormData();
   formData.append('photo', file);
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/team/upload-photo`, {
     method: 'POST',
     credentials: 'include',
+    headers,
     body: formData,
   });
   const data = await res.json().catch(() => ({}));
@@ -593,9 +645,13 @@ export async function uploadTeamExcel(file, department) {
   const formData = new FormData();
   formData.append('file', file);
   if (department) formData.append('department', department);
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/team/members/upload-excel`, {
     method: 'POST',
     credentials: 'include',
+    headers,
     body: formData,
   });
   const data = await res.json().catch(() => ({}));
@@ -604,7 +660,10 @@ export async function uploadTeamExcel(file, department) {
 }
 
 export async function downloadTeamTemplate() {
-  const res = await fetch(`${BASE}/api/v1/team/template`, { credentials: 'include' });
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${BASE}/api/v1/team/template`, { credentials: 'include', headers });
   if (!res.ok) throw new Error('Failed to download template');
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
