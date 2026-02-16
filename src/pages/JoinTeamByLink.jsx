@@ -4,9 +4,11 @@ import { validateTeamInviteLink, addTeamMemberByInviteLink, uploadTeamPhotoByInv
 import { toast } from "sonner";
 import { Users } from "react-feather";
 import { photoPreviewUrl, avatarPlaceholder } from "../utils/teamMemberUtils";
-import imageCompression from "browser-image-compression";
-import ReactCrop from "react-image-crop";
+import loadImage from "blueimp-load-image";
+import ReactCrop, { centerCrop, makeAspectCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
+
+const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB
 
 const COLS = [
   "name",
@@ -62,6 +64,23 @@ export default function JoinTeamByLink() {
     });
   };
 
+  /** Normalize EXIF orientation (fixes random crop on phone photos) */
+  const normalizeImageForCrop = (file) => {
+    return new Promise((resolve, reject) => {
+      loadImage(file, (img) => {
+        if (img?.type === "error") {
+          reject(new Error("Failed to load image"));
+          return;
+        }
+        if (img?.tagName === "CANVAS" && img.toBlob) {
+          img.toBlob((blob) => resolve(blob || file), "image/jpeg", 0.95);
+        } else {
+          resolve(file);
+        }
+      }, { orientation: true, canvas: true });
+    });
+  };
+
   const handlePhotoFile = async (e) => {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -69,17 +88,24 @@ export default function JoinTeamByLink() {
       toast.error("Please select an image file (JPG, PNG, etc.)");
       return;
     }
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error(`Image must be under 200MB (current: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+      return;
+    }
     try {
-      let toUse = file;
-      if (file.size > 500 * 1024) {
-        toUse = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 1200 });
-      }
-      const src = URL.createObjectURL(toUse);
+      const normalized = await normalizeImageForCrop(file);
+      const blob = normalized instanceof Blob ? normalized : new Blob([normalized], { type: file.type });
+      const src = URL.createObjectURL(blob);
       setCropImageSrc(src);
-      setCrop({ unit: "%", width: 90, height: 90, x: 5, y: 5 });
+      setCrop(null); // Set on image load via onImageLoad
     } catch (err) {
       toast.error(err.message || "Failed to process image");
     }
+  };
+
+  const onImageLoad = (e) => {
+    const { width, height } = e.currentTarget;
+    setCrop(centerCrop(makeAspectCrop({ unit: "%", width: 90 }, 1, width, height), width, height));
   };
 
   const handleCropApply = async () => {
@@ -99,12 +125,8 @@ export default function JoinTeamByLink() {
             height: (crop.height / 100) * nh,
           };
     try {
-      let blob = await getCroppedImg(imageEl, cropPx);
+      const blob = await getCroppedImg(imageEl, cropPx);
       if (!blob) return;
-      if (blob.size > 500 * 1024) {
-        const f = new File([blob], "photo.jpg", { type: "image/jpeg" });
-        blob = await imageCompression(f, { maxSizeMB: 0.5 });
-      }
       setPhotoUploading(true);
       const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
       const res = await uploadTeamPhotoByInviteLink(token, file);
@@ -220,7 +242,7 @@ export default function JoinTeamByLink() {
                     <div className="space-y-2">
                       <div className="flex flex-wrap gap-2 items-center">
                         <label className="px-3 py-2 rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 text-sm font-medium cursor-pointer">
-                          Upload photo
+                          {form.photo ? "Reupload photo" : "Upload photo"}
                           <input
                             type="file"
                             accept="image/*"
@@ -229,7 +251,7 @@ export default function JoinTeamByLink() {
                             disabled={photoUploading}
                           />
                         </label>
-                        <span className="text-xs text-gray-500">Max 500KB (auto compress) · then crop</span>
+                        <span className="text-xs text-gray-500">Max 200MB · then crop</span>
                       </div>
                       <input
                         type="text"
@@ -309,7 +331,7 @@ export default function JoinTeamByLink() {
               circularCrop
               className="max-h-[50vh]"
             >
-              <img ref={imgCropRef} src={cropImageSrc} alt="Crop" style={{ maxHeight: "50vh", width: "auto" }} />
+              <img ref={imgCropRef} src={cropImageSrc} alt="Crop" style={{ maxHeight: "50vh", width: "auto" }} onLoad={onImageLoad} />
             </ReactCrop>
             <div className="flex gap-2 mt-3">
               <button type="button" onClick={() => { URL.revokeObjectURL(cropImageSrc); setCropImageSrc(null); setCrop(null); }} className="flex-1 py-2 rounded-xl border border-gray-500/50 text-gray-300">Cancel</button>

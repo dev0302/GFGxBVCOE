@@ -21,10 +21,10 @@ function isFileTypeSupported(supportedTypes, fileType) {
 }
 
 // Upload file to Cloudinary
-async function uploadFileToCloudinary(file, folder, quality) {
+async function uploadFileToCloudinary(file, folder, quality, publicId = null) {
   const options = {
     folder,
-    public_id: file.name.split(".")[0],
+    public_id: publicId ?? file.name.split(".")[0],
     resource_type: "auto",
   };
   if (quality) {
@@ -35,7 +35,7 @@ async function uploadFileToCloudinary(file, folder, quality) {
 
 exports.cloudinaryConnect = cloudinaryConnect;
 
-exports.imageUpload = async (file, folder, quality) => {
+exports.imageUpload = async (file, folder, quality, publicId = null) => {
   try {
     if (!file) throw new Error("No file provided for upload.");
     if (!file.name || !file.name.includes("."))
@@ -51,7 +51,7 @@ exports.imageUpload = async (file, folder, quality) => {
       throw new Error(`.${fileType} files are not supported. Allowed: ${supportedTypes.join(", ")}`);
     }
 
-    const response = await uploadFileToCloudinary(file, folder, quality);
+    const response = await uploadFileToCloudinary(file, folder, quality, publicId);
     return response;
   } catch (error) {
     throw new Error(error.message || "Failed to upload image to Cloudinary.");
