@@ -181,7 +181,7 @@ exports.signup = async (req, res) => {
       expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "none", // 🔥 REQUIRED for cross-site
+      // sameSite: "none", // 🔥 REQUIRED for cross-site
     };
     res.cookie("Token", token, options);
     return res.status(201).json({
@@ -242,7 +242,7 @@ exports.login = async (req, res) => {
       expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "none", // 🔥 REQUIRED for cross-site
+      // sameSite: "none", // 🔥 REQUIRED for cross-site
     };
     res.cookie("Token", token, options).status(200).json({
       success: true,
@@ -440,7 +440,10 @@ exports.me = async (req, res) => {
 
 exports.logout = (req, res) => {
   res
-    .cookie("Token", "", { expires: new Date(0), httpOnly: true, sameSite: "lax" })
+    .clearCookie("Token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production"
+    })
     .status(200)
     .json({ success: true, message: "Logged out." });
 };
