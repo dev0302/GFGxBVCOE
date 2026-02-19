@@ -160,9 +160,9 @@ export default function ManageTeam({
     }
     try {
       let toUse = file;
-      if (file.size > 500 * 1024) {
+      if (file.size > 200 * 1024) {
         toUse = await imageCompression(file, {
-          maxSizeMB: 0.5,
+          maxSizeMB: 0.2,
           maxWidthOrHeight: 1200,
         });
       }
@@ -194,9 +194,9 @@ export default function ManageTeam({
     try {
       let blob = await getCroppedImg(imageEl, cropPx);
       if (!blob) return;
-      if (blob.size > 500 * 1024) {
+      if (blob.size > 200 * 1024) {
         const f = new File([blob], "photo.jpg", { type: "image/jpeg" });
-        blob = await imageCompression(f, { maxSizeMB: 0.5 });
+        blob = await imageCompression(f, { maxSizeMB: 0.2 });
       }
       setPhotoUploading(true);
       const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
@@ -1151,7 +1151,7 @@ export default function ManageTeam({
                           />
                         </label>
                         <span className="text-xs text-gray-500">
-                          Max 500KB (auto compress) · then crop
+                          Max 200KB (auto compress) · then crop
                         </span>
                       </div>
                       <input
