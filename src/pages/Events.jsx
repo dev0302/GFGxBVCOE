@@ -123,7 +123,7 @@ const Events = () => {
             {allEvents.map((event) => (
               <div
                 key={event.id}
-                className="glowing-container w-86% mx-auto md:w-full"
+                className="glowing-container w-[86%] mx-auto md:w-full"
                 style={{ height: "100%", borderRadius: "1.25rem" }}
               >
                 <div className="bg-[#2a2a3d] rounded-2xl shadow-lg overflow-hidden transition-all duration-300 group h-full w-full flex flex-col">
