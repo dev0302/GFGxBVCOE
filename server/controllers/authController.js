@@ -42,19 +42,6 @@ exports.sendOTP = async (req, res) => {
       });
     }
 
-    const isTesting = department.trim() === "Testing";
-    if (!isTesting) {
-      const config = await SignupConfig.findOne({
-        department: department.trim(),
-        allowedEmails: email.trim().toLowerCase(),
-      });
-      if (!config) {
-        return res.status(403).json({
-          success: false,
-          message: "This email is not allowed to sign up for the selected department.",
-        });
-      }
-    }
 
     await OTP.collection.createIndex({ otp: 1 }, { unique: true }).catch(() => { });
 
@@ -78,7 +65,7 @@ exports.sendOTP = async (req, res) => {
     }
 
     const htmlContent = emailVerificationTemplate(otp);
-    console.log(`[OTP] For ${emailNorm}: ${otp}`);
+    
     await mailSender(emailNorm, "GFGxBVCOE – Signup OTP", htmlContent);
 
     return res.status(200).json({
