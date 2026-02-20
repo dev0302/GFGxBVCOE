@@ -685,7 +685,8 @@ export default function ManageTeam({
                       onClick={() => setAddMenuOpen(false)}
                       aria-hidden
                     />
-                    <div className="absolute left-1/2 -translate-x-1/2 sm:left-auto sm:right-0 sm:translate-x-0 mt-2 w-56 rounded-xl darkthemebg border border-gray-500/30 shadow-xl py-1 z-50">
+                    <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-56 rounded-xl darkthemebg border border-gray-500/30 shadow-xl py-1 z-50">
+
                       <button
                         type="button"
                         onClick={() => {
