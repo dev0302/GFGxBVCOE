@@ -42,18 +42,21 @@ exports.sendOTP = async (req, res) => {
       });
     }
 
-    const config = await SignupConfig.findOne({
-      department: department.trim(),
-      allowedEmails: email.trim().toLowerCase(),
-    });
-    if (!config) {
-      return res.status(403).json({
-        success: false,
-        message: "This email is not allowed to sign up for the selected department.",
+    const isTesting = department.trim() === "Testing";
+    if (!isTesting) {
+      const config = await SignupConfig.findOne({
+        department: department.trim(),
+        allowedEmails: email.trim().toLowerCase(),
       });
+      if (!config) {
+        return res.status(403).json({
+          success: false,
+          message: "This email is not allowed to sign up for the selected department.",
+        });
+      }
     }
 
-    await OTP.collection.createIndex({ otp: 1 }, { unique: true }).catch(() => {});
+    await OTP.collection.createIndex({ otp: 1 }, { unique: true }).catch(() => { });
 
     let otp;
     let otpBody;
@@ -75,6 +78,7 @@ exports.sendOTP = async (req, res) => {
     }
 
     const htmlContent = emailVerificationTemplate(otp);
+    console.log(`[OTP] For ${emailNorm}: ${otp}`);
     await mailSender(emailNorm, "GFGxBVCOE – Signup OTP", htmlContent);
 
     return res.status(200).json({
@@ -127,15 +131,18 @@ exports.signup = async (req, res) => {
       });
     }
 
-    const config = await SignupConfig.findOne({
-      department: accountType.trim(),
-      allowedEmails: emailNorm,
-    });
-    if (!config) {
-      return res.status(403).json({
-        success: false,
-        message: "This email is not allowed to sign up for the selected department.",
+    const isTesting = accountType.trim() === "Testing";
+    if (!isTesting) {
+      const config = await SignupConfig.findOne({
+        department: accountType.trim(),
+        allowedEmails: emailNorm,
       });
+      if (!config) {
+        return res.status(403).json({
+          success: false,
+          message: "This email is not allowed to sign up for the selected department.",
+        });
+      }
     }
 
     const recentOTP = await OTP.find({ email: emailNorm }).sort({ createdAt: -1 }).limit(1);
@@ -585,7 +592,7 @@ exports.enrichProfile = async (req, res) => {
 
     if (!predefined) {
       console.log("No predefined profile found");
-      
+
       sendSSE(res, "no_predefined", "No predefined profile found.");
       sendSSE(res, "done", "");
       return res.end();
@@ -652,7 +659,7 @@ exports.enrichProfile = async (req, res) => {
     }
 
     console.log("All fineeeeee");
-    
+
 
     sendSSE(res, "done", "Profile updated.");
     res.end();
