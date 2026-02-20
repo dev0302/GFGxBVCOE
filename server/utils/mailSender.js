@@ -28,7 +28,6 @@ const mailSender = async (email, title, body) => {
       console.error("Brevo error:", data.message || response.statusText);
       return null;
     }
-    console.log("Brevo API Success:", data.messageId);
     return data;
   } catch (error) {
     console.error("mailSender error:", error.message);

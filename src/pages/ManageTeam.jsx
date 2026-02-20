@@ -186,11 +186,11 @@ export default function ManageTeam({
         : crop.unit === "px"
           ? { x: crop.x, y: crop.y, width: crop.width, height: crop.height }
           : {
-              x: (crop.x / 100) * nw,
-              y: (crop.y / 100) * nh,
-              width: (crop.width / 100) * nw,
-              height: (crop.height / 100) * nh,
-            };
+            x: (crop.x / 100) * nw,
+            y: (crop.y / 100) * nh,
+            width: (crop.width / 100) * nw,
+            height: (crop.height / 100) * nh,
+          };
     try {
       let blob = await getCroppedImg(imageEl, cropPx);
       if (!blob) return;
@@ -391,7 +391,7 @@ export default function ManageTeam({
       const pre = row.predefinedProfile || {};
       const name = row.registered
         ? [u?.firstName, u?.lastName].filter(Boolean).join(" ").trim() ||
-          row.email
+        row.email
         : pre?.name || row.email;
       return {
         name,
@@ -483,7 +483,7 @@ export default function ManageTeam({
           return d;
         localStorage.removeItem(key);
       }
-    } catch (_) {}
+    } catch (_) { }
     return null;
   };
 
@@ -499,7 +499,7 @@ export default function ManageTeam({
             INVITE_LINK_STORAGE_PREFIX + displayDepartment,
             JSON.stringify(res.data),
           );
-        } catch (_) {}
+        } catch (_) { }
         toast.success("Invite link created. Valid for 12 hours.");
       }
     } catch (e) {
@@ -528,7 +528,7 @@ export default function ManageTeam({
           localStorage.removeItem(
             INVITE_LINK_STORAGE_PREFIX + displayDepartment,
           );
-        } catch (_) {}
+        } catch (_) { }
         toast.success("Link suspended. It can no longer be used.");
       })
       .catch((e) => toast.error(e.message || "Failed to suspend link"))
@@ -685,7 +685,8 @@ export default function ManageTeam({
                       onClick={() => setAddMenuOpen(false)}
                       aria-hidden
                     />
-                    <div className="absolute right-0 mt-2 w-56 rounded-xl darkthemebg border border-gray-500/30 shadow-xl py-1 z-50">
+                    <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-56 rounded-xl darkthemebg border border-gray-500/30 shadow-xl py-1 z-50">
+
                       <button
                         type="button"
                         onClick={() => {
@@ -885,15 +886,15 @@ export default function ManageTeam({
                         const pre = row.predefinedProfile || {};
                         const name = row.registered
                           ? [u?.firstName, u?.lastName]
-                              .filter(Boolean)
-                              .join(" ")
-                              .trim() || row.email
+                            .filter(Boolean)
+                            .join(" ")
+                            .trim() || row.email
                           : pre?.name || row.email;
                         const tagLabel = row.registered
                           ? profile?.position ||
-                            getAccountTypeLabel(u?.accountType) ||
-                            u?.accountType ||
-                            ""
+                          getAccountTypeLabel(u?.accountType) ||
+                          u?.accountType ||
+                          ""
                           : null;
                         const photoUrl = row.registered
                           ? u?.image
