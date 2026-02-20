@@ -145,6 +145,22 @@ exports.addMember = async (req, res) => {
       return res.status(400).json({ success: false, message: "Name is required." });
     }
 
+    const emailNorm = (email || "").trim().toLowerCase();
+    if (emailNorm) {
+      // 1. Check if user already exists in User collection
+      const existingUser = await User.findOne({ email: emailNorm });
+      if (existingUser) {
+        return res.status(400).json({ success: false, message: "This user is already registered." });
+      }
+
+      // 2. Check if already in the team for this department
+      const Model = getTeamMemberModel(department);
+      const existingMember = await Model.findOne({ email: emailNorm });
+      if (existingMember) {
+        return res.status(400).json({ success: false, message: "This email is already added to this department." });
+      }
+    }
+
     const Model = getTeamMemberModel(department);
     const member = await Model.create({
       name: (name || "").trim(),
@@ -477,6 +493,22 @@ exports.addMemberByInviteLink = async (req, res) => {
 
     if (!name || !name.trim()) {
       return res.status(400).json({ success: false, message: "Name is required." });
+    }
+
+    //  Check if user already exists in User collection
+    const emailNorm = (email || "").trim().toLowerCase();
+    if (emailNorm) {
+
+      const existingUser = await User.findOne({ email: emailNorm });
+      if (existingUser) {
+        return res.status(400).json({ success: false, message: "You are already registered." });
+      }
+
+      const Model = getTeamMemberModel(link.department);
+      const existingMember = await Model.findOne({ email: emailNorm });
+      if (existingMember) {
+        return res.status(400).json({ success: false, message: "You are already registered in this department." });
+      }
     }
 
     const Model = getTeamMemberModel(link.department);
