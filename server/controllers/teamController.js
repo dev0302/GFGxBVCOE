@@ -501,7 +501,7 @@ exports.addMemberByInviteLink = async (req, res) => {
 
       const existingUser = await User.findOne({ email: emailNorm });
       if (existingUser) {
-        return res.status(400).json({ success: false, message: "You are already registered." });
+        return res.status(400).json({ success: false, message: "You are already registered as a Core/Head member. This form is only for Executive applications." });
       }
 
       const Model = getTeamMemberModel(link.department);

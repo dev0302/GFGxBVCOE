@@ -224,7 +224,7 @@ export default function JoinTeamByLink() {
               Join the team
             </h1>
             <p className="text-gray-400 text-sm mb-6">
-              You’re joining <span className="text-cyan-300 font-medium">{department}</span>. Fill in your details below.
+              You’re joining <span className="text-cyan-300 font-medium">{department}</span> <span className="text-cyan-300 font-medium">department</span>. Fill in your details below.
             </p>
             <form onSubmit={handleSubmit} className="space-y-3">
               {COLS.map((k) => (
@@ -294,7 +294,7 @@ export default function JoinTeamByLink() {
                       value={form[k]}
                       onChange={(e) => setForm((p) => ({ ...p, [k]: e.target.value }))}
                       className={inputClass}
-                      placeholder={LABELS[k]}
+                      placeholder="e.g. CSE-4"
                       required
                     />
                   ) : k === "non_tech_society" ? (
@@ -303,7 +303,7 @@ export default function JoinTeamByLink() {
                       value={form[k]}
                       onChange={(e) => setForm((p) => ({ ...p, [k]: e.target.value }))}
                       className={inputClass}
-                      placeholder={LABELS[k]}
+                      placeholder="if any"
                     />
                   ) : (
                     <input
@@ -351,7 +351,10 @@ export default function JoinTeamByLink() {
             </ReactCrop>
             <div className="flex gap-2 mt-3">
               <button type="button" onClick={() => { URL.revokeObjectURL(cropImageSrc); setCropImageSrc(null); setCrop(null); }} className="flex-1 py-2 rounded-xl border border-gray-500/50 text-gray-300">Cancel</button>
-              <button type="button" onClick={handleCropApply} disabled={photoUploading} className="flex-1 py-2 rounded-xl bg-cyan-600 text-white font-medium disabled:opacity-50">{photoUploading ? <Spinner className="size-4 text-gray-400" /> : "Apply & upload"}</button>
+              <button type="button" onClick={handleCropApply} disabled={photoUploading} className="flex-1 py-2 rounded-xl bg-cyan-600 text-white font-medium disabled:opacity-50">{photoUploading ? <div className="flex items-center justify-center h-full w-full gap-2">
+  <Spinner className="size-4 text-white animate-spin" />
+  <span className="text-white text-sm font-medium">Uploading</span>
+</div> : "Apply & upload"}</button>
             </div>
           </div>
         </div>
