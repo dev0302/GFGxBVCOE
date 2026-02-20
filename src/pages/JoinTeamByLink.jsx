@@ -10,7 +10,7 @@ import "react-image-crop/dist/ReactCrop.css";
 import { Spinner } from "@/components/ui/spinner";
 
 
-const MAX_FILE_SIZE = 200 * 1024 * 1024; // 200MB
+const MAX_FILE_SIZE = 200 * 1024 ; // 200kB
 
 const COLS = [
   "name",
@@ -50,17 +50,31 @@ export default function JoinTeamByLink() {
   const cropPxRef = useRef(null);
 
   const getCroppedImg = (imageEl, cropPx) => {
-    if (!imageEl || !cropPx?.width || !cropPx?.height) return Promise.resolve(null);
+    if (!imageEl || !cropPx?.width || !cropPx?.height)
+      return Promise.resolve(null);
+
     const canvas = document.createElement("canvas");
     canvas.width = cropPx.width;
     canvas.height = cropPx.height;
     const ctx = canvas.getContext("2d");
     if (!ctx) return Promise.resolve(null);
+
+    // Scale factors between displayed size and natural size
+    const scaleX = imageEl.naturalWidth / imageEl.width;
+    const scaleY = imageEl.naturalHeight / imageEl.height;
+
     ctx.drawImage(
       imageEl,
-      cropPx.x, cropPx.y, cropPx.width, cropPx.height,
-      0, 0, cropPx.width, cropPx.height
+      cropPx.x * scaleX,
+      cropPx.y * scaleY,
+      cropPx.width * scaleX,
+      cropPx.height * scaleY,
+      0,
+      0,
+      cropPx.width,
+      cropPx.height,
     );
+
     return new Promise((resolve) => {
       canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.9);
     });
@@ -91,7 +105,7 @@ export default function JoinTeamByLink() {
       return;
     }
     if (file.size > MAX_FILE_SIZE) {
-      toast.error(`Image must be under 200MB (current: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+      toast.error(`Image must be under 200kB (current: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
       return;
     }
     try {
@@ -253,7 +267,7 @@ export default function JoinTeamByLink() {
                             disabled={photoUploading}
                           />
                         </label>
-                        <span className="text-xs text-gray-500">Max 200MB · then crop</span>
+                        <span className="text-xs text-gray-500">Max 200KB · then crop</span>
                       </div>
                       <input
                         type="text"
