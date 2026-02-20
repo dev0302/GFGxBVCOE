@@ -16,7 +16,7 @@ export function setAuthToken(token) {
   try {
     if (token) sessionStorage.setItem(AUTH_TOKEN_KEY, token);
     else sessionStorage.removeItem(AUTH_TOKEN_KEY);
-  } catch (_) {}
+  } catch (_) { }
 }
 
 /** Clear stored token on logout. */
@@ -269,6 +269,7 @@ export const AUTH_DEPARTMENTS = [
   'Content and Documentation',
   'Photography and Videography',
   'Sponsorship and Marketing',
+  'Testing',
 ];
 
 /** Display label for account type (e.g. ADMIN → "Faculty Incharge") */
@@ -402,7 +403,7 @@ export function enrichProfileSSE({ onMessage }) {
             try {
               const data = JSON.parse(line.slice(6));
               onMessage(data);
-            } catch (_) {}
+            } catch (_) { }
           }
         }
         return read();
