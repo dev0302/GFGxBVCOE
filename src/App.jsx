@@ -8,6 +8,7 @@ import EventDashboardLayout from "./components/EventDashboard/EventDashboardLayo
 import UploadNewEvent from "./pages/eventDashboard/UploadNewEvent"
 import GenerateLink from "./pages/eventDashboard/GenerateLink"
 import DepartmentsAllowed from "./pages/eventDashboard/DepartmentsAllowed"
+import ForceDeletePermissions from "./pages/eventDashboard/ForceDeletePermissions"
 import ManageEvents from "./pages/eventDashboard/ManageEvents"
 import UpcomingEventPage from "./pages/eventDashboard/UpcomingEventPage"
 import Navbar from "./components/Navbar"
@@ -62,6 +63,7 @@ function App() {
               <Route path="upload" element={<UploadNewEvent />} />
               <Route path="generate-link" element={<GenerateLink />} />
               <Route path="departments" element={<DepartmentsAllowed />} />
+              <Route path="force-delete" element={<ForceDeletePermissions />} />
               <Route path="manage" element={<ManageEvents />} />
               <Route path="upcoming" element={<UpcomingEventPage />} />
             </Route>

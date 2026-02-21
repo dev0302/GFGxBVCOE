@@ -167,6 +167,14 @@ export async function cancelScheduledDelete(id) {
   return res.json();
 }
 
+/** Force-delete event immediately (no 10-day delay). Allowed only for Faculty Incharge and departments they allow. */
+export async function forceDeleteEvent(id) {
+  const res = await authFetch(`/api/v1/events/${id}/force`, { method: 'DELETE' });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to force-delete event');
+  return data;
+}
+
 export async function updateEvent(id, formData) {
   const res = await fetch(`${BASE}/api/v1/events/${id}`, {
     method: 'PUT',
@@ -240,6 +248,39 @@ export async function removeEventUploadDepartment(department) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Failed to remove department');
   return data;
+}
+
+/** Force-delete permissions: { allowed, canManage, data? }. Only Faculty Incharge can manage (canManage). */
+export async function getForceDeleteAllowed() {
+  const res = await authFetch('/api/v1/events/force-delete-allowed');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch force-delete permissions');
+  return data;
+}
+
+export async function addForceDeleteDepartment(department) {
+  const res = await authFetch('/api/v1/events/force-delete-allowed/add', {
+    method: 'POST',
+    body: JSON.stringify({ department }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to add');
+  return data;
+}
+
+export async function removeForceDeleteDepartment(department) {
+  const res = await authFetch('/api/v1/events/force-delete-allowed/remove', {
+    method: 'POST',
+    body: JSON.stringify({ department }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to remove');
+  return data;
+}
+
+/** Faculty Incharge, Chairperson, Vice-Chairperson can see the Force delete permissions sidebar and page. */
+export function canManageForceDeleteConfig(accountType) {
+  return accountType === 'ADMIN' || accountType === 'Chairperson' || accountType === 'Vice-Chairperson';
 }
 
 const authFetch = (url, options = {}) => {
