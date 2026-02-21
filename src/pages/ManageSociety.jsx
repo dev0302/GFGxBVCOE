@@ -444,7 +444,8 @@ export default function ManageSociety() {
                           const u = item.data;
                           const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "—";
                           const src = u.image || avatarPlaceholder(name);
-                          const tagLabel = (u.additionalDetails && u.additionalDetails.position) || getAccountTypeLabel(u.accountType) || u.accountType || "Member";
+                          const position = u.additionalDetails?.position && String(u.additionalDetails.position).trim();
+                          const tagLabel = position || getAccountTypeLabel(u.accountType) || u.accountType || "Member";
                           
                           content = (
                             <button
@@ -531,7 +532,7 @@ export default function ManageSociety() {
                           const name = m.name || m.email || "—";
                           const photoUrl = m.photo || m.image_drive_link;
                           const src = photoUrl ? photoPreviewUrl(photoUrl) : avatarPlaceholder(name);
-                          
+                          const tagLabel = (m.position && String(m.position).trim()) || item.department || "Team";
                           content = (
                             <button
                               type="button"
@@ -549,7 +550,7 @@ export default function ManageSociety() {
                                 <span className="block truncate text-xs text-gray-500">{m.email}</span>
                               </div>
                               <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                                Team
+                                {tagLabel}
                               </span>
                             </button>
                           );
