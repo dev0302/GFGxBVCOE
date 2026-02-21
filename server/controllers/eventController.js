@@ -786,7 +786,7 @@ const getUpcomingEvents = async (req, res) => {
 
 const createUpcomingEvent = async (req, res) => {
   try {
-    const { title, date, location, time, targetAudience, otherLinks, otherDocs } = req.body;
+    const { title, date, description, location, time, targetAudience, otherLinks, otherDocs } = req.body;
     if (!title?.trim() || !date) {
       return res.status(400).json({ success: false, message: "Title and date are required." });
     }
@@ -798,6 +798,7 @@ const createUpcomingEvent = async (req, res) => {
     const event = await UpcomingEvent.create({
       title: title.trim(),
       date: new Date(date),
+      description: (description || "").trim(),
       poster,
       location: (location || "").trim(),
       time: (time || "").trim(),
@@ -815,7 +816,7 @@ const createUpcomingEvent = async (req, res) => {
 const updateUpcomingEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, date, location, time, targetAudience, otherLinks, otherDocs } = req.body;
+    const { title, date, description, location, time, targetAudience, otherLinks, otherDocs } = req.body;
     const existing = await UpcomingEvent.findById(id);
     if (!existing) {
       return res.status(404).json({ success: false, message: "Upcoming event not found." });
@@ -828,6 +829,7 @@ const updateUpcomingEvent = async (req, res) => {
     const updates = {
       ...(title !== undefined && { title: title.trim() }),
       ...(date !== undefined && { date: new Date(date) }),
+      ...(description !== undefined && { description: (description || "").trim() }),
       poster,
       ...(location !== undefined && { location: (location || "").trim() }),
       ...(time !== undefined && { time: (time || "").trim() }),

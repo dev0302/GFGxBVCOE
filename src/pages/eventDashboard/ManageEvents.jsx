@@ -3,9 +3,11 @@ import { getEventsForManage, deleteEvent, cancelScheduledDelete, forceDeleteEven
 import { toast } from "sonner";
 import { SectionTitle } from "../../components/EventDashboard/SectionTitle";
 import EditEventModal from "../../components/EventDashboard/EditEventModal";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function ManageEvents() {
   const [managedEvents, setManagedEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
   const [deleteConfirmEv, setDeleteConfirmEv] = useState(null);
   const [forceDeleteConfirmEv, setForceDeleteConfirmEv] = useState(null);
@@ -15,11 +17,13 @@ export default function ManageEvents() {
   const [editingEv, setEditingEv] = useState(null);
 
   const loadManagedEvents = useCallback(() => {
+    setLoading(true);
     getEventsForManage()
       .then((res) => {
         if (res.success && Array.isArray(res.data)) setManagedEvents(res.data);
       })
-      .catch(() => setManagedEvents([]));
+      .catch(() => setManagedEvents([]))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -95,12 +99,27 @@ export default function ManageEvents() {
 
         <section className="bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl">
           <SectionTitle icon="⚙️">Events list</SectionTitle>
-          {managedEvents.length === 0 ? (
+          {loading ? (
+            <div className="min-h-[180px] flex items-center justify-center">
+              <Spinner className="size-5 text-gray-400" />
+            </div>
+          ) : managedEvents.length === 0 ? (
             <p className="text-gray-500 py-4 sm:py-6 text-center text-sm sm:text-base rounded-xl bg-[#252536]/50 border border-gray-500/20">No uploaded events yet.</p>
           ) : (
             <ul className="space-y-2 sm:space-y-3">
               {managedEvents.map((ev) => (
-                <li key={ev._id} className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-2 sm:gap-3 px-3 py-3 sm:px-5 sm:py-4 rounded-lg sm:rounded-xl bg-[#252536] border border-gray-500/20 hover:border-gray-500/40 transition-colors">
+                <li key={ev._id} className="relative flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-2 sm:gap-3 px-3 py-3 pr-24 sm:px-5 sm:py-4 sm:pr-28 rounded-lg sm:rounded-xl bg-[#252536] border border-gray-500/20 hover:border-gray-500/40 transition-colors">
+                  {canForceDelete && (
+                    <button
+                      type="button"
+                      onClick={() => openForceDeleteConfirm(ev)}
+                      disabled={forceDeletingId === ev._id}
+                      className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 px-2 py-1 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] rounded-md bg-rose-600/40 text-white hover:bg-rose-600/80 font-medium disabled:opacity-50"
+                      title="Delete permanently now (no 10-day delay)"
+                    >
+                      {forceDeletingId === ev._id ? "Deleting…" : "Force delete"}
+                    </button>
+                  )}
                   <div className="min-w-0 flex-1 order-1">
                     <span className="font-medium text-white block truncate text-sm sm:text-base">{ev.title}</span>
                     <span className="text-xs text-gray-400 block mt-0.5 sm:mt-0">
@@ -112,11 +131,6 @@ export default function ManageEvents() {
                     <button type="button" onClick={() => setEditingEv(ev)} className="px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 font-medium">
                       Edit
                     </button>
-                    {canForceDelete && (
-                      <button type="button" onClick={() => openForceDeleteConfirm(ev)} disabled={forceDeletingId === ev._id} className="px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-lg bg-rose-600/80 text-white hover:bg-rose-600 font-medium disabled:opacity-50" title="Delete permanently now (no 10-day delay)">
-                        {forceDeletingId === ev._id ? "Deleting…" : "Force delete"}
-                      </button>
-                    )}
                     {ev.scheduledDeleteAt ? (
                       <button type="button" onClick={() => handleCancelScheduledDelete(ev)} disabled={cancellingId === ev._id} className="px-2.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 font-medium disabled:opacity-50">
                         {cancellingId === ev._id ? "Cancelling…" : "Cancel deletion"}

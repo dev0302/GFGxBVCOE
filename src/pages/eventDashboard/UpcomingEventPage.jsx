@@ -13,6 +13,7 @@ import { Spinner } from "@/components/ui/spinner";
 const initialForm = {
   title: "",
   date: "",
+  description: "",
   poster: "",
   location: "",
   time: "",
@@ -58,6 +59,7 @@ export default function UpcomingEventPage() {
     setForm({
       title: item.title || "",
       date: item.date ? new Date(item.date).toISOString().slice(0, 10) : "",
+      description: item.description || "",
       poster: item.poster || "",
       location: item.location || "",
       time: item.time || "",
@@ -91,6 +93,7 @@ export default function UpcomingEventPage() {
       const fd = new FormData();
       fd.append("title", form.title.trim());
       fd.append("date", form.date);
+      if (form.description?.trim()) fd.append("description", form.description.trim());
       if (form.location?.trim()) fd.append("location", form.location.trim());
       if (form.time?.trim()) fd.append("time", form.time.trim());
       if (form.targetAudience?.trim()) fd.append("targetAudience", form.targetAudience.trim());
@@ -166,7 +169,12 @@ export default function UpcomingEventPage() {
                     )}
                     <div>
                       <span className="font-medium text-white block truncate">{item.title}</span>
-                      <span className="text-xs text-gray-400">{formatDate(item.date)}</span>
+                      <span className="text-xs text-gray-400 block">{formatDate(item.date)}</span>
+                      {item.description && (
+                        <span className="text-xs text-gray-500 line-clamp-2 max-w-xl">
+                          {item.description}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -234,6 +242,16 @@ export default function UpcomingEventPage() {
                   onChange={(e) => setForm((p) => ({ ...p, date: e.target.value }))}
                   className="w-full px-3 py-2 rounded-lg bg-[#252536] border border-gray-500/40 text-white focus:border-cyan-500 outline-none text-sm"
                   required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1">Description (optional)</label>
+                <textarea
+                  value={form.description}
+                  onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg bg-[#252536] border border-gray-500/40 text-white placeholder-gray-500 focus:border-cyan-500 outline-none text-sm min-h-[90px]"
+                  placeholder="Write a short description for the upcoming event"
+                  rows={3}
                 />
               </div>
               <div>
