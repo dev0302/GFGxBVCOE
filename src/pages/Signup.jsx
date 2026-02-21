@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { sendOTP, signup, AUTH_DEPARTMENTS, getAccountTypeLabel, enrichProfileSSE, getMe } from "../services/api";
 import { toast } from "sonner";
+
 import { useAuth } from "../context/AuthContext";
 import { SpinnerCustom } from "../components/SpinnerCustom";
+import { OtpInput } from "@/components/OtpInput";
 
 const Signup = () => {
   const [step, setStep] = useState(1);
@@ -154,18 +156,18 @@ const Signup = () => {
               <label className={labelClass}>Department</label>
               <input type="text" value={getAccountTypeLabel(department) || department} className={inputClass + " opacity-80"} readOnly />
             </div>
+            {/* Replace the old OTP input with this */}
             <div>
-              <label className={labelClass}>OTP *</label>
-              <input
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                className={inputClass}
-                placeholder="Enter 6-digit OTP"
-                maxLength={6}
-                required
-              />
-            </div>
+        <label className={labelClass}>Verification Code *</label>
+        <OtpInput 
+          value={otp} 
+          onChange={setOtp} 
+          disabled={loading} 
+        />
+        <p className="text-center text-[11px] text-gray-500 font-medium tracking-wide">
+          WE'VE SENT A 6-DIGIT CODE TO YOUR EMAIL
+        </p>
+      </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelClass}>First name *</label>
