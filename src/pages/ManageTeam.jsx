@@ -46,6 +46,7 @@ import {
   MemberDetailModal,
   UserDetailModal,
   PredefinedOnlyDetailModal,
+  ActivityLogModal,
 } from "../components/Search";
 import { createPortal } from "react-dom";
 import imageCompression from "browser-image-compression";
@@ -172,6 +173,7 @@ export default function ManageTeam({
   const [societyList, setSocietyList] = useState([]);
   const [selectedDetailItem, setSelectedDetailItem] = useState(null);
   const [sendingInviteTo, setSendingInviteTo] = useState(null);
+  const [activityLogUser, setActivityLogUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
@@ -2003,6 +2005,16 @@ export default function ManageTeam({
           <UserDetailModal
             user={selectedDetailItem.data}
             onClose={() => setSelectedDetailItem(null)}
+            onViewLogs={(userId, userName) => setActivityLogUser({ id: userId, name: userName })}
+          />,
+          document.body,
+        )}
+      {activityLogUser &&
+        createPortal(
+          <ActivityLogModal
+            userId={activityLogUser.id}
+            userName={activityLogUser.name}
+            onClose={() => setActivityLogUser(null)}
           />,
           document.body,
         )}

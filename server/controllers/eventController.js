@@ -4,6 +4,7 @@ const EventUploadLink = require("../models/EventUploadLink");
 const UpcomingEvent = require("../models/UpcomingEvent");
 const { CONFIG_KEY, CORE_EVENT_UPLOAD_ROLES, FORCE_DELETE_CONFIG_KEY, CORE_FORCE_DELETE_ROLES } = require("../models/EventUploadConfig");
 const { imageUpload, videoUpload, deleteImageByUrl, deleteAssetByUrl } = require("../config/cloudinary");
+const { logActivity } = require("../utils/activityLog");
 
 const UPLOAD_LINK_EXPIRY_HOURS = 12;
 
@@ -301,6 +302,9 @@ const createUploadLink = async (req, res) => {
     const expiresAt = new Date(Date.now() + UPLOAD_LINK_EXPIRY_HOURS * 60 * 60 * 1000);
     const token = EventUploadLink.generateToken();
     await EventUploadLink.create({ token, expiresAt });
+    if (req.user?.id) {
+      await logActivity(req.user.id, "event_upload_link_create", "event", {}, "", "EventUploadLink");
+    }
     return res.status(201).json({
       success: true,
       message: "Link created. Valid for 12 hours.",
@@ -321,6 +325,9 @@ const suspendUploadLink = async (req, res) => {
     const result = await EventUploadLink.deleteOne({ token });
     if (result.deletedCount === 0) {
       return res.status(404).json({ success: false, message: "Link not found or already suspended." });
+    }
+    if (req.user?.id) {
+      await logActivity(req.user.id, "event_upload_link_suspend", "event", {}, "", "EventUploadLink");
     }
     return res.status(200).json({ success: true, message: "Link suspended." });
   } catch (error) {
@@ -534,6 +541,9 @@ const addEventUploadDepartment = async (req, res) => {
     doc.extraAllowedDepartments.push(dept);
     await doc.save();
     const extra = doc.extraAllowedDepartments.filter(Boolean);
+    if (req.user?.id) {
+      await logActivity(req.user.id, "event_upload_permission_add", "permission", { department: dept }, "", "EventUploadConfig");
+    }
     return res.status(200).json({
       success: true,
       message: "Department added.",
@@ -574,6 +584,9 @@ const removeEventUploadDepartment = async (req, res) => {
     doc.extraAllowedDepartments = doc.extraAllowedDepartments.filter((d) => d !== dept);
     await doc.save();
     const extra = doc.extraAllowedDepartments.filter(Boolean);
+    if (req.user?.id) {
+      await logActivity(req.user.id, "event_upload_permission_remove", "permission", { department: dept }, "", "EventUploadConfig");
+    }
     return res.status(200).json({
       success: true,
       message: "Department removed.",
@@ -637,7 +650,11 @@ const forceDeleteEvent = async (req, res) => {
       });
     }
     await deleteEventGalleryFromCloudinary(event);
+    const title = event.title;
     await Event.findByIdAndDelete(id);
+    if (req.user?.id) {
+      await logActivity(req.user.id, "event_force_delete", "event", { title }, id, "Event");
+    }
     return res.status(200).json({
       success: true,
       message: "Event deleted permanently",
@@ -710,6 +727,9 @@ const addForceDeleteDepartment = async (req, res) => {
     doc.extraAllowedDepartments.push(dept);
     await doc.save();
     const extra = doc.extraAllowedDepartments.filter(Boolean);
+    if (req.user?.id) {
+      await logActivity(req.user.id, "force_delete_permission_add", "permission", { department: dept }, "", "EventUploadConfig");
+    }
     return res.status(200).json({
       success: true,
       message: "Department can now force-delete events.",
@@ -750,6 +770,9 @@ const removeForceDeleteDepartment = async (req, res) => {
     doc.extraAllowedDepartments = doc.extraAllowedDepartments.filter((d) => d !== dept);
     await doc.save();
     const extra = doc.extraAllowedDepartments.filter(Boolean);
+    if (req.user?.id) {
+      await logActivity(req.user.id, "force_delete_permission_remove", "permission", { department: dept }, "", "EventUploadConfig");
+    }
     return res.status(200).json({
       success: true,
       message: "Department removed from force-delete.",
@@ -806,6 +829,9 @@ const createUpcomingEvent = async (req, res) => {
       otherLinks: (otherLinks || "").trim(),
       otherDocs: (otherDocs || "").trim(),
     });
+    if (req.user?.id) {
+      await logActivity(req.user.id, "upcoming_event_create", "event", { title: event.title }, event._id.toString(), "UpcomingEvent");
+    }
     return res.status(201).json({ success: true, data: event });
   } catch (error) {
     console.error("createUpcomingEvent error:", error);
@@ -838,6 +864,9 @@ const updateUpcomingEvent = async (req, res) => {
       ...(otherDocs !== undefined && { otherDocs: (otherDocs || "").trim() }),
     };
     const event = await UpcomingEvent.findByIdAndUpdate(id, updates, { new: true });
+    if (req.user?.id) {
+      await logActivity(req.user.id, "upcoming_event_update", "event", { title: event?.title }, id, "UpcomingEvent");
+    }
     return res.status(200).json({ success: true, data: event });
   } catch (error) {
     console.error("updateUpcomingEvent error:", error);
@@ -855,7 +884,11 @@ const deleteUpcomingEvent = async (req, res) => {
     if (event.poster) {
       await deleteImageByUrl(event.poster);
     }
+    const title = event.title;
     await UpcomingEvent.findByIdAndDelete(id);
+    if (req.user?.id) {
+      await logActivity(req.user.id, "upcoming_event_delete", "event", { title }, id, "UpcomingEvent");
+    }
     return res.status(200).json({ success: true, message: "Deleted." });
   } catch (error) {
     console.error("deleteUpcomingEvent error:", error);

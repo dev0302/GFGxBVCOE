@@ -1,4 +1,5 @@
 const SignupConfig = require("../models/SignupConfig");
+const { logActivity } = require("../utils/activityLog");
 
 const ALL_DEPARTMENTS = [
   "ADMIN",
@@ -66,6 +67,9 @@ exports.addEmail = async (req, res) => {
     }
     config.allowedEmails.push(emailNorm);
     await config.save();
+    if (req.user?.id) {
+      await logActivity(req.user.id, "signup_config_add", "signup_config", { department: deptTrim, email: emailNorm }, "", "SignupConfig");
+    }
     return res.status(200).json({
       success: true,
       message: "Email added.",
@@ -101,6 +105,9 @@ exports.removeEmail = async (req, res) => {
     }
     config.allowedEmails = config.allowedEmails.filter((e) => e !== emailNorm);
     await config.save();
+    if (req.user?.id) {
+      await logActivity(req.user.id, "signup_config_remove", "signup_config", { department: deptTrim, email: emailNorm }, "", "SignupConfig");
+    }
     return res.status(200).json({
       success: true,
       message: "Email removed.",

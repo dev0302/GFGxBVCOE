@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
-import { getSearchPeople, getAccountTypeLabel, sendSignupInvite } from "../services/api";
+import { getSearchPeople, getAccountTypeLabel, sendSignupInvite, getActivityLogs, isSocietyRole } from "../services/api";
 import { driveLinkToImageUrl, avatarPlaceholder } from "../utils/teamMemberUtils";
-import { Search as SearchIcon, X, Mail } from "react-feather";
+import { Search as SearchIcon, X, Mail, Activity } from "react-feather";
 import "./Search.css";
 import { Spinner } from "./ui/spinner";
 
@@ -266,7 +266,118 @@ export function PredefinedOnlyDetailModal({ predefined, onClose }) {
   );
 }
 
-export function UserDetailModal({ user, onClose }) {
+const ACTION_LOG_LABELS = {
+  invite_link_create: "Created team invite link",
+  invite_link_suspend: "Suspended team invite link",
+  team_member_add: "Added team member",
+  team_member_update: "Updated team member",
+  team_member_delete: "Removed team member",
+  event_upload_link_create: "Created event upload link",
+  event_upload_link_suspend: "Suspended event upload link",
+  event_force_delete: "Force-deleted event",
+  event_upload_permission_add: "Added event upload permission",
+  event_upload_permission_remove: "Removed event upload permission",
+  force_delete_permission_add: "Added force-delete permission",
+  force_delete_permission_remove: "Removed force-delete permission",
+  upcoming_event_create: "Created upcoming event",
+  upcoming_event_update: "Updated upcoming event",
+  upcoming_event_delete: "Deleted upcoming event",
+  signup_config_add: "Added email to signup config",
+  signup_config_remove: "Removed email from signup config",
+};
+
+export function ActivityLogModal({ userId, userName, onClose }) {
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (!userId) return;
+    setLoading(true);
+    getActivityLogs(userId)
+      .then((res) => setLogs(res.data || []))
+      .catch(() => setLogs([]))
+      .finally(() => setLoading(false));
+  }, [userId]);
+
+  const formatDate = (d) => {
+    if (!d) return "—";
+    const date = new Date(d);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const isYesterday = new Date(now.getTime() - 864e5).toDateString() === date.toDateString();
+    const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    if (isToday) return `Today, ${time}`;
+    if (isYesterday) return `Yesterday, ${time}`;
+    return date.toLocaleDateString() + " " + time;
+  };
+
+  const detailSummary = (log) => {
+    const d = log.details || {};
+    const parts = [];
+    if (d.department) parts.push(d.department);
+    if (d.title) parts.push(d.title);
+    if (d.email) parts.push(d.email);
+    if (d.name) parts.push(d.name);
+    return parts.length ? parts.join(" · ") : null;
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[110] flex min-h-full items-center justify-center overflow-hidden overscroll-none p-4 py-8 bg-black/60 backdrop-blur-sm"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Activity log"
+    >
+      <div
+        className="bg-[#1e1e2f] rounded-2xl border border-gray-500/40 shadow-2xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden shrink-0"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 shrink-0">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <Activity className="h-5 w-5 text-cyan-400" />
+            {userName ? `Activity log — ${userName}` : "Activity log"}
+          </h2>
+          <button type="button" onClick={onClose} className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors" aria-label="Close">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 custom-scrollbar">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Spinner className="size-6 text-cyan-400" />
+            </div>
+          ) : logs.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">No activity recorded yet.</p>
+          ) : (
+            <ul className="space-y-0">
+              {logs.map((log, i) => {
+                const label = ACTION_LOG_LABELS[log.action] || log.action;
+                const summary = detailSummary(log);
+                return (
+                  <li
+                    key={log._id || i}
+                    className="flex gap-3 py-3 border-b border-gray-500/20 last:border-0"
+                  >
+                    <div className="shrink-0 w-2 h-2 rounded-full mt-2 bg-cyan-500/80" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-medium">{label}</p>
+                      {summary && <p className="text-gray-400 text-sm mt-0.5">{summary}</p>}
+                      <p className="text-gray-500 text-xs mt-1">{formatDate(log.createdAt)}</p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function UserDetailModal({ user, onClose, onViewLogs }) {
+  const { user: currentUser } = useAuth();
+  const canViewLogs = isSocietyRole(currentUser?.accountType) && onViewLogs;
   if (!user) return null;
   const profile = user.additionalDetails || {};
   const pre = user.predefinedProfile || {};
@@ -404,7 +515,18 @@ export function UserDetailModal({ user, onClose }) {
             </dl>
           </section>
 
-          {/* Predefined profile section hidden for registered users */}
+          {canViewLogs && (
+            <section>
+              <button
+                type="button"
+                onClick={() => onViewLogs(user._id, fullName)}
+                className="w-full flex items-center gap-3 p-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 transition-colors"
+              >
+                <Activity className="h-5 w-5 shrink-0" />
+                <span className="font-medium">View activity log</span>
+              </button>
+            </section>
+          )}
         </div>
       </div>
     </div>
@@ -419,6 +541,7 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null); // { type: 'teamMember' | 'user' | 'predefinedOnly', data }
   const [sendingInviteTo, setSendingInviteTo] = useState(null); // email while sending invite
+  const [activityLogUser, setActivityLogUser] = useState(null); // { id, name } when viewing logs
   const wrapRef = useRef(null);
   const debounceRef = useRef(null);
 
@@ -714,6 +837,16 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
           <UserDetailModal
             user={selectedItem.data}
             onClose={() => setSelectedItem(null)}
+            onViewLogs={(userId, userName) => setActivityLogUser({ id: userId, name: userName })}
+          />,
+          document.body
+        )}
+      {activityLogUser &&
+        createPortal(
+          <ActivityLogModal
+            userId={activityLogUser.id}
+            userName={activityLogUser.name}
+            onClose={() => setActivityLogUser(null)}
           />,
           document.body
         )}

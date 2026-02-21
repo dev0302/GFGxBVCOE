@@ -558,6 +558,14 @@ export async function getAllPeople() {
   return data;
 }
 
+/** Activity logs for a user. Society roles only (Faculty Incharge, Chairperson, Vice-Chairperson). */
+export async function getActivityLogs(userId) {
+  const res = await authFetch(`/api/v1/activity-logs/${encodeURIComponent(userId)}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch activity logs');
+  return data;
+}
+
 // Team (manage your department members; society roles pass department)
 export async function getTeamDepartments() {
   const res = await authFetch('/api/v1/team/departments');
