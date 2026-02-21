@@ -80,6 +80,8 @@ exports.sendOTP = async (req, res) => {
     }
 
     // Link hits backend to mark "user allowed autofill" - no redirect to frontend
+    // console.log(process.env.API_URL);
+    
     const apiUrl = (process.env.API_URL || `http://localhost:${process.env.PORT || 8080}`).replace(/\/$/, "");
     const autofillUrl = `${apiUrl}/api/v1/auth/allow-autofill?token=${encodeURIComponent(pollToken)}`;
     const htmlContent = emailVerificationTemplate(otp, autofillUrl);
