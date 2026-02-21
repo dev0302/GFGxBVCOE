@@ -3,6 +3,7 @@ import { getUpcomingEvents } from "../services/api";
 import { MapPin, Clock, Users, ExternalLink, Calendar } from "react-feather";
 import { motion, AnimatePresence } from "framer-motion";
 import CornerFrameScrambleText from "./ui/corner-frame-scramble-text";
+import { Accordion } from "./ui/accordion";
 
 // ... parseTimeIntoDate and useCountdown stay exactly the same ...
 function parseTimeIntoDate(date, timeStr) {
@@ -245,6 +246,29 @@ export default function UpcomingEventSection({ variant = "events" }) {
               </div>
             </div>
           </motion.div>
+
+          {/* FAQ Accordion – only when event has FAQs */}
+          {Array.isArray(event.faqs) && event.faqs.filter((f) => (f.question || "").trim() || (f.answer || "").trim()).length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              className="mt-16"
+            >
+              <h3 className={`text-2xl font-bold text-white mb-6 flex items-center gap-2`}>
+                <span className={`bg-gradient-to-r ${theme.accent} bg-clip-text text-transparent`}>FAQ</span>
+                <span className="h-px flex-1 max-w-[80px] bg-white/20 rounded" />
+              </h3>
+              <Accordion
+                items={event.faqs
+                  .filter((f) => (f.question || "").trim() || (f.answer || "").trim())
+                  .map((f) => ({ title: (f.question || "").trim() || "Question", content: (f.answer || "").trim() || "—" }))}
+                itemClassName={`${theme.card} border`}
+                triggerClassName="text-white/90"
+                contentClassName="text-white/60"
+              />
+            </motion.div>
+          )}
         </div>
       </div>
     </section>

@@ -807,9 +807,22 @@ const getUpcomingEvents = async (req, res) => {
   }
 };
 
+const parseFaqs = (raw) => {
+  if (!raw || typeof raw !== "string") return [];
+  try {
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .filter((item) => item && (item.question?.trim() || item.answer?.trim()))
+      .map((item) => ({ question: (item.question || "").trim(), answer: (item.answer || "").trim() }));
+  } catch {
+    return [];
+  }
+};
+
 const createUpcomingEvent = async (req, res) => {
   try {
-    const { title, date, description, location, time, targetAudience, otherLinks, otherDocs } = req.body;
+    const { title, date, description, location, time, targetAudience, otherLinks, otherDocs, faqs: faqsRaw } = req.body;
     if (!title?.trim() || !date) {
       return res.status(400).json({ success: false, message: "Title and date are required." });
     }
@@ -818,6 +831,7 @@ const createUpcomingEvent = async (req, res) => {
       const result = await imageUpload(req.files.poster, UPCOMING_FOLDER, 85);
       poster = result.secure_url;
     }
+    const faqs = parseFaqs(faqsRaw);
     const event = await UpcomingEvent.create({
       title: title.trim(),
       date: new Date(date),
@@ -828,6 +842,7 @@ const createUpcomingEvent = async (req, res) => {
       targetAudience: (targetAudience || "").trim(),
       otherLinks: (otherLinks || "").trim(),
       otherDocs: (otherDocs || "").trim(),
+      faqs,
     });
     if (req.user?.id) {
       await logActivity(req.user.id, "upcoming_event_create", "event", { title: event.title }, event._id.toString(), "UpcomingEvent");
@@ -842,7 +857,7 @@ const createUpcomingEvent = async (req, res) => {
 const updateUpcomingEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, date, description, location, time, targetAudience, otherLinks, otherDocs } = req.body;
+    const { title, date, description, location, time, targetAudience, otherLinks, otherDocs, faqs: faqsRaw } = req.body;
     const existing = await UpcomingEvent.findById(id);
     if (!existing) {
       return res.status(404).json({ success: false, message: "Upcoming event not found." });
@@ -852,6 +867,7 @@ const updateUpcomingEvent = async (req, res) => {
       const result = await imageUpload(req.files.poster, UPCOMING_FOLDER, 85);
       poster = result.secure_url;
     }
+    const faqs = faqsRaw !== undefined ? parseFaqs(faqsRaw) : undefined;
     const updates = {
       ...(title !== undefined && { title: title.trim() }),
       ...(date !== undefined && { date: new Date(date) }),
@@ -862,6 +878,7 @@ const updateUpcomingEvent = async (req, res) => {
       ...(targetAudience !== undefined && { targetAudience: (targetAudience || "").trim() }),
       ...(otherLinks !== undefined && { otherLinks: (otherLinks || "").trim() }),
       ...(otherDocs !== undefined && { otherDocs: (otherDocs || "").trim() }),
+      ...(faqs !== undefined && { faqs }),
     };
     const event = await UpcomingEvent.findByIdAndUpdate(id, updates, { new: true });
     if (req.user?.id) {
