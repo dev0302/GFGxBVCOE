@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { SectionTitle } from "../../components/EventDashboard/SectionTitle";
 import { Spinner } from "@/components/ui/spinner";
 import { NativeTypewriter } from "../../components/ui/native-typewriter";
+import { AddDepartmentUnlockAnimation } from "../../components/EventDashboard/AddDepartmentUnlockAnimation";
 
 export default function DepartmentsAllowed() {
   const { user, setUser } = useAuth();
@@ -13,6 +14,7 @@ export default function DepartmentsAllowed() {
   const [addingDept, setAddingDept] = useState(false);
   const [removingDept, setRemovingDept] = useState(null);
   const [addDeptValue, setAddDeptValue] = useState("");
+  const [showUnlockAnimation, setShowUnlockAnimation] = useState(false);
 
   const loadAllowedConfig = useCallback(() => {
     setLoadingAllowed(true);
@@ -32,6 +34,7 @@ export default function DepartmentsAllowed() {
     const dept = addDeptValue.trim();
     if (!dept) return;
     setAddingDept(true);
+    setShowUnlockAnimation(true);
     addEventUploadDepartment(dept)
       .then((res) => {
         if (res.data) setAllowedConfig(res.data);
@@ -39,7 +42,10 @@ export default function DepartmentsAllowed() {
         toast.success("Department added. They will see Manage Events in their menu.");
         return getMe().then((r) => r.user && setUser(r.user));
       })
-      .catch((err) => toast.error(err.message || "Failed to add"))
+      .catch((err) => {
+        setShowUnlockAnimation(false);
+        toast.error(err.message || "Failed to add");
+      })
       .finally(() => setAddingDept(false));
   };
 
@@ -131,6 +137,11 @@ export default function DepartmentsAllowed() {
           ) : null}
         </section>
       </div>
+
+      <AddDepartmentUnlockAnimation
+        isActive={showUnlockAnimation}
+        onComplete={() => setShowUnlockAnimation(false)}
+      />
     </div>
   );
 }
