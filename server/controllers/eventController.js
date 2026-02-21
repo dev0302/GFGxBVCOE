@@ -2,8 +2,8 @@ const Event = require("../models/Event");
 const EventUploadConfig = require("../models/EventUploadConfig");
 const EventUploadLink = require("../models/EventUploadLink");
 const UpcomingEvent = require("../models/UpcomingEvent");
-const { CONFIG_KEY, CORE_EVENT_UPLOAD_ROLES } = require("../models/EventUploadConfig");
-const { imageUpload, videoUpload } = require("../config/cloudinary");
+const { CONFIG_KEY, CORE_EVENT_UPLOAD_ROLES, FORCE_DELETE_CONFIG_KEY, CORE_FORCE_DELETE_ROLES } = require("../models/EventUploadConfig");
+const { imageUpload, videoUpload, deleteImageByUrl, deleteAssetByUrl } = require("../config/cloudinary");
 
 const UPLOAD_LINK_EXPIRY_HOURS = 12;
 
@@ -96,9 +96,21 @@ const createEvent = async (req, res) => {
   }
 };
 
+/** Delete all event gallery assets (images/videos) from Cloudinary. */
+async function deleteEventGalleryFromCloudinary(event) {
+  const urls = event?.galleryImages || [];
+  for (const url of urls) {
+    if (url) await deleteAssetByUrl(url);
+  }
+}
+
 const getAllEvents = async (req, res) => {
   try {
     const now = new Date();
+    const toRemove = await Event.find({ scheduledDeleteAt: { $lte: now } }).lean();
+    for (const ev of toRemove) {
+      await deleteEventGalleryFromCloudinary(ev);
+    }
     await Event.deleteMany({ scheduledDeleteAt: { $lte: now } });
     const forManage = req.query.manage === "1";
     const query = forManage
@@ -576,6 +588,182 @@ const removeEventUploadDepartment = async (req, res) => {
   }
 };
 
+// ---------- Force delete (immediate) – only Faculty Incharge + allowed departments ----------
+async function getForceDeleteAllowedList() {
+  const doc = await EventUploadConfig.findOne({ configKey: FORCE_DELETE_CONFIG_KEY });
+  const extra = doc?.extraAllowedDepartments?.filter(Boolean) || [];
+  return [...CORE_FORCE_DELETE_ROLES, ...extra];
+}
+
+/** Only Faculty Incharge, Chairperson and Vice-Chairperson can manage the force-delete allowed list. */
+function requireCanManageForceDeleteConfig(req, res, next) {
+  if (!CORE_FORCE_DELETE_ROLES.includes(req.user?.accountType)) {
+    return res.status(403).json({
+      success: false,
+      message: "Only Faculty Incharge, Chairperson and Vice-Chairperson can manage force-delete permissions.",
+    });
+  }
+  next();
+}
+
+/** User must be in force-delete allowed list to call force-delete. */
+async function requireCanForceDeleteEvent(req, res, next) {
+  try {
+    const list = await getForceDeleteAllowedList();
+    if (!list.includes(req.user?.accountType)) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to force-delete events.",
+      });
+    }
+    next();
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Access check failed.",
+    });
+  }
+}
+
+/** Permanently delete event immediately (no 10-day delay). */
+const forceDeleteEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const event = await Event.findById(id);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+    await deleteEventGalleryFromCloudinary(event);
+    await Event.findByIdAndDelete(id);
+    return res.status(200).json({
+      success: true,
+      message: "Event deleted permanently",
+    });
+  } catch (error) {
+    console.error("Force delete event error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to delete event",
+    });
+  }
+};
+
+const getForceDeleteAllowed = async (req, res) => {
+  try {
+    const list = await getForceDeleteAllowedList();
+    const doc = await EventUploadConfig.findOne({ configKey: FORCE_DELETE_CONFIG_KEY });
+    const extra = doc?.extraAllowedDepartments?.filter(Boolean) || [];
+    const canManage = CORE_FORCE_DELETE_ROLES.includes(req.user?.accountType);
+    return res.status(200).json({
+      success: true,
+      allowed: list.includes(req.user?.accountType),
+      canManage,
+      ...(canManage && {
+        data: {
+          core: CORE_FORCE_DELETE_ROLES,
+          extra,
+          all: list,
+        },
+      }),
+    });
+  } catch (error) {
+    console.error("Get force-delete allowed error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch force-delete permissions.",
+    });
+  }
+};
+
+const addForceDeleteDepartment = async (req, res) => {
+  try {
+    const { department } = req.body;
+    const dept = department?.trim();
+    if (!dept) {
+      return res.status(400).json({
+        success: false,
+        message: "Department is required.",
+      });
+    }
+    if (CORE_FORCE_DELETE_ROLES.includes(dept)) {
+      return res.status(400).json({
+        success: false,
+        message: "Faculty Incharge, Chairperson and Vice-Chairperson are already in the list and cannot be added again.",
+      });
+    }
+    let doc = await EventUploadConfig.findOne({ configKey: FORCE_DELETE_CONFIG_KEY });
+    if (!doc) {
+      doc = await EventUploadConfig.create({
+        configKey: FORCE_DELETE_CONFIG_KEY,
+        extraAllowedDepartments: [],
+      });
+    }
+    if (doc.extraAllowedDepartments.includes(dept)) {
+      return res.status(400).json({
+        success: false,
+        message: "Department is already allowed to force-delete.",
+      });
+    }
+    doc.extraAllowedDepartments.push(dept);
+    await doc.save();
+    const extra = doc.extraAllowedDepartments.filter(Boolean);
+    return res.status(200).json({
+      success: true,
+      message: "Department can now force-delete events.",
+      data: { core: CORE_FORCE_DELETE_ROLES, extra, all: [...CORE_FORCE_DELETE_ROLES, ...extra] },
+    });
+  } catch (error) {
+    console.error("Add force-delete department error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to add.",
+    });
+  }
+};
+
+const removeForceDeleteDepartment = async (req, res) => {
+  try {
+    const { department } = req.body;
+    const dept = department?.trim();
+    if (!dept) {
+      return res.status(400).json({
+        success: false,
+        message: "Department is required.",
+      });
+    }
+    if (CORE_FORCE_DELETE_ROLES.includes(dept)) {
+      return res.status(400).json({
+        success: false,
+        message: "Faculty Incharge, Chairperson and Vice-Chairperson cannot be removed from force-delete permissions.",
+      });
+    }
+    const doc = await EventUploadConfig.findOne({ configKey: FORCE_DELETE_CONFIG_KEY });
+    if (!doc) {
+      return res.status(200).json({
+        success: true,
+        data: { core: CORE_FORCE_DELETE_ROLES, extra: [], all: CORE_FORCE_DELETE_ROLES },
+      });
+    }
+    doc.extraAllowedDepartments = doc.extraAllowedDepartments.filter((d) => d !== dept);
+    await doc.save();
+    const extra = doc.extraAllowedDepartments.filter(Boolean);
+    return res.status(200).json({
+      success: true,
+      message: "Department removed from force-delete.",
+      data: { core: CORE_FORCE_DELETE_ROLES, extra, all: [...CORE_FORCE_DELETE_ROLES, ...extra] },
+    });
+  } catch (error) {
+    console.error("Remove force-delete department error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to remove.",
+    });
+  }
+};
+
 // ---------- Upcoming events (auto-delete on event date) ----------
 const UPCOMING_FOLDER = "gfg-events/upcoming";
 
@@ -583,6 +771,10 @@ const getUpcomingEvents = async (req, res) => {
   try {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
+    const toRemove = await UpcomingEvent.find({ date: { $lt: startOfToday } }).lean();
+    for (const ev of toRemove) {
+      if (ev.poster) await deleteImageByUrl(ev.poster);
+    }
     await UpcomingEvent.deleteMany({ date: { $lt: startOfToday } });
     const list = await UpcomingEvent.find({ date: { $gte: startOfToday } }).sort({ date: 1 }).lean();
     return res.status(200).json({ success: true, data: list });
@@ -654,10 +846,14 @@ const updateUpcomingEvent = async (req, res) => {
 const deleteUpcomingEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const event = await UpcomingEvent.findByIdAndDelete(id);
+    const event = await UpcomingEvent.findById(id);
     if (!event) {
       return res.status(404).json({ success: false, message: "Upcoming event not found." });
     }
+    if (event.poster) {
+      await deleteImageByUrl(event.poster);
+    }
+    await UpcomingEvent.findByIdAndDelete(id);
     return res.status(200).json({ success: true, message: "Deleted." });
   } catch (error) {
     console.error("deleteUpcomingEvent error:", error);
@@ -671,6 +867,7 @@ module.exports = {
   deleteEvent,
   scheduleDeleteEvent,
   cancelScheduledDelete,
+  forceDeleteEvent,
   updateEvent,
   createUploadLink,
   validateUploadLink,
@@ -682,6 +879,11 @@ module.exports = {
   requireEventUploadAccess,
   requireCanManageEventUploadConfig,
   getEventUploadAllowedList,
+  getForceDeleteAllowed,
+  addForceDeleteDepartment,
+  removeForceDeleteDepartment,
+  requireCanManageForceDeleteConfig,
+  requireCanForceDeleteEvent,
   getUpcomingEvents,
   createUpcomingEvent,
   updateUpcomingEvent,

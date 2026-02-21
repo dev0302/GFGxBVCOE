@@ -91,3 +91,93 @@ exports.videoUpload = async (file, folder, quality) => {
     throw new Error(error.message || "Failed to upload video to Cloudinary.");
   }
 };
+
+/**
+ * Extract Cloudinary public_id from a Cloudinary URL.
+ * URL format: .../upload/v<version>/<folder>/<name>.<ext>  =>  public_id = "<folder>/<name>"
+ * @param {string} url - Full Cloudinary URL (e.g. secure_url)
+ * @returns {string|null} - public_id or null if not a Cloudinary URL / parse failed
+ */
+function getPublicIdFromUrl(url) {
+  if (!url || typeof url !== "string" || !url.includes("cloudinary.com")) return null;
+  try {
+    const match = url.match(/\/upload\/(?:v\d+\/)?(.+)$/);
+    if (!match) return null;
+    const path = match[1];
+    const lastSlash = path.lastIndexOf("/");
+    const nameWithExt = lastSlash === -1 ? path : path.slice(lastSlash + 1);
+    const dot = nameWithExt.lastIndexOf(".");
+    const name = dot === -1 ? nameWithExt : nameWithExt.slice(0, dot);
+    const publicId = lastSlash === -1 ? name : `${path.slice(0, lastSlash)}/${name}`;
+    return publicId || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Delete an image from Cloudinary by its URL (e.g. stored poster URL).
+ * Safe to call with non-Cloudinary or empty URL; no-op in that case.
+ * @param {string} imageUrl - Full Cloudinary image URL
+ * @param {object} [options] - { resource_type: 'image' } (default)
+ * @returns {Promise<{ result: string }|null>} - Cloudinary result or null if not deleted
+ */
+exports.deleteImageByUrl = async (imageUrl, options = {}) => {
+  try {
+    const publicId = getPublicIdFromUrl(imageUrl);
+    if (!publicId) return null;
+    const result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: options.resource_type || "image",
+      ...options,
+    });
+    console.log("Cloudinary image deleted:", {
+      deleted: true,
+      publicId,
+      url: imageUrl,
+      result: result?.result ?? result,
+    });
+    return result;
+  } catch (error) {
+    console.error("Cloudinary deleteImageByUrl error:", error.message);
+    return null;
+  }
+};
+
+/**
+ * Infer Cloudinary resource_type from URL (video URLs contain /video/ in path).
+ * @param {string} url - Full Cloudinary URL
+ * @returns {'image'|'video'}
+ */
+function getResourceTypeFromUrl(url) {
+  return url && url.includes("/video/") ? "video" : "image";
+}
+
+/**
+ * Delete any Cloudinary asset (image or video) by URL. Infers resource_type from URL.
+ * Safe to call with non-Cloudinary or empty URL; no-op in that case.
+ * @param {string} assetUrl - Full Cloudinary asset URL (image or video)
+ * @param {object} [options] - Override resource_type if needed
+ * @returns {Promise<{ result: string }|null>}
+ */
+exports.deleteAssetByUrl = async (assetUrl, options = {}) => {
+  try {
+    const publicId = getPublicIdFromUrl(assetUrl);
+    if (!publicId) return null;
+    const resourceType = options.resource_type ?? getResourceTypeFromUrl(assetUrl);
+    const result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: resourceType,
+      ...options,
+    });
+    console.log("Cloudinary asset deleted:", {
+      deleted: true,
+      type: resourceType,
+      publicId,
+      url: assetUrl,
+      result: result?.result ?? result,
+    });
+    return result;
+  } catch (error) {
+    console.error("Cloudinary deleteAssetByUrl error:", error.message);
+    return null;
+  }
+};

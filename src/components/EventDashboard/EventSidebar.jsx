@@ -1,13 +1,14 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Upload, Link2, Users, List, Calendar } from "react-feather";
+import { Upload, Link2, Users, List, Calendar, Shield } from "react-feather";
 import { useAuth } from "../../context/AuthContext";
-import { canManageEventUploadConfig } from "../../services/api";
+import { canManageEventUploadConfig, canManageForceDeleteConfig } from "../../services/api";
 
 const sidebarLinks = [
   { name: "Upload new event", path: "/uploadevent/upload", icon: Upload },
   { name: "Upcoming event", path: "/uploadevent/upcoming", icon: Calendar },
   { name: "Generate upload link", path: "/uploadevent/generate-link", icon: Link2 },
   { name: "Departments allowed", path: "/uploadevent/departments", icon: Users, requireConfig: true },
+  { name: "Force delete permissions", path: "/uploadevent/force-delete", icon: Shield, requireFacultyIncharge: true },
   { name: "Manage uploaded events", path: "/uploadevent/manage", icon: List },
 ];
 
@@ -25,6 +26,7 @@ export default function EventSidebar() {
       <div className="flex flex-col gap-0.5 px-2 md:px-4">
         {sidebarLinks.map((link) => {
           if (link.requireConfig && !canManageEventUploadConfig(user?.accountType)) return null;
+          if (link.requireFacultyIncharge && !canManageForceDeleteConfig(user?.accountType)) return null;
           const Icon = link.icon;
           const isActive = matchRoute(link.path);
           return (
