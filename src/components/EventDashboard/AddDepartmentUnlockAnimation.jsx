@@ -160,7 +160,7 @@ export function AddDepartmentUnlockAnimation({ isActive, onComplete }) {
                     exit={{ opacity: 0 }}
                     className="text-2xl font-semibold text-white"
                   >
-                    Activating...
+                    Adding...
                   </motion.h2>
                 )}
 
@@ -175,7 +175,7 @@ export function AddDepartmentUnlockAnimation({ isActive, onComplete }) {
                       animate={{ scale: [1, 1.02, 1] }}
                       transition={{ duration: 0.4 }}
                     >
-                      Unlocked
+                      Done
                     </motion.h2>
                     <motion.p
                       initial={{ opacity: 0 }}
