@@ -60,7 +60,7 @@ export function MemberDetailModal({ member, onClose }) {
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="p-6 space-y-6 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
+        <div className="p-6 space-y-6 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }} data-lenis-prevent>
           <div className="flex flex-col items-center gap-3">
             <img
               src={photoUrl}
@@ -193,7 +193,7 @@ export function PredefinedOnlyDetailModal({ predefined, onClose }) {
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="p-6 space-y-8 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
+        <div className="p-6 space-y-8 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }} data-lenis-prevent>
           <div className="flex flex-col items-center gap-3">
             <img
               src={imgSrc}
@@ -407,7 +407,7 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="p-6 space-y-8 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
+        <div className="p-6 space-y-8 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }} data-lenis-prevent>
           {/* Header: photo + name */}
           <div className="flex flex-col items-center gap-3">
             <img
@@ -605,17 +605,17 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
     : [];
   const filteredUsers = q
     ? users.filter((u) => {
-        const name = [u.firstName, u.lastName].filter(Boolean).join(" ").toLowerCase();
-        const email = (u.email || "").toLowerCase();
-        return name.startsWith(q) || email.startsWith(q);
-      })
+      const name = [u.firstName, u.lastName].filter(Boolean).join(" ").toLowerCase();
+      const email = (u.email || "").toLowerCase();
+      return name.startsWith(q) || email.startsWith(q);
+    })
     : [];
   const filteredPredefinedOnly = q
     ? predefinedOnly.filter((p) => {
-        const name = (p.name || "").toLowerCase();
-        const email = (p.email || "").toLowerCase();
-        return name.startsWith(q) || email.startsWith(q);
-      })
+      const name = (p.name || "").toLowerCase();
+      const email = (p.email || "").toLowerCase();
+      return name.startsWith(q) || email.startsWith(q);
+    })
     : [];
   const totalCount = filteredTeamMembers.length + filteredUsers.length + filteredPredefinedOnly.length;
   const hasQuery = query.trim().length > 0;
@@ -677,7 +677,7 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
               </div>
             </div>
             <div className="search-member-list">
-              {loading ?  (
+              {loading ? (
                 <div className="flex items-center justify-center gap-2 px-2 py-4 text-sm text-gray-400">
                   <Spinner className="size-4 text-gray-400" />
                   <span>Loading...</span>
