@@ -9,7 +9,8 @@ import { Users, ChevronRight, Printer, FileText, X, Download, List, Mail } from 
 import { avatarPlaceholder, photoPreviewUrl } from "../utils/teamMemberUtils";
 import ManageTeam from "./ManageTeam";
 import Search from "../components/Search";
-
+import { motion, AnimatePresence } from "framer-motion";
+// import { Mail } from "lucide-react";
 import { UserDetailModal, PredefinedOnlyDetailModal, MemberDetailModal } from "../components/Search";
 import {
   downloadTeamListPDF,
@@ -30,6 +31,26 @@ const EXPORT_LABELS = {
 };
 const ORG_NAME = "GFG BVCOE";
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
+
+const iosRowVariants = {
+  hidden: { 
+    opacity: 0, 
+    y: 20, 
+    scale: 0.96 
+  },
+  visible: (idx) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      damping: 25,
+      stiffness: 300,
+      mass: 0.8,
+      delay: Math.min(idx * 0.06, 0.8), 
+    }
+  })
+};
 
 export default function ManageSociety() {
   const { user, loading: authLoading } = useAuth();
@@ -291,16 +312,27 @@ export default function ManageSociety() {
             {departments.map((dept) => (
               <div
                 key={dept}
-                className="flex items-center justify-between w-full rounded-xl border border-gray-500/40 bg-[#1e1e2f]/80 px-5 py-4 text-left text-gray-200 hover:border-cyan-500/50 transition-colors group"
+                onClick={() => setSelectedDepartment(dept)}
+                className="flex items-center justify-between w-full rounded-xl
+                 border border-gray-500/40 bg-[#1e1e2f]/80
+                 px-5 py-4 text-left text-gray-200
+                 hover:border-cyan-500/50 transition-colors
+                 cursor-pointer group"
               >
                 <button
-                  type="button"
-                  onClick={() => setSelectedDepartment(dept)}
+                  // type="button"
+                  // onClick={() => setSelectedDepartment(dept)}
                   className="flex-1 flex items-center justify-between text-left min-w-0"
                 >
                   <span className="font-medium text-white">{dept}</span>
                   <span className="flex items-center gap-2 text-sm text-gray-400 shrink-0 ml-2">
-                    <span>{departmentCounts[dept] ?? "…"} members</span>
+                    <span className="flex items-center gap-1">
+                      {departmentCounts[dept] ?? (
+                        <Spinner className="size-2 text-gray-200" />
+                      )}
+                      <span>members</span>
+                    </span>
+
                     <ChevronRight className="h-4 w-4 text-cyan-400" />
                   </span>
                 </button>
@@ -326,164 +358,222 @@ export default function ManageSociety() {
         )}
 
         {/* Show all people modal: users (position/accountType tag) + predefined-only + members, sorted */}
-        {showListOpen && (
-          <div
-            className="fixed inset-0 z-[90] flex min-h-full items-center justify-center overflow-hidden p-4 py-8 bg-black/60 backdrop-blur-sm"
-            onClick={() => { setShowListOpen(false); setSelectedDetailItem(null); }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="All people list"
+        <AnimatePresence>
+  {showListOpen && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="fixed inset-0 z-[90] flex min-h-full items-center justify-center overflow-hidden p-4 py-8 bg-black/60 backdrop-blur-sm"
+      onClick={() => {
+        setShowListOpen(false);
+        setSelectedDetailItem(null);
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="All people list"
+    >
+      <motion.div
+        initial={{ scale: 0.95, y: 20, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.95, y: 20, opacity: 0 }}
+        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+        className="bg-[#1e1e2f] rounded-2xl border border-gray-500/40 shadow-2xl w-full max-w-2xl h-5/6 flex flex-col overflow-hidden shrink-0"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 shrink-0">
+          <h2 className="text-lg font-bold text-white">All people</h2>
+          <button
+            type="button"
+            onClick={() => {
+              setShowListOpen(false);
+              setSelectedDetailItem(null);
+            }}
+            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors"
+            aria-label="Close"
           >
-            <div
-              className="bg-[#1e1e2f] rounded-2xl border border-gray-500/40 shadow-2xl w-full max-w-2xl h-5/6 flex flex-col overflow-hidden shrink-0"
-              onClick={(e) => e.stopPropagation()}
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* List Content */}
+        <div 
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2 custom-scrollbar" 
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
+          {allPeopleLoading ? (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center justify-center gap-3 py-24 text-center text-gray-400 flex-col"
             >
-              <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 shrink-0">
-                <h2 className="text-lg font-bold text-white">All people</h2>
-                <button
-                  type="button"
-                  onClick={() => { setShowListOpen(false); setSelectedDetailItem(null); }}
-                  className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors"
-                  aria-label="Close"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+              <div className="relative flex items-center justify-center">
+                {/* iOS-style Spinner */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                  className="size-8 border-2 border-gray-500/30 border-t-cyan-400 rounded-full"
+                />
               </div>
-              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2" style={{ WebkitOverflowScrolling: "touch" }}>
-                {allPeopleLoading ? (
-                  <div className="flex items-center justify-center gap-2 py-12 text-center text-gray-400 flex-col">
-                    <Spinner className="size-4 text-gray-400" />
-                    <span>Loading...</span>
-                  </div>
-                ) : allPeopleList.length === 0 ? (
-                  <div className="py-12 text-center text-gray-500">No one in the list.</div>
-                ) : (
-                  <ul className="space-y-1">
-                    {allPeopleList.map((item, idx) => {
-                      if (item.type === "user") {
-                        const u = item.data;
-                        const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "—";
-                        const src = u.image || avatarPlaceholder(name);
-                        const tagLabel = (u.additionalDetails && u.additionalDetails.position) || getAccountTypeLabel(u.accountType) || u.accountType || "Member";
-                        return (
-                          <li key={`user-${u._id}`}>
-                            <button
-                              type="button"
-                              className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-colors border border-transparent hover:border-gray-500/30"
-                              onClick={() => setSelectedDetailItem({ type: "user", data: u })}
-                            >
-                              <img
-                                src={src}
-                                alt=""
-                                className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
-                                onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
-                              />
-                              <div className="flex-1 min-w-0">
-                                <span className="block truncate font-medium text-white">{name}</span>
-                                <span className="block truncate text-xs text-gray-500">{u.email}</span>
-                              </div>
-                              <span className="shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
-                                {tagLabel}
-                              </span>
-                            </button>
-                          </li>
-                        );
-                      }
-                      if (item.type === "predefinedOnly") {
-                        const pre = item.data;
-                        const name = pre.name || pre.email || "—";
-                        const imagePath = (pre.image || "").trim();
-                        const src = imagePath
-                          ? imagePath.startsWith("http")
-                            ? imagePath
-                            : `${PREDEFINED_IMAGE_BASE}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`
-                          : avatarPlaceholder(name);
-                        const email = (pre.email || "").trim().toLowerCase();
-                        const isSending = sendingInviteTo === email;
-                        return (
-                          <li key={`pre-${email}-${idx}`}>
-                            <div className="w-full flex items-center gap-3 p-3 rounded-xl border border-transparent hover:border-gray-500/30 hover:bg-gray-500/10 transition-colors">
-                              <button
-                                type="button"
-                                className="flex-1 flex items-center gap-3 min-w-0 text-left"
-                                onClick={() => setSelectedDetailItem({ type: "predefinedOnly", data: pre })}
-                              >
-                                <img
-                                  src={src}
-                                  alt=""
-                                  className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
-                                  onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <span className="block truncate font-medium text-white">{name}</span>
-                                  <span className="block truncate text-xs text-gray-500">{pre.email}</span>
-                                </div>
-                              </button>
-                              <span className="shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/40">
-                                Not registered yet
-                              </span>
-                              <button
-                                type="button"
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  if (!email || isSending) return;
-                                  setSendingInviteTo(email);
-                                  try {
-                                    await sendSignupInvite(email);
-                                    toast.success("Invite email sent.");
-                                  } catch (err) {
-                                    toast.error(err.message || "Failed to send invite");
-                                  } finally {
-                                    setSendingInviteTo(null);
-                                  }
-                                }}
-                                disabled={isSending}
-                                title="Send signup invite email"
-                                className="p-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-50 shrink-0"
-                              >
-                                {isSending ? <span className="text-xs">Sending…</span> : <Mail className="h-4 w-4" />}
-                              </button>
-                            </div>
-                          </li>
-                        );
-                      }
-                      if (item.type === "teamMember") {
-                        const m = item.data;
-                        const name = m.name || m.email || "—";
-                        const photoUrl = m.photo || m.image_drive_link;
-                        const src = photoUrl ? photoPreviewUrl(photoUrl) : avatarPlaceholder(name);
-                        return (
-                          <li key={`tm-${m._id}-${idx}`}>
-                            <button
-                              type="button"
-                              className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-colors border border-transparent hover:border-gray-500/30"
-                              onClick={() => setSelectedDetailItem({ type: "teamMember", data: m })}
-                            >
-                              <img
-                                src={src}
-                                alt=""
-                                className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
-                                onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
-                              />
-                              <div className="flex-1 min-w-0">
-                                <span className="block truncate font-medium text-white">{name}</span>
-                                <span className="block truncate text-xs text-gray-500">{m.email}</span>
-                              </div>
-                              <span className="shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
-                                Team member
-                              </span>
-                            </button>
-                          </li>
-                        );
-                      }
-                      return null;
-                    })}
-                  </ul>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+              <motion.span 
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-sm font-medium tracking-wide"
+              >
+                Loading People...
+              </motion.span>
+            </motion.div>
+          ) : allPeopleList.length === 0 ? (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="py-12 text-center text-gray-500"
+            >
+              No one in the list.
+            </motion.div>
+          ) : (
+            <ul className="space-y-1">
+              {allPeopleList.map((item, idx) => {
+                let content = null;
+
+                if (item.type === "user") {
+                  const u = item.data;
+                  const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "—";
+                  const src = u.image || avatarPlaceholder(name);
+                  const tagLabel = (u.additionalDetails && u.additionalDetails.position) || getAccountTypeLabel(u.accountType) || u.accountType || "Member";
+                  
+                  content = (
+                    <button
+                      type="button"
+                      className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-all border border-transparent hover:border-gray-500/30 active:scale-[0.98]"
+                      onClick={() => setSelectedDetailItem({ type: "user", data: u })}
+                    >
+                      <img
+                        src={src}
+                        alt=""
+                        className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
+                        onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <span className="block truncate font-medium text-white">{name}</span>
+                        <span className="block truncate text-xs text-gray-500">{u.email}</span>
+                      </div>
+                      <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        {tagLabel}
+                      </span>
+                    </button>
+                  );
+                }
+
+                if (item.type === "predefinedOnly") {
+                  const pre = item.data;
+                  const name = pre.name || pre.email || "—";
+                  const imagePath = (pre.image || "").trim();
+                  const src = imagePath
+                    ? imagePath.startsWith("http")
+                      ? imagePath
+                      : `${PREDEFINED_IMAGE_BASE}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`
+                    : avatarPlaceholder(name);
+                  const email = (pre.email || "").trim().toLowerCase();
+                  const isSending = sendingInviteTo === email;
+                  
+                  content = (
+                    <div className="w-full flex items-center gap-3 p-3 rounded-xl border border-transparent hover:border-gray-500/30 hover:bg-gray-500/10 transition-all">
+                      <button
+                        type="button"
+                        className="flex-1 flex items-center gap-3 min-w-0 text-left active:scale-[0.98]"
+                        onClick={() => setSelectedDetailItem({ type: "predefinedOnly", data: pre })}
+                      >
+                        <img
+                          src={src}
+                          alt=""
+                          className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
+                          onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <span className="block truncate font-medium text-white">{name}</span>
+                          <span className="block truncate text-xs text-gray-500">{pre.email}</span>
+                        </div>
+                      </button>
+                      <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-red-500/10 text-red-400 border border-red-500/20">
+                        Unregistered
+                      </span>
+                      <button
+                        type="button"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (!email || isSending) return;
+                          setSendingInviteTo(email);
+                          try {
+                            await sendSignupInvite(email);
+                            toast.success("Invite email sent.");
+                          } catch (err) {
+                            toast.error(err.message || "Failed to send invite");
+                          } finally {
+                            setSendingInviteTo(null);
+                          }
+                        }}
+                        disabled={isSending}
+                        className="p-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-50 shrink-0"
+                      >
+                        {isSending ? <div className="size-4 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" /> : <Mail className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  );
+                }
+
+                if (item.type === "teamMember") {
+                  const m = item.data;
+                  const name = m.name || m.email || "—";
+                  const photoUrl = m.photo || m.image_drive_link;
+                  const src = photoUrl ? photoPreviewUrl(photoUrl) : avatarPlaceholder(name);
+                  
+                  content = (
+                    <button
+                      type="button"
+                      className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-all border border-transparent hover:border-gray-500/30 active:scale-[0.98]"
+                      onClick={() => setSelectedDetailItem({ type: "teamMember", data: m })}
+                    >
+                      <img
+                        src={src}
+                        alt=""
+                        className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
+                        onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <span className="block truncate font-medium text-white">{name}</span>
+                        <span className="block truncate text-xs text-gray-500">{m.email}</span>
+                      </div>
+                      <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                        Team
+                      </span>
+                    </button>
+                  );
+                }
+
+                return (
+  <motion.li
+    key={item.type + (item.data._id || item.data.email) + idx}
+    variants={iosRowVariants}
+    initial="hidden"
+    animate="visible"
+    custom={idx} // This passes 'idx' to the visible function above
+    className="list-none" // Ensure no default bullet points
+  >
+    {content}
+  </motion.li>
+);
+              })}
+            </ul>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
         {selectedDetailItem?.type === "user" &&
           createPortal(
