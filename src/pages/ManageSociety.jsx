@@ -97,7 +97,7 @@ export default function ManageSociety() {
   }, [user, departments]);
 
   useEffect(() => {
-    if (showListOpen && user) {
+    if ((showListOpen || !selectedDepartment) && user) {
       setAllPeopleLoading(true);
       getAllPeople()
         .then((res) => setAllPeopleList(res.data || []))
@@ -107,7 +107,7 @@ export default function ManageSociety() {
         })
         .finally(() => setAllPeopleLoading(false));
     }
-  }, [showListOpen, user]);
+  }, [showListOpen, selectedDepartment, user]);
 
   useEffect(() => {
     if (showListOpen) {
@@ -279,6 +279,14 @@ export default function ManageSociety() {
         </h1>
         <p className="text-gray-400 text-sm mb-6">
           Select a department to view and manage its members (same as Manage team).
+          {!allPeopleLoading && allPeopleList.length > 0 && (
+            <>
+              {" · "}
+              <span className="text-gray-300 font-medium">
+                {allPeopleList.length} total member{allPeopleList.length !== 1 ? "s" : ""}
+              </span>
+            </>
+          )}
         </p>
 
         <div className="flex flex-col sm:flex-wrap sm:flex-row items-center gap-3 mb-6">

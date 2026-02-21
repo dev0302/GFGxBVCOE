@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { SectionTitle } from "../../components/EventDashboard/SectionTitle";
 import { Calendar, Plus, Edit3, Trash2, X } from "react-feather";
 import { Spinner } from "@/components/ui/spinner";
+import { NativeTypewriter } from "../../components/ui/native-typewriter";
 
 const initialForm = {
   title: "",
@@ -138,7 +139,9 @@ export default function UpcomingEventPage() {
       <div className="w-full max-w-3xl py-10 flex flex-col gap-10">
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">Upcoming event</h1>
-          <p className="mt-2 text-gray-400 text-sm">Events shown below hero on Home and Events page. Past events are auto-removed on the event date.</p>
+          <p className="mt-2 text-gray-400 text-sm">
+            <NativeTypewriter content="Events shown below hero on Home and Events page. Past events are auto-removed on the event date." className="text-gray-400 text-sm" speed={15} cursor={false} />
+          </p>
         </div>
 
         <section className="bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">

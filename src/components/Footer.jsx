@@ -100,42 +100,42 @@ const Footer = () => {
         {/* Footer Bottom */}
         <div className="mt-12 border-t border-[#80a8813b] pt-6 text-center text-[#cbd5e1] text-sm opacity-70">
           <p>&copy; {new Date().getFullYear()} GeeksforGeeks Campus Body - BVCOE. All rights reserved.</p>
-          <div className="mt-2 text-white flex justify-center items-center gap-4">
-            Developed by -{" "}
-            <a 
-              href="https://www.linkedin.com/in/dev-malik-976230311/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#38bdf8] hover:text-[#7dd3fc] transition-colors duration-300 inline-block relative hover:-translate-y-0.5"
-            > 
-              <div className="flex gap-1 justify-center items-center">
-                <img src={dev} alt="Dev Malik" className="h-5 w-5 border-2 border-white object-cover rounded-full" />
-                Dev
-              </div>
-            </a>
-            <a
-              href="https://www.linkedin.com/in/himank-pandoh-58a0b52b1/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#38bdf8] hover:text-[#7dd3fc] transition-colors duration-300 inline-block relative hover:-translate-y-0.5"
-            >
-              <div className="flex gap-1 justify-center items-center">
-                <img src={himank} alt="Himank Pandoh" className="h-5 w-5 border-2 border-white object-cover rounded-full" />
-                Himank
-              </div>
-            </a>
-            <a
-              href="https://www.linkedin.com/in/gaurav-karakoti/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#38bdf8] hover:text-[#7dd3fc] transition-colors duration-300 inline-block relative hover:-translate-y-0.5"
-            >
-              <div className="flex gap-1 justify-center items-center">
-                <img src={gaurav} alt="Gaurav Karakoti" className="h-5 w-5 border-2 border-white object-cover rounded-full" />
-                Gaurav
-              </div>
-            </a>
-          </div>
+          <div className="mt-8 flex flex-col items-center gap-6">
+  <span className="text-gray-400 uppercase tracking-widest text-xs font-semibold">
+    Developed by
+  </span>
+
+  <div className="flex flex-wrap justify-center items-center gap-8">
+    {[
+      { name: "Dev", link: "https://www.linkedin.com/in/dev-malik-976230311/", img: dev },
+      { name: "Himank", link: "https://www.linkedin.com/in/himank-pandoh-58a0b52b1/", img: himank },
+      { name: "Gaurav", link: "https://www.linkedin.com/in/gaurav-karakoti/", img: gaurav },
+    ].map((dev, index) => (
+      <a
+        key={index}
+        href={dev.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group flex flex-col items-center gap-3 transition-all duration-300 hover:-translate-y-2"
+      >
+        {/* Profile Image Container */}
+        <div className="relative">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#38bdf8] to-[#7dd3fc] rounded-full opacity-0 group-hover:opacity-100 transition duration-300 blur"></div>
+          <img
+            src={dev.img}
+            alt={dev.name}
+            className="relative h-14 w-14 rounded-full border-2 border-white/20 object-cover bg-slate-800 p-0.5 shadow-xl"
+          />
+        </div>
+
+        {/* Name Label */}
+        <span className="text-sm font-medium text-white/80 group-hover:text-[#38bdf8] transition-colors duration-300 tracking-wide">
+          {dev.name}
+        </span>
+      </a>
+    ))}
+  </div>
+</div>
         </div>
       </footer>
     </section>
