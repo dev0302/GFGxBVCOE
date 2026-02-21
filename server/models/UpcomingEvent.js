@@ -4,6 +4,7 @@ const upcomingEventSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
     date: { type: Date, required: true },
+    description: { type: String, default: "" },
     poster: { type: String, default: "" },
     location: { type: String, default: "" },
     time: { type: String, default: "" },

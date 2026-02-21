@@ -101,6 +101,60 @@ const iosRowVariants = {
   })
 };
 
+const PrintingLoader = ({ isPrinting }) => (
+  <AnimatePresence>
+    {isPrinting && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-[#1e1e2f]/80 backdrop-blur-md"
+      >
+        <div className="relative flex flex-col items-center">
+          <div className="relative p-8 bg-[#2c2c3e] rounded-3xl border border-gray-500/30 shadow-2xl">
+            <motion.div
+              animate={{ y: [0, -5, 0] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+            >
+              <FileText className="h-16 w-16 text-red-500" />
+            </motion.div>
+            <motion.div
+              initial={{ top: "20%" }}
+              animate={{ top: "70%" }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut",
+              }}
+              className="absolute left-6 right-6 h-1 bg-red-400 shadow-[0_0_15px_rgba(239,68,68,0.8)] rounded-full z-10"
+            />
+          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6 text-center"
+          >
+            <h3 className="text-white font-bold text-lg flex items-center gap-2">
+              <Printer className="h-5 w-5 animate-pulse" />
+              Generating PDF...
+            </h3>
+            <p className="text-gray-400 text-sm">Please do not close this tab</p>
+          </motion.div>
+          <div className="w-48 h-1.5 bg-gray-700 rounded-full mt-4 overflow-hidden">
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: "100%" }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+              className="w-full h-full bg-gradient-to-r from-transparent via-red-500 to-transparent"
+            />
+          </div>
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
 export default function ManageTeam({
   department: propDepartment,
   isSociety,
@@ -136,6 +190,7 @@ export default function ManageTeam({
   const [selectedExportFields, setSelectedExportFields] = useState([
     ...EXPORT_COLS,
   ]);
+  const [isPrinting, setIsPrinting] = useState(false);
   const imgCropRef = useRef(null);
   const cropPxRef = useRef(null);
 
@@ -450,7 +505,7 @@ export default function ManageTeam({
     return (roster || []).length + extra.length;
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (selectedExportFields.length === 0) {
       toast.error("Select at least one column to include");
       return;
@@ -459,7 +514,10 @@ export default function ManageTeam({
       toast.error("No one to export");
       return;
     }
+    setIsPrinting(true);
     try {
+      // Let overlay paint before sync PDF generation starts.
+      await new Promise((resolve) => requestAnimationFrame(() => resolve()));
       downloadTeamListPDF(
         rosterToExportRows(),
         selectedExportFields,
@@ -469,6 +527,8 @@ export default function ManageTeam({
       toast.success("PDF downloaded");
     } catch (e) {
       toast.error(e.message || "PDF download failed");
+    } finally {
+      setIsPrinting(false);
     }
   };
 
@@ -649,6 +709,7 @@ export default function ManageTeam({
 
   return (
     <div className="min-h-screen darkthemebg pt-24 pb-16">
+      <PrintingLoader isPrinting={isPrinting} />
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="flex flex-col gap-4 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -1075,12 +1136,14 @@ export default function ManageTeam({
                   type="button"
                   onClick={handleExportPDF}
                   disabled={
-                    members.length === 0 || selectedExportFields.length === 0
+                    isPrinting ||
+                    members.length === 0 ||
+                    selectedExportFields.length === 0
                   }
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FileText className="h-4 w-4" />
-                  Generate & Download PDF
+                  {isPrinting ? "Processing..." : "Generate & Download PDF"}
                 </button>
                 <button
                   type="button"

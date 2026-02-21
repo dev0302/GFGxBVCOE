@@ -53,9 +53,9 @@ export function downloadTeamListPDF(members, columns, labels, title) {
     head: [head],
     body: rows,
     startY: 38,
-    styles: { fontSize: 8 },
-    headStyles: { fillColor: [34, 197, 94], textColor: [255, 255, 255] },
-    alternateRowStyles: { fillColor: [245, 255, 245] },
+    styles: { fontSize: 8, textColor: [22, 22, 22], lineColor: [120, 120, 120], lineWidth: 0.1 },
+    headStyles: { fillColor: [58, 58, 58], textColor: [245, 245, 245] },
+    alternateRowStyles: { fillColor: [248, 248, 248] },
     margin: { left: 14, right: 14 },
   });
 
@@ -115,7 +115,7 @@ export function downloadAllDepartmentsPDF(departmentMembersMap, columns, labels,
     }
 
     doc.setFontSize(11);
-    doc.setTextColor(34, 197, 94);
+    doc.setTextColor(58, 58, 58);
     doc.text(dept, 14, startY);
     doc.setTextColor(0, 0, 0);
     startY += 6;
@@ -132,9 +132,9 @@ export function downloadAllDepartmentsPDF(departmentMembersMap, columns, labels,
       head: [head],
       body: rows,
       startY,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [34, 197, 94], textColor: [255, 255, 255] },
-      alternateRowStyles: { fillColor: [245, 255, 245] },
+      styles: { fontSize: 8, textColor: [22, 22, 22], lineColor: [120, 120, 120], lineWidth: 0.1 },
+      headStyles: { fillColor: [58, 58, 58], textColor: [245, 245, 245] },
+      alternateRowStyles: { fillColor: [248, 248, 248] },
       margin: { left: 14, right: 14 },
     });
     startY = doc.lastAutoTable.finalY + 14;
