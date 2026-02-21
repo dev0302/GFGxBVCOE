@@ -49,19 +49,22 @@ export default function JoinTeamByLink() {
   const imgCropRef = useRef(null);
   const cropPxRef = useRef(null);
 
+  /** cropPx = crop in display pixels (as ReactCrop reports). Output is full-resolution crop. */
   const getCroppedImg = (imageEl, cropPx) => {
     if (!imageEl || !cropPx?.width || !cropPx?.height)
       return Promise.resolve(null);
 
-    const canvas = document.createElement("canvas");
-    canvas.width = cropPx.width;
-    canvas.height = cropPx.height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return Promise.resolve(null);
-
-    // Scale factors between displayed size and natural size
     const scaleX = imageEl.naturalWidth / imageEl.width;
     const scaleY = imageEl.naturalHeight / imageEl.height;
+    const outW = Math.round(cropPx.width * scaleX);
+    const outH = Math.round(cropPx.height * scaleY);
+    if (outW <= 0 || outH <= 0) return Promise.resolve(null);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = outW;
+    canvas.height = outH;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return Promise.resolve(null);
 
     ctx.drawImage(
       imageEl,
@@ -71,8 +74,8 @@ export default function JoinTeamByLink() {
       cropPx.height * scaleY,
       0,
       0,
-      cropPx.width,
-      cropPx.height,
+      outW,
+      outH,
     );
 
     return new Promise((resolve) => {
@@ -128,24 +131,25 @@ export default function JoinTeamByLink() {
     if (!imgCropRef.current || !crop?.width || !cropImageSrc || !token) return;
     const imageEl = imgCropRef.current;
     const px = cropPxRef.current;
-    const nw = imageEl.naturalWidth;
-    const nh = imageEl.naturalHeight;
+    const dw = imageEl.width;
+    const dh = imageEl.height;
     const cropPx = px && px.width && px.height
       ? { x: px.x, y: px.y, width: px.width, height: px.height }
       : crop.unit === "px"
         ? { x: crop.x, y: crop.y, width: crop.width, height: crop.height }
         : {
-            x: (crop.x / 100) * nw,
-            y: (crop.y / 100) * nh,
-            width: (crop.width / 100) * nw,
-            height: (crop.height / 100) * nh,
+            x: (crop.x / 100) * dw,
+            y: (crop.y / 100) * dh,
+            width: (crop.width / 100) * dw,
+            height: (crop.height / 100) * dh,
           };
     try {
       const blob = await getCroppedImg(imageEl, cropPx);
       if (!blob) return;
       setPhotoUploading(true);
       const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
-      const res = await uploadTeamPhotoByInviteLink(token, file);
+      const previousUrl = form.photo?.trim() || "";
+      const res = await uploadTeamPhotoByInviteLink(token, file, previousUrl);
       if (res?.url) {
         setForm((p) => ({ ...p, photo: res.url }));
         toast.success("Photo uploaded");

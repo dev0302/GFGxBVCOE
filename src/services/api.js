@@ -650,10 +650,13 @@ export async function addTeamMemberByInviteLink(token, payload) {
   return data;
 }
 
-/** Upload team photo via invite link (public). Valid token required. Returns { url }. */
-export async function uploadTeamPhotoByInviteLink(token, file) {
+/** Upload team photo via invite link (public). Valid token required. Returns { url }. Pass previousPhotoUrl when reuploading to delete the old one from Cloudinary. */
+export async function uploadTeamPhotoByInviteLink(token, file, previousPhotoUrl = '') {
   const formData = new FormData();
   formData.append('photo', file);
+  if (previousPhotoUrl && typeof previousPhotoUrl === 'string') {
+    formData.append('previousPhotoUrl', previousPhotoUrl.trim());
+  }
   const res = await fetch(`${BASE}/api/v1/team/join/${token}/upload-photo`, {
     method: 'POST',
     body: formData,

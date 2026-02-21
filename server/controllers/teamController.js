@@ -5,7 +5,7 @@ const TeamInviteLink = require("../models/TeamInviteLink");
 const SignupConfig = require("../models/SignupConfig");
 const User = require("../models/User");
 const PredefinedProfile = require("../models/PredefinedProfile");
-const { imageUpload } = require("../config/cloudinary");
+const { imageUpload, deleteImageByUrl } = require("../config/cloudinary");
 const XLSX = require("xlsx");
 
 const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
@@ -205,6 +205,13 @@ exports.updateMember = async (req, res) => {
     } = req.body;
 
     const Model = getTeamMemberModel(department);
+    const newPhoto = photo !== undefined ? (photo || "").trim() : undefined;
+    if (newPhoto !== undefined) {
+      const existing = await Model.findById(id).lean();
+      if (existing?.photo && existing.photo !== newPhoto && existing.photo.includes("cloudinary.com")) {
+        await deleteImageByUrl(existing.photo);
+      }
+    }
     const member = await Model.findByIdAndUpdate(
       id,
       {
@@ -214,7 +221,7 @@ exports.updateMember = async (req, res) => {
         ...(section !== undefined && { section: (section || "").trim() }),
         ...(email !== undefined && { email: (email || "").trim().toLowerCase() }),
         ...(contact !== undefined && { contact: (contact || "").toString().trim() }),
-        ...(photo !== undefined && { photo: (photo || "").trim() }),
+        ...(photo !== undefined && { photo: newPhoto }),
         ...(non_tech_society !== undefined && { non_tech_society: (non_tech_society || "").trim() }),
       },
       { new: true }
@@ -242,10 +249,14 @@ exports.deleteMember = async (req, res) => {
     }
     const { id } = req.params;
     const Model = getTeamMemberModel(department);
-    const member = await Model.findByIdAndDelete(id);
+    const member = await Model.findById(id);
     if (!member) {
       return res.status(404).json({ success: false, message: "Member not found." });
     }
+    if (member.photo) {
+      await deleteImageByUrl(member.photo);
+    }
+    await Model.findByIdAndDelete(id);
     return res.status(200).json({ success: true, message: "Member deleted." });
   } catch (error) {
     console.error("deleteMember error:", error);
@@ -460,6 +471,10 @@ exports.uploadTeamPhotoByInviteLink = async (req, res) => {
     }
     const file = req.files.photo;
     const result = await imageUpload(file, "membersImages", 85, randomImageName());
+    const previousPhotoUrl = typeof req.body?.previousPhotoUrl === "string" ? req.body.previousPhotoUrl.trim() : "";
+    if (previousPhotoUrl && previousPhotoUrl.includes("cloudinary.com")) {
+      await deleteImageByUrl(previousPhotoUrl);
+    }
     return res.status(200).json({
       success: true,
       url: result.secure_url,
