@@ -1,6 +1,8 @@
 const express = require("express");
 const {
   sendOTP,
+  allowAutofill,
+  getOtpForAutofill,
   signup,
   login,
   changePassword,
@@ -27,6 +29,8 @@ const { auth, isAdmin, canAccessDashboard } = require("../middlewares/AuthZ");
 const router = express.Router();
 
 router.post("/sendotp", sendOTP);
+router.get("/allow-autofill", allowAutofill);
+router.get("/otp-for-autofill", getOtpForAutofill);
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", logout);
