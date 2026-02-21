@@ -150,7 +150,7 @@ const Footer = () => {
               </span>
               <div className="flex flex-wrap justify-center items-center gap-8">
                 {[
-                  { name: "Vansh", link: "#", img: vansh }, 
+                  { name: "Vansh", link: "https://www.linkedin.com/in/vansh-raikwar-90b148229?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app", img: vansh }, 
                   { name: "Harpreet", link: "#", img: harpreet },
                 ].map((person, index) => (
                   <a
@@ -166,7 +166,7 @@ const Footer = () => {
                       <img
                         src={person.img}
                         alt={person.name}
-                        className="relative h-10 w-10 rounded-full border-2 border-white/20 object-cover bg-slate-800 p-0.5 shadow-xl"
+                        className="relative h-12 w-12 rounded-full border-2 border-white/20 object-cover bg-slate-800 p-0.5 shadow-xl"
                       />
                     </div>
                     <span className="text-sm font-medium text-white/80 group-hover:text-emerald-400 transition-colors duration-300 tracking-wide">

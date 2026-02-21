@@ -1,5 +1,10 @@
 const mongoose = require("mongoose");
 
+const faqSchema = new mongoose.Schema(
+  { question: { type: String, trim: true }, answer: { type: String, trim: true } },
+  { _id: false }
+);
+
 const upcomingEventSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
@@ -11,6 +16,7 @@ const upcomingEventSchema = new mongoose.Schema(
     targetAudience: { type: String, default: "" },
     otherLinks: { type: String, default: "" }, // JSON string: [{ label, url }]
     otherDocs: { type: String, default: "" }, // JSON string or comma-separated URLs
+    faqs: { type: [faqSchema], default: [] },
   },
   { timestamps: true }
 );
