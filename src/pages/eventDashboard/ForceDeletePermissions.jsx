@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { SectionTitle } from "../../components/EventDashboard/SectionTitle";
 import { Spinner } from "@/components/ui/spinner";
 import { NativeTypewriter } from "../../components/ui/native-typewriter";
+import { AddDepartmentUnlockAnimation } from "../../components/EventDashboard/AddDepartmentUnlockAnimation";
 
 export default function ForceDeletePermissions() {
   const [config, setConfig] = useState(null);
@@ -12,6 +13,7 @@ export default function ForceDeletePermissions() {
   const [addingDept, setAddingDept] = useState(false);
   const [removingDept, setRemovingDept] = useState(null);
   const [addDeptValue, setAddDeptValue] = useState("");
+  const [showUnlockAnimation, setShowUnlockAnimation] = useState(false);
 
   const loadConfig = useCallback(() => {
     setLoading(true);
@@ -37,13 +39,17 @@ export default function ForceDeletePermissions() {
     const dept = addDeptValue.trim();
     if (!dept) return;
     setAddingDept(true);
+    setShowUnlockAnimation(true);
     addForceDeleteDepartment(dept)
       .then((res) => {
         if (res.data) setConfig(res.data);
         setAddDeptValue("");
         toast.success("Department can now use Force delete on events.");
       })
-      .catch((err) => toast.error(err.message || "Failed to add"))
+      .catch((err) => {
+        setShowUnlockAnimation(false);
+        toast.error(err.message || "Failed to add");
+      })
       .finally(() => setAddingDept(false));
   };
 
@@ -138,6 +144,11 @@ export default function ForceDeletePermissions() {
           ) : null}
         </section>
       </div>
+
+      <AddDepartmentUnlockAnimation
+        isActive={showUnlockAnimation}
+        onComplete={() => setShowUnlockAnimation(false)}
+      />
     </div>
   );
 }
