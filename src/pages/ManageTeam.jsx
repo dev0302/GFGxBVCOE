@@ -1719,7 +1719,8 @@ export default function ManageTeam({
                         key = `reg-${u._id}-${idx}`;
                         const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "—";
                         const src = u.image || avatarPlaceholder(name);
-                        const roleLabel = getAccountTypeLabel(u.accountType) || u.accountType || "Member";
+                        const position = u.additionalDetails?.position && String(u.additionalDetails.position).trim();
+                        const roleLabel = position || item.department || getAccountTypeLabel(u.accountType) || u.accountType || "Member";
 
                         content = (
                           <button
@@ -1792,6 +1793,7 @@ export default function ManageTeam({
                         const name = m.name || m.email || "—";
                         const photoUrl = m.photo || m.image_drive_link;
                         const src = photoUrl ? photoPreviewUrl(photoUrl) : avatarPlaceholder(name);
+                        const tagLabel = (m.position && String(m.position).trim()) || item.department || "Team";
 
                         content = (
                           <button
@@ -1804,7 +1806,7 @@ export default function ManageTeam({
                               <span className="block truncate font-medium text-white">{name}</span>
                               <span className="block truncate text-xs text-gray-500">{m.email}</span>
                             </div>
-                            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Team</span>
+                            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">{tagLabel}</span>
                           </button>
                         );
                       }
@@ -1884,7 +1886,8 @@ export default function ManageTeam({
                         key = `user-${u._id}-${idx}`;
                         const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "—";
                         const src = u.image || avatarPlaceholder(name);
-                        const roleLabel = getAccountTypeLabel(u.accountType) || u.accountType || "Member";
+                        const position = u.additionalDetails?.position && String(u.additionalDetails.position).trim();
+                        const roleLabel = position || item.department || getAccountTypeLabel(u.accountType) || u.accountType || "Member";
                         content = (
                           <button
                             type="button"
@@ -1954,6 +1957,7 @@ export default function ManageTeam({
                         const name = m.name || m.email || "—";
                         const photoUrl = m.photo || m.image_drive_link;
                         const src = photoUrl ? photoPreviewUrl(photoUrl) : avatarPlaceholder(name);
+                        const tagLabel = (m.position && String(m.position).trim()) || dept || "Team";
                         content = (
                           <button
                             type="button"
@@ -1966,7 +1970,7 @@ export default function ManageTeam({
                               <span className="block truncate text-xs text-gray-500">{m.email}</span>
                             </div>
                             <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                              {dept ? `${dept} · Team` : "Team"}
+                              {tagLabel}
                             </span>
                           </button>
                         );
