@@ -6,6 +6,7 @@ const SignupConfig = require("../models/SignupConfig");
 const User = require("../models/User");
 const PredefinedProfile = require("../models/PredefinedProfile");
 const { imageUpload, deleteImageByUrl } = require("../config/cloudinary");
+const { logActivity } = require("../utils/activityLog");
 const XLSX = require("xlsx");
 
 const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
@@ -174,6 +175,9 @@ exports.addMember = async (req, res) => {
       addedBy: req.user.id,
     });
 
+    if (req.user?.id) {
+      await logActivity(req.user.id, "team_member_add", "team", { department, email: member.email, name: member.name }, member._id.toString(), "TeamMember");
+    }
     return res.status(201).json({ success: true, data: member });
   } catch (error) {
     console.error("addMember error:", error);
@@ -229,6 +233,9 @@ exports.updateMember = async (req, res) => {
     if (!member) {
       return res.status(404).json({ success: false, message: "Member not found." });
     }
+    if (req.user?.id) {
+      await logActivity(req.user.id, "team_member_update", "team", { department, memberId: id }, id, "TeamMember");
+    }
     return res.status(200).json({ success: true, data: member });
   } catch (error) {
     console.error("updateMember error:", error);
@@ -256,7 +263,12 @@ exports.deleteMember = async (req, res) => {
     if (member.photo) {
       await deleteImageByUrl(member.photo);
     }
+    const email = member.email;
+    const name = member.name;
     await Model.findByIdAndDelete(id);
+    if (req.user?.id) {
+      await logActivity(req.user.id, "team_member_delete", "team", { department, email, name }, id, "TeamMember");
+    }
     return res.status(200).json({ success: true, message: "Member deleted." });
   } catch (error) {
     console.error("deleteMember error:", error);
@@ -423,6 +435,9 @@ exports.createInviteLink = async (req, res) => {
     const token = TeamInviteLink.generateToken();
     const expiresAt = new Date(Date.now() + TeamInviteLink.INVITE_LINK_EXPIRY_HOURS * 60 * 60 * 1000);
     await TeamInviteLink.create({ token, department, expiresAt });
+    if (req.user?.id) {
+      await logActivity(req.user.id, "invite_link_create", "invite_link", { department }, "", "TeamInviteLink");
+    }
     return res.status(201).json({
       success: true,
       message: "Invite link created.",
@@ -549,9 +564,13 @@ exports.addMemberByInviteLink = async (req, res) => {
 exports.suspendTeamInviteLink = async (req, res) => {
   try {
     const { token } = req.params;
+    const link = await TeamInviteLink.findOne({ token });
     const result = await TeamInviteLink.deleteOne({ token });
     if (result.deletedCount === 0) {
       return res.status(404).json({ success: false, message: "Link not found or already suspended." });
+    }
+    if (req.user?.id) {
+      await logActivity(req.user.id, "invite_link_suspend", "invite_link", { department: link?.department }, "", "TeamInviteLink");
     }
     return res.status(200).json({ success: true, message: "Link suspended." });
   } catch (error) {

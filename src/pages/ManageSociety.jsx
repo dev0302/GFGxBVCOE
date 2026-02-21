@@ -11,7 +11,7 @@ import ManageTeam from "./ManageTeam";
 import Search from "../components/Search";
 import { motion, AnimatePresence } from "framer-motion";
 // import { Mail } from "lucide-react";
-import { UserDetailModal, PredefinedOnlyDetailModal, MemberDetailModal } from "../components/Search";
+import { UserDetailModal, PredefinedOnlyDetailModal, MemberDetailModal, ActivityLogModal } from "../components/Search";
 import {
   downloadTeamListPDF,
   downloadAllDepartmentsPDF,
@@ -67,6 +67,7 @@ export default function ManageSociety() {
   const [allPeopleList, setAllPeopleList] = useState([]);
   const [selectedDetailItem, setSelectedDetailItem] = useState(null); // { type: 'user'|'predefinedOnly'|'teamMember', data }
   const [sendingInviteTo, setSendingInviteTo] = useState(null);
+  const [activityLogUser, setActivityLogUser] = useState(null);
 
   useEffect(() => {
     if (!user || !isSocietyRole(user?.accountType)) return;
@@ -580,6 +581,16 @@ export default function ManageSociety() {
             <UserDetailModal
               user={selectedDetailItem.data}
               onClose={() => setSelectedDetailItem(null)}
+              onViewLogs={(userId, userName) => setActivityLogUser({ id: userId, name: userName })}
+            />,
+            document.body
+          )}
+        {activityLogUser &&
+          createPortal(
+            <ActivityLogModal
+              userId={activityLogUser.id}
+              userName={activityLogUser.name}
+              onClose={() => setActivityLogUser(null)}
             />,
             document.body
           )}
