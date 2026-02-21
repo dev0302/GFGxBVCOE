@@ -876,7 +876,7 @@ exports.sendSignupInvite = async (req, res) => {
     }
 
     const baseUrl =
-      process.env.FRONTEND_URL ||
+      process.env.VITE_API_BASE_URL ||
       req.get("origin") ||
       req.get("referer")?.replace(/\/[^/]*$/, "") ||
       "https://gfg-bvcoe.vercel.app";
