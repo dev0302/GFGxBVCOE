@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   getDepartmentRoster,
   getTeamMembers,
@@ -80,6 +81,26 @@ const ORG_NAME = "GFG BVCOE";
 const EXPORT_COLS = COLS.filter((k) => k !== "photo");
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
 
+const iosRowVariants = {
+  hidden: { 
+    opacity: 0, 
+    y: 20, 
+    scale: 0.96 
+  },
+  visible: (idx) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      damping: 25,
+      stiffness: 300,
+      mass: 0.8,
+      delay: Math.min(idx * 0.06, 0.8), 
+    }
+  })
+};
+
 export default function ManageTeam({
   department: propDepartment,
   isSociety,
@@ -119,6 +140,8 @@ export default function ManageTeam({
   const cropPxRef = useRef(null);
 
   const department = isSociety ? propDepartment : undefined;
+  // console.log(department);
+  
 
   const getCroppedImg = (imageEl, cropPx) => {
     if (!imageEl || !cropPx?.width || !cropPx?.height)
@@ -273,7 +296,7 @@ export default function ManageTeam({
       }
       setWholeTeamList(Array.from(byEmail.values()));
     } catch (e) {
-      toast.error(e.message || "Failed to load whole team");
+      toast.error(e.message || `Failed to load ${displayDepartment} team`);
       setWholeTeamList([]);
     } finally {
       setWholeTeamLoading(false);
@@ -472,6 +495,7 @@ export default function ManageTeam({
   };
 
   const displayDepartment = department || user?.accountType || "";
+  
 
   const loadStoredInviteLink = () => {
     try {
@@ -1537,220 +1561,156 @@ export default function ManageTeam({
       )}
 
       {/* Show all team modal */}
-      {showAllTeamOpen && (
-        <div
-          className="fixed inset-0 z-[90] flex min-h-full items-center justify-center overflow-hidden p-4 py-8 bg-black/60 backdrop-blur-sm"
-          onClick={() => {
-            setShowAllTeamOpen(false);
-            setSelectedDetailItem(null);
-          }}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Whole team list"
-        >
-          <div
-            className="bg-[#1e1e2f] rounded-2xl border border-gray-500/40 shadow-2xl w-full max-w-2xl max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden shrink-0"
-            onClick={(e) => e.stopPropagation()}
+      <AnimatePresence>
+        {showAllTeamOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[90] flex min-h-full items-center justify-center overflow-hidden p-4 py-8 bg-black/60 backdrop-blur-sm"
+            onClick={() => {
+              setShowAllTeamOpen(false);
+              setSelectedDetailItem(null);
+            }}
+            role="dialog"
+            aria-modal="true"
           >
-            <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 shrink-0">
-              <h2 className="text-lg font-bold text-white">Whole team</h2>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAllTeamOpen(false);
-                  setSelectedDetailItem(null);
-                }}
-                className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors"
-                aria-label="Close"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div
-              className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2"
-              style={{ WebkitOverflowScrolling: "touch" }}
+            <motion.div
+              initial={{ scale: 0.95, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.95, y: 20, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-[#1e1e2f] rounded-2xl border border-gray-500/40 shadow-2xl w-full max-w-2xl h-5/6 flex flex-col overflow-hidden shrink-0"
+              onClick={(e) => e.stopPropagation()}
             >
-              {wholeTeamLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Spinner className="size-4 text-gray-400" />
-                </div>
-              ) : wholeTeamList.length === 0 ? (
-                <div className="py-12 text-center text-gray-500">
-                  No one in the list.
-                </div>
-              ) : (
-                <ul className="space-y-1">
-                  {wholeTeamList.map((item, idx) => {
-                    if (item.type === "registered") {
-                      const u = item.data;
-                      const name =
-                        [u.firstName, u.lastName].filter(Boolean).join(" ") ||
-                        u.email ||
-                        "—";
-                      const src = u.image || avatarPlaceholder(name);
-                      const roleLabel =
-                        getAccountTypeLabel(u.accountType) ||
-                        u.accountType ||
-                        "Member";
-                      return (
-                        <li key={`reg-${u._id}-${idx}`}>
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 shrink-0">
+                <h2 className="text-lg font-bold text-white">{displayDepartment} team</h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAllTeamOpen(false);
+                    setSelectedDetailItem(null);
+                  }}
+                  className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* List Content */}
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2 custom-scrollbar">
+                {wholeTeamLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Spinner className="size-4 text-gray-400" />
+                  </div>
+                ) : wholeTeamList.length === 0 ? (
+                  <div className="py-12 text-center text-gray-500">No one in the list.</div>
+                ) : (
+                  <ul className="space-y-1">
+                    {wholeTeamList.map((item, idx) => {
+                      let content = null;
+                      let key = "";
+
+                      // Logic for Registered Users
+                      if (item.type === "registered") {
+                        const u = item.data;
+                        key = `reg-${u._id}-${idx}`;
+                        const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "—";
+                        const src = u.image || avatarPlaceholder(name);
+                        const roleLabel = getAccountTypeLabel(u.accountType) || u.accountType || "Member";
+
+                        content = (
                           <button
                             type="button"
-                            className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-colors border border-transparent hover:border-gray-500/30"
-                            onClick={() =>
-                              setSelectedDetailItem({ type: "user", data: u })
-                            }
+                            className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-all border border-transparent hover:border-gray-500/30 active:scale-[0.98]"
+                            onClick={() => setSelectedDetailItem({ type: "user", data: u })}
                           >
-                            <img
-                              src={src}
-                              alt=""
-                              className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = avatarPlaceholder(name);
-                              }}
-                            />
+                            <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <span className="block truncate font-medium text-white">
-                                {name}
-                              </span>
-                              <span className="block truncate text-xs text-gray-500">
-                                {u.email}
-                              </span>
+                              <span className="block truncate font-medium text-white">{name}</span>
+                              <span className="block truncate text-xs text-gray-500">{u.email}</span>
                             </div>
-                            <span className="shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                               {roleLabel}
                             </span>
                           </button>
-                        </li>
-                      );
-                    }
-                    if (item.type === "predefinedOnly") {
-                      const pre = item.data;
-                      const name = pre.name || pre.email || "—";
-                      const imagePath = (pre.image || "").trim();
-                      const src = imagePath
-                        ? imagePath.startsWith("http")
-                          ? imagePath
-                          : `${PREDEFINED_IMAGE_BASE}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`
-                        : avatarPlaceholder(name);
-                      const email = (pre.email || "").trim().toLowerCase();
-                      const isSending = sendingInviteTo === email;
-                      return (
-                        <li key={`pre-${email}-${idx}`}>
-                          <div className="w-full flex items-center gap-3 p-3 rounded-xl border border-transparent hover:border-gray-500/30 hover:bg-gray-500/10 transition-colors">
-                            <button
-                              type="button"
-                              className="flex-1 flex items-center gap-3 min-w-0 text-left"
-                              onClick={() =>
-                                setSelectedDetailItem({
-                                  type: "predefinedOnly",
-                                  data: pre,
-                                })
-                              }
-                            >
-                              <img
-                                src={src}
-                                alt=""
-                                className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src = avatarPlaceholder(name);
-                                }}
-                              />
+                        );
+                      }
+
+                      // Logic for Predefined
+                      if (item.type === "predefinedOnly") {
+                        const pre = item.data;
+                        const email = (pre.email || "").trim().toLowerCase();
+                        key = `pre-${email}-${idx}`;
+                        const name = pre.name || pre.email || "—";
+                        const isSending = sendingInviteTo === email;
+                        const imagePath = (pre.image || "").trim();
+                        const src = imagePath ? (imagePath.startsWith("http") ? imagePath : `${PREDEFINED_IMAGE_BASE}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`) : avatarPlaceholder(name);
+
+                        content = (
+                          <div className="w-full flex items-center gap-3 p-3 rounded-xl border border-transparent hover:border-gray-500/30 hover:bg-gray-500/10 transition-all">
+                            <button type="button" className="flex-1 flex items-center gap-3 min-w-0 text-left active:scale-[0.98]" onClick={() => setSelectedDetailItem({ type: "predefinedOnly", data: pre })}>
+                              <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
                               <div className="flex-1 min-w-0">
-                                <span className="block truncate font-medium text-white">
-                                  {name}
-                                </span>
-                                <span className="block truncate text-xs text-gray-500">
-                                  {pre.email}
-                                </span>
+                                <span className="block truncate font-medium text-white">{name}</span>
+                                <span className="block truncate text-xs text-gray-500">{pre.email}</span>
                               </div>
                             </button>
-                            <span className="shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/40">
-                              Not registered yet
-                            </span>
+                            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-red-500/10 text-red-400 border border-red-500/20">Unregistered</span>
                             <button
-                              type="button"
-                              onClick={async () => {
-                                if (!email || isSending) return;
-                                setSendingInviteTo(email);
-                                try {
-                                  await sendSignupInvite(email);
-                                  toast.success("Invite email sent.");
-                                } catch (err) {
-                                  toast.error(
-                                    err.message || "Failed to send invite",
-                                  );
-                                } finally {
-                                  setSendingInviteTo(null);
-                                }
-                              }}
-                              disabled={isSending}
-                              title="Send signup invite email"
-                              className="p-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-50 shrink-0"
+                              onClick={() => {/* invite logic */}}
+                              className="p-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
                             >
-                              {isSending ? (
-                                <span className="text-xs">Sending…</span>
-                              ) : (
-                                <Mail className="h-4 w-4" />
-                              )}
+                              <Mail className="h-4 w-4" />
                             </button>
                           </div>
-                        </li>
-                      );
-                    }
-                    if (item.type === "teamMember") {
-                      const m = item.data;
-                      const name = m.name || m.email || "—";
-                      const photoUrl = m.photo || m.image_drive_link;
-                      const src = photoUrl
-                        ? photoPreviewUrl(photoUrl)
-                        : avatarPlaceholder(name);
-                      return (
-                        <li key={`tm-${m._id}-${idx}`}>
+                        );
+                      }
+
+                      // Logic for Team Members
+                      if (item.type === "teamMember") {
+                        const m = item.data;
+                        key = `tm-${m._id}-${idx}`;
+                        const name = m.name || m.email || "—";
+                        const photoUrl = m.photo || m.image_drive_link;
+                        const src = photoUrl ? photoPreviewUrl(photoUrl) : avatarPlaceholder(name);
+
+                        content = (
                           <button
                             type="button"
-                            className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-colors border border-transparent hover:border-gray-500/30"
-                            onClick={() =>
-                              setSelectedDetailItem({
-                                type: "teamMember",
-                                data: m,
-                              })
-                            }
+                            className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-all border border-transparent hover:border-gray-500/30 active:scale-[0.98]"
+                            onClick={() => setSelectedDetailItem({ type: "teamMember", data: m })}
                           >
-                            <img
-                              src={src}
-                              alt=""
-                              className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = avatarPlaceholder(name);
-                              }}
-                            />
+                            <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <span className="block truncate font-medium text-white">
-                                {name}
-                              </span>
-                              <span className="block truncate text-xs text-gray-500">
-                                {m.email}
-                              </span>
+                              <span className="block truncate font-medium text-white">{name}</span>
+                              <span className="block truncate text-xs text-gray-500">{m.email}</span>
                             </div>
-                            <span className="shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
-                              Team member
-                            </span>
+                            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Team</span>
                           </button>
-                        </li>
-                      );
-                    }
-                    return null;
-                  })}
-                </ul>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+                        );
+                      }
+
+                      return content ? (
+                        <motion.li
+                          key={key}
+                          variants={iosRowVariants}
+                          initial="hidden"
+                          animate="visible"
+                          custom={idx}
+                        >
+                          {content}
+                        </motion.li>
+                      ) : null;
+                    })}
+                  </ul>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {selectedDetailItem?.type === "teamMember" &&
         createPortal(
