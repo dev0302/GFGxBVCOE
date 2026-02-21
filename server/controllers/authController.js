@@ -284,7 +284,9 @@ exports.forgotPassword = async (req, res) => {
     await PasswordReset.deleteMany({ email: emailNorm });
     await PasswordReset.create({ email: emailNorm, token, expiresAt });
 
-    const baseUrl = process.env.VITE_API_BASE_URL || "http://localhost:5173";
+    const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    console.log("forgot pass base url:" + process.env.FRONTEND_URL );
+    
     const resetLink = `${baseUrl}/reset-password/${token}`;
     const htmlContent = passwordResetTemplate(resetLink);
 
@@ -875,8 +877,11 @@ exports.sendSignupInvite = async (req, res) => {
       return res.status(400).json({ success: false, message: "This person is already registered." });
     }
 
+    console.log(process.env.FRONTEND_URL);
+    
+
     const baseUrl =
-      process.env.VITE_API_BASE_URL ||
+      process.env.FRONTEND_URL ||
       req.get("origin") ||
       req.get("referer")?.replace(/\/[^/]*$/, "") ||
       "https://gfg-bvcoe.vercel.app";
