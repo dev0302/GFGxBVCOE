@@ -1722,10 +1722,26 @@ export default function ManageTeam({
                             </button>
                             <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-red-500/10 text-red-400 border border-red-500/20">Unregistered</span>
                             <button
-                              onClick={() => {/* invite logic */}}
+                              onClick={async () => {
+                                if (!email) return;
+                                setSendingInviteTo(email);
+                                try {
+                                  await sendSignupInvite(email);
+                                  toast.success("Invite email sent.");
+                                } catch (err) {
+                                  toast.error(err.message || "Failed to send invite");
+                                } finally {
+                                  setSendingInviteTo(null);
+                                }
+                              }}
+                              disabled={isSending}
                               className="p-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
                             >
-                              <Mail className="h-4 w-4" />
+                              {isSending ? (
+                                <Spinner className="h-4 w-4 text-cyan-400" />
+                              ) : (
+                                <Mail className="h-4 w-4" />
+                              )}
                             </button>
                           </div>
                         );
