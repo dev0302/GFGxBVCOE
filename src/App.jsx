@@ -51,41 +51,41 @@ function App() {
         />
         <Navbar />
         <Routes>
+          <Route path="/" element={<Home />} />
           <Route element={<AuthAwareLayout />}>
-            <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/team" element={<Team2 />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/uploadevent">
-            <Route path="link/:token" element={<UploadEventByLink />} />
-            <Route element={<EventDashboardLayout />}>
-              <Route index element={<Navigate to="/uploadevent/upload" replace />} />
-              <Route path="upload" element={<UploadNewEvent />} />
-              <Route path="generate-link" element={<GenerateLink />} />
-              <Route path="departments" element={<DepartmentsAllowed />} />
-              <Route path="force-delete" element={<ForceDeletePermissions />} />
-              <Route path="manage" element={<ManageEvents />} />
-              <Route path="upcoming" element={<UpcomingEventPage />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/team" element={<Team2 />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/uploadevent">
+              <Route path="link/:token" element={<UploadEventByLink />} />
+              <Route element={<EventDashboardLayout />}>
+                <Route index element={<Navigate to="/uploadevent/upload" replace />} />
+                <Route path="upload" element={<UploadNewEvent />} />
+                <Route path="generate-link" element={<GenerateLink />} />
+                <Route path="departments" element={<DepartmentsAllowed />} />
+                <Route path="force-delete" element={<ForceDeletePermissions />} />
+                <Route path="manage" element={<ManageEvents />} />
+                <Route path="upcoming" element={<UpcomingEventPage />} />
+              </Route>
             </Route>
-          </Route>
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<AdminSignupConfig />} />
-          <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/manage-team" element={<ManageTeam />} />
-          <Route path="/manage-society" element={<ManageSociety />} />
-          <Route path="/join-team/:token" element={<JoinTeamByLink />} />
-          <Route path="/notfound" element={<NotFound></NotFound>} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/bentogrid" element={<GFGBentoGrid />} />
-          <Route path="/results" element={<ResultPage />} />
-          <Route path="/quiz" element={<Quiz />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/quiz/result" element={<QuizResult />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/dashboard" element={<AdminSignupConfig />} />
+            <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/manage-team" element={<ManageTeam />} />
+            <Route path="/manage-society" element={<ManageSociety />} />
+            <Route path="/join-team/:token" element={<JoinTeamByLink />} />
+            <Route path="/notfound" element={<NotFound></NotFound>} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/bentogrid" element={<GFGBentoGrid />} />
+            <Route path="/results" element={<ResultPage />} />
+            <Route path="/quiz" element={<Quiz />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/quiz/result" element={<QuizResult />} />
           </Route>
         </Routes>
       </div>
