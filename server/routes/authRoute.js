@@ -36,7 +36,7 @@ router.post("/changepassword", auth, changePassword);
 router.get("/me", auth, me);
 router.get("/search-people", auth, searchPeople);
 router.get("/all-users", auth, canAccessDashboard, getAllUsers);
-router.get("/all-people", auth, canAccessDashboard, getAllPeople);
+router.get("/all-people", auth, getAllPeople);
 router.post("/send-signup-invite", auth, sendSignupInvite);
 router.delete("/account", auth, deleteAccount);
 router.get("/enrich-profile", auth, enrichProfile);

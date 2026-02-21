@@ -6,6 +6,7 @@ import {
   getDepartmentRoster,
   getTeamMembers,
   getTeamDepartments,
+  getAllPeople,
   addTeamMember,
   updateTeamMember,
   deleteTeamMember,
@@ -166,6 +167,9 @@ export default function ManageTeam({
   const [showAllTeamOpen, setShowAllTeamOpen] = useState(false);
   const [wholeTeamLoading, setWholeTeamLoading] = useState(false);
   const [wholeTeamList, setWholeTeamList] = useState([]);
+  const [showSocietyListOpen, setShowSocietyListOpen] = useState(false);
+  const [societyListLoading, setSocietyListLoading] = useState(false);
+  const [societyList, setSocietyList] = useState([]);
   const [selectedDetailItem, setSelectedDetailItem] = useState(null);
   const [sendingInviteTo, setSendingInviteTo] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -375,6 +379,29 @@ export default function ManageTeam({
       };
     }
   }, [showAllTeamOpen]);
+
+  useEffect(() => {
+    if (showSocietyListOpen && user) {
+      setSocietyListLoading(true);
+      getAllPeople()
+        .then((res) => setSocietyList(res.data || []))
+        .catch((e) => {
+          toast.error(e.message || "Failed to load society list");
+          setSocietyList([]);
+        })
+        .finally(() => setSocietyListLoading(false));
+    }
+  }, [showSocietyListOpen, user]);
+
+  useEffect(() => {
+    if (showSocietyListOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [showSocietyListOpen]);
 
   const handleAddManual = async (e) => {
     e.preventDefault();
@@ -824,6 +851,15 @@ export default function ManageTeam({
               aria-label="Show all team"
             >
               <List className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowSocietyListOpen(true)}
+              className="shrink-0 p-2.5 rounded-xl bg-gray-600/40 border border-gray-500/40 text-gray-200 hover:bg-emerald-500/20 hover:border-emerald-500/40 hover:text-emerald-300 transition-colors"
+              title="Show whole society (core/heads, all dept members, unregistered)"
+              aria-label="Show whole society"
+            >
+              <Users className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -1767,6 +1803,169 @@ export default function ManageTeam({
                               <span className="block truncate text-xs text-gray-500">{m.email}</span>
                             </div>
                             <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Team</span>
+                          </button>
+                        );
+                      }
+
+                      return content ? (
+                        <motion.li
+                          key={key}
+                          variants={iosRowVariants}
+                          initial="hidden"
+                          animate="visible"
+                          custom={idx}
+                        >
+                          {content}
+                        </motion.li>
+                      ) : null;
+                    })}
+                  </ul>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Show whole society modal (society roles only) */}
+      <AnimatePresence>
+        {showSocietyListOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[90] flex min-h-full items-center justify-center overflow-hidden p-4 py-8 bg-black/60 backdrop-blur-sm"
+            onClick={() => {
+              setShowSocietyListOpen(false);
+              setSelectedDetailItem(null);
+            }}
+            role="dialog"
+            aria-modal="true"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.95, y: 20, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-[#1e1e2f] rounded-2xl border border-gray-500/40 shadow-2xl w-full max-w-2xl h-5/6 flex flex-col overflow-hidden shrink-0"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 shrink-0">
+                <h2 className="text-lg font-bold text-white">Whole society</h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSocietyListOpen(false);
+                    setSelectedDetailItem(null);
+                  }}
+                  className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2 custom-scrollbar">
+                {societyListLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Spinner className="size-4 text-gray-400" />
+                  </div>
+                ) : societyList.length === 0 ? (
+                  <div className="py-12 text-center text-gray-500">No one in the list.</div>
+                ) : (
+                  <ul className="space-y-1">
+                    {societyList.map((item, idx) => {
+                      let content = null;
+                      let key = "";
+
+                      if (item.type === "user") {
+                        const u = item.data;
+                        key = `user-${u._id}-${idx}`;
+                        const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "—";
+                        const src = u.image || avatarPlaceholder(name);
+                        const roleLabel = getAccountTypeLabel(u.accountType) || u.accountType || "Member";
+                        content = (
+                          <button
+                            type="button"
+                            className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-all border border-transparent hover:border-gray-500/30 active:scale-[0.98]"
+                            onClick={() => setSelectedDetailItem({ type: "user", data: u })}
+                          >
+                            <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <span className="block truncate font-medium text-white">{name}</span>
+                              <span className="block truncate text-xs text-gray-500">{u.email}</span>
+                            </div>
+                            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              {roleLabel}
+                            </span>
+                          </button>
+                        );
+                      }
+
+                      if (item.type === "predefinedOnly") {
+                        const pre = item.data;
+                        const email = (pre.email || "").trim().toLowerCase();
+                        key = `pre-${email}-${idx}`;
+                        const name = pre.name || pre.email || "—";
+                        const isSending = sendingInviteTo === email;
+                        const imagePath = (pre.image || "").trim();
+                        const src = imagePath ? (imagePath.startsWith("http") ? imagePath : `${PREDEFINED_IMAGE_BASE}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`) : avatarPlaceholder(name);
+                        content = (
+                          <div className="w-full flex items-center gap-3 p-3 rounded-xl border border-transparent hover:border-gray-500/30 hover:bg-gray-500/10 transition-all">
+                            <button type="button" className="flex-1 flex items-center gap-3 min-w-0 text-left active:scale-[0.98]" onClick={() => setSelectedDetailItem({ type: "predefinedOnly", data: pre })}>
+                              <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <span className="block truncate font-medium text-white">{name}</span>
+                                <span className="block truncate text-xs text-gray-500">{pre.email}</span>
+                              </div>
+                            </button>
+                            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-red-500/10 text-red-400 border border-red-500/20">Unregistered</span>
+                            <button
+                              onClick={async () => {
+                                if (!email) return;
+                                setSendingInviteTo(email);
+                                try {
+                                  await sendSignupInvite(email);
+                                  toast.success("Invite email sent.");
+                                } catch (err) {
+                                  toast.error(err.message || "Failed to send invite");
+                                } finally {
+                                  setSendingInviteTo(null);
+                                }
+                              }}
+                              disabled={isSending}
+                              className="p-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/20 transition-colors disabled:opacity-50"
+                            >
+                              {isSending ? (
+                                <Spinner className="h-4 w-4 text-cyan-400" />
+                              ) : (
+                                <Mail className="h-4 w-4" />
+                              )}
+                            </button>
+                          </div>
+                        );
+                      }
+
+                      if (item.type === "teamMember") {
+                        const m = item.data;
+                        const dept = item.department || "";
+                        key = `tm-${m._id}-${dept}-${idx}`;
+                        const name = m.name || m.email || "—";
+                        const photoUrl = m.photo || m.image_drive_link;
+                        const src = photoUrl ? photoPreviewUrl(photoUrl) : avatarPlaceholder(name);
+                        content = (
+                          <button
+                            type="button"
+                            className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-all border border-transparent hover:border-gray-500/30 active:scale-[0.98]"
+                            onClick={() => setSelectedDetailItem({ type: "teamMember", data: m })}
+                          >
+                            <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <span className="block truncate font-medium text-white">{name}</span>
+                              <span className="block truncate text-xs text-gray-500">{m.email}</span>
+                            </div>
+                            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                              {dept ? `${dept} · Team` : "Team"}
+                            </span>
                           </button>
                         );
                       }
