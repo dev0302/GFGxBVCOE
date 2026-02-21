@@ -45,27 +45,36 @@ function wrapCard(innerHtml) {
  * @param {string} [autofillUrl] - URL to autofill OTP on signup page (opens signup and fills OTP when clicked)
  */
 exports.emailVerificationTemplate = (otp, autofillUrl) => {
-  const autofillSection = autofillUrl
+  const autofillBlock = autofillUrl
     ? `
-    <p style="${BASE_STYLES.body}">
+    <p style="${BASE_STYLES.body} margin-bottom: 16px;">
       Click below to autofill the OTP on your open signup tab:
     </p>
-    <div style="margin: 20px 0;">
+    <div style="margin-bottom: 20px;">
       <a href="${autofillUrl}" style="${BASE_STYLES.button}">Autofill OTP</a>
     </div>
   `
     : "";
-  const inner = `
-    <h1 style="${BASE_STYLES.title}">Email Verification</h1>
-    <p style="${BASE_STYLES.body}">
-      Thank you for signing up for GFGxBVCOE. Please use the OTP below to verify your email address.
+  const otpLabel = autofillUrl ? "Or enter the OTP manually:" : "Use the OTP below:";
+  const otpBlock = `
+    <p style="${BASE_STYLES.body} margin-bottom: 12px;">
+      ${otpLabel}
     </p>
-    <div style="${BASE_STYLES.box}">
+    <div style="${BASE_STYLES.box} margin-top: 0;">
       <p style="color: #e5e7eb; font-size: 32px; font-weight: bold; letter-spacing: 8px; margin: 0; font-family: monospace;">
         ${otp}
       </p>
     </div>
-    ${autofillSection}
+  `;
+  const inner = `
+    <h1 style="${BASE_STYLES.title}">Email Verification</h1>
+    <p style="${BASE_STYLES.body}">
+      Thank you for signing up for GFGxBVCOE. Please verify your email address.
+    </p>
+    <div style="background-color: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 24px; margin: 24px 0;">
+      ${autofillBlock}
+      ${otpBlock}
+    </div>
     <p style="${BASE_STYLES.footer}">
       This OTP will expire in 10 minutes. If you didn't request this, please ignore this email.
     </p>
