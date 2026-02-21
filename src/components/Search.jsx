@@ -193,7 +193,7 @@ export function PredefinedOnlyDetailModal({ predefined, onClose }) {
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="p-6 space-y-8 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
+        <div className="p-6 space-y-8 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }} data-lenis-prevent>
           <div className="flex flex-col items-center gap-3">
             <img
               src={imgSrc}
@@ -296,7 +296,7 @@ export function UserDetailModal({ user, onClose }) {
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="p-6 space-y-8 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
+        <div className="p-6 space-y-8 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }} data-lenis-prevent>
           {/* Header: photo + name */}
           <div className="flex flex-col items-center gap-3">
             <img
