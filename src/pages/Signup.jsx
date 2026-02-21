@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { sendOTP, signup, AUTH_DEPARTMENTS, getAccountTypeLabel, enrichProfileSSE, getMe } from "../services/api";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
 import { SpinnerCustom } from "../components/SpinnerCustom";
@@ -15,7 +16,9 @@ const Signup = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [enriching, setEnriching] = useState(false);
   const [enrichStatus, setEnrichStatus] = useState("Fetching details…");
@@ -158,16 +161,16 @@ const Signup = () => {
             </div>
             {/* Replace the old OTP input with this */}
             <div>
-        <label className={labelClass}>Verification Code *</label>
-        <OtpInput 
-          value={otp} 
-          onChange={setOtp} 
-          disabled={loading} 
-        />
-        <p className="text-center text-[11px] text-gray-500 font-medium tracking-wide">
-          WE'VE SENT A 6-DIGIT CODE TO YOUR EMAIL
-        </p>
-      </div>
+              <label className={labelClass}>Verification Code *</label>
+              <OtpInput
+                value={otp}
+                onChange={setOtp}
+                disabled={loading}
+              />
+              <p className="text-center text-[11px] text-gray-500 font-medium tracking-wide">
+                WE'VE SENT A 6-DIGIT CODE TO YOUR EMAIL
+              </p>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelClass}>First name *</label>
@@ -192,25 +195,45 @@ const Signup = () => {
             </div>
             <div>
               <label className={labelClass}>Password *</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={inputClass}
-                placeholder="••••••••"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={inputClass + " pr-11"}
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
             <div>
               <label className={labelClass}>Confirm password *</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className={inputClass}
-                placeholder="••••••••"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={inputClass + " pr-11"}
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
             <div className="flex gap-2">
               <button

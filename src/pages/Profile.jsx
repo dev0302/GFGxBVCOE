@@ -184,6 +184,32 @@ const Profile = () => {
 
   if (!user) return <Navigate to="/login" replace />;
 
+  // profile bar
+  const completionPercent = (() => {
+    let score = 0;
+    const total = 12;
+    if (formData.firstName && formData.lastName) score++;
+    if (avatarPreview) score++;
+    if (formData.gender) score++;
+    if (formData.dob) score++;
+    if (formData.about) score++;
+    if (formData.contact) score++;
+    if (formData.yearOfStudy) score++;
+    if (formData.section) score++;
+    if (formData.non_tech_society) score++;
+    if (formData.instagram) score++;
+    if (formData.linkedin) score++;
+    if (formData.github) score++;
+    return Math.round((score / total) * 100);
+  })();
+
+  const getCompletionColor = (percent) => {
+    if (percent < 30) return "from-red-500 to-orange-500";
+    if (percent < 70) return "from-orange-500 to-cyan-500";
+    return "from-cyan-500 to-emerald-500";
+  };
+  // profile bar
+
   const inputClass =
     "w-full px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none";
   const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
@@ -196,12 +222,12 @@ const Profile = () => {
           <p className="text-gray-400 text-sm">Manage your details and display picture</p>
         </div>
 
-        {loading ?  (
-            <div className="flex items-center gap-2 text-gray-400">
-              <span>Loading your profile</span>
-              <Spinner className="size-4 text-gray-400" />
-            </div>
-          ) : (
+        {loading ? (
+          <div className="flex items-center gap-2 text-gray-400">
+            <span>Loading your profile</span>
+            <Spinner className="size-4 text-gray-400" />
+          </div>
+        ) : (
           <div className="bg-gradient-to-br from-[#1e1e2f]/90 to-[#2c2c3e]/90 border border-gray-500/30 rounded-2xl p-6 md:p-8 shadow-xl space-y-8">
             {/* Avatar */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
@@ -242,6 +268,48 @@ const Profile = () => {
                 </div>
               </div>
             </div>
+
+            {/* Profile Completion Bar */}
+            {!loading && (
+              <div className="bg-[#252536]/40 border border-gray-500/20 rounded-2xl p-5 shadow-inner backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-white">Profile completion</span>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full bg-white/10 ${completionPercent === 100 ? "text-emerald-400" : "text-cyan-400"}`}>
+                      {completionPercent}%
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-400">
+                    {completionPercent === 100 ? "Amazing! Your profile is complete." : "Complete your profile to unlock full potential"}
+                  </span>
+                </div>
+
+                <div className="h-2.5 w-full bg-gray-500/20 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full bg-gradient-to-r ${getCompletionColor(completionPercent)} transition-all duration-1000 ease-out`}
+                    style={{ width: `${completionPercent}%` }}
+                  />
+                </div>
+
+                {completionPercent < 100 && (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest w-full mb-1">Missing fields</p>
+                    {!(formData.firstName && formData.lastName) && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Name</span>}
+                    {!avatarPreview && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Profile Picture</span>}
+                    {!formData.gender && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Gender</span>}
+                    {!formData.dob && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Birth date</span>}
+                    {!formData.about && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">About</span>}
+                    {!formData.contact && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Contact</span>}
+                    {!formData.yearOfStudy && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Year of study</span>}
+                    {!formData.section && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Section</span>}
+                    {!formData.non_tech_society && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Non-tech society</span>}
+                    {!formData.instagram && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Instagram</span>}
+                    {!formData.linkedin && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">LinkedIn</span>}
+                    {!formData.github && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">GitHub</span>}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Branch, Year, Position & Roles (p0, p1, p2) */}
             {(profileDetails.branch || profileDetails.year || profileDetails.position || profileDetails.p0 || profileDetails.p1 || profileDetails.p2) && (
