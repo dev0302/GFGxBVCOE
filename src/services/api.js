@@ -310,7 +310,6 @@ export const AUTH_DEPARTMENTS = [
   'Content and Documentation',
   'Photography and Videography',
   'Sponsorship and Marketing',
-  'Testing',
 ];
 
 /** Display label for account type (e.g. ADMIN → "Faculty Incharge") */
@@ -352,6 +351,15 @@ export async function sendOTP({ email, department }) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Failed to send OTP');
+  return data;
+}
+
+/** Poll for OTP using one-time pollToken (for autofill). Returns { otp } when available. */
+export async function getOtpForAutofill(pollToken) {
+  if (!pollToken) throw new Error('Token required');
+  const res = await fetch(`${BASE}/api/v1/auth/otp-for-autofill?token=${encodeURIComponent(pollToken)}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to get OTP');
   return data;
 }
 

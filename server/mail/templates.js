@@ -41,8 +41,20 @@ function wrapCard(innerHtml) {
 
 /**
  * Email verification / signup OTP
+ * @param {string} otp - 6-digit OTP
+ * @param {string} [autofillUrl] - URL to autofill OTP on signup page (opens signup and fills OTP when clicked)
  */
-exports.emailVerificationTemplate = (otp) => {
+exports.emailVerificationTemplate = (otp, autofillUrl) => {
+  const autofillSection = autofillUrl
+    ? `
+    <p style="${BASE_STYLES.body}">
+      Click below to autofill the OTP on your open signup tab:
+    </p>
+    <div style="margin: 20px 0;">
+      <a href="${autofillUrl}" style="${BASE_STYLES.button}">Autofill OTP</a>
+    </div>
+  `
+    : "";
   const inner = `
     <h1 style="${BASE_STYLES.title}">Email Verification</h1>
     <p style="${BASE_STYLES.body}">
@@ -53,6 +65,7 @@ exports.emailVerificationTemplate = (otp) => {
         ${otp}
       </p>
     </div>
+    ${autofillSection}
     <p style="${BASE_STYLES.footer}">
       This OTP will expire in 10 minutes. If you didn't request this, please ignore this email.
     </p>

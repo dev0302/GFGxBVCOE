@@ -4,6 +4,7 @@ const User = require("../models/User");
 const Profile = require("../models/Profile");
 const PredefinedProfile = require("../models/PredefinedProfile");
 const SignupConfig = require("../models/SignupConfig");
+const crypto = require("crypto");
 const otpGenerator = require("otp-generator");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
@@ -35,6 +36,20 @@ exports.sendOTP = async (req, res) => {
     }
 
     const emailNorm = email.trim().toLowerCase();
+    const deptTrim = (department || "").trim();
+
+    // First check: is this email allowed for this department?
+    const config = await SignupConfig.findOne({
+      department: deptTrim,
+      allowedEmails: emailNorm,
+    });
+    if (!config) {
+      return res.status(403).json({
+        success: false,
+        message: "This email is not allowed to sign up for the selected department.",
+      });
+    }
+
     const checkUserPresent = await User.findOne({ email: emailNorm });
     if (checkUserPresent) {
       return res.status(401).json({
@@ -43,26 +58,12 @@ exports.sendOTP = async (req, res) => {
       });
     }
 
-    const deptTrim = (department || "").trim();
-    const isTesting = deptTrim === "Testing";
-    if (!isTesting) {
-      const config = await SignupConfig.findOne({
-        department: deptTrim,
-        allowedEmails: emailNorm,
-      });
-      if (!config) {
-        return res.status(403).json({
-          success: false,
-          message: "This email is not allowed to sign up for the selected department.",
-        });
-      }
-    }
-
     await OTP.collection.createIndex({ otp: 1 }, { unique: true }).catch(() => { });
 
     let otp;
     let otpBody;
 
+    const pollToken = crypto.randomBytes(24).toString("hex");
     while (true) {
       try {
         otp = otpGenerator.generate(6, {
@@ -70,7 +71,7 @@ exports.sendOTP = async (req, res) => {
           lowerCaseAlphabets: false,
           specialChars: false,
         });
-        otpBody = await OTP.create({ email: emailNorm, otp });
+        otpBody = await OTP.create({ email: emailNorm, otp, pollToken });
         break;
       } catch (err) {
         if (err.code === 11000) continue;
@@ -78,13 +79,17 @@ exports.sendOTP = async (req, res) => {
       }
     }
 
-    const htmlContent = emailVerificationTemplate(otp);
-    
+    // Link hits backend to mark "user allowed autofill" - no redirect to frontend
+    const apiUrl = (process.env.API_URL || `http://localhost:${process.env.PORT || 8080}`).replace(/\/$/, "");
+    const autofillUrl = `${apiUrl}/api/v1/auth/allow-autofill?token=${encodeURIComponent(pollToken)}`;
+    const htmlContent = emailVerificationTemplate(otp, autofillUrl);
+
     await mailSender(emailNorm, "GFGxBVCOE – Signup OTP", htmlContent);
 
     return res.status(200).json({
       success: true,
       message: "OTP sent successfully.",
+      pollToken,
       otp: process.env.NODE_ENV === "development" ? otp : undefined,
     });
   } catch (error) {
@@ -94,6 +99,56 @@ exports.sendOTP = async (req, res) => {
       message: "Something went wrong.",
       error: error.message,
     });
+  }
+};
+
+/** Called when user clicks "Autofill OTP" link in email. Marks that user allowed autofill. */
+exports.allowAutofill = async (req, res) => {
+  try {
+    const { token } = req.query;
+    if (!token || typeof token !== "string") {
+      return res.status(400).send("Invalid request.");
+    }
+    const updated = await OTP.findOneAndUpdate(
+      { pollToken: token.trim() },
+      { $set: { autofillAllowed: true } },
+      { new: true }
+    );
+    if (!updated) {
+      return res.status(404).send("Link expired or already used.");
+    }
+    return res.status(200).send(`
+      <!DOCTYPE html>
+      <html><head><meta charset="utf-8"><title>OTP Autofill</title></head>
+      <body style="font-family:system-ui;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;margin:0;">
+        <div style="text-align:center;padding:2rem;">
+          <p style="font-size:1.25rem;">✓ Check your signup tab — OTP will autofill there.</p>
+          <p style="color:#94a3b8;font-size:0.875rem;">You can close this tab.</p>
+        </div>
+      </body></html>
+    `);
+  } catch (error) {
+    console.error("allowAutofill error:", error);
+    return res.status(500).send("Something went wrong.");
+  }
+};
+
+/** Polled by signup page: returns OTP only when user clicked allow-autofill link, then clears. */
+exports.getOtpForAutofill = async (req, res) => {
+  try {
+    const { token } = req.query;
+    if (!token || typeof token !== "string") {
+      return res.status(400).json({ success: false, message: "Token required." });
+    }
+    const doc = await OTP.findOne({ pollToken: token.trim(), autofillAllowed: true }).lean();
+    if (!doc) {
+      return res.status(404).json({ success: false, message: "Not yet allowed or already used." });
+    }
+    await OTP.updateOne({ _id: doc._id }, { $unset: { pollToken: 1, autofillAllowed: 1 } });
+    return res.status(200).json({ success: true, otp: doc.otp });
+  } catch (error) {
+    console.error("getOtpForAutofill error:", error);
+    return res.status(500).json({ success: false, message: "Something went wrong." });
   }
 };
 
@@ -132,18 +187,15 @@ exports.signup = async (req, res) => {
       });
     }
 
-    const isTesting = accountType.trim() === "Testing";
-    if (!isTesting) {
-      const config = await SignupConfig.findOne({
-        department: accountType.trim(),
-        allowedEmails: emailNorm,
+    const config = await SignupConfig.findOne({
+      department: accountType.trim(),
+      allowedEmails: emailNorm,
+    });
+    if (!config) {
+      return res.status(403).json({
+        success: false,
+        message: "This email is not allowed to sign up for the selected department.",
       });
-      if (!config) {
-        return res.status(403).json({
-          success: false,
-          message: "This email is not allowed to sign up for the selected department.",
-        });
-      }
     }
 
     const recentOTP = await OTP.find({ email: emailNorm }).sort({ createdAt: -1 }).limit(1);
