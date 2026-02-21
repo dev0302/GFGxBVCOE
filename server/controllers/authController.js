@@ -284,7 +284,7 @@ exports.forgotPassword = async (req, res) => {
     await PasswordReset.deleteMany({ email: emailNorm });
     await PasswordReset.create({ email: emailNorm, token, expiresAt });
 
-    const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const baseUrl = process.env.VITE_API_BASE_URL || "http://localhost:5173";
     const resetLink = `${baseUrl}/reset-password/${token}`;
     const htmlContent = passwordResetTemplate(resetLink);
 
