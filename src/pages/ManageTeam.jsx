@@ -764,6 +764,22 @@ export default function ManageTeam({
                 <span className="text-cyan-300 font-medium">
                   {displayDepartment}
                 </span>
+                {(() => {
+                  const rosterArr = roster || [];
+                  const rosterEmails = new Set(rosterArr.map((r) => (r.email || "").toLowerCase()));
+                  const extraCount = (members || []).filter(
+                    (m) => !rosterEmails.has((m.email || "").toLowerCase())
+                  ).length;
+                  const totalMembers = rosterArr.length + extraCount;
+                  return totalMembers > 0 ? (
+                    <>
+                      {" · "}
+                      <span className="text-gray-300 font-medium">
+                        {totalMembers} member{totalMembers !== 1 ? "s" : ""}
+                      </span>
+                    </>
+                  ) : null;
+                })()}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">

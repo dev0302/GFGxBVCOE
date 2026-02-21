@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { getUpcomingEvents } from "../services/api";
 import { MapPin, Clock, Users, ExternalLink, Calendar } from "react-feather";
 import { motion, AnimatePresence } from "framer-motion";
+import CornerFrameScrambleText from "./ui/corner-frame-scramble-text";
 
 // ... parseTimeIntoDate and useCountdown stay exactly the same ...
 function parseTimeIntoDate(date, timeStr) {
@@ -178,9 +179,15 @@ export default function UpcomingEventSection({ variant = "events" }) {
             {/* Content Area */}
             <div className="p-8 md:p-12 lg:w-1/2 flex flex-col">
               <div className="flex-1">
-                <h3 className="text-3xl font-bold text-white mb-6 leading-[1.1]">
-                  {event.title}
-                </h3>
+                <CornerFrameScrambleText
+                  value={event.title}
+                  as="h3"
+                  loop
+                  loopDelay={2500}
+                  className="mb-6"
+                  style={{ '--foreground': 'rgba(255,255,255,0.25)' }}
+                  textClassName="text-3xl font-bold leading-[1.1] bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent"
+                />
                 
                 <div className="grid grid-cols-1 gap-5 mb-8">
                   <div className="flex items-center gap-4 text-white/70">

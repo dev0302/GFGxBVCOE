@@ -3,6 +3,7 @@ import { getForceDeleteAllowed, addForceDeleteDepartment, removeForceDeleteDepar
 import { toast } from "sonner";
 import { SectionTitle } from "../../components/EventDashboard/SectionTitle";
 import { Spinner } from "@/components/ui/spinner";
+import { NativeTypewriter } from "../../components/ui/native-typewriter";
 
 export default function ForceDeletePermissions() {
   const [config, setConfig] = useState(null);
@@ -62,7 +63,9 @@ export default function ForceDeletePermissions() {
       <div className="w-full max-w-3xl py-10 flex flex-col gap-10">
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">Force delete permissions</h1>
-          <p className="mt-2 text-gray-400 text-sm">Faculty Incharge, Chairperson and Vice-Chairperson can add or remove departments that are allowed to use &quot;Force delete&quot; on events (immediate permanent delete, no 10-day delay). Faculty Incharge, Chairperson and Vice-Chairperson are always allowed.</p>
+          <p className="mt-2 text-gray-400 text-sm">
+          <NativeTypewriter content='Faculty Incharge, Chairperson and Vice-Chairperson can add or remove departments that are allowed to use "Force delete" on events (immediate permanent delete, no 10-day delay). Faculty Incharge, Chairperson and Vice-Chairperson are always allowed.' className="text-gray-400 text-sm" speed={15} cursor={false} />
+        </p>
         </div>
 
         <section className="bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">
