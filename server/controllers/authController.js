@@ -34,7 +34,8 @@ exports.sendOTP = async (req, res) => {
       });
     }
 
-    const checkUserPresent = await User.findOne({ email: email.trim().toLowerCase() });
+    const emailNorm = email.trim().toLowerCase();
+    const checkUserPresent = await User.findOne({ email: emailNorm });
     if (checkUserPresent) {
       return res.status(401).json({
         success: false,
@@ -42,12 +43,25 @@ exports.sendOTP = async (req, res) => {
       });
     }
 
+    const deptTrim = (department || "").trim();
+    const isTesting = deptTrim === "Testing";
+    if (!isTesting) {
+      const config = await SignupConfig.findOne({
+        department: deptTrim,
+        allowedEmails: emailNorm,
+      });
+      if (!config) {
+        return res.status(403).json({
+          success: false,
+          message: "This email is not allowed to sign up for the selected department.",
+        });
+      }
+    }
 
     await OTP.collection.createIndex({ otp: 1 }, { unique: true }).catch(() => { });
 
     let otp;
     let otpBody;
-    const emailNorm = email.trim().toLowerCase();
 
     while (true) {
       try {
