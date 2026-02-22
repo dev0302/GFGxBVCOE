@@ -532,6 +532,7 @@ exports.updateProfile = async (req, res) => {
       yearOfStudy,
       section,
       non_tech_society,
+      position,
       instagram,
       linkedin,
       github,
@@ -557,6 +558,7 @@ exports.updateProfile = async (req, res) => {
         yearOfStudy: yearOfStudy || null,
         section: section || null,
         non_tech_society: non_tech_society || null,
+        position: position || null,
         socials: {
           instagram: instagram || null,
           linkedin: linkedin || null,
@@ -573,6 +575,7 @@ exports.updateProfile = async (req, res) => {
       if (yearOfStudy !== undefined) profile.yearOfStudy = yearOfStudy || null;
       if (section !== undefined) profile.section = section || null;
       if (non_tech_society !== undefined) profile.non_tech_society = non_tech_society || null;
+      if (position !== undefined) profile.position = position || null;
       if (instagram !== undefined || linkedin !== undefined || github !== undefined) {
         profile.socials = profile.socials || {};
         if (instagram !== undefined) profile.socials.instagram = instagram || null;
