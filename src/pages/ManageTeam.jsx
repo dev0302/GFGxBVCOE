@@ -1327,7 +1327,7 @@ export default function ManageTeam({
                         setForm((p) => ({ ...p, [k]: e.target.value }))
                       }
                       className={inputClass}
-                      placeholder={LABELS[k]}
+                      placeholder="e.g. CSE-4"
                       required
                     />
                   ) : k === "non_tech_society" ? (
@@ -1626,7 +1626,7 @@ export default function ManageTeam({
                         setForm((p) => ({ ...p, [k]: e.target.value }))
                       }
                       className={inputClass}
-                      placeholder={LABELS[k]}
+                      placeholder="e.g. CSE-4"
                       required
                     />
                   ) : k === "non_tech_society" ? (

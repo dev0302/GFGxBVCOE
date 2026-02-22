@@ -4,6 +4,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef, useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { Spinner } from "./ui/spinner";
 import { SaxHome2Linear } from '@meysam213/iconsax-react'
 import { SaxInfoCircleLinear } from '@meysam213/iconsax-react'
 import { SaxProfile2UserLinear } from '@meysam213/iconsax-react'
@@ -21,7 +22,7 @@ function Navbar() {
   const logoRef = useRef();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
 
   useGSAP(() => {
     const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
@@ -112,7 +113,11 @@ function Navbar() {
           </ul>
         </nav>
         <div ref={joinBtn} className="hidden sm:flex items-center gap-2">
-          {user ? (
+          {authLoading ? (
+            <div className="flex h-9 w-9 items-center justify-center">
+              <Spinner className="size-5 text-cyan-400" />
+            </div>
+          ) : user ? (
             <ProfileDropDown onLogout={logout} isDarkNavbar={isDarkNavbar} />
           ) : (
             <>
@@ -131,9 +136,13 @@ function Navbar() {
         </div>
 
         <div className="sm:hidden z-50 flex items-center gap-2">
-          {user && (
+          {authLoading ? (
+            <div className="flex h-9 w-9 items-center justify-center">
+              <Spinner className="size-5 text-cyan-400" />
+            </div>
+          ) : user ? (
             <ProfileDropDown onLogout={logout} isDarkNavbar={isDarkNavbar} avatarOnly showChevron />
-          )}
+          ) : null}
           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-green-100 focus:outline-none">
             {isMenuOpen ? (
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>

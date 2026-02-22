@@ -25,6 +25,7 @@ const Profile = () => {
     yearOfStudy: "",
     section: "",
     non_tech_society: "",
+    position: "",
     instagram: "",
     linkedin: "",
     github: "",
@@ -60,6 +61,7 @@ const Profile = () => {
           yearOfStudy: profile.yearOfStudy || "",
           section: profile.section || "",
           non_tech_society: profile.non_tech_society || "",
+          position: profile.position || "",
           instagram: profile.socials?.instagram || "",
           linkedin: profile.socials?.linkedin || "",
           github: profile.socials?.github || "",
@@ -91,20 +93,25 @@ const Profile = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await updateProfile({
+      const payload = {
         firstName: formData.firstName,
         lastName: formData.lastName,
         gender: formData.gender || undefined,
         dob: formData.dob || undefined,
         about: formData.about || undefined,
         contact: formData.contact || undefined,
-        yearOfStudy: formData.yearOfStudy || undefined,
-        section: formData.section || undefined,
-        non_tech_society: formData.non_tech_society || undefined,
         instagram: formData.instagram || undefined,
         linkedin: formData.linkedin || undefined,
         github: formData.github || undefined,
-      });
+      };
+      if (isFacultyIncharge) {
+        payload.position = formData.position || undefined;
+      } else {
+        payload.yearOfStudy = formData.yearOfStudy || undefined;
+        payload.section = formData.section || undefined;
+        payload.non_tech_society = formData.non_tech_society || undefined;
+      }
+      const res = await updateProfile(payload);
       if (res.data) setUser(res.data);
       toast.success("Profile updated");
     } catch (err) {
@@ -184,19 +191,25 @@ const Profile = () => {
 
   if (!user) return <Navigate to="/login" replace />;
 
+  const isFacultyIncharge = user.accountType === "ADMIN";
+
   // profile bar
   const completionPercent = (() => {
     let score = 0;
-    const total = 12;
+    const total = isFacultyIncharge ? 10 : 12;
     if (formData.firstName && formData.lastName) score++;
     if (avatarPreview) score++;
     if (formData.gender) score++;
     if (formData.dob) score++;
     if (formData.about) score++;
     if (formData.contact) score++;
-    if (formData.yearOfStudy) score++;
-    if (formData.section) score++;
-    if (formData.non_tech_society) score++;
+    if (isFacultyIncharge) {
+      if (formData.position) score++;
+    } else {
+      if (formData.yearOfStudy) score++;
+      if (formData.section) score++;
+      if (formData.non_tech_society) score++;
+    }
     if (formData.instagram) score++;
     if (formData.linkedin) score++;
     if (formData.github) score++;
@@ -300,9 +313,15 @@ const Profile = () => {
                     {!formData.dob && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Birth date</span>}
                     {!formData.about && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">About</span>}
                     {!formData.contact && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Contact</span>}
-                    {!formData.yearOfStudy && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Year of study</span>}
-                    {!formData.section && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Section</span>}
-                    {!formData.non_tech_society && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Non-tech society</span>}
+                    {isFacultyIncharge ? (
+                      !formData.position && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Position</span>
+                    ) : (
+                      <>
+                        {!formData.yearOfStudy && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Year of study</span>}
+                        {!formData.section && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Section</span>}
+                        {!formData.non_tech_society && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Non-tech society</span>}
+                      </>
+                    )}
                     {!formData.instagram && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Instagram</span>}
                     {!formData.linkedin && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">LinkedIn</span>}
                     {!formData.github && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">GitHub</span>}
@@ -311,17 +330,17 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Branch, Year, Position & Roles (p0, p1, p2) */}
-            {(profileDetails.branch || profileDetails.year || profileDetails.position || profileDetails.p0 || profileDetails.p1 || profileDetails.p2) && (
+            {/* Branch, Year, Position & Roles (p0, p1, p2) - Faculty Incharge only shows position */}
+            {((isFacultyIncharge && profileDetails.position) || (!isFacultyIncharge && (profileDetails.branch || profileDetails.year || profileDetails.position || profileDetails.p0 || profileDetails.p1 || profileDetails.p2))) && (
               <div className="rounded-xl bg-[#252536]/60 border border-gray-500/30 p-5">
                 <h2 className="text-sm font-semibold text-cyan-400/90 uppercase tracking-wider mb-4">Role & details</h2>
                 <div className="flex flex-wrap gap-2">
-                  {profileDetails.branch && (
+                  {!isFacultyIncharge && profileDetails.branch && (
                     <span className="inline-flex items-center px-3 py-1 rounded-lg bg-cyan-500/15 text-cyan-300 text-sm font-medium border border-cyan-500/30">
                       {profileDetails.branch}
                     </span>
                   )}
-                  {profileDetails.year && (
+                  {!isFacultyIncharge && profileDetails.year && (
                     <span className="inline-flex items-center px-3 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 text-sm font-medium border border-emerald-500/30">
                       {profileDetails.year} year
                     </span>
@@ -331,17 +350,17 @@ const Profile = () => {
                       {profileDetails.position}
                     </span>
                   )}
-                  {profileDetails.p0 && (
+                  {!isFacultyIncharge && profileDetails.p0 && (
                     <span className="inline-flex items-center px-3 py-1 rounded-lg bg-amber-500/15 text-amber-300 text-sm font-medium border border-amber-500/30" title="Primary role">
                       {profileDetails.p0}
                     </span>
                   )}
-                  {profileDetails.p1 && profileDetails.p1 !== "NA" && profileDetails.p1 !== "nil" && (
+                  {!isFacultyIncharge && profileDetails.p1 && profileDetails.p1 !== "NA" && profileDetails.p1 !== "nil" && (
                     <span className="inline-flex items-center px-3 py-1 rounded-lg bg-sky-500/15 text-sky-300 text-sm font-medium border border-sky-500/30" title="Additional role">
                       {profileDetails.p1}
                     </span>
                   )}
-                  {profileDetails.p2 && profileDetails.p2 !== "NA" && profileDetails.p2 !== "nil" && (
+                  {!isFacultyIncharge && profileDetails.p2 && profileDetails.p2 !== "NA" && profileDetails.p2 !== "nil" && (
                     <span className="inline-flex items-center px-3 py-1 rounded-lg bg-rose-500/15 text-rose-300 text-sm font-medium border border-rose-500/30" title="Additional role">
                       {profileDetails.p2}
                     </span>
@@ -442,33 +461,47 @@ const Profile = () => {
                   placeholder="Phone or contact"
                 />
               </div>
-              <div>
-                <label className={labelClass}>Year of study</label>
-                <input
-                  value={formData.yearOfStudy}
-                  onChange={handleChange("yearOfStudy")}
-                  className={inputClass}
-                  placeholder="e.g. 2nd year"
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Section</label>
-                <input
-                  value={formData.section}
-                  onChange={handleChange("section")}
-                  className={inputClass}
-                  placeholder="e.g. A, B, or section name"
-                />
-              </div>
-              <div>
-                <label className={labelClass}>Non-tech society</label>
-                <input
-                  value={formData.non_tech_society}
-                  onChange={handleChange("non_tech_society")}
-                  className={inputClass}
-                  placeholder="e.g. Music club, Dance, etc."
-                />
-              </div>
+              {isFacultyIncharge ? (
+                <div>
+                  <label className={labelClass}>Position</label>
+                  <input
+                    value={formData.position}
+                    onChange={handleChange("position")}
+                    className={inputClass}
+                    placeholder="e.g. Professor, HOD, etc."
+                  />
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label className={labelClass}>Year of study</label>
+                    <input
+                      value={formData.yearOfStudy}
+                      onChange={handleChange("yearOfStudy")}
+                      className={inputClass}
+                      placeholder="e.g. 2nd year"
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Section</label>
+                    <input
+                      value={formData.section}
+                      onChange={handleChange("section")}
+                      className={inputClass}
+                      placeholder="e.g. CSE-4"
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Non-tech society</label>
+                    <input
+                      value={formData.non_tech_society}
+                      onChange={handleChange("non_tech_society")}
+                      className={inputClass}
+                      placeholder="e.g. Music club, Dance, etc."
+                    />
+                  </div>
+                </>
+              )}
               <div className="sm:col-span-2">
                 <label className={labelClass}>About you</label>
                 <textarea
