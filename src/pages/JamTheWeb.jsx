@@ -137,12 +137,12 @@ export default function JamTheWeb() {
   if (authLoading) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24 pb-20">
+    <div className="min-h-screen darkthemebg pt-24 pb-20">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="mb-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Jam the Web — Results</h1>
-            <p className="mt-1 text-gray-600">
+            <h1 className="text-2xl font-semibold text-white">Jam the Web — Results</h1>
+            <p className="mt-1 text-gray-400">
               {isViewOnly
                 ? "View scores and feedback. Sign in to edit."
                 : "Enter scores from Dev, Siddhant and Gaurav."}
@@ -153,7 +153,7 @@ export default function JamTheWeb() {
               <button
                 type="button"
                 onClick={() => setSortedByScore((v) => !v)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium text-gray-200 bg-slate-700/80 border border-slate-600 rounded-lg hover:bg-slate-600/80"
               >
                 {sortedByScore ? "By team ID" : "By score"}
               </button>
@@ -161,7 +161,7 @@ export default function JamTheWeb() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting || loading || !teams.length}
-                className="px-5 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-5 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-500 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {submitting ? <Spinner className="size-4" /> : null}
                 {submitting ? "Submitting…" : "Submit scores"}
@@ -172,7 +172,7 @@ export default function JamTheWeb() {
             <button
               type="button"
               onClick={() => setSortedByScore((v) => !v)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 w-fit"
+              className="px-4 py-2 text-sm font-medium text-gray-200 bg-slate-700/80 border border-slate-600 rounded-lg hover:bg-slate-600/80 w-fit"
             >
               {sortedByScore ? "By team ID" : "By score"}
             </button>
@@ -181,43 +181,43 @@ export default function JamTheWeb() {
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <Spinner className="size-8 text-green-600" />
+            <Spinner className="size-8 text-green-400" />
           </div>
         ) : !teams.length ? (
-          <div className="text-center py-16 text-gray-500">No teams found.</div>
+          <div className="text-center py-16 text-gray-400">No teams found.</div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-slate-800/60 rounded-lg border border-slate-600/50 shadow-xl overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+              <table className="min-w-full divide-y divide-slate-600/50">
                 <thead>
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Team</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Lead</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Keywords</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase min-w-[200px]">Links</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">#</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">Team</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">Lead</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">Keywords</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase min-w-[200px]">Links</th>
                     {JUDGES.map((j) => (
-                      <th key={j} className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">{j}</th>
+                      <th key={j} className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">{j}</th>
                     ))}
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">Total</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-slate-600/40">
                   {sortedTeams.map((team, idx) => (
-                    <tr key={team._id || team.team_id || idx} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <tr key={team._id || team.team_id || idx} className={idx % 2 === 0 ? "bg-slate-800/40" : "bg-slate-700/30"}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                         {team.team_id ?? idx + 1}
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-gray-900">{team.team_name}</div>
-                        <div className="text-sm text-gray-500">{team.email}</div>
-                        {team.phone && <div className="text-xs text-gray-400">{team.phone}</div>}
+                        <div className="text-sm font-medium text-white">{team.team_name}</div>
+                        <div className="text-sm text-gray-400">{team.email}</div>
+                        {team.phone && <div className="text-xs text-gray-500">{team.phone}</div>}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{team.lead_name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-300">{team.lead_name}</td>
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1.5">
                           {(team.keywords || []).map((kw) => (
-                            <span key={kw} className="px-2 py-0.5 rounded bg-gray-100 text-xs text-gray-600">
+                            <span key={kw} className="px-2 py-0.5 rounded bg-slate-600/60 text-xs text-gray-300">
                               {kw}
                             </span>
                           ))}
@@ -230,7 +230,7 @@ export default function JamTheWeb() {
                               href={team.live_url}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-green-100 text-green-800 text-sm font-medium hover:bg-green-200 transition-colors border border-green-200 hover:border-green-300"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-green-500/20 text-green-300 text-sm font-medium hover:bg-green-500/30 transition-colors border border-green-500/40"
                             >
                               <svg className="size-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -243,7 +243,7 @@ export default function JamTheWeb() {
                               href={team.repo_url}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors border border-gray-200 hover:border-gray-300"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-600/60 text-gray-300 text-sm font-medium hover:bg-slate-500/60 transition-colors border border-slate-500/50"
                             >
                               <svg className="size-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
@@ -260,12 +260,12 @@ export default function JamTheWeb() {
                           <td key={judge} className="px-6 py-4">
                             <div className="space-y-1.5">
                               {isViewOnly ? (
-                                <span className="block text-sm font-medium text-gray-900">{val !== "" ? val : "—"}</span>
+                                <span className="block text-sm font-medium text-white">{val !== "" ? val : "—"}</span>
                               ) : (
                                 <input
                                   type="number"
                                   min="0"
-                                  className="w-14 px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                  className="w-14 px-2 py-1.5 text-sm text-white bg-slate-700 border border-slate-600 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                   value={val}
                                   onChange={(e) => handleScoreChange(team._id, judge, e.target.value)}
                                 />
@@ -273,7 +273,7 @@ export default function JamTheWeb() {
                               <button
                                 type="button"
                                 onClick={() => setFeedbackModal(team)}
-                                className={`text-sm font-medium ${feedback ? "text-green-600 hover:text-green-700" : "text-gray-500 hover:text-gray-700"}`}
+                                className={`text-sm font-medium ${feedback ? "text-green-400 hover:text-green-300" : "text-gray-500 hover:text-gray-400"}`}
                               >
                                 {feedback ? "View feedback" : isViewOnly ? "No feedback" : "Add feedback"}
                               </button>
@@ -281,7 +281,7 @@ export default function JamTheWeb() {
                           </td>
                         );
                       })}
-                      <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                      <td className="px-6 py-4 text-sm font-semibold text-white">
                         {team.totalScore || 0}
                       </td>
                     </tr>
@@ -306,19 +306,19 @@ export default function JamTheWeb() {
         const team = teams.find((t) => t._id === feedbackModal._id) || feedbackModal;
         return (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
           onClick={() => setFeedbackModal(null)}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[85vh] overflow-hidden flex flex-col"
+            className="bg-slate-800 rounded-xl shadow-xl border border-slate-600 max-w-lg w-full max-h-[85vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Feedback — {team.team_name}</h3>
+            <div className="px-6 py-4 border-b border-slate-600 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-white">Feedback — {team.team_name}</h3>
               <button
                 type="button"
                 onClick={() => setFeedbackModal(null)}
-                className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                className="p-1.5 rounded-lg text-gray-400 hover:bg-slate-700 hover:text-white"
               >
                 <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -330,18 +330,18 @@ export default function JamTheWeb() {
                 const val = team.judges?.[judge]?.score ?? "";
                 const feedback = team.judges?.[judge]?.feedback ?? "";
                 return (
-                  <div key={judge} className="rounded-lg border border-gray-200 p-4 space-y-2">
+                  <div key={judge} className="rounded-lg border border-slate-600 p-4 space-y-2 bg-slate-700/30">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-gray-900">{judge}</span>
-                      <span className="text-sm font-medium text-gray-600">{val !== "" ? val : "—"}</span>
+                      <span className="text-sm font-semibold text-white">{judge}</span>
+                      <span className="text-sm font-medium text-gray-400">{val !== "" ? val : "—"}</span>
                     </div>
                     {isViewOnly ? (
-                      <p className="text-sm text-gray-600 whitespace-pre-wrap min-h-[2rem]">
+                      <p className="text-sm text-gray-400 whitespace-pre-wrap min-h-[2rem]">
                         {feedback || "No feedback given."}
                       </p>
                     ) : (
                       <textarea
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none min-h-[80px] placeholder:text-gray-400"
+                        className="w-full px-3 py-2 text-sm text-white bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none min-h-[80px] placeholder:text-gray-500"
                         placeholder="Add feedback…"
                         value={feedback}
                         onChange={(e) => handleFeedbackChange(team._id, judge, e.target.value)}
@@ -351,13 +351,13 @@ export default function JamTheWeb() {
                 );
               })}
             </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-2">
+            <div className="px-6 py-4 border-t border-slate-600 flex justify-end gap-2">
               {!isViewOnly && (
                 <button
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-500 rounded-lg disabled:opacity-50"
                 >
                   {submitting ? "Saving…" : "Save & close"}
                 </button>
@@ -365,7 +365,7 @@ export default function JamTheWeb() {
               <button
                 type="button"
                 onClick={() => setFeedbackModal(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg"
+                className="px-4 py-2 text-sm font-medium text-gray-300 bg-slate-700 hover:bg-slate-600 rounded-lg"
               >
                 {isViewOnly ? "Close" : "Close without saving"}
               </button>
