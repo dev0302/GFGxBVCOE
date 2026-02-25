@@ -735,11 +735,21 @@ export async function downloadTeamTemplate() {
   URL.revokeObjectURL(url);
 }
 
-// Jam the Web judging
+// Jam the Web judging (GET is public for view-only; POST requires auth)
 export async function getJamTheWebTeams(sortBy = "id") {
   const params = new URLSearchParams();
   if (sortBy === "score") params.set("sort", "score");
   const res = await authFetch(`/api/v1/jamtheweb?${params.toString()}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch Jam the Web data");
+  return data;
+}
+
+/** Public fetch for guests (no auth required). */
+export async function getJamTheWebTeamsPublic(sortBy = "id") {
+  const params = new URLSearchParams();
+  if (sortBy === "score") params.set("sort", "score");
+  const res = await fetch(`${BASE}/api/v1/jamtheweb?${params.toString()}`, { credentials: "include" });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to fetch Jam the Web data");
   return data;
