@@ -63,7 +63,7 @@ function Navbar() {
   }, []);
 
   const location = useLocation();
-  const darkRoutes = ["/events", "/contact", "/gallery", "/notfound", "/team", "/about", "/team2", "/results", "/quiz", "/leaderboard", "/admin", "/dashboard", "/profile", "/manage-team", "/manage-society", "/uploadevent", "/login", "/signup", "/forgot-password", "/reset-password"];
+  const darkRoutes = ["/events", "/contact", "/gallery", "/notfound", "/team", "/about", "/team2", "/results", "/quiz", "/leaderboard", "/admin", "/dashboard", "/profile", "/manage-team", "/manage-society", "/uploadevent", "/jam-the-web", "/login", "/signup", "/forgot-password", "/reset-password"];
   const isDarkNavbar = darkRoutes.includes(location.pathname) || location.pathname.startsWith("/uploadevent/") || location.pathname.startsWith("/reset-password/") || location.pathname.startsWith("/join-team/");
 
   const navLinkClass = ({ isActive }) =>

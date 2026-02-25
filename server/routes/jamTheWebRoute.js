@@ -4,7 +4,7 @@ const { auth } = require("../middlewares/AuthZ");
 
 const router = express.Router();
 
-router.get("/", auth, getJamTeams);
+router.get("/", getJamTeams); // Public: view-only for guests
 router.post("/submit", auth, submitJamScores);
 
 module.exports = router;

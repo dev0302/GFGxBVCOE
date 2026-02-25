@@ -1,7 +1,6 @@
-import { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
-import { getJamTheWebTeams, submitJamTheWebScores, isSocietyRole } from "../services/api";
+import { getJamTheWebTeams, getJamTheWebTeamsPublic, submitJamTheWebScores } from "../services/api";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -9,29 +8,27 @@ const JUDGES = ["Dev", "Siddhant", "Gaurav"];
 
 export default function JamTheWeb() {
   const { user, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [sortedByScore, setSortedByScore] = useState(false);
+  const [feedbackModal, setFeedbackModal] = useState(null); // { team }
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (!user || !isSocietyRole(user.accountType)) {
-      navigate("/", { replace: true });
-      return;
-    }
-    getJamTheWebTeams()
+  const isViewOnly = !user;
+
+  const fetchTeams = useCallback(() => {
+    const fetcher = isViewOnly ? getJamTheWebTeamsPublic : getJamTheWebTeams;
+    fetcher("id")
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : [];
         const withTotals = data.map((t) => ({
           ...t,
           totalScore:
-            (t.totalScore != null
+            t.totalScore != null
               ? t.totalScore
               : (t.judges?.Dev?.score || 0) +
                 (t.judges?.Siddhant?.score || 0) +
-                (t.judges?.Gaurav?.score || 0)),
+                (t.judges?.Gaurav?.score || 0),
         }));
         setTeams(withTotals);
       })
@@ -40,9 +37,16 @@ export default function JamTheWeb() {
         setTeams([]);
       })
       .finally(() => setLoading(false));
-  }, [user, authLoading, navigate]);
+  }, [isViewOnly]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    setLoading(true);
+    fetchTeams();
+  }, [authLoading, isViewOnly, fetchTeams]);
 
   const handleScoreChange = (teamId, judgeName, value) => {
+    if (isViewOnly) return;
     setTeams((prev) =>
       prev.map((team) => {
         if (team._id !== teamId) return team;
@@ -64,6 +68,7 @@ export default function JamTheWeb() {
   };
 
   const handleFeedbackChange = (teamId, judgeName, value) => {
+    if (isViewOnly) return;
     setTeams((prev) =>
       prev.map((team) => {
         if (team._id !== teamId) return team;
@@ -80,7 +85,7 @@ export default function JamTheWeb() {
   };
 
   const handleSubmit = async () => {
-    if (!teams.length) return;
+    if (isViewOnly || !teams.length) return;
     setSubmitting(true);
     try {
       const payload = teams.map((t) => ({
@@ -100,15 +105,16 @@ export default function JamTheWeb() {
       const withTotals = data.map((t) => ({
         ...t,
         totalScore:
-          (t.totalScore != null
+          t.totalScore != null
             ? t.totalScore
             : (t.judges?.Dev?.score || 0) +
               (t.judges?.Siddhant?.score || 0) +
-              (t.judges?.Gaurav?.score || 0)),
+              (t.judges?.Gaurav?.score || 0),
       }));
       setTeams(withTotals);
       setSortedByScore(true);
-      toast.success("Scores saved and teams sorted by total score");
+      setFeedbackModal(null);
+      toast.success("Scores saved");
     } catch (err) {
       toast.error(err.message || "Failed to submit scores");
     } finally {
@@ -137,27 +143,40 @@ export default function JamTheWeb() {
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">Jam the Web — Results</h1>
             <p className="mt-1 text-gray-600">
-              Enter scores from Dev, Siddhant and Gaurav.
+              {isViewOnly
+                ? "View scores and feedback. Sign in to edit."
+                : "Enter scores from Dev, Siddhant and Gaurav."}
             </p>
           </div>
-          <div className="flex gap-3">
+          {!isViewOnly && (
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setSortedByScore((v) => !v)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                {sortedByScore ? "By team ID" : "By score"}
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting || loading || !teams.length}
+                className="px-5 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {submitting ? <Spinner className="size-4" /> : null}
+                {submitting ? "Submitting…" : "Submit scores"}
+              </button>
+            </div>
+          )}
+          {isViewOnly && (
             <button
               type="button"
               onClick={() => setSortedByScore((v) => !v)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 w-fit"
             >
               {sortedByScore ? "By team ID" : "By score"}
             </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={submitting || loading || !teams.length}
-              className="px-5 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {submitting ? <Spinner className="size-4" /> : null}
-              {submitting ? "Submitting…" : "Submit scores"}
-            </button>
-          </div>
+          )}
         </div>
 
         {loading ? (
@@ -239,20 +258,25 @@ export default function JamTheWeb() {
                         const feedback = team.judges?.[judge]?.feedback ?? "";
                         return (
                           <td key={judge} className="px-6 py-4">
-                            <div className="space-y-2">
-                              <input
-                                type="number"
-                                min="0"
-                                className="w-14 px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                value={val}
-                                onChange={(e) => handleScoreChange(team._id, judge, e.target.value)}
-                              />
-                              <textarea
-                                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none min-h-[52px] placeholder:text-gray-400"
-                                placeholder="Feedback"
-                                value={feedback}
-                                onChange={(e) => handleFeedbackChange(team._id, judge, e.target.value)}
-                              />
+                            <div className="space-y-1.5">
+                              {isViewOnly ? (
+                                <span className="block text-sm font-medium text-gray-900">{val !== "" ? val : "—"}</span>
+                              ) : (
+                                <input
+                                  type="number"
+                                  min="0"
+                                  className="w-14 px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                  value={val}
+                                  onChange={(e) => handleScoreChange(team._id, judge, e.target.value)}
+                                />
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => setFeedbackModal(team)}
+                                className={`text-sm font-medium ${feedback ? "text-green-600 hover:text-green-700" : "text-gray-500 hover:text-gray-700"}`}
+                              >
+                                {feedback ? "View feedback" : isViewOnly ? "No feedback" : "Add feedback"}
+                              </button>
                             </div>
                           </td>
                         );
@@ -268,11 +292,88 @@ export default function JamTheWeb() {
           </div>
         )}
 
-        {teams.length > 0 && (
+        {!isViewOnly && teams.length > 0 && (
           <p className="mt-4 text-sm text-gray-500">You can edit and re-submit anytime.</p>
         )}
+
+        {isViewOnly && teams.length > 0 && (
+          <p className="mt-4 text-sm text-gray-500">Sign in to edit scores and feedback.</p>
+        )}
       </div>
+
+      {/* Feedback Modal */}
+      {feedbackModal && (() => {
+        const team = teams.find((t) => t._id === feedbackModal._id) || feedbackModal;
+        return (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+          onClick={() => setFeedbackModal(null)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[85vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Feedback — {team.team_name}</h3>
+              <button
+                type="button"
+                onClick={() => setFeedbackModal(null)}
+                className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+              >
+                <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="px-6 py-4 overflow-y-auto flex-1 space-y-6">
+              {JUDGES.map((judge) => {
+                const val = team.judges?.[judge]?.score ?? "";
+                const feedback = team.judges?.[judge]?.feedback ?? "";
+                return (
+                  <div key={judge} className="rounded-lg border border-gray-200 p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-gray-900">{judge}</span>
+                      <span className="text-sm font-medium text-gray-600">{val !== "" ? val : "—"}</span>
+                    </div>
+                    {isViewOnly ? (
+                      <p className="text-sm text-gray-600 whitespace-pre-wrap min-h-[2rem]">
+                        {feedback || "No feedback given."}
+                      </p>
+                    ) : (
+                      <textarea
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none min-h-[80px] placeholder:text-gray-400"
+                        placeholder="Add feedback…"
+                        value={feedback}
+                        onChange={(e) => handleFeedbackChange(team._id, judge, e.target.value)}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-2">
+              {!isViewOnly && (
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg disabled:opacity-50"
+                >
+                  {submitting ? "Saving…" : "Save & close"}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setFeedbackModal(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg"
+              >
+                {isViewOnly ? "Close" : "Close without saving"}
+              </button>
+            </div>
+          </div>
+        </div>
+        );
+      })()}
     </div>
   );
 }
-
