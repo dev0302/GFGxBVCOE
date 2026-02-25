@@ -735,4 +735,24 @@ export async function downloadTeamTemplate() {
   URL.revokeObjectURL(url);
 }
 
+// Jam the Web judging
+export async function getJamTheWebTeams(sortBy = "id") {
+  const params = new URLSearchParams();
+  if (sortBy === "score") params.set("sort", "score");
+  const res = await authFetch(`/api/v1/jamtheweb?${params.toString()}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch Jam the Web data");
+  return data;
+}
+
+export async function submitJamTheWebScores(teams) {
+  const res = await authFetch("/api/v1/jamtheweb/submit", {
+    method: "POST",
+    body: JSON.stringify({ teams }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to submit scores");
+  return data;
+}
+
 
