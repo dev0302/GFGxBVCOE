@@ -1,4 +1,25 @@
 const JamTheWebTeam = require("../models/JamTheWebTeam");
+const JamTheWebConfig = require("../models/JamTheWebConfig");
+
+exports.getResultsDeclared = async (req, res) => {
+  try {
+    const doc = await JamTheWebConfig.findOne().lean();
+    return res.status(200).json({ success: true, declared: !!doc?.resultsDeclared });
+  } catch (error) {
+    console.error("getResultsDeclared error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.declareResults = async (req, res) => {
+  try {
+    await JamTheWebConfig.findOneAndUpdate({}, { resultsDeclared: true }, { upsert: true, new: true });
+    return res.status(200).json({ success: true, declared: true, message: "Results declared." });
+  } catch (error) {
+    console.error("declareResults error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 exports.getJamTeams = async (req, res) => {
   try {
