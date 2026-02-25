@@ -115,7 +115,7 @@ const headsData = [
     image: "/Saksham.webp",
     p1: "",
     p2: "",
-    email: "sakshamchandela20@gmail.com",
+    email: "saksham101105@gmail.com",
     instaLink: "https://www.instagram.com/saksham.chandela/",
     linkedinLink: "https://www.linkedin.com/in/saksham-chandela",
     timeline: [
@@ -266,7 +266,7 @@ const headsData = [
     year: "3rd Year",
     position: "PR & Outreach Head",
     image: "Radhika.webp",
-    email: "radhika.trivedi23@gmail.com",
+    email: "radhikatriv0712@gmail.com",
     instaLink: "https://www.instagram.com/radhika_trivedi_",
     linkedinLink: "https://www.linkedin.com/in/radhika-trivedi-44a453256",
     timeline: [
@@ -309,7 +309,7 @@ const headsData = [
     image: "/Uneeb.webp",
     p1: "",
     p2: "",
-    email: "uneebhasan18@gmail.com",
+    email: "uneebhasanlm10@gmail.com",
     instaLink: "https://www.instagram.com/uneeb_hasan18",
     linkedinLink: "https://www.linkedin.com/in/uneeb-hasan-424a97322/",
   },
