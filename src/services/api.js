@@ -755,6 +755,22 @@ export async function getJamTheWebTeamsPublic(sortBy = "id") {
   return data;
 }
 
+/** Public: check if Jam the Web results are declared. */
+export async function getJamTheWebResultsDeclared() {
+  const res = await fetch(`${BASE}/api/v1/jamtheweb/declared`, { credentials: "include" });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch");
+  return data;
+}
+
+/** Declare Jam the Web results (auth required). */
+export async function declareJamTheWebResults() {
+  const res = await authFetch("/api/v1/jamtheweb/declare", { method: "POST" });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to declare results");
+  return data;
+}
+
 export async function submitJamTheWebScores(teams) {
   const res = await authFetch("/api/v1/jamtheweb/submit", {
     method: "POST",
