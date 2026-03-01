@@ -32,6 +32,21 @@ exports.auth = async (req, res, next) => {
   }
 };
 
+/** Set req.user if valid token present; do not reject if missing (for optional logging). */
+exports.optionalAuth = async (req, res, next) => {
+  try {
+    const token = req.cookies.Token || req.headers.authorization?.split(" ")[1];
+    if (!token) return next();
+    try {
+      const decode = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decode;
+    } catch (_) { /* invalid or expired – leave req.user unset */ }
+    next();
+  } catch (err) {
+    next();
+  }
+};
+
 const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
 
 exports.isAdmin = (req, res, next) => {

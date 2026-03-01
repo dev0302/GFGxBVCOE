@@ -41,10 +41,10 @@ const createEvent = async (req, res) => {
         const ext = (file.name || "").split(".").pop().toLowerCase();
         const videoTypes = ["mp4", "avi", "mov", "wmv", "flv", "mkv", "webm", "mpeg", "mpg", "3gp", "m4v"];
         if (videoTypes.includes(ext)) {
-          const result = await videoUpload(file, FOLDER);
+          const result = await videoUpload(file, FOLDER, 50);
           galleryUrls.push(result.secure_url);
         } else {
-          const result = await imageUpload(file, FOLDER);
+          const result = await imageUpload(file, FOLDER, 50);
           galleryUrls.push(result.secure_url);
         }
       }
@@ -82,6 +82,10 @@ const createEvent = async (req, res) => {
       prerequisites: parseJson(prerequisites) || [],
       targetAudience: targetAudience || "",
     });
+
+    if (req.user?.id) {
+      await logActivity(req.user.id, "event_create", "event", { title: event.title, galleryCount: galleryUrls.length }, event._id.toString(), "Event");
+    }
 
     return res.status(201).json({
       success: true,
@@ -149,6 +153,9 @@ const scheduleDeleteEvent = async (req, res) => {
         message: "Event not found",
       });
     }
+    if (req.user?.id) {
+      await logActivity(req.user.id, "event_schedule_delete", "event", { title: event.title }, id, "Event");
+    }
     return res.status(200).json({
       success: true,
       message: "Event scheduled for deletion in 10 days",
@@ -177,6 +184,9 @@ const cancelScheduledDelete = async (req, res) => {
         success: false,
         message: "Event not found",
       });
+    }
+    if (req.user?.id) {
+      await logActivity(req.user.id, "event_cancel_delete", "event", { title: event.title }, id, "Event");
     }
     return res.status(200).json({
       success: true,
@@ -263,24 +273,43 @@ const updateEvent = async (req, res) => {
     if (prerequisites !== undefined) event.prerequisites = parseJson(prerequisites) || [];
     if (speakers !== undefined) event.speakers = parseJson(speakers) || [];
 
-    if (req.files && req.files.gallery && req.files.gallery.length) {
+    const oldGallery = [...(event.galleryImages || [])];
+    let keptUrls = oldGallery;
+    if (req.body.galleryKeepUrls !== undefined && req.body.galleryKeepUrls !== "") {
+      const parsed = parseJson(req.body.galleryKeepUrls);
+      keptUrls = Array.isArray(parsed) ? parsed : [];
+    }
+    let newUrls = [];
+    if (req.files && req.files.gallery) {
       const files = Array.isArray(req.files.gallery) ? req.files.gallery : [req.files.gallery];
-      const galleryUrls = [];
       for (const file of files) {
         const ext = (file.name || "").split(".").pop().toLowerCase();
         const videoTypes = ["mp4", "avi", "mov", "wmv", "flv", "mkv", "webm", "mpeg", "mpg", "3gp", "m4v"];
         if (videoTypes.includes(ext)) {
-          const result = await videoUpload(file, FOLDER);
-          galleryUrls.push(result.secure_url);
+          const result = await videoUpload(file, FOLDER, 50);
+          newUrls.push(result.secure_url);
         } else {
-          const result = await imageUpload(file, FOLDER);
-          galleryUrls.push(result.secure_url);
+          const result = await imageUpload(file, FOLDER, 50);
+          newUrls.push(result.secure_url);
         }
       }
-      if (galleryUrls.length > 0) event.galleryImages = galleryUrls;
+    }
+    event.galleryImages = [...keptUrls, ...newUrls];
+
+    const removedUrls = oldGallery.filter((url) => !event.galleryImages.includes(url));
+    for (const url of removedUrls) {
+      if (url) await deleteAssetByUrl(url).catch((err) => console.warn("Cloudinary delete skipped:", err?.message));
     }
 
     await event.save();
+
+    if (req.user?.id) {
+      await logActivity(req.user.id, "event_update", "event", {
+        title: event.title,
+        imagesAdded: newUrls.length,
+        imagesRemoved: removedUrls.length,
+      }, id, "Event");
+    }
 
     return res.status(200).json({
       success: true,
@@ -396,10 +425,10 @@ const createEventByLink = async (req, res) => {
         const ext = (file.name || "").split(".").pop().toLowerCase();
         const videoTypes = ["mp4", "avi", "mov", "wmv", "flv", "mkv", "webm", "mpeg", "mpg", "3gp", "m4v"];
         if (videoTypes.includes(ext)) {
-          const result = await videoUpload(file, FOLDER);
+          const result = await videoUpload(file, FOLDER, 50);
           galleryUrls.push(result.secure_url);
         } else {
-          const result = await imageUpload(file, FOLDER);
+          const result = await imageUpload(file, FOLDER, 50);
           galleryUrls.push(result.secure_url);
         }
       }
@@ -828,7 +857,7 @@ const createUpcomingEvent = async (req, res) => {
     }
     let poster = "";
     if (req.files?.poster) {
-      const result = await imageUpload(req.files.poster, UPCOMING_FOLDER, 85);
+      const result = await imageUpload(req.files.poster, UPCOMING_FOLDER, 50);
       poster = result.secure_url;
     }
     const faqs = parseFaqs(faqsRaw);
@@ -864,7 +893,7 @@ const updateUpcomingEvent = async (req, res) => {
     }
     let poster = existing.poster;
     if (req.files?.poster) {
-      const result = await imageUpload(req.files.poster, UPCOMING_FOLDER, 85);
+      const result = await imageUpload(req.files.poster, UPCOMING_FOLDER, 50);
       poster = result.secure_url;
     }
     const faqs = faqsRaw !== undefined ? parseFaqs(faqsRaw) : undefined;

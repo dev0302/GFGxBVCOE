@@ -20,14 +20,14 @@ function isFileTypeSupported(supportedTypes, fileType) {
   return supportedTypes.includes(fileType);
 }
 
-// Upload file to Cloudinary
+// Upload file to Cloudinary (quality 1–100; applied to image and video for compression)
 async function uploadFileToCloudinary(file, folder, quality, publicId = null) {
   const options = {
     folder,
     public_id: publicId ?? file.name.split(".")[0],
     resource_type: "auto",
   };
-  if (quality) {
+  if (quality != null && quality !== "" && typeof quality === "number") {
     options.quality = quality;
   }
   return await cloudinary.uploader.upload(file.tempFilePath, options);

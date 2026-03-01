@@ -11,6 +11,7 @@ import { Calendar, Plus, Edit3, Trash2, X } from "react-feather";
 import { Spinner } from "@/components/ui/spinner";
 import { NativeTypewriter } from "../../components/ui/native-typewriter";
 import { motion, AnimatePresence } from "framer-motion";
+import { cloudinaryImageUrl } from "../../utils/cloudinary";
 
 const initialForm = {
   title: "",
@@ -191,7 +192,7 @@ export default function UpcomingEventPage() {
                 >
                   <div className="min-w-0 flex-1 flex items-center gap-4">
                     {item.poster ? (
-                      <img src={item.poster} alt="" className="h-14 w-14 rounded-xl object-cover shrink-0 border border-gray-500/30" />
+                      <img src={cloudinaryImageUrl(item.poster)} alt="" className="h-14 w-14 rounded-xl object-cover shrink-0 border border-gray-500/30" />
                     ) : (
                       <div className="h-14 w-14 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
                         <Calendar className="h-6 w-6 text-cyan-400" />
@@ -348,7 +349,7 @@ export default function UpcomingEventPage() {
                       className="w-full px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-gray-300 text-sm file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:text-cyan-400 file:font-medium"
                     />
                     {form.poster && !posterFile && (
-                      <img src={form.poster} alt="Current poster" className="mt-2 h-28 rounded-xl object-cover border border-gray-500/30" />
+                      <img src={cloudinaryImageUrl(form.poster)} alt="Current poster" className="mt-2 h-28 rounded-xl object-cover border border-gray-500/30" />
                     )}
                   </div>
                   <div>

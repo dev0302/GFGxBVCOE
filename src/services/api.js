@@ -135,10 +135,16 @@ export async function getEventsForManage() {
   return res.json(); // { success, data }
 }
 
+/** Create event. Sends auth token when available so activity log can record who created it. */
 export async function createEvent(formData) {
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/events`, {
     method: 'POST',
     body: formData,
+    credentials: 'include',
+    headers,
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -147,9 +153,16 @@ export async function createEvent(formData) {
   return res.json();
 }
 
-/** Schedule event for deletion in 10 days (soft delete). */
+/** Schedule event for deletion in 10 days (soft delete). Requires auth. */
 export async function deleteEvent(id) {
-  const res = await fetch(`${BASE}/api/v1/events/${id}`, { method: 'DELETE' });
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${BASE}/api/v1/events/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers,
+  });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || 'Failed to schedule deletion');
@@ -157,9 +170,16 @@ export async function deleteEvent(id) {
   return res.json();
 }
 
-/** Cancel scheduled deletion so the event stays. */
+/** Cancel scheduled deletion so the event stays. Requires auth. */
 export async function cancelScheduledDelete(id) {
-  const res = await fetch(`${BASE}/api/v1/events/${id}/cancel-delete`, { method: 'PATCH' });
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${BASE}/api/v1/events/${id}/cancel-delete`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers,
+  });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.message || 'Failed to cancel deletion');
@@ -175,10 +195,16 @@ export async function forceDeleteEvent(id) {
   return data;
 }
 
+/** Update event (title, gallery, etc.). Requires auth. Do not set Content-Type so FormData sends multipart. */
 export async function updateEvent(id, formData) {
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/events/${id}`, {
     method: 'PUT',
     body: formData,
+    credentials: 'include',
+    headers,
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
