@@ -30,6 +30,43 @@ function Team2() {
   const heroRef = useRef(null);
   const teamGridRef = useRef(null);
 
+  useGSAP(
+    () => {
+      // Hero: smooth fade + lift on page enter
+      if (heroRef.current) {
+        gsap.fromTo(
+          heroRef.current,
+          { opacity: 0, y: 32, filter: "blur(10px)" },
+          {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 0.9,
+            ease: "power3.out",
+          }
+        );
+      }
+
+      // Team cards: modern staggered entrance
+      if (teamGridRef.current) {
+        gsap.fromTo(
+          teamGridRef.current.children,
+          { opacity: 0, y: 28, scale: 0.96, filter: "blur(12px)" },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            filter: "blur(0px)",
+            duration: 0.85,
+            ease: "power3.out",
+            stagger: 0.06,
+          }
+        );
+      }
+    },
+    { scope: containerRef, dependencies: [activeTab] }
+  );
+
   // useGSAP(
   //   () => {
   //     gsap.fromTo(

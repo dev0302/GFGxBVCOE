@@ -10,7 +10,7 @@ import "react-image-crop/dist/ReactCrop.css";
 import { Spinner } from "@/components/ui/spinner";
 
 
-const MAX_FILE_SIZE = 200 * 1024 ; // 200kB
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB max
 
 const COLS = [
   "name",
@@ -108,7 +108,7 @@ export default function JoinTeamByLink() {
       return;
     }
     if (file.size > MAX_FILE_SIZE) {
-      toast.error(`Image must be under 200kB (current: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+      toast.error(`Image must be under 5MB (current: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
       return;
     }
     try {
@@ -271,7 +271,7 @@ export default function JoinTeamByLink() {
                             disabled={photoUploading}
                           />
                         </label>
-                        <span className="text-xs text-gray-500">Max 200KB · then crop</span>
+                        <span className="text-xs text-gray-500">Max 5MB · then crop</span>
                       </div>
                       <input
                         type="text"
