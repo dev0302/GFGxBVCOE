@@ -1,5 +1,5 @@
 const express = require("express");
-const { auth } = require("../middlewares/AuthZ");
+const { auth, optionalAuth } = require("../middlewares/AuthZ");
 const {
   createEvent,
   getAllEvents,
@@ -30,16 +30,16 @@ const {
 const router = express.Router();
 
 router.get("/upcoming", getUpcomingEvents);
-router.post("/", createEvent);
+router.post("/", optionalAuth, createEvent);
 router.get("/", getAllEvents);
 router.post("/upload-link", auth, requireEventUploadAccess, createUploadLink);
 router.delete("/upload-link/:token", auth, requireEventUploadAccess, suspendUploadLink);
 router.get("/upload-by-link/:token", validateUploadLink);
 router.post("/upload-by-link/:token", createEventByLink);
 router.delete("/:id/force", auth, requireEventUploadAccess, requireCanForceDeleteEvent, forceDeleteEvent);
-router.delete("/:id", scheduleDeleteEvent);
-router.patch("/:id/cancel-delete", cancelScheduledDelete);
-router.put("/:id", updateEvent);
+router.delete("/:id", auth, requireEventUploadAccess, scheduleDeleteEvent);
+router.patch("/:id/cancel-delete", auth, requireEventUploadAccess, cancelScheduledDelete);
+router.put("/:id", auth, requireEventUploadAccess, updateEvent);
 
 router.get("/upload-allowed", auth, requireEventUploadAccess, requireCanManageEventUploadConfig, getEventUploadAllowed);
 router.get("/force-delete-allowed", auth, requireEventUploadAccess, getForceDeleteAllowed);

@@ -8,6 +8,7 @@ import events from "../data/eventData";
 import EventModal from "../components/EventModal";
 import UpcomingEventSection from "../components/UpcomingEventSection";
 import { getEvents } from "../services/api";
+import { cloudinaryImageUrl } from "../utils/cloudinary";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -129,7 +130,7 @@ const Events = () => {
                 <div className="bg-[#2a2a3d] rounded-2xl shadow-lg overflow-hidden transition-all duration-300 group h-full w-full flex flex-col">
                   <div className="h-40 sm:h-48 overflow-hidden flex-shrink-0">
                     <img
-                      src={event.galleryImages[0]}
+                      src={cloudinaryImageUrl(event.galleryImages[0])}
                       alt={event.title}
                       loading="eager"
                       className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500"

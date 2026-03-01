@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
+import { cloudinaryImageUrl } from '../utils/cloudinary';
 
 const EventModal = ({ event, onClose }) => {
   const modalRef = useRef(null);
@@ -62,7 +63,7 @@ const EventModal = ({ event, onClose }) => {
 
     return (
       <img
-        src={src}
+        src={cloudinaryImageUrl(src)}
         alt="event media"
         loading="lazy"
         className={`w-full h-full object-cover transition-all duration-300 ${
@@ -121,12 +122,12 @@ const EventModal = ({ event, onClose }) => {
                 {renderMedia(activeMedia, true)}
               </div>
 
-              {/* Thumbnails */}
-              <div className="flex gap-3">
+              {/* Thumbnails — max 6 per row */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-3">
                 {event.galleryImages.map((media, index) => (
                   <div
                     key={index}
-                    className="w-1/4 h-20 rounded-lg overflow-hidden cursor-pointer border border-gray-400/20 hover:border-gray-400/40 transition-all duration-300"
+                    className="aspect-square rounded-lg overflow-hidden cursor-pointer border border-gray-400/20 hover:border-gray-400/40 transition-all duration-300"
                     onClick={() => setActiveMedia(media)}
                   >
                     {renderMedia(media, activeMedia === media)}

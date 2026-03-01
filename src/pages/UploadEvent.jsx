@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { createEvent, getEventsForManage, deleteEvent, cancelScheduledDelete, updateEvent, userCanManageEvents, canManageEventUploadConfig, getEventUploadAllowed, addEventUploadDepartment, removeEventUploadDepartment, createUploadLink, AUTH_DEPARTMENTS, getAccountTypeLabel, getMe } from "../services/api";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
+import { cloudinaryImageUrl } from "../utils/cloudinary";
 
 const VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg", "video/quicktime"];
 const isVideo = (file) => file?.type?.startsWith("video/") || VIDEO_TYPES.includes(file?.type);
@@ -32,6 +33,7 @@ const EditEventModal = ({ event, onClose, onSaved, inputClass, labelClass }) => 
   const [prerequisites, setPrerequisites] = useState(event?.prerequisites?.length ? [...event.prerequisites] : [""]);
   const [galleryFiles, setGalleryFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
+  const [removedGalleryUrls, setRemovedGalleryUrls] = useState([]);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -60,6 +62,10 @@ const EditEventModal = ({ event, onClose, onSaved, inputClass, labelClass }) => 
     });
   };
 
+  const existingGallery = event?.galleryImages ?? [];
+  const keptExistingUrls = existingGallery.filter((url) => !removedGalleryUrls.includes(url));
+  const removeExistingGalleryUrl = (url) => setRemovedGalleryUrls((prev) => [...prev, url]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim() || !date || !time.trim() || !location.trim() || !category.trim() || !description.trim()) {
@@ -79,6 +85,7 @@ const EditEventModal = ({ event, onClose, onSaved, inputClass, labelClass }) => 
     formData.append("speakers", JSON.stringify(speakers.filter((s) => s.name || s.title)));
     formData.append("agenda", JSON.stringify(agenda.filter(Boolean)));
     formData.append("prerequisites", JSON.stringify(prerequisites.filter(Boolean)));
+    formData.append("galleryKeepUrls", JSON.stringify(keptExistingUrls));
     galleryFiles.forEach((file) => formData.append("gallery", file));
 
     try {
@@ -91,8 +98,6 @@ const EditEventModal = ({ event, onClose, onSaved, inputClass, labelClass }) => 
       setSaving(false);
     }
   };
-
-  const existingGallery = event?.galleryImages ?? [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={onClose}>
@@ -185,9 +190,21 @@ const EditEventModal = ({ event, onClose, onSaved, inputClass, labelClass }) => 
             </div>
           </div>
           <div>
-            <label className={labelClass}>Gallery (optional – add new to replace)</label>
-            {existingGallery.length > 0 && (
-              <p className="text-xs text-gray-500 mb-2">Current: {existingGallery.length} file(s). Add new files below to replace.</p>
+            <label className={labelClass}>Gallery</label>
+            <p className="text-xs text-gray-500 mb-2">Existing uploads (click × to remove). Add new images/videos below.</p>
+            {keptExistingUrls.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2 mb-3">
+                {keptExistingUrls.map((url, i) => (
+                  <div key={url + i} className="relative w-16 h-16 rounded-lg overflow-hidden bg-[#252536] shrink-0">
+                    {/\.(mp4|webm|mov|avi|mkv|m4v)(\?|$)/i.test(url) ? (
+                      <video src={url} className="w-full h-full object-cover" muted playsInline />
+                    ) : (
+                      <img src={cloudinaryImageUrl(url)} alt="" className="w-full h-full object-cover" />
+                    )}
+                    <button type="button" onClick={() => removeExistingGalleryUrl(url)} className="absolute top-0.5 right-0.5 w-5 h-5 rounded bg-red-500 text-white text-xs hover:bg-red-600">×</button>
+                  </div>
+                ))}
+              </div>
             )}
             <input
               ref={fileInputRef}
@@ -198,18 +215,18 @@ const EditEventModal = ({ event, onClose, onSaved, inputClass, labelClass }) => 
               className="hidden"
             />
             <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full py-3 border border-dashed border-gray-500/50 rounded-xl text-gray-400 hover:border-cyan-500/50 hover:text-cyan-400">
-              Add new images/videos (optional)
+              Add new images/videos
             </button>
             {galleryFiles.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {galleryFiles.map((file, i) => (
-                  <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden bg-[#252536]">
+                  <div key={"new-" + i} className="relative w-16 h-16 rounded-lg overflow-hidden bg-[#252536]">
                     {file.type.startsWith("video/") ? (
                       <video src={previewUrls[i]} className="w-full h-full object-cover" muted playsInline />
                     ) : (
                       <img src={previewUrls[i]} alt="" className="w-full h-full object-cover" />
                     )}
-                    <button type="button" onClick={() => removeGalleryFile(i)} className="absolute top-0.5 right-0.5 w-5 h-5 rounded bg-red-500 text-white text-xs">×</button>
+                    <button type="button" onClick={() => removeGalleryFile(i)} className="absolute top-0.5 right-0.5 w-5 h-5 rounded bg-red-500 text-white text-xs hover:bg-red-600">×</button>
                   </div>
                 ))}
               </div>
