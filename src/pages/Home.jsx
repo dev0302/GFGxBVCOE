@@ -118,47 +118,38 @@ function Home() {
 
   return (
     <div className="relative overflow-x-hidden">
-      {/* Hero Section with Background */}
-      <div className="relative min-h-screen">
-        {/* Background */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url('/landingpage_img2.jpg')`,
-            filter: "blur(1px)", // stronger blur if you like
-          }}
-        >
-          {/* Dark overlay for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/30 to-black/50"></div>
-          {/* Subtle pattern overlay */}
-          <div className="absolute inset-0 opacity-5">
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: `radial-gradient(circle at 25% 25%, #10b981 1px, transparent 1px)`,
-                backgroundSize: "60px 60px",
-              }}
-            />
-          </div>
-        </div>
+     {/* Hero Section */}
+<div className="relative min-h-screen overflow-hidden">
+  {/* Background Video */}
+  <video
+    className="absolute top-0 left-0 w-full h-full object-cover"
+    src="/bgvideo.mp4"
+    autoPlay
+    // loop
+    muted
+    playsInline
+    preload="auto"
+  />
 
-        {/* Hero Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 pt-20 pb-20 text-center">
-          {/* Title */}
-          <h1
-            ref={titleRef}
-            className="text-3xl md:text-5xl font-bold text-white mb-8 tracking-tight pt-8 leading-tight md:leading-tight pb-1"
-            style={{
-              background: "linear-gradient(135deg, #22c55e, #10b981, #059669)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Empowering Students for
-            <br />
-            a Brighter Future
-          </h1>
+  {/* Optional dark overlay for readability */}
+  <div className="absolute inset-0 bg-black/50" />
+
+  {/* Hero Content */}
+  <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 pt-20 pb-20 text-center">
+    <h1
+      ref={titleRef}
+      className="text-3xl md:text-5xl font-bold mb-8 tracking-tight pt-8 leading-tight md:leading-tight pb-1"
+      style={{
+        background: "linear-gradient(135deg, #22c55e, #10b981, #059669)",
+        backgroundClip: "text",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+      }}
+    >
+      Empowering Students for
+      <br />
+      a Brighter Future
+    </h1>
 
           {/* Description */}
           <p
