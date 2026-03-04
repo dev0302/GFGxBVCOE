@@ -170,9 +170,9 @@ const Gallery = () => {
     }
 
     return (
-        <div ref={containerRef} className="relative w-full overflow-x-hidden text-white font-nunito bg-[#0a0a0a]">
+        <div ref={containerRef} className="relative w-full overflow-x-hidden text-white font-nunito bg-[#0a0a0abb]">
             {/* Using a simplified dark background for clarity */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e]"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-[rgb(42,4,67)] via-[#1a1a2e] to-[#020d2c]"></div>
             
             {/* Your animated background elements can stay here */}
             {/* ... */}
@@ -184,7 +184,7 @@ const Gallery = () => {
                     <h1 className="relative text-5xl md:text-6xl font-bold text-white mb-6 font-audiowide tracking-tight">
                         Society <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 drop-shadow-lg">Scrapbook</span>
                     </h1>
-                    <p className="relative text-lg md:text-xl text-green-100 leading-relaxed">
+                    <p className="font-nunito relative text-lg md:text-xl text-gray-200 leading-relaxed">
                         A continuous stream of our favorite moments, memories, and milestones.
                     </p>
                 </div>

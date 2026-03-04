@@ -630,7 +630,7 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
   const inputBase =
     "w-full rounded-2xl border bg-transparent text-sm outline-none transition-colors";
   const inputTheme = isNavbar
-    ? "border-white/50 text-white placeholder-white/70 focus:border-white bg-white/5"
+    ? "border-gray-200/20 text-white placeholder-white/70 focus:border-white/30 bg-white/5"
     : isDark
       ? "border-gray-500/40 text-white placeholder-gray-500 focus:border-cyan-500 bg-[#252536]"
       : "border-green-400/40 text-white placeholder-green-200/70 focus:border-green-400 bg-green-900/30";

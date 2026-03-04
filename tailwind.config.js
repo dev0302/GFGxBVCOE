@@ -23,7 +23,9 @@ export default {
   			audiowide: [
   				'Audiowide',
   				'sans-serif'
-  			]
+  			],
+			rounded: ["'M PLUS Rounded 1c'", "sans-serif"],
+			changa: ["Changa", "sans-serif"],
   		},
   		colors: {
   			primary: {

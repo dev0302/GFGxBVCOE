@@ -121,7 +121,7 @@ function Team2() {
       {/* Hero Section */}
       <section ref={heroRef} className="pb-10 px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-8 leading-tight font-alfa tracking-tight">
+          <h1 className="font-audiowide text-4xl md:text-6xl font-bold text-white mb-8 leading-tight tracking-tight">
             Meet Our{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">
               Team
@@ -153,10 +153,10 @@ function Team2() {
             <h3 className="text-indigo-400 text-base font-medium mb-3 text-center md:text-left">
               Faculty Incharge, GFGxBVCOE
             </h3>
-            <p className="text-[12px] md:text-sm leading-relaxed text-center md:text-left text-gray-300 mt-1">
+            <p className="text-[12px] md:text-base leading-relaxed text-center md:text-left text-gray-300 mt-1 font-nunito ">
               Empowering students with mentorship that blends wisdom, empathy,
               and creativity. Her guidance fosters a culture of growth,
-              collaboration, and emotional intelligence—making every student
+              collaboration, and emotional intelligence - making every student
               feel seen and supported.
             </p>
           </div>
