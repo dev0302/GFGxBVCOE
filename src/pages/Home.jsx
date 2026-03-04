@@ -179,36 +179,36 @@ function Home() {
             <NavLink to="/results">
               <button
                 id="btn-join"
-                className="relative px-6 py-4 bg-gradient-to-r 
+                className=" px-3 py-3 bg-gradient-to-r 
              from-green-500/50 via-emerald-400/50 to-teal-500/50
              text-white font-bold rounded-full transition-all duration-500 ease-in-out
-             transform hover:-translate-y-2 hover:scale-110
+             transform hover:-translate-y-2 hover:scale-105
              shadow-[0_0_20px_rgba(16,185,129,0.6)]
-             hover:shadow-[0_0_35px_rgba(16,185,129,0.8)]
+            
              border-2 border-white/20
              overflow-hidden group"
               >
                 {/* Shining sweep overlay */}
-                <span
+                {/* <span
                   className="absolute top-0 left-0 w-1/3 h-full bg-white/30 blur-md transform -skew-x-12 animate-shine hover:shadow-[0_0_35px_rgba(16,185,129,0.8)]"
-                ></span>
+                ></span> */}
 
                 {/* Text + icon */}
-                <span className="relative z-10 flex items-center justify-center">
-                  <span className="mr-3">2025 Execoms Result out</span>
+                <span className="relative  flex items-center justify-center">
+                  <span className="ml-3 font-nunito text-center">2025 Execoms Result out</span>
                   <svg
-                    className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                    className="w-5 h-5 group-hover:translate-x-[2px] transition-transform"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <path
+                    {/* <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth="2"
                       d="M14 5l7 7m0 0l-7 7m7-7H3"
-                    ></path>
+                    ></path> */}
                   </svg>
                 </span>
               </button>
@@ -218,7 +218,7 @@ function Home() {
             <button
               id="btn-about"
               onClick={() => navigate("/about")}
-              className="px-8 py-4 bg-transparent text-green-100 font-semibold rounded-full text-lg border-2 border-green-300/40 backdrop-blur-sm transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:bg-green-400/20 hover:border-green-300"
+              className="px-8 py-3 bg-transparent text-green-100 font-semibold rounded-full text-lg border-2 border-green-300/40 backdrop-blur-sm transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:bg-green-400/20 hover:border-green-300"
             >
               About Us
             </button>
@@ -278,13 +278,13 @@ function Home() {
       {/* About Section */}
       <section className="py-20 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 text-white text-center">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 font-audiowide">
             Who We{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
               Are
             </span>
           </h2>
-          <p className="text-lg md:text-xl text-green-100 max-w-3xl mx-auto leading-relaxed font-light font-nunito mb-12">
+          <p className="text-lg md:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed font-light font-nunito mb-12 ">
             GFG BVCOE is a community of tech enthusiasts dedicated to fostering
             a culture of learning, innovation, and collaboration. We organize
             workshops, hackathons, and speaker sessions to help students grow

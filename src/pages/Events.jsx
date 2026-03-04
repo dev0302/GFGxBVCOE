@@ -117,10 +117,10 @@ const Events = () => {
       {/* Events Grid */}
       <section
         ref={eventsRef}
-        className="py-16 md:py-18 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] font-['Inter'] text-white w-10/12 mx-auto"
+        className="py-16 md:py-18 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] font-['Inter'] text-white w-[95%] sm:w-11/12 mx-auto"
       >
-        <div className="container mx-auto w-full px-4 sm:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 gap-y-16 md:gap-20">
+        <div className=" mx-auto w-[98%] px-4 sm:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 gap-y-16 md:gap-20 max">
             {allEvents.map((event) => (
               <div
                 key={event.id}
