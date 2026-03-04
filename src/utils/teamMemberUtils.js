@@ -1,3 +1,5 @@
+import { cloudinaryAvatarUrl, cloudinaryLargeAvatarUrl } from "./cloudinary";
+
 /** Extract Google Drive file ID from share link. */
 function getDriveFileId(url) {
   if (!url || typeof url !== "string") return null;
@@ -19,15 +21,57 @@ export function driveLinkToImageUrl(url) {
   return url || "";
 }
 
-/** Preview URL for photo field: Drive links converted to thumbnail URL; Cloudinary/other https as-is. */
+/**
+ * Preview URL for member photos/avatars:
+ * - Google Drive links → thumbnail URL
+ * - Cloudinary URLs → 64x64 avatar transform (/upload/w_64,h_64,c_fill,f_auto,q_auto/)
+ * - Other https URLs → unchanged
+ * - Plain IDs/paths → best-effort Drive thumbnail or original string
+ */
 export function photoPreviewUrl(url) {
   if (!url || typeof url !== "string") return "";
   const trimmed = url.trim();
+
+  // Google Drive → thumbnail API
   if (/drive\.google\.com/i.test(trimmed)) {
     const driveUrl = driveLinkToImageUrl(trimmed);
     if (driveUrl && driveUrl !== trimmed) return driveUrl;
   }
+
+  // Cloudinary → optimized 64x64 avatar transform
+  if (/cloudinary\.com/i.test(trimmed)) {
+    return cloudinaryAvatarUrl(trimmed);
+  }
+
+  // Other absolute URLs → as-is
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
+
+  // Fallback: try treating as Drive link, else original
+  const driveUrl = driveLinkToImageUrl(trimmed);
+  return driveUrl || trimmed;
+}
+
+/**
+ * Larger avatar preview (e.g. whole-society modal):
+ * - Google Drive links → thumbnail URL
+ * - Cloudinary URLs → 128x128 avatar transform (/upload/w_128,h_128,c_fill,f_auto,q_auto/)
+ * - Other https URLs → unchanged
+ */
+export function photoPreviewLargeAvatarUrl(url) {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+
+  if (/drive\.google\.com/i.test(trimmed)) {
+    const driveUrl = driveLinkToImageUrl(trimmed);
+    if (driveUrl && driveUrl !== trimmed) return driveUrl;
+  }
+
+  if (/cloudinary\.com/i.test(trimmed)) {
+    return cloudinaryLargeAvatarUrl(trimmed);
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+
   const driveUrl = driveLinkToImageUrl(trimmed);
   return driveUrl || trimmed;
 }

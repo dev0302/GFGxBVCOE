@@ -274,7 +274,7 @@ export default function ManageSociety() {
     <div className="min-h-screen darkthemebg pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-4xl">
         <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2 mb-2">
-          <Users className="h-8 w-8 text-cyan-400" />
+          <Users className="h-10 w-10 text-cyan-400" />
           Manage society
         </h1>
         <p className="text-gray-400 text-sm mb-6">
@@ -451,7 +451,7 @@ export default function ManageSociety() {
                         if (item.type === "user") {
                           const u = item.data;
                           const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "—";
-                          const src = u.image || avatarPlaceholder(name);
+                          const src = u.image ? photoPreviewUrl(u.image) : avatarPlaceholder(name);
                           const position = u.additionalDetails?.position && String(u.additionalDetails.position).trim();
                           const tagLabel = position || getAccountTypeLabel(u.accountType) || u.accountType || "Member";
                           

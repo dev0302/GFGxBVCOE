@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { getSearchPeople, getAccountTypeLabel, sendSignupInvite, getActivityLogs, isSocietyRole } from "../services/api";
-import { driveLinkToImageUrl, avatarPlaceholder } from "../utils/teamMemberUtils";
+import { driveLinkToImageUrl, avatarPlaceholder, photoPreviewUrl } from "../utils/teamMemberUtils";
 import { Search as SearchIcon, X, Mail, Activity } from "react-feather";
 import "./Search.css";
 import { Spinner } from "./ui/spinner";
@@ -34,7 +34,7 @@ const TEAM_LABELS = {
 export function MemberDetailModal({ member, onClose }) {
   if (!member) return null;
   const photoUrl = (member.photo || member.image_drive_link)
-    ? driveLinkToImageUrl(member.photo || member.image_drive_link)
+    ? photoPreviewUrl(member.photo || member.image_drive_link)
     : avatarPlaceholder(member.name);
 
   return (
@@ -692,7 +692,7 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
                 <>
                   {filteredTeamMembers.slice(0, 15).map((m) => {
                     const src = (m.photo || m.image_drive_link)
-                      ? driveLinkToImageUrl(m.photo || m.image_drive_link)
+                      ? photoPreviewUrl(m.photo || m.image_drive_link)
                       : avatarPlaceholder(m.name);
                     return (
                       <button
@@ -725,7 +725,7 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
                   })}
                   {filteredUsers.slice(0, 15).map((u) => {
                     const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email;
-                    const src = u.image || avatarPlaceholder(name);
+                    const src = u.image ? photoPreviewUrl(u.image) : avatarPlaceholder(name);
                     const roleLabel = u.additionalDetails?.position || getAccountTypeLabel(u.accountType) || u.accountType || "Member";
                     return (
                       <button
