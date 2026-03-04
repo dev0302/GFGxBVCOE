@@ -69,7 +69,7 @@ function Navbar() {
   const navLinkClass = ({ isActive }) =>
     `flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${isActive
       ? "text-white bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30"
-      : "text-green-100 hover:text-white hover:bg-green-700/50 backdrop-blur-sm"
+      : "text-gray-200 hover:text-white hover:bg-green-700/50 backdrop-blur-sm"
     }`;
 
   const mobileNavLinkClass = ({ isActive }) =>

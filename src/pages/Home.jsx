@@ -117,7 +117,7 @@ function Home() {
   }, []);
 
   return (
-    <div className="relative overflow-x-hidden">
+    <div className="relative overflow-x-hidden ">
       {/* Hero Section with Background */}
       <div className="relative min-h-screen">
         {/* Background */}
@@ -336,7 +336,7 @@ function Home() {
           {/* Team Preview Grid */}
           <div ref={teamCardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 max-w-6xl mx-auto">
             {/* Chair Person - Featured */}
-            <div className="lg:col-span-1 md:col-span-2 group">
+            <div className="lg:col-span-1 md:col-span-2 group font-nunito">
               <div className="relative bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-3xl p-8 border border-green-400/30 hover:border-green-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/20 backdrop-blur-sm">
                 {/* Glow Effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -350,7 +350,7 @@ function Home() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-green-300 transition-colors duration-300">
+                  <h3 className="font-rounded text-2xl font-bold text-white mb-2 group-hover:text-green-300 transition-colors duration-300">
                     Toshika Goswami
                   </h3>
                   <p className="text-green-300 text-lg font-semibold mb-2">Chair Person</p>
@@ -385,7 +385,7 @@ function Home() {
             </div>
 
             {/* Vice Chair Person */}
-            <div className="group">
+            <div className="group font-nunito">
               <div className="relative bg-gradient-to-br from-blue-600/20 to-cyan-600/20 rounded-3xl p-6 border border-blue-400/30 hover:border-blue-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 backdrop-blur-sm">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
@@ -397,7 +397,7 @@ function Home() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-1 group-hover:text-blue-300 transition-colors duration-300">
+                  <h3 className="font-rounded text-xl font-bold text-white mb-1 group-hover:text-blue-300 transition-colors duration-300">
                     Kartik Bhattacharya
                   </h3>
                   <p className="text-blue-300 font-semibold mb-1">Vice-Chairperson</p>
@@ -443,7 +443,7 @@ function Home() {
             </div>
 
             {/* Design Lead */}
-            <div className="group">
+            <div className="group font-nunito">
               <div className="relative bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-3xl p-6 border border-purple-400/30 hover:border-purple-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20 backdrop-blur-sm">
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
@@ -455,7 +455,7 @@ function Home() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-1 group-hover:text-purple-300 transition-colors duration-300">
+                  <h3 className="font-rounded text-xl font-bold text-white mb-1 group-hover:text-purple-300 transition-colors duration-300">
                     Archita
                   </h3>
                   <p className="text-purple-300 font-semibold mb-1">Design & Creative Lead</p>
@@ -505,12 +505,12 @@ function Home() {
           <div className="text-center">
             <button
               onClick={() => navigate("/team")}
-              className="group relative px-10 py-5 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold rounded-full text-lg transition-all duration-500 ease-in-out transform hover:-translate-y-2 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/40 border-2 border-transparent hover:border-emerald-300/50 overflow-hidden"
+              className="group relative px-10 py-5 bg-gradient-to-r from-green-600 to-emerald-700 text-white font-bold rounded-3xl text-lg transition-all duration-500 ease-in-out transform hover:-translate-y-2 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/40 border-2 border-transparent hover:border-emerald-300/50 overflow-hidden"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
               <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
               <span className="relative z-10 flex items-center justify-center">
-                <span className="mr-3">Meet the Full Team</span>
+                <span className="font-rounded mr-3">Meet the Full Team</span>
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>

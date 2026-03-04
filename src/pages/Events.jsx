@@ -99,13 +99,13 @@ const Events = () => {
             </span>
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
           </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6">
+          <h1 className="font-audiowide text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6">
             Discover Our{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
               Events
             </span>
           </h1>
-          <p className="text-lg md:text-xl text-richblack-100 max-w-3xl mx-auto leading-relaxed font-normal">
+          <p className="text-lg md:text-xl font-nunito text-richblack-100 max-w-3xl mx-auto leading-relaxed font-normal">
             Join our exciting workshops, hackathons, and masterclasses. Learn,
             grow, and connect with the tech community.
           </p>
@@ -137,12 +137,17 @@ const Events = () => {
                     />
                   </div>
                   <div className="p-5 md:p-6 flex flex-col flex-grow">
-                    <div className="inline-flex items-center px-3 py-1 bg-[#444] rounded-full border border-gray-500/30 mb-4 self-start">
-                      <span className="text-xs sm:text-sm font-medium text-[#ccc]">
+                    <div className=" items-center justify-center px-3 py-[2px] 
+                    bg-white/10 backdrop-blur-md 
+                    rounded-lg border border-white/10 
+                    mb-4 self-start">
+                      
+                      <span className="text-xs sm:text-xs font-normal text-white/80 font-nunito">
                         {event.category}
                       </span>
+
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors duration-300">
+                    <h3 className="text-xl font-bold text-gray-300 mb-3 group-hover:text-cyan-400 transition-colors duration-300 font-changa">
                       {event.title}
                     </h3>
                     <div className="space-y-2 mb-4 text-[#aaa]">
@@ -156,13 +161,13 @@ const Events = () => {
                         📍 <span className="text-sm">{event.location}</span>
                       </div>
                     </div>
-                    <p className="text-sm text-[#aaa] leading-relaxed mb-6 flex-grow">
+                    <p className="text-sm text-[#aaa] leading-relaxed mb-6 flex-grow font-nunito">
                       {event.description}
                     </p>
-                    <div className="glowing-btn-wrapper green rounded-lg w-full mt-auto">
+                    <div className=" green rounded-lg w-10/12 mx-auto mt-auto">
                       <button
                         onClick={() => handleKnowMoreClick(event)}
-                        className="w-full px-6 py-3 bg-cyan-700 text-white font-semibold rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50"
+                        className="w-full px-6 py-3 bg-cyan-700 text-white font-semibold rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50 font-nunito"
                       >
                         Know More
                       </button>
