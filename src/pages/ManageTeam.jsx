@@ -36,6 +36,7 @@ import {
   driveLinkToImageUrl,
   avatarPlaceholder,
   photoPreviewUrl,
+  photoPreviewLargeAvatarUrl,
 } from "../utils/teamMemberUtils";
 import {
   downloadTeamListPDF,
@@ -754,7 +755,7 @@ export default function ManageTeam({
                 </button>
               )}
               <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
-                <Users className="h-8 w-8 text-cyan-400" />
+                <Users className="h-10 w-10 text-cyan-400" />
                 {isSociety
                   ? `Manage society › ${displayDepartment}`
                   : "Manage your team"}
@@ -1089,9 +1090,7 @@ export default function ManageTeam({
                                   <img
                                     src={
                                       photoUrl
-                                        ? photoUrl.startsWith("http")
-                                          ? photoUrl
-                                          : photoPreviewUrl(photoUrl)
+                                        ? photoPreviewUrl(photoUrl)
                                         : avatarPlaceholder(name)
                                     }
                                     alt={name}
@@ -1734,7 +1733,7 @@ export default function ManageTeam({
                         const u = item.data;
                         key = `reg-${u._id}-${idx}`;
                         const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "—";
-                        const src = u.image || avatarPlaceholder(name);
+                        const src = u.image ? photoPreviewUrl(u.image) : avatarPlaceholder(name);
                         const position = u.additionalDetails?.position && String(u.additionalDetails.position).trim();
                         const roleLabel = position || item.department || getAccountTypeLabel(u.accountType) || u.accountType || "Member";
 
@@ -1744,7 +1743,7 @@ export default function ManageTeam({
                             className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-all border border-transparent hover:border-gray-500/30 active:scale-[0.98]"
                             onClick={() => setSelectedDetailItem({ type: "user", data: u })}
                           >
-                            <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
+                           <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
                             <div className="flex-1 min-w-0">
                               <span className="block truncate font-medium text-white">{name}</span>
                               <span className="block truncate text-xs text-gray-500">{u.email}</span>
@@ -1901,7 +1900,7 @@ export default function ManageTeam({
                         const u = item.data;
                         key = `user-${u._id}-${idx}`;
                         const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "—";
-                        const src = u.image || avatarPlaceholder(name);
+                        const src = u.image ? photoPreviewLargeAvatarUrl(u.image) : avatarPlaceholder(name);
                         const position = u.additionalDetails?.position && String(u.additionalDetails.position).trim();
                         const roleLabel = position || item.department || getAccountTypeLabel(u.accountType) || u.accountType || "Member";
                         content = (
@@ -1972,7 +1971,7 @@ export default function ManageTeam({
                         key = `tm-${m._id}-${dept}-${idx}`;
                         const name = m.name || m.email || "—";
                         const photoUrl = m.photo || m.image_drive_link;
-                        const src = photoUrl ? photoPreviewUrl(photoUrl) : avatarPlaceholder(name);
+                        const src = photoUrl ? photoPreviewLargeAvatarUrl(photoUrl) : avatarPlaceholder(name);
                         const tagLabel = (m.position && String(m.position).trim()) || dept || "Team";
                         content = (
                           <button

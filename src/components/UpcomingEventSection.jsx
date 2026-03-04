@@ -4,7 +4,7 @@ import { MapPin, Clock, Users, ExternalLink, Calendar } from "react-feather";
 import { motion, AnimatePresence } from "framer-motion";
 import CornerFrameScrambleText from "./ui/corner-frame-scramble-text";
 import { Accordion } from "./ui/accordion";
-import { cloudinaryImageUrl } from "../utils/cloudinary";
+import { cloudinaryEventCardImageUrl } from "../utils/cloudinary";
 
 // ... parseTimeIntoDate and useCountdown stay exactly the same ...
 function parseTimeIntoDate(date, timeStr) {
@@ -164,7 +164,7 @@ export default function UpcomingEventSection({ variant = "events" }) {
             {event.poster && (
               <div className="lg:w-1/2 relative group">
                 <img 
-                  src={cloudinaryImageUrl(event.poster)} 
+                  src={cloudinaryEventCardImageUrl(event.poster)} 
                   className="w-full h-full object-cover aspect-video lg:aspect-auto min-h-[400px] transition-transform duration-700 group-hover:scale-110" 
                   alt="Poster" 
                 />
