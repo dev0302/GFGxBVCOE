@@ -91,7 +91,7 @@ function Navbar() {
             <img
               src={logo}
               alt="GFG Logo"
-              className="w-10 h-10 rounded-full border-2 border-green-400 shadow-lg cursor-pointer hover:scale-110 transition-transform duration-300"
+              className="w-8 h-8 rounded-full border-2 border-green-400 shadow-lg cursor-pointer hover:scale-110 transition-transform duration-300"
             />
           </NavLink>
           <p className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 font-montserrat tracking-wide">
@@ -141,7 +141,15 @@ function Navbar() {
               <Spinner className="size-5 text-cyan-400" />
             </div>
           ) : user ? (
-            <ProfileDropDown onLogout={logout} isDarkNavbar={isDarkNavbar} avatarOnly showChevron />
+            <ProfileDropDown
+              onLogout={logout}
+              isDarkNavbar={isDarkNavbar}
+              avatarOnly
+              showChevron
+              onBeforeToggle={() => {
+                if (isMenuOpen) setIsMenuOpen(false);
+              }}
+            />
           ) : null}
           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-green-100 focus:outline-none">
             {isMenuOpen ? (
