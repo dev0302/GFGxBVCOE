@@ -115,7 +115,9 @@ function Navbar() {
         <div ref={joinBtn} className="hidden sm:flex items-center gap-2">
           {authLoading ? (
             <div className="flex h-9 w-9 items-center justify-center">
-              <Spinner className="size-5 text-cyan-400" />
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-600/80 to-gray-500/60 border border-white/20 flex items-center justify-center animate-pulse">
+                <SaxUserTwotone className="h-4 w-4 text-gray-200/80" />
+              </div>
             </div>
           ) : user ? (
             <ProfileDropDown onLogout={logout} isDarkNavbar={isDarkNavbar} />
@@ -138,7 +140,9 @@ function Navbar() {
         <div className="sm:hidden z-50 flex items-center gap-2">
           {authLoading ? (
             <div className="flex h-9 w-9 items-center justify-center">
-              <Spinner className="size-5 text-cyan-400" />
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-600/80 to-gray-500/60 border border-white/20 flex items-center justify-center animate-pulse">
+                <SaxUserTwotone className="h-4 w-4 text-gray-200/80" />
+              </div>
             </div>
           ) : user ? (
             <ProfileDropDown

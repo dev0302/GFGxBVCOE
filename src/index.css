@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@400;700&family=Nunito:wght@400;700&family=Alfa+Slab+One&display=swap');
+@import "./styles/ios-close.css";
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -451,6 +452,122 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Events page: grid fly-in + staggered card reveal */
+.events-grid {
+  opacity: 0;
+  transform: translateY(60px) scale(0.9);
+  will-change: transform, opacity;
+  animation: events-grid-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes events-grid-in {
+  from {
+    opacity: 0;
+    transform: translateY(80px) scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.event-card {
+  opacity: 0;
+  transform: translateY(40px) scale(0.95);
+  will-change: transform, opacity;
+  animation-name: event-card-in;
+  animation-duration: 0.55s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: forwards;
+  animation-delay: calc(0.25s + (var(--stagger-index, 0) * 0.08s));
+}
+
+@keyframes event-card-in {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Gallery page: zoom-out reveal for all pics */
+.gallery-image-card {
+  opacity: 0;
+  transform: scale(1.08);
+  will-change: transform, opacity;
+  animation-name: gallery-zoom-out;
+  animation-duration: 0.85s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: forwards;
+  animation-delay: calc(0.15s + (var(--gallery-index, 0) * 0.035s));
+}
+
+@keyframes gallery-zoom-out {
+  0% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.0);
+  }
+}
+
+/* Gallery page background effects */
+.gallery-bg-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gallery-bg-orbits {
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(34, 197, 94, 0.15), transparent 55%),
+    radial-gradient(circle at 90% 20%, rgba(56, 189, 248, 0.16), transparent 55%),
+    radial-gradient(circle at 15% 90%, rgba(168, 85, 247, 0.18), transparent 55%);
+  mix-blend-mode: screen;
+  filter: blur(18px);
+  opacity: 0.8;
+  animation: gallery-orbits 26s ease-in-out infinite alternate;
+}
+
+.gallery-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+  background-size: 72px 72px;
+  opacity: 0.45;
+  mix-blend-mode: soft-light;
+}
+
+@keyframes gallery-orbits {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(10px, -10px, 0) scale(1.04);
+  }
+  100% {
+    transform: translate3d(-8px, 12px, 0) scale(1.02);
   }
 }
 
