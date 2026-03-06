@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { SectionTitle } from "../../components/EventDashboard/SectionTitle";
 import EditEventModal from "../../components/EventDashboard/EditEventModal";
 import { Spinner } from "@/components/ui/spinner";
-import { NativeTypewriter } from "../../components/ui/native-typewriter";
 
 export default function ManageEvents() {
   const [managedEvents, setManagedEvents] = useState([]);
@@ -96,8 +95,8 @@ export default function ManageEvents() {
         <div>
           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-white">Manage uploaded events</h1>
           <p className="mt-1.5 sm:mt-2 text-gray-400 text-xs sm:text-sm">
-          <NativeTypewriter content="Only events uploaded through this dashboard. Hardcoded events on the Events page are not listed here." className="text-gray-400 text-xs sm:text-sm" speed={15} cursor={false} />
-        </p>
+            Only events uploaded through this dashboard. Hardcoded events on the Events page are not listed here.
+          </p>
         </div>
 
         <section className="bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-xl">

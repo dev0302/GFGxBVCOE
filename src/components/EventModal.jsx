@@ -1,15 +1,21 @@
 import React, { useRef, useEffect, useState } from 'react';
 import gsap from 'gsap';
-import { cloudinaryImageUrl } from '../utils/cloudinary';
 
 const EventModal = ({ event, onClose }) => {
   const modalRef = useRef(null);
   const [activeMedia, setActiveMedia] = useState('');
+  const [selectedMedia, setSelectedMedia] = useState('');
+  const [isMainLoading, setIsMainLoading] = useState(false);
+  const [isFadingIn, setIsFadingIn] = useState(false);
+  const loadIdRef = useRef(0);
 
   useEffect(() => {
     if (event) {
       // Default to first gallery item
-      setActiveMedia(event.galleryImages[0]);
+      const first = event.galleryImages[0];
+      setActiveMedia(first);
+      setSelectedMedia(first);
+      setIsMainLoading(false);
       gsap.fromTo(
         modalRef.current,
         { scale: 0.9, opacity: 0 },
@@ -40,6 +46,17 @@ const EventModal = ({ event, onClose }) => {
 
   const handleWheel = (e) => {
     e.stopPropagation();
+  };
+
+  const isVideoMedia = (src) =>
+    typeof src === 'string' &&
+    (src.endsWith('.mp4') || src.includes('/video/upload/'));
+
+  const commitActiveMedia = (media) => {
+    setActiveMedia(media);
+    setIsMainLoading(false);
+    setIsFadingIn(true);
+    requestAnimationFrame(() => setIsFadingIn(false));
   };
 
   const getEventModalMediaUrl = (src, { mediaType, size }) => {
@@ -83,10 +100,65 @@ const EventModal = ({ event, onClose }) => {
     return src;
   };
 
+  const handleThumbnailClick = (media) => {
+    if (!media) return;
+    setSelectedMedia(media);
+    if (media === activeMedia) return;
+
+    const loadId = ++loadIdRef.current;
+    setIsMainLoading(true);
+
+    const isVideo = isVideoMedia(media);
+    if (isVideo) {
+      const videoSrc = getEventModalMediaUrl(media, {
+        mediaType: 'video',
+        size: 'preview',
+      });
+
+      try {
+        const v = document.createElement('video');
+        v.preload = 'auto';
+        v.muted = true;
+        v.playsInline = true;
+        v.src = videoSrc;
+
+        const done = () => {
+          if (loadIdRef.current !== loadId) return;
+          commitActiveMedia(media);
+        };
+
+        v.onloadeddata = done;
+        v.onerror = done;
+        if (typeof v.load === 'function') v.load();
+
+        // Fallback: never keep spinner forever
+        window.setTimeout(done, 1200);
+      } catch (_) {
+        commitActiveMedia(media);
+      }
+      return;
+    }
+
+    const imgSrc = getEventModalMediaUrl(media, {
+      mediaType: 'image',
+      size: 'preview',
+    });
+
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = () => {
+      if (loadIdRef.current !== loadId) return;
+      commitActiveMedia(media);
+    };
+    img.onerror = () => {
+      if (loadIdRef.current !== loadId) return;
+      commitActiveMedia(media);
+    };
+    img.src = imgSrc;
+  };
+
   const renderMedia = (src, isActive = false, kind = 'preview') => {
-    const isVideo =
-      typeof src === 'string' &&
-      (src.endsWith('.mp4') || src.includes('/video/upload/'));
+    const isVideo = isVideoMedia(src);
 
     if (isVideo) {
       if (kind === 'thumbnail') {
@@ -186,7 +258,30 @@ const EventModal = ({ event, onClose }) => {
             {/* Active Media */}
             <div className="mb-6">
               <div className="w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-4 border border-gray-400/30 shadow-lg">
-                {renderMedia(activeMedia, true, 'preview')}
+                <div className="relative w-full h-full">
+                  <div
+                    className={`w-full h-full transition-all duration-300 ${
+                      isMainLoading ? 'blur-[1.5px] brightness-75' : ''
+                    } ${
+                      isFadingIn ? 'opacity-0' : 'opacity-100'
+                    } transition-opacity`}
+                  >
+                    {renderMedia(activeMedia, true, 'preview')}
+                  </div>
+                  {isMainLoading && (
+                    <div className="absolute inset-0 bg-black/20">
+                      <div className="absolute inset-0 p-4">
+                        <div className="h-full w-full rounded-xl overflow-hidden border border-white/10 bg-white/5 animate-pulse">
+                          <div className="h-full w-full bg-gradient-to-br from-white/5 via-white/10 to-white/5" />
+                        </div>
+                        <div className="absolute left-6 right-6 bottom-6 space-y-2">
+                          <div className="h-3 w-2/3 rounded bg-white/10 animate-pulse" />
+                          <div className="h-3 w-1/2 rounded bg-white/10 animate-pulse" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Thumbnails — max 6 per row */}
@@ -195,9 +290,9 @@ const EventModal = ({ event, onClose }) => {
                   <div
                     key={index}
                     className="aspect-square rounded-lg overflow-hidden cursor-pointer border border-gray-400/20 hover:border-gray-400/40 transition-all duration-300"
-                    onClick={() => setActiveMedia(media)}
+                    onClick={() => handleThumbnailClick(media)}
                   >
-                    {renderMedia(media, activeMedia === media, 'thumbnail')}
+                    {renderMedia(media, selectedMedia === media, 'thumbnail')}
                   </div>
                 ))}
               </div>
