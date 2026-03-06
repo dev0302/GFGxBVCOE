@@ -2,7 +2,6 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { createEvent } from "../../services/api";
 import { toast } from "sonner";
 import { SectionTitle, inputClass, labelClass } from "../../components/EventDashboard/SectionTitle";
-import { NativeTypewriter } from "../../components/ui/native-typewriter";
 
 const VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg", "video/quicktime"];
 const isVideo = (file) => file?.type?.startsWith("video/") || VIDEO_TYPES.includes(file?.type);
@@ -121,12 +120,7 @@ export default function UploadNewEvent() {
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">Upload new event</h1>
           <p className="mt-2 text-gray-400 text-sm">
-            <NativeTypewriter
-              content="New events appear on the Events page. Add images and videos for the gallery."
-              className="text-gray-400 text-sm"
-              speed={15}
-              cursor={false}
-            />
+            New events appear on the Events page. Add images and videos for the gallery.
           </p>
         </div>
 

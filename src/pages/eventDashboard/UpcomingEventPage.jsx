@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { SectionTitle, inputClass, labelClass } from "../../components/EventDashboard/SectionTitle";
 import { Calendar, Plus, Edit3, Trash2, X } from "react-feather";
 import { Spinner } from "@/components/ui/spinner";
-import { NativeTypewriter } from "../../components/ui/native-typewriter";
 import { motion, AnimatePresence } from "framer-motion";
 import { cloudinaryImageUrl } from "../../utils/cloudinary";
 
@@ -157,7 +156,7 @@ export default function UpcomingEventPage() {
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">Upcoming event</h1>
           <p className="mt-2 text-gray-400 text-sm">
-            <NativeTypewriter content="Events shown below hero on Home and Events page. Past events are auto-removed on the event date." className="text-gray-400 text-sm" speed={15} cursor={false} />
+            Events shown below hero on Home and Events page. Past events are auto-removed on the event date.
           </p>
         </div>
 

@@ -5,6 +5,7 @@ import { getMe, updateProfile, updateAvatar, changePassword, deleteAccount } fro
 import { toast } from "sonner";
 import { Trash2, X } from "react-feather";
 import { Spinner } from "@/components/ui/spinner";
+import { motion } from "framer-motion";
 
 
 const Profile = () => {
@@ -241,7 +242,12 @@ const Profile = () => {
             <Spinner className="size-4 text-gray-400" />
           </div>
         ) : (
-          <div className="bg-gradient-to-br from-[#1e1e2f]/90 to-[#2c2c3e]/90 border border-gray-500/30 rounded-2xl p-6 md:p-8 shadow-xl space-y-8">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.24, ease: "easeOut" }}
+            className="bg-gradient-to-br from-[#1e1e2f]/90 to-[#2c2c3e]/90 border border-gray-500/30 rounded-2xl p-6 md:p-8 shadow-xl space-y-8"
+          >
             {/* Avatar */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
               <div className="shrink-0">
@@ -306,25 +312,79 @@ const Profile = () => {
 
                 {completionPercent < 100 && (
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <p className="text-[10px] text-gray-500 uppercase tracking-widest w-full mb-1">Missing fields</p>
-                    {!(formData.firstName && formData.lastName) && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Name</span>}
-                    {!avatarPreview && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Profile Picture</span>}
-                    {!formData.gender && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Gender</span>}
-                    {!formData.dob && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Birth date</span>}
-                    {!formData.about && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">About</span>}
-                    {!formData.contact && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Contact</span>}
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest w-full mb-1">
+                      Missing fields
+                    </p>
+                    {!(formData.firstName && formData.lastName) && (
+                      <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
+                        Name
+                      </span>
+                    )}
+                    {!avatarPreview && (
+                      <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
+                        Profile Picture
+                      </span>
+                    )}
+                    {!formData.gender && (
+                      <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
+                        Gender
+                      </span>
+                    )}
+                    {!formData.dob && (
+                      <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
+                        Birth date
+                      </span>
+                    )}
+                    {!formData.about && (
+                      <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
+                        About
+                      </span>
+                    )}
+                    {!formData.contact && (
+                      <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
+                        Contact
+                      </span>
+                    )}
                     {isFacultyIncharge ? (
-                      !formData.position && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Position</span>
+                      !formData.position && (
+                        <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
+                          Position
+                        </span>
+                      )
                     ) : (
                       <>
-                        {!formData.yearOfStudy && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Year of study</span>}
-                        {!formData.section && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Section</span>}
-                        {!formData.non_tech_society && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Non-tech society</span>}
+                        {!formData.yearOfStudy && (
+                          <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
+                            Year of study
+                          </span>
+                        )}
+                        {!formData.section && (
+                          <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
+                            Section
+                          </span>
+                        )}
+                        {!formData.non_tech_society && (
+                          <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
+                            Non-tech society
+                          </span>
+                        )}
                       </>
                     )}
-                    {!formData.instagram && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">Instagram</span>}
-                    {!formData.linkedin && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">LinkedIn</span>}
-                    {!formData.github && <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">GitHub</span>}
+                    {!formData.instagram && (
+                      <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
+                        Instagram
+                      </span>
+                    )}
+                    {!formData.linkedin && (
+                      <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
+                        LinkedIn
+                      </span>
+                    )}
+                    {!formData.github && (
+                      <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
+                        GitHub
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
@@ -665,7 +725,7 @@ const Profile = () => {
                 Delete my account
               </button>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Delete account confirmation modal */}

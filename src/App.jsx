@@ -1,4 +1,4 @@
-import { Route, Routes, Navigate } from "react-router-dom"
+import { Route, Routes, Navigate, useLocation } from "react-router-dom"
 import { Toaster } from "sonner"
 import Home from "./pages/Home"
 import About from "./pages/About"
@@ -35,8 +35,22 @@ import ManageTeam from "./pages/ManageTeam"
 import ManageSociety from "./pages/ManageSociety"
 import JoinTeamByLink from "./pages/JoinTeamByLink"
 import AuthAwareLayout from "./components/AuthAwareLayout"
+import { AnimatePresence, motion } from "framer-motion"
 
 function App() {
+  const location = useLocation()
+  const dropdownBasePaths = [
+    "/dashboard",
+    "/profile",
+    "/manage-team",
+    "/manage-society",
+    "/jam-the-web",
+  ]
+
+  const shouldAnimatePage = dropdownBasePaths.some((base) =>
+    location.pathname === base || location.pathname.startsWith(base + "/"),
+  )
+
   return (
     <FeatureFlagsProvider>
       <AuthProvider>
@@ -51,45 +65,56 @@ function App() {
           closeButton
         />
         <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route element={<AuthAwareLayout />}>
-            <Route path="/about" element={<About />} />
-            <Route path="/team" element={<Team2 />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/uploadevent">
-              <Route path="link/:token" element={<UploadEventByLink />} />
-              <Route element={<EventDashboardLayout />}>
-                <Route index element={<Navigate to="/uploadevent/upload" replace />} />
-                <Route path="upload" element={<UploadNewEvent />} />
-                <Route path="generate-link" element={<GenerateLink />} />
-                <Route path="departments" element={<DepartmentsAllowed />} />
-                <Route path="force-delete" element={<ForceDeletePermissions />} />
-                <Route path="manage" element={<ManageEvents />} />
-                <Route path="upcoming" element={<UpcomingEventPage />} />
+        <AnimatePresence mode="wait">
+          <motion.main
+            key={location.pathname}
+            initial={shouldAnimatePage ? { opacity: 0, scale: 0.98 } : { opacity: 1, scale: 1 }}
+            animate={shouldAnimatePage ? { opacity: 1, scale: 1 } : { opacity: 1, scale: 1 }}
+            exit={shouldAnimatePage ? { opacity: 0, scale: 0.98 } : { opacity: 1, scale: 1 }}
+            transition={shouldAnimatePage ? { duration: 0.22, ease: "easeOut" } : { duration: 0 }}
+            className="flex-1 flex flex-col"
+          >
+            <Routes location={location}>
+              <Route path="/" element={<Home />} />
+              <Route element={<AuthAwareLayout />}>
+                <Route path="/about" element={<About />} />
+                <Route path="/team" element={<Team2 />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/uploadevent">
+                  <Route path="link/:token" element={<UploadEventByLink />} />
+                  <Route element={<EventDashboardLayout />}>
+                    <Route index element={<Navigate to="/uploadevent/upload" replace />} />
+                    <Route path="upload" element={<UploadNewEvent />} />
+                    <Route path="generate-link" element={<GenerateLink />} />
+                    <Route path="departments" element={<DepartmentsAllowed />} />
+                    <Route path="force-delete" element={<ForceDeletePermissions />} />
+                    <Route path="manage" element={<ManageEvents />} />
+                    <Route path="upcoming" element={<UpcomingEventPage />} />
+                  </Route>
+                </Route>
+                <Route path="/login" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password/:token" element={<ResetPassword />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/dashboard" element={<AdminSignupConfig />} />
+                <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/manage-team" element={<ManageTeam />} />
+                <Route path="/manage-society" element={<ManageSociety />} />
+                <Route path="/join-team/:token" element={<JoinTeamByLink />} />
+                <Route path="/notfound" element={<NotFound></NotFound>} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/gallery" element={<Gallery />} />
+                <Route path="/bentogrid" element={<GFGBentoGrid />} />
+                <Route path="/results" element={<ResultPage />} />
+                <Route path="/quiz" element={<Quiz />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
+                <Route path="/quiz/result" element={<QuizResult />} />
+                <Route path="/jam-the-web" element={<JamTheWeb />} />
               </Route>
-            </Route>
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/dashboard" element={<AdminSignupConfig />} />
-            <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/manage-team" element={<ManageTeam />} />
-            <Route path="/manage-society" element={<ManageSociety />} />
-            <Route path="/join-team/:token" element={<JoinTeamByLink />} />
-            <Route path="/notfound" element={<NotFound></NotFound>} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/gallery" element={<Gallery />} />
-            <Route path="/bentogrid" element={<GFGBentoGrid />} />
-            <Route path="/results" element={<ResultPage />} />
-            <Route path="/quiz" element={<Quiz />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/quiz/result" element={<QuizResult />} />
-            <Route path="/jam-the-web" element={<JamTheWeb />} />
-          </Route>
-        </Routes>
+            </Routes>
+          </motion.main>
+        </AnimatePresence>
       </div>
       </AuthProvider>
     </FeatureFlagsProvider>

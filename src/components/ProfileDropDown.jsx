@@ -117,7 +117,7 @@ function ProfileDropDown({ onLogout, isDarkNavbar, avatarOnly = false, alignLeft
                 setOpen(false);
                 navigate("/dashboard");
               }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition hover:bg-gray-500/20 hover:text-cyan-300"
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
             >
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
                 <Layout className="h-4 w-4" />
@@ -133,7 +133,7 @@ function ProfileDropDown({ onLogout, isDarkNavbar, avatarOnly = false, alignLeft
               setOpen(false);
               navigate("/jam-the-web");
             }}
-            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition hover:bg-gray-500/20 hover:text-cyan-300"
+            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
           >
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
               <Layout className="h-4 w-4" />
@@ -148,7 +148,7 @@ function ProfileDropDown({ onLogout, isDarkNavbar, avatarOnly = false, alignLeft
               setOpen(false);
               navigate("/profile");
             }}
-            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition hover:bg-gray-500/20 hover:text-cyan-300"
+            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
           >
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
               <User className="h-4 w-4" />
@@ -163,7 +163,7 @@ function ProfileDropDown({ onLogout, isDarkNavbar, avatarOnly = false, alignLeft
               setOpen(false);
               navigate(isSocietyRole(user.accountType) ? "/manage-society" : "/manage-team");
             }}
-            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition hover:bg-gray-500/20 hover:text-cyan-300"
+            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
           >
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
               <Users className="h-4 w-4" />
@@ -183,7 +183,7 @@ function ProfileDropDown({ onLogout, isDarkNavbar, avatarOnly = false, alignLeft
                 setOpen(false);
                 navigate("/uploadevent");
               }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition hover:bg-gray-500/20 hover:text-cyan-300"
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
             >
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
                 <Calendar className="h-4 w-4" />
@@ -203,7 +203,7 @@ function ProfileDropDown({ onLogout, isDarkNavbar, avatarOnly = false, alignLeft
               await onLogout?.();
               navigate("/");
             }}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-500/90 to-red-500/90 px-3 py-2 text-xs font-semibold text-white shadow transition hover:from-rose-500 hover:to-red-500"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-500/90 to-red-500/90 px-3 py-2 text-xs font-semibold text-white shadow transition-colors duration-300 ease-out hover:from-rose-500 hover:to-red-500"
           >
             <LogOut className="h-3.5 w-3.5" />
             <span>Logout</span>

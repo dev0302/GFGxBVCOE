@@ -4,7 +4,6 @@ import { getEventUploadAllowed, addEventUploadDepartment, removeEventUploadDepar
 import { toast } from "sonner";
 import { SectionTitle } from "../../components/EventDashboard/SectionTitle";
 import { Spinner } from "@/components/ui/spinner";
-import { NativeTypewriter } from "../../components/ui/native-typewriter";
 import { AddDepartmentUnlockAnimation } from "../../components/EventDashboard/AddDepartmentUnlockAnimation";
 
 export default function DepartmentsAllowed() {
@@ -67,8 +66,8 @@ export default function DepartmentsAllowed() {
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">Departments allowed to visit Upload Event page</h1>
           <p className="mt-2 text-gray-400 text-sm">
-          <NativeTypewriter content="Faculty Incharge, Chairperson, Vice-Chairperson and Event Management are always allowed. Add or remove other departments below." className="text-gray-400 text-sm" speed={15} cursor={false} />
-        </p>
+            Faculty Incharge, Chairperson, Vice-Chairperson and Event Management are always allowed. Add or remove other departments below.
+          </p>
         </div>
 
         <section className="bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">

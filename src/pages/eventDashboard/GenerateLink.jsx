@@ -2,7 +2,6 @@ import { useState } from "react";
 import { createUploadLink, suspendUploadLink } from "../../services/api";
 import { toast } from "sonner";
 import { SectionTitle } from "../../components/EventDashboard/SectionTitle";
-import { NativeTypewriter } from "../../components/ui/native-typewriter";
 
 const STORAGE_KEY = "gfg_upload_event_link";
 
@@ -63,8 +62,8 @@ export default function GenerateLink() {
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">Generate upload event link</h1>
           <p className="mt-2 text-gray-400 text-sm">
-          <NativeTypewriter content="Create a link that anyone can use to open the upload form without logging in. Expires in 12 hours." className="text-gray-400 text-sm" speed={15} cursor={false} />
-        </p>
+            Create a link that anyone can use to open the upload form without logging in. Expires in 12 hours.
+          </p>
         </div>
         <section className="bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">
           <SectionTitle icon="🔗">Generate link</SectionTitle>
