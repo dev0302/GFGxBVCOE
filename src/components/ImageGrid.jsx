@@ -136,6 +136,7 @@ function ImageGrid() {
           <img
             src="/gridimg1.webp"
             alt="Image 1"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -143,6 +144,7 @@ function ImageGrid() {
           <img
             src="/gridimg2.webp"
             alt="Image 2"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -151,6 +153,7 @@ function ImageGrid() {
           <img
             src="/gridimg3.webp"
             alt="Image 3"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -166,6 +169,7 @@ function ImageGrid() {
           <img
             src="/gridimg5.webp"
             alt="Image 5"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -173,6 +177,7 @@ function ImageGrid() {
           <img
             src="/gridimg6.webp"
             alt="Image 6"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -181,6 +186,7 @@ function ImageGrid() {
           <img
             src="/gridimg7.webp"
             alt="Image 7"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -188,6 +194,7 @@ function ImageGrid() {
           <img
             src="/gridimg8.webp"
             alt="Image 8"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -196,6 +203,7 @@ function ImageGrid() {
           <img
             src="/gridimg9.webp"
             alt="Image 9"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -203,6 +211,7 @@ function ImageGrid() {
           <img
             src="/gridimg10.webp"
             alt="Image 1"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -211,6 +220,7 @@ function ImageGrid() {
           <img
             src="/gridimg11.webp"
             alt="Image 2"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -218,6 +228,7 @@ function ImageGrid() {
           <img
             src="/gridimg12.webp"
             alt="Image 3"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -226,6 +237,7 @@ function ImageGrid() {
           <img
             src="/gridimg13.webp"
             alt="Image 4"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -233,6 +245,7 @@ function ImageGrid() {
           <img
             src="/gridimg14.webp"
             alt="Image 5"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -241,6 +254,7 @@ function ImageGrid() {
           <img
             src="/gridimg15.webp"
             alt="Image 6"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -248,6 +262,7 @@ function ImageGrid() {
           <img
             src="/gridimg16.webp"
             alt="Image 7"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -256,6 +271,7 @@ function ImageGrid() {
           <img
             src="/gridimg17.webp"
             alt="Image 8"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -263,6 +279,7 @@ function ImageGrid() {
           <img
             src="/gridimg18.webp"
             alt="Image 9"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -271,6 +288,7 @@ function ImageGrid() {
           <img
             src="/pwgatefft1.webp"
             alt="Image 1"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
@@ -278,6 +296,7 @@ function ImageGrid() {
           <img
             src="/gridimg20.webp"
             alt="Image 2"
+            loading="lazy"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>

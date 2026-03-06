@@ -85,6 +85,7 @@ const Footer = () => {
             <img
               src={gfgLogo}
               alt="GFG Logo"
+              loading="lazy"
               className="w-[55px] h-[55px] rounded-full border-green-400 border-4 object-cover"
             />
             <h2 className="text-2xl font-bold text-white m-0">GFG Society</h2>

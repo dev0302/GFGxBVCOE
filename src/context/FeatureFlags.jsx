@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { getSettings, setLeaderboardEnabled as apiSetLeaderboardEnabled } from "../services/api";
+// import { getSettings, setLeaderboardEnabled as apiSetLeaderboardEnabled } from "../services/api";
 
 const FeatureFlagsContext = createContext({ leaderboardEnabled: false, setLeaderboardEnabled: () => {} });
 
