@@ -272,7 +272,7 @@ function Home() {
 
       {/* Bento Grid Section */}
       <div className="relative z-10">
-        <GFGBentoGrid />
+        {/* <GFGBentoGrid /> */}
       </div>
 
       {/* About Section */}
@@ -347,6 +347,7 @@ function Home() {
                     <img 
                       src="/Toshika.webp" 
                       alt="Toshika Goswami"
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
@@ -393,6 +394,7 @@ function Home() {
                   <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-3 border-blue-400/50 shadow-lg group-hover:border-blue-400 transition-colors duration-300">
                     <img 
                       src="/Kartik.webp" 
+                      loading="lazy"
                       alt="Kartik Bhattacharya"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
@@ -452,6 +454,7 @@ function Home() {
                     <img 
                       src="/Archita.webp" 
                       alt="Archita"
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
