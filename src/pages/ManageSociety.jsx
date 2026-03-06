@@ -464,7 +464,7 @@ export default function ManageSociety() {
                               <img
                                 src={src}
                                 alt=""
-                                className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
+                                className="h-8 w-8 rounded-full object-cover border border-gray-500/50 shrink-0"
                                 onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
                               />
                               <div className="flex-1 min-w-0">
@@ -500,7 +500,7 @@ export default function ManageSociety() {
                                 <img
                                   src={src}
                                   alt=""
-                                  className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
+                                  className="h-8 w-8 rounded-full object-cover border border-gray-500/50 shrink-0"
                                   onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
                                 />
                                 <div className="flex-1 min-w-0">
@@ -550,7 +550,7 @@ export default function ManageSociety() {
                               <img
                                 src={src}
                                 alt=""
-                                className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
+                                className="h-8 w-8 rounded-full object-cover border border-gray-500/50 shrink-0"
                                 onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
                               />
                               <div className="flex-1 min-w-0">

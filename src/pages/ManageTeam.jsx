@@ -1909,7 +1909,7 @@ export default function ManageTeam({
                             className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-all border border-transparent hover:border-gray-500/30 active:scale-[0.98]"
                             onClick={() => setSelectedDetailItem({ type: "user", data: u })}
                           >
-                            <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
+                            <img src={src} alt="" className="ray-500/50 shrink-0" />
                             <div className="flex-1 min-w-0">
                               <span className="block truncate font-medium text-white">{name}</span>
                               <span className="block truncate text-xs text-gray-500">{u.email}</span>

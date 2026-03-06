@@ -42,13 +42,75 @@ const EventModal = ({ event, onClose }) => {
     e.stopPropagation();
   };
 
-  const renderMedia = (src, isActive = false) => {
-    const isVideo = src.endsWith('.mp4') || (typeof src === 'string' && src.includes('/video/upload/'));
+  const getEventModalMediaUrl = (src, { mediaType, size }) => {
+    if (!src || typeof src !== 'string') return src;
+    if (!src.includes('cloudinary.com')) return src;
+
+    const isImagePath = src.includes('/image/upload/');
+    const isVideoPath = src.includes('/video/upload/');
+
+    if (mediaType === 'image' || (isImagePath && !isVideoPath)) {
+      const base = '/image/upload/';
+      if (!isImagePath) return src;
+      const [prefix, rest] = src.split(base);
+      const transform =
+        size === 'thumbnail'
+          ? 'f_auto,q_auto,c_limit,w_256,h_256/'
+          : 'f_auto,q_auto,c_limit,w_1024,h_1024/';
+      return `${prefix}${base}${transform}${rest}`;
+    }
+
+    if (mediaType === 'video' || isVideoPath) {
+      const base = '/video/upload/';
+      if (!isVideoPath) return src;
+      const [prefix, rest] = src.split(base);
+
+      if (size === 'thumbnail') {
+        const transform = 'so_1,f_auto,q_auto,c_limit,w_256,h_256/';
+        const [pathPart, queryPart = ''] = rest.split('?');
+        const pathWithJpg = pathPart.includes('.')
+          ? pathPart.replace(/\.[^/.]+$/, '.jpg')
+          : `${pathPart}.jpg`;
+        const thumb = `${prefix}${base}${transform}${pathWithJpg}`;
+        return queryPart ? `${thumb}?${queryPart}` : thumb;
+      }
+
+      // main preview video
+      const transform = 'f_auto,q_auto,w_1024/';
+      return `${prefix}${base}${transform}${rest}`;
+    }
+
+    return src;
+  };
+
+  const renderMedia = (src, isActive = false, kind = 'preview') => {
+    const isVideo =
+      typeof src === 'string' &&
+      (src.endsWith('.mp4') || src.includes('/video/upload/'));
 
     if (isVideo) {
+      if (kind === 'thumbnail') {
+        const thumbSrc = getEventModalMediaUrl(src, {
+          mediaType: 'video',
+          size: 'thumbnail',
+        });
+        return (
+          <img
+            src={thumbSrc}
+            alt="event media thumbnail"
+            loading="lazy"
+            className="w-full h-full object-cover transition-all duration-300 opacity-70 hover:opacity-100"
+          />
+        );
+      }
+
+      const videoSrc = getEventModalMediaUrl(src, {
+        mediaType: 'video',
+        size: 'preview',
+      });
       return (
         <video
-          src={src}
+          src={videoSrc}
           controls={isActive}
           muted={!isActive}
           playsInline
@@ -61,9 +123,14 @@ const EventModal = ({ event, onClose }) => {
       );
     }
 
+    const imgSrc = getEventModalMediaUrl(src, {
+      mediaType: 'image',
+      size: kind === 'thumbnail' ? 'thumbnail' : 'preview',
+    });
+
     return (
       <img
-        src={cloudinaryImageUrl(src)}
+        src={imgSrc}
         alt="event media"
         loading="lazy"
         className={`w-full h-full object-cover transition-all duration-300 ${
@@ -119,7 +186,7 @@ const EventModal = ({ event, onClose }) => {
             {/* Active Media */}
             <div className="mb-6">
               <div className="w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-4 border border-gray-400/30 shadow-lg">
-                {renderMedia(activeMedia, true)}
+                {renderMedia(activeMedia, true, 'preview')}
               </div>
 
               {/* Thumbnails — max 6 per row */}
@@ -130,7 +197,7 @@ const EventModal = ({ event, onClose }) => {
                     className="aspect-square rounded-lg overflow-hidden cursor-pointer border border-gray-400/20 hover:border-gray-400/40 transition-all duration-300"
                     onClick={() => setActiveMedia(media)}
                   >
-                    {renderMedia(media, activeMedia === media)}
+                    {renderMedia(media, activeMedia === media, 'thumbnail')}
                   </div>
                 ))}
               </div>

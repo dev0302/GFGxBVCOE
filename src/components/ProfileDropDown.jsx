@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { getAccountTypeLabel, isSocietyRole, userCanManageEvents } from "../services/api";
 import { Calendar, ChevronDown, Layout, LogOut, User, Users } from "react-feather";
 
-function ProfileDropDown({ onLogout, isDarkNavbar, avatarOnly = false, alignLeft = false, showChevron = false }) {
+function ProfileDropDown({ onLogout, isDarkNavbar, avatarOnly = false, alignLeft = false, showChevron = false, onBeforeToggle }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
@@ -25,16 +25,23 @@ function ProfileDropDown({ onLogout, isDarkNavbar, avatarOnly = false, alignLeft
     : "border-green-400/50 hover:border-green-400";
   const menuBg = "bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] border border-gray-500/40";
   const textCls = isDarkNavbar ? "text-gray-200" : "text-green-100";
-  const avatarSize = avatarOnly ? "h-9 w-9" : "h-10 w-10";
+  const avatarSize = avatarOnly ? "h-9 w-9" : "h-8 w-8";
   const dropdownPosition = alignLeft
     ? "left-0 mt-2 w-64 origin-top-left"
-    : "right-0 mt-2 w-64 origin-top-right";
+    : "right-[-45px] sm:right-0 mt-2 w-64 origin-top-right";
   const dropdownWidth = avatarOnly ? "max-w-[min(16rem,calc(100vw-1.5rem))] w-64" : "w-64";
+
+  const handleToggle = () => {
+    if (typeof onBeforeToggle === "function") {
+      onBeforeToggle();
+    }
+    setOpen((v) => !v);
+  };
 
   return (
     <div className="relative" ref={ref}>
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={handleToggle}
         className={`flex items-center rounded-full border shadow-sm transition-all duration-150 ${avatarOnly && !showChevron ? "p-0.5" : "gap-1.5 p-0.5"} ${borderCls} ${textCls}`}
         aria-label="Open profile menu"
       >
@@ -70,10 +77,10 @@ function ProfileDropDown({ onLogout, isDarkNavbar, avatarOnly = false, alignLeft
               <img
                 src={user.image}
                 alt=""
-                className="h-9 w-9 rounded-full object-cover border border-gray-500/50"
+                className="h-8 w-8 rounded-full object-cover border border-gray-500/50"
               />
             ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-cyan-600/80 text-sm font-semibold text-white">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-600/80 text-xs font-semibold text-white">
                 {user.firstName?.[0]}
                 {user.lastName?.[0]}
               </div>
