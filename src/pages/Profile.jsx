@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Trash2, X } from "react-feather";
 import { Spinner } from "@/components/ui/spinner";
 import { motion } from "framer-motion";
+import { cloudinaryProfileAvatarUrl } from "../utils/cloudinary";
 
 
 const Profile = () => {
@@ -253,7 +254,11 @@ const Profile = () => {
               <div className="shrink-0">
                 {avatarPreview ? (
                   <img
-                    src={avatarPreview}
+                    src={
+                      avatarPreview.includes("cloudinary.com")
+                        ? cloudinaryProfileAvatarUrl(avatarPreview)
+                        : avatarPreview
+                    }
                     alt=""
                     className="h-20 w-20 rounded-full object-cover border-2 border-gray-500/50"
                   />

@@ -73,3 +73,20 @@ export function cloudinaryLargeAvatarUrl(url) {
 
   return url.replace("/upload/", AVATAR_TRANSFORM);
 }
+
+/**
+ * Profile page avatar variant.
+ * Ensures a 256x256 cropped avatar with automatic format & quality:
+ *   /upload/w_256,h_256,c_fill,f_auto,q_auto/
+ */
+export function cloudinaryProfileAvatarUrl(url) {
+  if (!url || typeof url !== "string") return url;
+  if (!url.includes("cloudinary.com")) return url;
+  if (url.includes("/video/upload/")) return url;
+
+  const AVATAR_TRANSFORM = "/upload/w_256,h_256,c_fill,f_auto,q_auto/";
+
+  if (url.includes(AVATAR_TRANSFORM)) return url;
+
+  return url.replace("/upload/", AVATAR_TRANSFORM);
+}

@@ -318,10 +318,17 @@ export default function ManageSociety() {
           <div className="text-gray-400">Loading departments…</div>
         ) : (
           <div className="grid gap-3">
-            {departments.map((dept) => (
-              <div
+            {departments.map((dept, idx) => (
+              <motion.div
                 key={dept}
                 onClick={() => setSelectedDepartment(dept)}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.22,
+                  ease: "easeOut",
+                  delay: Math.min(idx * 0.04, 0.4),
+                }}
                 className="flex items-center justify-between w-full rounded-xl
                  border border-gray-500/40 bg-[#1e1e2f]/80
                  px-5 py-4 text-left text-gray-200
@@ -361,7 +368,7 @@ export default function ManageSociety() {
                     <FileText className="h-5 w-5" />
                   )}
                 </button>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}
@@ -400,10 +407,10 @@ export default function ManageSociety() {
                       setShowListOpen(false);
                       setSelectedDetailItem(null);
                     }}
-                    className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors"
+                    className="ios-close-dot"
                     aria-label="Close"
                   >
-                    <X className="h-5 w-5" />
+                    <span>×</span>
                   </button>
                 </div>
 

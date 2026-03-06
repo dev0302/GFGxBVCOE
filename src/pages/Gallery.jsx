@@ -143,7 +143,8 @@ const Gallery = () => {
                 {repeatedImages.map((image, index) => (
                     <div 
                         key={`${image.id}-${index}`} 
-                        className="h-64 md:h-72 w-auto rounded-2xl group relative overflow-hidden flex-shrink-0"
+                        className="h-64 md:h-72 w-auto rounded-2xl group relative overflow-hidden flex-shrink-0 gallery-image-card"
+                        style={{ "--gallery-index": index }}
                     >
                         <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 via-emerald-500/20 to-teal-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                         
@@ -170,12 +171,13 @@ const Gallery = () => {
     }
 
     return (
-        <div ref={containerRef} className="relative w-full overflow-x-hidden text-white font-nunito bg-[#0a0a0abb]">
-            {/* Using a simplified dark background for clarity */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[rgb(42,4,67)] via-[#1a1a2e] to-[#020d2c]"></div>
-            
-            {/* Your animated background elements can stay here */}
-            {/* ... */}
+        <div ref={containerRef} className="relative w-full overflow-x-hidden text-white font-nunito bg-[#020617]">
+            {/* Rich gallery background */}
+            <div className="gallery-bg-layer">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#020617] via-[#020617] to-[#020617]"></div>
+                <div className="gallery-bg-orbits" />
+                <div className="gallery-bg-grid" />
+            </div>
             
             {/* Hero Section */}
             <section ref={heroRef} className="pt-32 pb-20 relative text-center z-20">
