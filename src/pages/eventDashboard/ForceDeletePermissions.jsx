@@ -63,6 +63,14 @@ export default function ForceDeletePermissions() {
       .finally(() => setRemovingDept(null));
   };
 
+  if (loading && !config) {
+    return (
+      <div className="flex min-h-full w-full justify-center items-center bg-[#1e1e2f] pb-20 px-4 sm:px-6 lg:px-10">
+        <Spinner className="size-5 text-cyan-400" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-full w-full justify-center bg-[#1e1e2f] pb-20 px-4 sm:px-6 lg:px-10">
       <div className="w-full max-w-3xl py-10 flex flex-col gap-10">

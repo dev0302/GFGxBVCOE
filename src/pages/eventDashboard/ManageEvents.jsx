@@ -89,6 +89,14 @@ export default function ManageEvents() {
     return new Date(dateStr).toLocaleDateString(undefined, { dateStyle: "medium" });
   };
 
+  if (loading && managedEvents.length === 0) {
+    return (
+      <div className="flex min-h-full w-full justify-center items-center bg-[#1e1e2f] pb-20 px-3 sm:px-6 md:px-8 lg:px-10">
+        <Spinner className="size-6 text-cyan-400" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-full w-full justify-center bg-[#1e1e2f] pb-20 px-3 sm:px-6 md:px-8 lg:px-10">
       <div className="w-full max-w-3xl py-6 sm:py-8 md:py-10 flex flex-col gap-6 sm:gap-8 md:gap-10">

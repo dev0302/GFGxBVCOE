@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getMe, updateProfile, updateAvatar, changePassword, deleteAccount } from "../services/api";
 import { toast } from "sonner";
 import { Trash2, X } from "react-feather";
-import { Spinner } from "@/components/ui/spinner";
 import { motion } from "framer-motion";
 import { cloudinaryProfileAvatarUrl } from "../utils/cloudinary";
 
@@ -12,7 +11,7 @@ import { cloudinaryProfileAvatarUrl } from "../utils/cloudinary";
 const Profile = () => {
   const { user, setUser, logout } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const location = useLocation();
   const [saving, setSaving] = useState(false);
   const [savingAvatar, setSavingAvatar] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -46,46 +45,58 @@ const Profile = () => {
   const [passwordForm, setPasswordForm] = useState({ oldPassword: "", newPassword: "", confirmPassword: "" });
   const [savingPassword, setSavingPassword] = useState(false);
 
+  // Populate profile UI from Redux-backed auth user whenever we land on /profile.
   useEffect(() => {
     if (!user) return;
-    const load = async () => {
+    const profile = user.additionalDetails || {};
+    setFormData({
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      gender: profile.gender || "",
+      dob: profile.dob ? profile.dob.substring(0, 10) : "",
+      about: profile.about || "",
+      contact: profile.phoneNumber || user.contact || "",
+      yearOfStudy: profile.yearOfStudy || "",
+      section: profile.section || "",
+      non_tech_society: profile.non_tech_society || "",
+      position: profile.position || "",
+      instagram: profile.socials?.instagram || "",
+      linkedin: profile.socials?.linkedin || "",
+      github: profile.socials?.github || "",
+    });
+    setProfileDetails({
+      branch: profile.branch || "",
+      year: profile.year || "",
+      position: profile.position || "",
+      p0: profile.p0 || "",
+      p1: profile.p1 || "",
+      p2: profile.p2 || "",
+      timeline: Array.isArray(profile.timeline) ? profile.timeline : [],
+    });
+    setAvatarPreview(user.image || "");
+  }, [user, location.pathname]);
+
+  // When /profile is opened from any route, perform a background freshness check with backend.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const syncFromBackend = async () => {
       try {
         const res = await getMe();
-        const data = res.user || res;
-        const profile = data.additionalDetails || {};
-        setFormData({
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-          gender: profile.gender || "",
-          dob: profile.dob ? profile.dob.substring(0, 10) : "",
-          about: profile.about || "",
-          contact: profile.phoneNumber || data.contact || "",
-          yearOfStudy: profile.yearOfStudy || "",
-          section: profile.section || "",
-          non_tech_society: profile.non_tech_society || "",
-          position: profile.position || "",
-          instagram: profile.socials?.instagram || "",
-          linkedin: profile.socials?.linkedin || "",
-          github: profile.socials?.github || "",
-        });
-        setProfileDetails({
-          branch: profile.branch || "",
-          year: profile.year || "",
-          position: profile.position || "",
-          p0: profile.p0 || "",
-          p1: profile.p1 || "",
-          p2: profile.p2 || "",
-          timeline: Array.isArray(profile.timeline) ? profile.timeline : [],
-        });
-        setAvatarPreview(data.image || "");
-      } catch (err) {
-        toast.error(err.message || "Failed to load profile");
-      } finally {
-        setLoading(false);
+        if (cancelled) return;
+        const fresh = res.user || res;
+        if (!user || JSON.stringify(fresh) !== JSON.stringify(user)) {
+          setUser(fresh);
+        }
+      } catch {
+        // silent: we already have local/Redux data
       }
     };
-    load();
-  }, [user]);
+    syncFromBackend();
+    return () => {
+      cancelled = true;
+    };
+  }, [location.pathname]);
 
   const handleChange = (field) => (e) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
@@ -237,18 +248,12 @@ const Profile = () => {
           <p className="text-gray-400 text-sm">Manage your details and display picture</p>
         </div>
 
-        {loading ? (
-          <div className="flex items-center gap-2 text-gray-400">
-            <span>Loading your profile</span>
-            <Spinner className="size-4 text-gray-400" />
-          </div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.24, ease: "easeOut" }}
-            className="bg-gradient-to-br from-[#1e1e2f]/90 to-[#2c2c3e]/90 border border-gray-500/30 rounded-2xl p-6 md:p-8 shadow-xl space-y-8"
-          >
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.24, ease: "easeOut" }}
+          className="bg-gradient-to-br from-[#1e1e2f]/90 to-[#2c2c3e]/90 border border-gray-500/30 rounded-2xl p-6 md:p-8 shadow-xl space-y-8"
+        >
             {/* Avatar */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
               <div className="shrink-0">
@@ -294,8 +299,7 @@ const Profile = () => {
             </div>
 
             {/* Profile Completion Bar */}
-            {!loading && (
-              <div className="bg-[#252536]/40 border border-gray-500/20 rounded-2xl p-5 shadow-inner backdrop-blur-sm">
+            <div className="bg-[#252536]/40 border border-gray-500/20 rounded-2xl p-5 shadow-inner backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-white">Profile completion</span>
@@ -393,7 +397,6 @@ const Profile = () => {
                   </div>
                 )}
               </div>
-            )}
 
             {/* Branch, Year, Position & Roles (p0, p1, p2) - Faculty Incharge only shows position */}
             {((isFacultyIncharge && profileDetails.position) || (!isFacultyIncharge && (profileDetails.branch || profileDetails.year || profileDetails.position || profileDetails.p0 || profileDetails.p1 || profileDetails.p2))) && (
@@ -731,7 +734,6 @@ const Profile = () => {
               </button>
             </div>
           </motion.div>
-        )}
 
         {/* Delete account confirmation modal */}
         {showDeleteConfirm && (

@@ -11,7 +11,7 @@ import DepartmentsAllowed from "./pages/eventDashboard/DepartmentsAllowed"
 import ForceDeletePermissions from "./pages/eventDashboard/ForceDeletePermissions"
 import ManageEvents from "./pages/eventDashboard/ManageEvents"
 import UpcomingEventPage from "./pages/eventDashboard/UpcomingEventPage"
-import Navbar from "./components/Navbar"
+import Navbar from "./components/common/Navbar"
 import { FeatureFlagsProvider } from "./context/FeatureFlags.jsx"
 import { AuthProvider } from "./context/AuthContext"
 import NotFound from "./components/NotFound"
@@ -76,7 +76,7 @@ function App() {
           >
             <Routes location={location}>
               <Route path="/" element={<Home />} />
-              <Route element={<AuthAwareLayout />}>
+              {/* <Route element={<AuthAwareLayout />}> */}
                 <Route path="/about" element={<About />} />
                 <Route path="/team" element={<Team2 />} />
                 <Route path="/events" element={<Events />} />
@@ -111,7 +111,7 @@ function App() {
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/quiz/result" element={<QuizResult />} />
                 <Route path="/jam-the-web" element={<JamTheWeb />} />
-              </Route>
+              {/* </Route> */}
             </Routes>
           </motion.main>
         </AnimatePresence>
