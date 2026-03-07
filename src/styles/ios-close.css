@@ -6,9 +6,9 @@
   width: 1.5rem; /* 24px */
   height: 1.5rem;
   border-radius: 9999px;
-  background-color: rgba(248, 216, 35, 0.975);
-  border: 1px solid rgba(235, 200, 20, 0.9);
-  /* color: #0f0400; */
+  background-color: rgba(240, 116, 100, 0.893);
+  border: 1px solid rgba(220, 68, 42, 0.9);
+  color: #f3e27f;
   box-shadow: 0 0 6px rgba(248, 113, 113, 0.45);
   cursor: pointer;
   opacity: 0.7;

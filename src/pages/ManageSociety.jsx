@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getTeamDepartments, getTeamMembers, getDepartmentRoster, getAllPeople, getAccountTypeLabel, sendSignupInvite } from "../services/api";
 import { isSocietyRole } from "../services/api";
@@ -18,6 +18,12 @@ import {
   downloadAllDepartmentsExcel,
 } from "../utils/teamListExport";
 import { Spinner } from "@/components/ui/spinner";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setDepartments as setDepartmentsInStore,
+  setDepartmentCounts as setDepartmentCountsInStore,
+  setAllPeopleList as setAllPeopleListInStore,
+} from "../redux/slices/manageSocietySlice.jsx";
 
 const EXPORT_COLS = ["name", "year", "branch", "section", "email", "contact", "non_tech_society"];
 const EXPORT_LABELS = {
@@ -54,9 +60,12 @@ const iosRowVariants = {
 
 export default function ManageSociety() {
   const { user, loading: authLoading } = useAuth();
-  const [departments, setDepartments] = useState([]);
-  const [departmentCounts, setDepartmentCounts] = useState({});
-  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const manageSociety = useSelector((state) => state.manageSociety);
+  const [departments, setDepartments] = useState(manageSociety.departments || []);
+  const [departmentCounts, setDepartmentCounts] = useState(manageSociety.departmentCounts || {});
+  const [loading, setLoading] = useState(!manageSociety.departments?.length);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [printAllModalOpen, setPrintAllModalOpen] = useState(false);
   const [printAllSelectedFields, setPrintAllSelectedFields] = useState([...EXPORT_COLS]);
@@ -64,22 +73,33 @@ export default function ManageSociety() {
   const [deptPdfLoading, setDeptPdfLoading] = useState(null);
   const [showListOpen, setShowListOpen] = useState(false);
   const [allPeopleLoading, setAllPeopleLoading] = useState(false);
-  const [allPeopleList, setAllPeopleList] = useState([]);
+  const [allPeopleList, setAllPeopleList] = useState(manageSociety.allPeopleList || []);
   const [selectedDetailItem, setSelectedDetailItem] = useState(null); // { type: 'user'|'predefinedOnly'|'teamMember', data }
   const [sendingInviteTo, setSendingInviteTo] = useState(null);
   const [activityLogUser, setActivityLogUser] = useState(null);
 
+  // Initial departments load: if Redux has nothing, show spinner; otherwise hydrate from Redux and refresh in background.
   useEffect(() => {
     if (!user || !isSocietyRole(user?.accountType)) return;
+    if (!manageSociety.departments?.length) {
+      console.log("redux has nothing");
+      setLoading(true);
+    }
     getTeamDepartments()
-      .then((res) => setDepartments(res.data || []))
+      .then((res) => {
+        const next = res.data || [];
+        setDepartments(next);
+        dispatch(setDepartmentsInStore(next));
+      })
       .catch((e) => {
         toast.error(e.message || "Failed to load departments");
         setDepartments([]);
+        dispatch(setDepartmentsInStore([]));
       })
       .finally(() => setLoading(false));
-  }, [user]);
+  }, [user, location.pathname, manageSociety.departments?.length, dispatch]);
 
+  // Department member counts: always fetch fresh when departments change, cache in Redux.
   useEffect(() => {
     if (!user || departments.length === 0) return;
     const counts = {};
@@ -91,23 +111,37 @@ export default function ManageSociety() {
           })
           .catch(() => {
             counts[dept] = 0;
-          })
-      )
-    ).then(() => setDepartmentCounts({ ...counts }));
-  }, [user, departments]);
+          }),
+      ),
+    ).then(() => {
+      setDepartmentCounts({ ...counts });
+      dispatch(setDepartmentCountsInStore(counts));
+    });
+  }, [user, departments, dispatch]);
 
+  // All people list: if already present in Redux, show immediately and refresh in background.
   useEffect(() => {
-    if ((showListOpen || !selectedDepartment) && user) {
+    if (!user) return;
+    const shouldLoadAll =
+      (showListOpen || !selectedDepartment) && !manageSociety.allPeopleList?.length;
+    if (shouldLoadAll) {
       setAllPeopleLoading(true);
+    }
+    if (showListOpen || !selectedDepartment) {
       getAllPeople()
-        .then((res) => setAllPeopleList(res.data || []))
+        .then((res) => {
+          const list = res.data || [];
+          setAllPeopleList(list);
+          dispatch(setAllPeopleListInStore(list));
+        })
         .catch((e) => {
           toast.error(e.message || "Failed to load people");
           setAllPeopleList([]);
+          dispatch(setAllPeopleListInStore([]));
         })
         .finally(() => setAllPeopleLoading(false));
     }
-  }, [showListOpen, selectedDepartment, user]);
+  }, [showListOpen, selectedDepartment, user, dispatch, manageSociety.allPeopleList?.length]);
 
   useEffect(() => {
     if (showListOpen) {
@@ -253,7 +287,9 @@ export default function ManageSociety() {
   if (authLoading) {
     return (
       <div className="min-h-screen darkthemebg pt-24 flex items-center justify-center">
-        <p className="text-gray-400"><Spinner className="size-4 text-gray-400" /></p>
+        <p className="text-gray-400">
+          <Spinner className="size-4 text-gray-400" />
+        </p>
       </div>
     );
   }
@@ -315,7 +351,9 @@ export default function ManageSociety() {
         </div>
 
         {loading ? (
-          <div className="text-gray-400">Loading departments…</div>
+          <div className="flex min-h-[40vh] items-center justify-center text-gray-400">
+            <Spinner className="size-5 text-cyan-400" />
+          </div>
         ) : (
           <div className="grid gap-3">
             {departments.map((dept, idx) => (
