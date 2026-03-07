@@ -5,7 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef, useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import Footer from "../components/Footer";
+import Footer from "../components/common/Footer";
 import ImageGrid from "../components/ImageGrid";
 import UpcomingEventSection from "../components/UpcomingEventSection";
 import Lenis from "lenis";
