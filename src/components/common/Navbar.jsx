@@ -70,26 +70,42 @@ function Navbar() {
     <>
       <div
         ref={navMain}
-        className={`NAVBAR_CONTAINER fixed top-0 left-0 right-0 z-50 w-full flex items-center justify-between px-6 py-3 
-      ${
-        isDarkNavbar
-          ? "bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border-b border-gray-500/40"
-          : "bg-gradient-to-r from-green-900/95 via-green-800/95 to-emerald-800/95 border-b border-green-400/30"
-      } 
-      backdrop-blur-xl shadow-2xl`}
+        className={`NAVBAR_CONTAINER fixed top-0 left-0 right-0 z-50 w-full flex items-center justify-between px-6 py-3 backdrop-blur-xl shadow-2xl`}
       >
-        <div ref={logoRef} className="flex items-center gap-3 min-w-0">
-          <NavLink to="/" className="block">
-            <img
-              src={logo}
-              alt="GFG Logo"
-              className="w-8 h-8 rounded-full border-2 border-green-400 shadow-lg cursor-pointer hover:scale-110 transition-transform duration-300"
-            />
-          </NavLink>
-          <p className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 font-montserrat tracking-wide">
-            GFGxBVCOE
-          </p>
-        </div>
+         {/* Dark Navbar Background */}
+  <div
+    className={`absolute inset-0 transition-opacity duration-700 ease-in-out
+    bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border-b border-gray-500/40
+    ${isDarkNavbar ? "opacity-100" : "opacity-0"}`}
+  />
+
+  {/* Light Navbar Background */}
+  <div
+    className={`absolute inset-0 transition-opacity duration-700 ease-in-out
+    bg-gradient-to-r from-green-900/95 via-green-800/95 to-emerald-800/95 border-b border-green-400/30
+    ${isDarkNavbar ? "opacity-0" : "opacity-100"}`}
+  />
+         {/* Navbar Content */}
+  <div className="">
+
+    <div ref={logoRef} className="flex items-center gap-3 min-w-0">
+      <NavLink to="/" className="block">
+        <img
+          src={logo}
+          alt="GFG Logo"
+          className="w-8 h-8 rounded-full border-2 border-green-400 shadow-lg cursor-pointer hover:scale-110 transition-transform duration-300 drop-shadow-[0_0_6px_rgba(34,197,94,0.5)]  opacity-90"
+        />
+      </NavLink>
+
+      <p className="font-bold text-xl bg-clip-text text-transparent 
+bg-gradient-to-r from-green-200 via-emerald-300 to-green-400 
+drop-shadow-[0_0_6px_rgba(34,197,94,0.5)]
+font-montserrate opacity-90">
+  GFGxBVCOE
+</p>
+    </div>
+
+  </div>
 
         <nav className="hidden sm:flex items-center gap-4">
           {user && (
