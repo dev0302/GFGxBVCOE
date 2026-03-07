@@ -29,40 +29,68 @@ function Team2() {
   const containerRef = useRef(null);
   const heroRef = useRef(null);
   const teamGridRef = useRef(null);
+  const facultycardref = useRef(null);
 
   useGSAP(
     () => {
+      // Set initial states
+          gsap.set([heroRef.current, teamGridRef.current, facultycardref.current], {
+            opacity: 0,
+            y: 50
+          });
       // Hero: smooth fade + lift on page enter
-      if (heroRef.current) {
-        gsap.fromTo(
-          heroRef.current,
-          { opacity: 0, y: 32, filter: "blur(10px)" },
-          {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            duration: 0.9,
-            ease: "power3.out",
-          }
-        );
+      gsap.fromTo(heroRef.current, 
+      { opacity: 0, y: 100 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1.2, 
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none none",
+           
+        }
       }
+    );
 
-      // Team cards: modern staggered entrance
-      if (teamGridRef.current) {
-        gsap.fromTo(
-          teamGridRef.current.children,
-          { opacity: 0, y: 28, scale: 0.96, filter: "blur(12px)" },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            filter: "blur(0px)",
-            duration: 0.85,
-            ease: "power3.out",
-            stagger: 0.06,
-          }
-        );
+      gsap.fromTo(teamGridRef.current, 
+      { opacity: 0, y: 60 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1, 
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: teamGridRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none none",
+           
+        }
       }
+    );
+
+    gsap.fromTo(facultycardref.current, 
+      { opacity: 0, y: 60 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1, 
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: facultycardref.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none none",
+           
+        }
+      }
+    );
+
+
     },
     { scope: containerRef, dependencies: [activeTab] }
   );
@@ -135,7 +163,7 @@ function Team2() {
       </section>
 
       {/* Faculty Card */}
-      <div className="darkthemebg2 rounded-2xl px-8 py-6 max-w-4xl mx-auto border-2 border-gray-300 border-opacity-20 transition-shadow duration-300 hover:shadow-xl w-10/12 md:py-10 md:px-12">
+      <div ref={facultycardref} className="darkthemebg2 rounded-2xl px-8 py-6 max-w-4xl mx-auto border-2 border-gray-300 border-opacity-20 transition-shadow duration-300 hover:shadow-xl w-10/12 md:py-10 md:px-12">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
           <div className="relative shrink-0">
             <img
