@@ -62,9 +62,55 @@ async function downloadSvgAsPng(svgElement, fileName, size) {
   }
 }
 
+
 export default function GenerateQR() {
+  
+  const [aiDescription, setAiDescription] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
   const [generated, setGenerated] = useState(() => getStoredGenerated());
   const [urlInput, setUrlInput] = useState(() => getStoredGenerated()?.url || "");
+const generateAIContent = async () => {
+  if (!urlInput.trim()) {
+    toast.error("Enter URL first");
+    return;
+  }
+
+  try {
+    setAiLoading(true);
+
+    const res = await fetch(`http://localhost:8080/api/generate-content`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url: normalizeUrl(urlInput) }),
+    });
+
+    const contentType = res.headers.get("content-type");
+
+    if (!contentType?.includes("application/json")) {
+      const text = await res.text();
+      console.error("Server returned:", text);
+      throw new Error(`Server error: ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || "Request failed");
+
+    // 🔥 KEY PART (AUTO-FILL)
+    setTitle(data.title);
+    setAiDescription(data.description);
+
+    toast.success("AI content generated ✨");
+
+  } catch (err) {
+    toast.error(err.message || "Failed to generate content");
+  } finally {
+    setAiLoading(false);
+  }
+};
+
   const [title, setTitle] = useState(() => getStoredGenerated()?.title || "");
   const [downloadingType, setDownloadingType] = useState(null);
 
@@ -89,7 +135,7 @@ export default function GenerateQR() {
     setGenerated(payload);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    } catch (_) {}
+    } catch (_) { }
     toast.success("QR generated");
   };
 
@@ -99,7 +145,7 @@ export default function GenerateQR() {
     setTitle("");
     try {
       localStorage.removeItem(STORAGE_KEY);
-    } catch (_) {}
+    } catch (_) { }
     toast.success("Current QR removed");
   };
 
@@ -188,6 +234,18 @@ export default function GenerateQR() {
             >
               Delete current QRs
             </button>
+            <button
+              type="button"
+              onClick={generateAIContent}
+              className="rounded-xl bg-purple-500/20 px-4 py-2.5 text-sm font-semibold text-purple-300 hover:bg-purple-500/30"
+            >
+              {aiLoading ? "Generating..." : "✨ Generate AI Description"}
+            </button>
+            {aiDescription && (
+              <div className="mt-4 rounded-xl border border-purple-400/30 bg-purple-500/10 p-4">
+                <p className="text-sm text-purple-200">{aiDescription}</p>
+              </div>
+            )}
             {generated && (
               <p className="text-xs text-gray-500">
                 Last generated: <span className="text-gray-300">{qrValue}</span>
@@ -220,11 +278,11 @@ export default function GenerateQR() {
                   <button
                     type="button"
                     onClick={() => handleDownload("normal")}
-                  disabled={downloadingType !== null}
+                    disabled={downloadingType !== null}
                     className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-xs font-medium text-cyan-300 transition-colors hover:bg-cyan-500/20"
                   >
                     <Download className="h-3.5 w-3.5" />
-                  {downloadingType === "normal" ? "Creating image..." : "Download PNG"}
+                    {downloadingType === "normal" ? "Creating image..." : "Download PNG"}
                   </button>
                 </div>
 
