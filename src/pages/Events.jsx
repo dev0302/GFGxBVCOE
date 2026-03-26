@@ -10,6 +10,7 @@ import UpcomingEventSection from "../components/UpcomingEventSection";
 import { getEvents } from "../services/api";
 import { cloudinaryEventCardImageUrl } from "../utils/cloudinary";
 import { Spinner } from "@/components/ui/spinner";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 
 gsap.registerPlugin(ScrollTrigger);
@@ -21,6 +22,11 @@ const Events = () => {
   const navigate = useNavigate();
   const [uploadedEvents, setUploadedEvents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [expandedEvents, setExpandedEvents] = useState({});
+
+  const toggleExpand = (id) => {
+    setExpandedEvents((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -172,9 +178,28 @@ const Events = () => {
                             📍 <span className="text-sm">{event.location}</span>
                           </div>
                         </div>
-                        <p className="text-sm text-[#aaa] leading-relaxed mb-6 flex-grow font-nunito">
-                          {event.description}
-                        </p>
+                        <div className="relative flex-grow">
+                          <p
+                            className={`text-sm text-[#aaa] leading-relaxed mb-1 font-nunito transition-all duration-300 ${
+                              !expandedEvents[event.id] ? "line-clamp-3" : ""
+                            }`}
+                          >
+                            {event.description}
+                          </p>
+                          {event.description && event.description.length > 120 && (
+                            <button
+                              onClick={() => toggleExpand(event.id)}
+                              className="text-cyan-400 hover:text-cyan-300 text-xs flex items-center gap-1 mb-4 transition-colors font-medium"
+                            >
+                              {expandedEvents[event.id] ? "Show Less" : "Read More"}
+                              {expandedEvents[event.id] ? (
+                                <ChevronUp size={14} />
+                              ) : (
+                                <ChevronDown size={14} />
+                              )}
+                            </button>
+                          )}
+                        </div>
                         <div className=" green rounded-lg w-10/12 mx-auto mt-auto">
                           <button
                             onClick={() => handleKnowMoreClick(event)}
