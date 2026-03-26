@@ -317,7 +317,7 @@ function ProfileDropDown({
                 </button>
 
                 <div
-                  className={`absolute -top-44 right-full mr-[-200px] sm:mr-2 w-72 max-w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl border border-gray-500/40 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] shadow-xl backdrop-blur-sm overflow-hidden z-[70] transition-all duration-200 ease-out ${
+                  className={`absolute -top-60 right-full mr-[-200px] sm:mr-1 w-72 max-w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl border border-gray-500/40 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] shadow-xl backdrop-blur-sm overflow-hidden z-[70] transition-all duration-200 ease-out ${
                     deptFlyoutOpen
                       ? "pointer-events-auto opacity-100 translate-x-0 scale-100"
                       : "pointer-events-none opacity-0 translate-x-1 scale-95"
