@@ -13,18 +13,23 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.13.6",
     "bcrypt": "^6.0.0",
+    "cheerio": "^1.0.0-rc.12",
     "cloudinary": "^2.9.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
     "express-fileupload": "^1.5.2",
+    "groq-sdk": "^1.1.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.23.0",
     "nodemailer": "^8.0.1",
     "nodemon": "^3.1.14",
     "otp-generator": "^4.0.1",
+    "playwright": "^1.58.2",
     "xlsx": "^0.18.5"
   }
 }
