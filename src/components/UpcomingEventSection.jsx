@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { getUpcomingEvents } from "../services/api";
-import { MapPin, Clock, Users, ExternalLink, Calendar } from "react-feather";
+import { MapPin, Clock, Users, ExternalLink, Calendar, ChevronDown, ChevronUp, Award } from "react-feather";
 import { motion, AnimatePresence } from "framer-motion";
 import CornerFrameScrambleText from "./ui/corner-frame-scramble-text";
 import { Accordion } from "./ui/accordion";
@@ -52,6 +52,15 @@ function useCountdown(targetDate) {
 export default function UpcomingEventSection({ variant = "events" }) {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const descriptionRef = useRef(null);
+
+  useEffect(() => {
+    if (descriptionRef.current && !isExpanded) {
+      setIsOverflowing(descriptionRef.current.scrollHeight > descriptionRef.current.clientHeight);
+    }
+  }, [event, isExpanded]);
 
   useEffect(() => {
     getUpcomingEvents()
@@ -225,13 +234,41 @@ export default function UpcomingEventSection({ variant = "events" }) {
                   )}
                 </div>
 
-                <p className="text-white/60 text-sm leading-relaxed mb-8 line-clamp-4">
-                  {event.description}
-                </p>
+                <div className="relative">
+                  <p 
+                    ref={descriptionRef}
+                    className={`text-white/60 text-sm leading-relaxed mb-2 transition-all duration-300 break-words ${!isExpanded ? "line-clamp-3" : ""}`}
+                  >
+                    {event.description}
+                  </p>
+                  {(isOverflowing || isExpanded) && (
+                    <button
+                      onClick={() => setIsExpanded(!isExpanded)}
+                      className={`text-xs font-bold uppercase tracking-widest flex items-center gap-1 mb-8 transition-colors ${theme.text} hover:opacity-80`}
+                    >
+                      {isExpanded ? "Show Less" : "Read More"}
+                      {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Action Bar */}
               <div className="flex flex-wrap gap-3 pt-8 border-t border-white/5">
+                {(event.title?.toLowerCase().includes("jam the web") || event.description?.toLowerCase().includes("leaderboard")) && (
+                  <motion.button
+                    whileHover={{ y: -3 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      const link = event.title?.toLowerCase().includes("jam the web") ? "/jam-the-web" : "/leaderboard";
+                      window.location.href = link;
+                    }}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-bold transition-all ${theme.btn}`}
+                  >
+                    <Award size={14} />
+                    Leaderboard
+                  </motion.button>
+                )}
                 {links.map((link, i) => (
                   <motion.a
                     whileHover={{ y: -3 }}
