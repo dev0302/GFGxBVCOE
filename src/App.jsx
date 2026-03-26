@@ -7,11 +7,15 @@ import UploadEventByLink from "./pages/UploadEventByLink"
 import EventDashboardLayout from "./components/EventDashboard/EventDashboardLayout"
 import UploadNewEvent from "./pages/eventDashboard/UploadNewEvent"
 import GenerateLink from "./pages/eventDashboard/GenerateLink"
-import DepartmentsAllowed from "./pages/eventDashboard/DepartmentsAllowed"
+import EMDepartmentsAllowed from "./pages/eventDashboard/DepartmentsAllowed"
 import ForceDeletePermissions from "./pages/eventDashboard/ForceDeletePermissions"
 import ManageEvents from "./pages/eventDashboard/ManageEvents"
 import UpcomingEventPage from "./pages/eventDashboard/UpcomingEventPage"
+import GenerateQR from "./pages/eventDashboard/GenerateQR"
 import Navbar from "./components/common/Navbar"
+import DepartmentDashboardLayout from "./components/DepartmentDashboard/DepartmentDashboardLayout"
+import DepartmentMain from "./pages/dashboard/DepartmentMain"
+import DepartmentDepartmentsAllowed from "./pages/dashboard/DepartmentsAllowed"
 import { FeatureFlagsProvider } from "./context/FeatureFlags.jsx"
 import { AuthProvider } from "./context/AuthContext"
 import NotFound from "./components/NotFound"
@@ -47,9 +51,24 @@ function App() {
     "/jam-the-web",
   ]
 
-  const shouldAnimatePage = dropdownBasePaths.some((base) =>
-    location.pathname === base || location.pathname.startsWith(base + "/"),
-  )
+  const isDashboardLike =
+    location.pathname.startsWith("/em-dashboard") ||
+    location.pathname.startsWith("/dashboard/");
+
+  // Keep this stable for tab switches so layouts (sidebars) don't remount.
+  const dashboardLikeMotionKey = (() => {
+    if (location.pathname.startsWith("/em-dashboard")) return "/em-dashboard";
+    if (location.pathname.startsWith("/dashboard/")) {
+      const parts = location.pathname.split("/");
+      const departmentKey = parts[2] || "unknown";
+      return `/dashboard/${departmentKey}`;
+    }
+    return location.pathname;
+  })();
+
+  const shouldAnimatePage =
+    !isDashboardLike &&
+    dropdownBasePaths.some((base) => location.pathname === base || location.pathname.startsWith(base + "/"));
 
   return (
     <FeatureFlagsProvider>
@@ -67,7 +86,7 @@ function App() {
         <Navbar />
         <AnimatePresence mode="wait">
           <motion.main
-            key={location.pathname}
+            key={dashboardLikeMotionKey}
             initial={shouldAnimatePage ? { opacity: 0, scale: 0.98 } : { opacity: 1, scale: 1 }}
             animate={shouldAnimatePage ? { opacity: 1, scale: 1 } : { opacity: 1, scale: 1 }}
             exit={shouldAnimatePage ? { opacity: 0, scale: 0.98 } : { opacity: 1, scale: 1 }}
@@ -80,16 +99,28 @@ function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/team" element={<Team2 />} />
                 <Route path="/events" element={<Events />} />
-                <Route path="/uploadevent">
+                {/* Backward-compatible redirects (older URL: /uploadevent) */}
+                <Route path="/uploadevent/link/:token" element={<UploadEventByLink />} />
+                <Route path="/uploadevent" element={<Navigate to="/em-dashboard" replace />} />
+                <Route path="/em-dashboard">
                   <Route path="link/:token" element={<UploadEventByLink />} />
                   <Route element={<EventDashboardLayout />}>
-                    <Route index element={<Navigate to="/uploadevent/upload" replace />} />
+                    <Route index element={<Navigate to="/em-dashboard/upload" replace />} />
                     <Route path="upload" element={<UploadNewEvent />} />
                     <Route path="generate-link" element={<GenerateLink />} />
-                    <Route path="departments" element={<DepartmentsAllowed />} />
+                    <Route path="departments" element={<EMDepartmentsAllowed />} />
+                    <Route path="generate-qr" element={<GenerateQR />} />
                     <Route path="force-delete" element={<ForceDeletePermissions />} />
                     <Route path="manage" element={<ManageEvents />} />
                     <Route path="upcoming" element={<UpcomingEventPage />} />
+                  </Route>
+                </Route>
+                <Route path="/dashboard/:departmentKey">
+                  <Route element={<DepartmentDashboardLayout />}>
+                    {/* Clicking `/dashboard/:departmentKey` should land on the first sidebar tab. */}
+                    <Route index element={<Navigate to="departments" replace />} />
+                    <Route path="departments" element={<DepartmentDepartmentsAllowed />} />
+                    <Route path="generate-qr" element={<GenerateQR />} />
                   </Route>
                 </Route>
                 <Route path="/login" element={<Login />} />

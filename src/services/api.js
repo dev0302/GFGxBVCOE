@@ -256,6 +256,46 @@ export async function getEventUploadAllowed() {
   return data;
 }
 
+/** Get allowed departments for a generic dashboard (non-EM department dashboards). */
+export async function getDashboardAllowed(departmentKey) {
+  const key = String(departmentKey || "").trim();
+  if (!key) throw new Error("dashboardKey required");
+  const res = await authFetch(`/api/v1/dashboards/${encodeURIComponent(key)}/allowed`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch allowed departments");
+  return data;
+}
+
+/** Add a department to allowed list for a generic dashboard (non-EM department dashboards). */
+export async function addDashboardAllowedDepartment(departmentKey, department) {
+  const key = String(departmentKey || "").trim();
+  const dept = String(department || "").trim();
+  if (!key) throw new Error("dashboardKey required");
+  if (!dept) throw new Error("department required");
+  const res = await authFetch(`/api/v1/dashboards/${encodeURIComponent(key)}/allowed/add`, {
+    method: "POST",
+    body: JSON.stringify({ department: dept }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to add department");
+  return data;
+}
+
+/** Remove a department from allowed list for a generic dashboard (non-EM department dashboards). */
+export async function removeDashboardAllowedDepartment(departmentKey, department) {
+  const key = String(departmentKey || "").trim();
+  const dept = String(department || "").trim();
+  if (!key) throw new Error("dashboardKey required");
+  if (!dept) throw new Error("department required");
+  const res = await authFetch(`/api/v1/dashboards/${encodeURIComponent(key)}/allowed/remove`, {
+    method: "POST",
+    body: JSON.stringify({ department: dept }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to remove department");
+  return data;
+}
+
 export async function addEventUploadDepartment(department) {
   const res = await authFetch('/api/v1/events/upload-allowed/add', {
     method: 'POST',

@@ -38,7 +38,7 @@ export default function GenerateLink() {
 
   const onCopy = () => {
     if (!data?.token) return;
-    const url = `${window.location.origin}/uploadevent/link/${data.token}`;
+    const url = `${window.location.origin}/em-dashboard/link/${data.token}`;
     navigator.clipboard.writeText(url).then(() => toast.success("Link copied")).catch(() => toast.error("Could not copy"));
   };
 
@@ -75,7 +75,7 @@ export default function GenerateLink() {
             <div className="mt-4 p-4 rounded-xl bg-[#252536] border border-gray-500/20">
               <p className="text-xs text-gray-400 mb-2">Share this link (expires in 12 hours):</p>
               <p className="text-sm font-mono break-all mb-2">
-                {disclosed && typeof window !== "undefined" ? <span className="text-cyan-300">{window.location.origin}/uploadevent/link/{data.token}</span> : <span className="text-gray-500">••••••••/uploadevent/link/••••••••</span>}
+                {disclosed && typeof window !== "undefined" ? <span className="text-cyan-300">{window.location.origin}/em-dashboard/link/{data.token}</span> : <span className="text-gray-500">••••••••/em-dashboard/link/••••••••</span>}
               </p>
               <p className="text-xs text-gray-500 mb-3">Expires: {data.expiresAt ? new Date(data.expiresAt).toLocaleString() : ""}</p>
               <div className="flex flex-wrap gap-2">

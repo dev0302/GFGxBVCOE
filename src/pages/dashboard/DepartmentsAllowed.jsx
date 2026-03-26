@@ -1,13 +1,23 @@
 import { useState, useEffect, useCallback } from "react";
+import { useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { getEventUploadAllowed, addEventUploadDepartment, removeEventUploadDepartment, AUTH_DEPARTMENTS, getAccountTypeLabel, getMe } from "../../services/api";
+import {
+  getDashboardAllowed,
+  addDashboardAllowedDepartment,
+  removeDashboardAllowedDepartment,
+  AUTH_DEPARTMENTS,
+  getAccountTypeLabel,
+  getMe,
+} from "../../services/api";
 import { toast } from "sonner";
 import { SectionTitle } from "../../components/EventDashboard/SectionTitle";
 import { Spinner } from "@/components/ui/spinner";
 import { AddDepartmentUnlockAnimation } from "../../components/EventDashboard/AddDepartmentUnlockAnimation";
 
 export default function DepartmentsAllowed() {
+  const { departmentKey } = useParams();
   const { user, setUser } = useAuth();
+
   const [allowedConfig, setAllowedConfig] = useState(null);
   const [loadingAllowed, setLoadingAllowed] = useState(false);
   const [addingDept, setAddingDept] = useState(false);
@@ -15,15 +25,17 @@ export default function DepartmentsAllowed() {
   const [addDeptValue, setAddDeptValue] = useState("");
   const [showUnlockAnimation, setShowUnlockAnimation] = useState(false);
 
+  const dashboardLabel = getAccountTypeLabel(departmentKey) || departmentKey;
+
   const loadAllowedConfig = useCallback(() => {
     setLoadingAllowed(true);
-    getEventUploadAllowed()
+    return getDashboardAllowed(departmentKey)
       .then((res) => {
         if (res.success && res.data) setAllowedConfig(res.data);
       })
       .catch(() => setAllowedConfig(null))
       .finally(() => setLoadingAllowed(false));
-  }, []);
+  }, [departmentKey]);
 
   useEffect(() => {
     loadAllowedConfig();
@@ -34,11 +46,12 @@ export default function DepartmentsAllowed() {
     if (!dept) return;
     setAddingDept(true);
     setShowUnlockAnimation(true);
-    addEventUploadDepartment(dept)
+
+    addDashboardAllowedDepartment(departmentKey, dept)
       .then((res) => {
         if (res.data) setAllowedConfig(res.data);
         setAddDeptValue("");
-        toast.success("Department added. They will see EM Dashboard in their menu.");
+        toast.success(`Department added. They will see ${dashboardLabel} Dashboard in their menu.`);
         return getMe().then((r) => r.user && setUser(r.user));
       })
       .catch((err) => {
@@ -50,7 +63,7 @@ export default function DepartmentsAllowed() {
 
   const handleRemoveAllowedDept = (department) => {
     setRemovingDept(department);
-    removeEventUploadDepartment(department)
+    removeDashboardAllowedDepartment(departmentKey, department)
       .then((res) => {
         if (res.data) setAllowedConfig(res.data);
         toast.success("Department removed.");
@@ -72,16 +85,20 @@ export default function DepartmentsAllowed() {
     <div className="flex min-h-full w-full justify-center bg-[#1e1e2f] pb-20 px-4 sm:px-6 lg:px-10">
       <div className="w-full max-w-3xl py-10 flex flex-col gap-10">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">Departments allowed to access EM Dashboard</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+            Departments allowed to access {dashboardLabel} Dashboard
+          </h1>
           <p className="mt-2 text-gray-400 text-sm">
-            Faculty Incharge, Chairperson, Vice-Chairperson and Event Management are always allowed. Add or remove other departments below.
+            Society roles and the core {dashboardLabel} department are always allowed. Add or remove other departments below.
           </p>
         </div>
 
         <section className="bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">
           <SectionTitle icon="👥">Allowed departments</SectionTitle>
           {loadingAllowed ? (
-            <p className="text-gray-500 py-4"><Spinner className="size-4 text-gray-400" /></p>
+            <p className="text-gray-500 py-4">
+              <Spinner className="size-4 text-gray-400" />
+            </p>
           ) : allowedConfig ? (
             <div className="space-y-4">
               <div>
@@ -94,12 +111,16 @@ export default function DepartmentsAllowed() {
                   ))}
                 </div>
               </div>
+
               {allowedConfig.extra?.length > 0 && (
                 <div>
                   <p className="text-xs font-medium text-gray-400 mb-2">Additionally allowed</p>
                   <ul className="space-y-2">
                     {allowedConfig.extra.map((d) => (
-                      <li key={d} className="flex items-center justify-between gap-3 px-4 py-2 rounded-xl bg-[#252536] border border-gray-500/20">
+                      <li
+                        key={d}
+                        className="flex items-center justify-between gap-3 px-4 py-2 rounded-xl bg-[#252536] border border-gray-500/20"
+                      >
                         <span className="text-white font-medium">{getAccountTypeLabel(d) || d}</span>
                         <button
                           type="button"
@@ -114,6 +135,7 @@ export default function DepartmentsAllowed() {
                   </ul>
                 </div>
               )}
+
               <div>
                 <p className="text-xs font-medium text-gray-400 mb-2">Add department</p>
                 <div className="flex flex-wrap gap-2 items-center">
@@ -124,7 +146,9 @@ export default function DepartmentsAllowed() {
                   >
                     <option value="">Select department</option>
                     {AUTH_DEPARTMENTS.filter((d) => !allowedConfig.all?.includes(d)).map((d) => (
-                      <option key={d} value={d}>{getAccountTypeLabel(d) || d}</option>
+                      <option key={d} value={d}>
+                        {getAccountTypeLabel(d) || d}
+                      </option>
                     ))}
                   </select>
                   <button
@@ -152,3 +176,4 @@ export default function DepartmentsAllowed() {
     </div>
   );
 }
+

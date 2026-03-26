@@ -1,15 +1,16 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Upload, Link2, Users, List, Calendar, Shield } from "react-feather";
+import { Upload, Link2, Users, List, Calendar, Shield, Grid } from "react-feather";
 import { useAuth } from "../../context/AuthContext";
 import { canManageEventUploadConfig, canManageForceDeleteConfig } from "../../services/api";
 
 const sidebarLinks = [
-  { name: "Upload new event", path: "/uploadevent/upload", icon: Upload },
-  { name: "Upcoming event", path: "/uploadevent/upcoming", icon: Calendar },
-  { name: "Generate upload link", path: "/uploadevent/generate-link", icon: Link2 },
-  { name: "Departments allowed", path: "/uploadevent/departments", icon: Users, requireConfig: true },
-  { name: "Force delete permissions", path: "/uploadevent/force-delete", icon: Shield, requireFacultyIncharge: true },
-  { name: "Manage uploaded events", path: "/uploadevent/manage", icon: List },
+  { name: "Upload new event", path: "/em-dashboard/upload", icon: Upload },
+  { name: "Upcoming event", path: "/em-dashboard/upcoming", icon: Calendar },
+  { name: "Generate upload link", path: "/em-dashboard/generate-link", icon: Link2 },
+  { name: "Generate QR", path: "/em-dashboard/generate-qr", icon: Grid },
+  { name: "Departments allowed", path: "/em-dashboard/departments", icon: Users, requireConfig: true },
+  { name: "Force delete permissions", path: "/em-dashboard/force-delete", icon: Shield, requireFacultyIncharge: true },
+  { name: "Manage uploaded events", path: "/em-dashboard/manage", icon: List },
 ];
 
 export default function EventSidebar() {
@@ -17,7 +18,7 @@ export default function EventSidebar() {
   const { user } = useAuth();
 
   const matchRoute = (path) => {
-    if (path === "/uploadevent/upload") return location.pathname === path || location.pathname === "/uploadevent";
+    if (path === "/em-dashboard/upload") return location.pathname === path || location.pathname === "/em-dashboard";
     return location.pathname === path || location.pathname.startsWith(path + "/");
   };
 
