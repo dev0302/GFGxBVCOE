@@ -497,7 +497,7 @@ const UploadEvent = () => {
       .then((res) => {
         if (res.data) setAllowedConfig(res.data);
         setAddDeptValue("");
-        toast.success("Department added. They will see Manage Events in their menu.");
+        toast.success("Department added. They will see EM Dashboard in their menu.");
         return getMe().then((r) => r.user && setUser(r.user));
       })
       .catch((err) => toast.error(err.message || "Failed to add"))
@@ -523,7 +523,7 @@ const UploadEvent = () => {
 
   const copyUploadLink = () => {
     if (!uploadLinkData?.token) return;
-    const url = `${window.location.origin}/uploadevent/link/${uploadLinkData.token}`;
+    const url = `${window.location.origin}/em-dashboard/link/${uploadLinkData.token}`;
     navigator.clipboard.writeText(url).then(() => toast.success("Link copied to clipboard")).catch(() => toast.error("Could not copy"));
   };
 
@@ -845,9 +845,9 @@ const UploadEvent = () => {
               <p className="text-xs text-gray-400 mb-2">Share this link (expires in 12 hours). Link is saved and will remain here until it expires or you generate a new one.</p>
               <p className="text-sm font-mono break-all mb-2 min-h-[1.5rem]">
                 {linkDisclosed && typeof window !== "undefined" ? (
-                  <span className="text-cyan-300">{`${window.location.origin}/uploadevent/link/${uploadLinkData.token}`}</span>
+                  <span className="text-cyan-300">{`${window.location.origin}/em-dashboard/link/${uploadLinkData.token}`}</span>
                 ) : (
-                  <span className="text-gray-500">••••••••••••••••/uploadevent/link/••••••••••••••••</span>
+                  <span className="text-gray-500">••••••••••••••••/em-dashboard/link/••••••••••••••••</span>
                 )}
               </p>
               <p className="text-xs text-gray-500 mb-3">
@@ -876,9 +876,9 @@ const UploadEvent = () => {
         {/* Departments allowed to upload events (only Faculty Incharge, Chairperson, Vice-Chairperson, Event Management can see and edit) */}
         {canManageEventUploadConfig(user?.accountType) && (
         <section className="mt-14 bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">
-          <SectionTitle icon="👥">Departments allowed to visit Upload Event page</SectionTitle>
+          <SectionTitle icon="👥">Departments allowed to access EM Dashboard</SectionTitle>
           <p className="text-sm text-gray-400 mb-4">
-            Faculty Incharge, Chairperson, Vice-Chairperson and Event Management are always allowed. Add or remove other departments below. Added departments will see &quot;Manage Events&quot; in their profile dropdown.
+            Faculty Incharge, Chairperson, Vice-Chairperson and Event Management are always allowed. Add or remove other departments below. Added departments will see &quot;EM Dashboard&quot; in their profile dropdown.
           </p>
           {loadingAllowed ? (
             <p className="text-gray-500 py-4"><Spinner className="size-4 text-gray-400" /></p>

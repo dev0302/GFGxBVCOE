@@ -41,7 +41,7 @@ function Navbar() {
     "/profile",
     "/manage-team",
     "/manage-society",
-    "/uploadevent",
+    "/em-dashboard",
     "/jam-the-web",
     "/login",
     "/signup",
@@ -50,7 +50,8 @@ function Navbar() {
   ];
   const isDarkNavbar =
     darkRoutes.includes(location.pathname) ||
-    location.pathname.startsWith("/uploadevent/") ||
+    location.pathname.startsWith("/em-dashboard/") ||
+    location.pathname.startsWith("/dashboard/") ||
     location.pathname.startsWith("/reset-password/") ||
     location.pathname.startsWith("/join-team/");
 
@@ -70,7 +71,7 @@ function Navbar() {
     <>
       <div
         ref={navMain}
-        className="NAVBAR_CONTAINER fixed top-0 left-0 right-0 z-50 w-full px-6 py-3 backdrop-blur-xl shadow-2xl relative"
+        className="NAVBAR_CONTAINER fixed top-0 left-0 right-0 z-50 w-full px-6 py-3 backdrop-blur-xl shadow-2xl"
       >
          {/* Dark Navbar Background */}
   <div

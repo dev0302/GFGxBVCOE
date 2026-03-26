@@ -13,6 +13,7 @@ const { emailVerificationTemplate, passwordResetTemplate, passwordChangedTemplat
 const { imageUpload, uploadImageFromUrl } = require("../config/cloudinary");
 const { getTeamMemberModel } = require("../models/TeamMember");
 const { getEventUploadAllowedList } = require("./eventController");
+const DashboardAccessConfig = require("../models/DashboardAccessConfig");
 const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
 
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
@@ -302,6 +303,43 @@ exports.login = async (req, res) => {
     const eventUploadAllowed = await getEventUploadAllowedList();
     user.canManageEvents = eventUploadAllowed.includes(user.accountType);
 
+    // Dashboards access: EM dashboard uses existing event-upload allowed list,
+    // while other department dashboards use DashboardAccessConfig.
+    const nonEmDashboardKeys = [
+      "Social Media and Promotion",
+      "Technical",
+      "Public Relation and Outreach",
+      "Design",
+      "Content and Documentation",
+      "Photography and Videography",
+      "Sponsorship and Marketing",
+    ];
+
+    const dashboardAccess = new Set();
+    if (SOCIETY_ROLES.includes(user.accountType)) {
+      dashboardAccess.add("Event Management");
+      nonEmDashboardKeys.forEach((k) => dashboardAccess.add(k));
+    } else {
+      if (eventUploadAllowed.includes(user.accountType)) dashboardAccess.add("Event Management");
+
+      const docs = await DashboardAccessConfig.find({
+        dashboardKey: { $in: nonEmDashboardKeys },
+      }).lean();
+      const extraByKey = {};
+      for (const d of docs) {
+        extraByKey[d.dashboardKey] = d.extraAllowedDepartments || [];
+      }
+
+      nonEmDashboardKeys.forEach((k) => {
+        if (k === user.accountType) {
+          dashboardAccess.add(k);
+        } else if ((extraByKey[k] || []).includes(user.accountType)) {
+          dashboardAccess.add(k);
+        }
+      });
+    }
+    user.dashboardAccess = Array.from(dashboardAccess);
+
     const isProduction = process.env.NODE_ENV === "production";
     const options = {
       expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
@@ -500,6 +538,43 @@ exports.me = async (req, res) => {
     const user = userDoc.toObject();
     const eventUploadAllowed = await getEventUploadAllowedList();
     user.canManageEvents = eventUploadAllowed.includes(user.accountType);
+
+    // Dashboards access: EM dashboard uses existing event-upload allowed list,
+    // while other department dashboards use DashboardAccessConfig.
+    const nonEmDashboardKeys = [
+      "Social Media and Promotion",
+      "Technical",
+      "Public Relation and Outreach",
+      "Design",
+      "Content and Documentation",
+      "Photography and Videography",
+      "Sponsorship and Marketing",
+    ];
+
+    const dashboardAccess = new Set();
+    if (SOCIETY_ROLES.includes(user.accountType)) {
+      dashboardAccess.add("Event Management");
+      nonEmDashboardKeys.forEach((k) => dashboardAccess.add(k));
+    } else {
+      if (eventUploadAllowed.includes(user.accountType)) dashboardAccess.add("Event Management");
+
+      const docs = await DashboardAccessConfig.find({
+        dashboardKey: { $in: nonEmDashboardKeys },
+      }).lean();
+      const extraByKey = {};
+      for (const d of docs) {
+        extraByKey[d.dashboardKey] = d.extraAllowedDepartments || [];
+      }
+
+      nonEmDashboardKeys.forEach((k) => {
+        if (k === user.accountType) {
+          dashboardAccess.add(k);
+        } else if ((extraByKey[k] || []).includes(user.accountType)) {
+          dashboardAccess.add(k);
+        }
+      });
+    }
+    user.dashboardAccess = Array.from(dashboardAccess);
     return res.status(200).json({ success: true, user });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
