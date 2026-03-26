@@ -2,7 +2,7 @@ import { useGSAP } from "@gsap/react";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Lenis from "lenis";
 import events from "../data/eventData";
 import EventModal from "../components/EventModal";
@@ -10,7 +10,45 @@ import UpcomingEventSection from "../components/UpcomingEventSection";
 import { getEvents } from "../services/api";
 import { cloudinaryEventCardImageUrl } from "../utils/cloudinary";
 import { Spinner } from "@/components/ui/spinner";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Trophy } from "lucide-react";
+
+/** Sub-component to detect overflow and show Read More button accurately */
+const EventDescription = ({ event, isExpanded, toggleExpand }) => {
+  const [showButton, setShowButton] = useState(false);
+  const textRef = useRef(null);
+
+  useEffect(() => {
+    if (textRef.current && !isExpanded) {
+      // Check if text is actually clamped
+      const isOverflowing = textRef.current.scrollHeight > textRef.current.clientHeight;
+      setShowButton(isOverflowing);
+    } else if (isExpanded) {
+      setShowButton(true);
+    }
+  }, [event.description, isExpanded]);
+
+  return (
+    <div className="relative">
+      <p
+        ref={textRef}
+        className={`text-sm text-[#aaa] leading-relaxed mb-1 font-nunito transition-all duration-300 break-words ${
+          !isExpanded ? "line-clamp-3" : ""
+        }`}
+      >
+        {event.description}
+      </p>
+      {showButton && (
+        <button
+          onClick={() => toggleExpand(event.id)}
+          className="text-xs font-bold uppercase tracking-widest flex items-center gap-1 mb-2 text-cyan-400 hover:text-cyan-300 transition-colors"
+        >
+          {isExpanded ? "Show Less" : "Read More"}
+          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </button>
+      )}
+    </div>
+  );
+};
 
 
 gsap.registerPlugin(ScrollTrigger);
@@ -26,6 +64,13 @@ const Events = () => {
 
   const toggleExpand = (id) => {
     setExpandedEvents((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const getLeaderboardLink = (event) => {
+    if (event.leaderboardLink) return event.leaderboardLink;
+    if (event.title?.toLowerCase().includes("jam the web")) return "/jam-the-web";
+    if (event.description?.toLowerCase().includes("leaderboard")) return "/leaderboard";
+    return null;
   };
 
   useEffect(() => {
@@ -178,35 +223,31 @@ const Events = () => {
                             📍 <span className="text-sm">{event.location}</span>
                           </div>
                         </div>
-                        <div className="relative flex-grow">
-                          <p
-                            className={`text-sm text-[#aaa] leading-relaxed mb-1 font-nunito transition-all duration-300 ${
-                              !expandedEvents[event.id] ? "line-clamp-3" : ""
-                            }`}
-                          >
-                            {event.description}
-                          </p>
-                          {event.description && event.description.length > 120 && (
+                        <EventDescription 
+                          event={event} 
+                          isExpanded={expandedEvents[event.id]} 
+                          toggleExpand={toggleExpand} 
+                        />
+                        <div className="flex flex-col gap-2 mt-auto w-full">
+                          <div className=" green rounded-lg w-full">
                             <button
-                              onClick={() => toggleExpand(event.id)}
-                              className="text-cyan-400 hover:text-cyan-300 text-xs flex items-center gap-1 mb-4 transition-colors font-medium"
+                              onClick={() => handleKnowMoreClick(event)}
+                              className="w-full px-6 py-2.5 bg-cyan-700 text-white font-semibold rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50 font-nunito flex items-center justify-center gap-2"
                             >
-                              {expandedEvents[event.id] ? "Show Less" : "Read More"}
-                              {expandedEvents[event.id] ? (
-                                <ChevronUp size={14} />
-                              ) : (
-                                <ChevronDown size={14} />
-                              )}
+                              Know More
                             </button>
+                          </div>
+                          {getLeaderboardLink(event) && (
+                            <div className="blue rounded-lg w-full">
+                              <button
+                                onClick={() => navigate(getLeaderboardLink(event))}
+                                className="w-full px-6 py-2.5 bg-slate-700 text-white font-semibold rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50 font-nunito flex items-center justify-center gap-2"
+                              >
+                                <Trophy size={16} className="text-amber-400" />
+                                Leaderboard
+                              </button>
+                            </div>
                           )}
-                        </div>
-                        <div className=" green rounded-lg w-10/12 mx-auto mt-auto">
-                          <button
-                            onClick={() => handleKnowMoreClick(event)}
-                            className="w-full px-6 py-3 bg-cyan-700 text-white font-semibold rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50 font-nunito"
-                          >
-                            Know More
-                          </button>
                         </div>
                       </div>
                     </div>
