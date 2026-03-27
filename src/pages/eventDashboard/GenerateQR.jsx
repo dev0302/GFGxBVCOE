@@ -4,9 +4,13 @@ import html2canvas from "html2canvas";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
+import { ShiningText } from "@/components/ui/shining-text";
 
 const DEFAULT_URL = "https://geeksforgeeks.org";
 const STORAGE_KEY = "gfg_generate_qr_last";
+const MIN_DOWNLOAD_OVERLAY_MS = 3000;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function getStoredGenerated() {
   try {
@@ -14,7 +18,7 @@ function getStoredGenerated() {
     if (!raw) return null;
     const data = JSON.parse(raw);
     if (!data?.url || !data?.title) return null;
-    return { url: data.url, title: data.title };
+    return { url: data.url, title: data.title, description: data.description || "" };
   } catch (_) {
     return null;
   }
@@ -65,56 +69,15 @@ async function downloadSvgAsPng(svgElement, fileName, size) {
 
 export default function GenerateQR() {
   
-  const [aiDescription, setAiDescription] = useState("");
-  const [aiLoading, setAiLoading] = useState(false);
-  const [generated, setGenerated] = useState(() => getStoredGenerated());
-  const [urlInput, setUrlInput] = useState(() => getStoredGenerated()?.url || "");
-const generateAIContent = async () => {
-  if (!urlInput.trim()) {
-    toast.error("Enter URL first");
-    return;
-  }
+  const stored = getStoredGenerated();
+  const [aiDescription, setAiDescription] = useState(() => stored?.description || "");
+  const [processingFlow, setProcessingFlow] = useState(false);
+  const [progressMessage, setProgressMessage] = useState("");
+  const [generated, setGenerated] = useState(() => stored);
+  const [urlInput, setUrlInput] = useState(() => stored?.url || "");
+  const [titleDirty, setTitleDirty] = useState(false);
 
-  try {
-    setAiLoading(true);
-
-    const res = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/api/generate-content`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url: normalizeUrl(urlInput) }),
-      }
-    );
-
-    const contentType = res.headers.get("content-type");
-
-    if (!contentType?.includes("application/json")) {
-      const text = await res.text();
-      console.error("Server returned:", text);
-      throw new Error(`Server error: ${res.status}`);
-    }
-
-    const data = await res.json();
-
-    if (!res.ok) throw new Error(data.error || "Request failed");
-
-    // 🔥 KEY PART (AUTO-FILL)
-    setTitle(data.title);
-    setAiDescription(data.description);
-
-    toast.success("AI content generated ✨");
-
-  } catch (err) {
-    toast.error(err.message || "Failed to generate content");
-  } finally {
-    setAiLoading(false);
-  }
-};
-
-  const [title, setTitle] = useState(() => getStoredGenerated()?.title || "");
+  const [title, setTitle] = useState(() => stored?.title || "");
   const [downloadingType, setDownloadingType] = useState(null);
 
   const normalWrapperRef = useRef(null);
@@ -122,39 +85,129 @@ const generateAIContent = async () => {
 
   const qrValue = useMemo(() => normalizeUrl(generated?.url || "") || DEFAULT_URL, [generated]);
 
-  const handleGenerate = () => {
+  const fetchAIContent = async (normalizedUrl) => {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/generate-content`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: normalizedUrl }),
+    });
+
+    const contentType = res.headers.get("content-type");
+    if (!contentType?.includes("application/json")) {
+      const text = await res.text();
+      console.error("Server returned:", text);
+      throw new Error(`Server error: ${res.status}`);
+    }
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Request failed");
+    return data;
+  };
+
+  const handleGenerate = async () => {
     const enteredUrl = urlInput.trim();
-    const enteredTitle = title.trim();
     if (!enteredUrl) {
       toast.error("Enter URL first");
       return;
     }
-    if (!enteredTitle) {
-      toast.error("Enter title first");
-      return;
-    }
 
-    const payload = { url: enteredUrl, title: enteredTitle };
-    setGenerated(payload);
+    const normalizedUrl = normalizeUrl(enteredUrl);
+    let finalTitle = title.trim();
+    let finalDescription = aiDescription.trim();
+    let aiData = null;
+
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    } catch (_) { }
-    toast.success("QR generated");
+      setProcessingFlow(true);
+
+      // Step 1: auto-fetch title when URL exists but title is empty.
+      if (!finalTitle) {
+        setProgressMessage("Auto fetching title using AI...");
+        aiData = await fetchAIContent(normalizedUrl);
+        finalTitle = String(aiData?.title || "").trim();
+        if (!finalTitle) throw new Error("Could not fetch title");
+        setTitle(finalTitle);
+      }
+
+      // Step 2: fetch description when missing.
+      if (!finalDescription) {
+        setProgressMessage("Fetching description using AI...");
+        if (!aiData) aiData = await fetchAIContent(normalizedUrl);
+        finalDescription = String(aiData?.description || "").trim();
+        if (finalDescription) setAiDescription(finalDescription);
+      }
+
+      // Step 3: generate QR cards.
+      setProgressMessage("Generating QR codes...");
+      const payload = {
+        url: enteredUrl,
+        title: finalTitle,
+        description: finalDescription || "",
+      };
+      setGenerated(payload);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (_) {}
+
+      setProgressMessage("QR codes generated successfully.");
+      toast.success("QR generated");
+    } catch (err) {
+      setProgressMessage("");
+      toast.error(err.message || "Failed to generate QR");
+    } finally {
+      setProcessingFlow(false);
+    }
   };
 
   const handleDeleteCurrent = () => {
     setGenerated(null);
     setUrlInput("");
     setTitle("");
+    setTitleDirty(false);
+    setAiDescription("");
+    setProgressMessage("");
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch (_) { }
     toast.success("Current QR removed");
   };
 
+  const handleUpdateTitle = async () => {
+    if (!generated?.url) return;
+    const nextTitle = title.trim();
+    if (!nextTitle) {
+      toast.error("Enter title first");
+      return;
+    }
+
+    try {
+      setProcessingFlow(true);
+      setProgressMessage("Generating QR codes...");
+      const payload = {
+        url: generated.url,
+        title: nextTitle,
+        description: aiDescription?.trim() || generated.description || "",
+      };
+      setGenerated(payload);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (_) {}
+      setTitleDirty(false);
+      setProgressMessage("QR codes generated successfully.");
+      toast.success("Title updated");
+    } catch (err) {
+      toast.error(err?.message || "Failed to update title");
+    } finally {
+      setProcessingFlow(false);
+    }
+  };
+
   const handleDownload = async (type) => {
     try {
       setDownloadingType(type);
+      // Ensure the download overlay animation is visible for a minimum time
+      // (even if the image renders quickly).
+      await sleep(MIN_DOWNLOAD_OVERLAY_MS);
+
       if (type === "stylish") {
         const posterElement = stylishPosterRef.current;
         if (!posterElement) throw new Error("Poster not available");
@@ -202,7 +255,23 @@ const generateAIContent = async () => {
                 <input
                   type="text"
                   value={urlInput}
-                  onChange={(e) => setUrlInput(e.target.value)}
+                  onChange={(e) => {
+                    setUrlInput(e.target.value);
+                    // URL changed: clear previously generated AI data/status.
+                    if (aiDescription || progressMessage) {
+                      setAiDescription("");
+                      setProgressMessage("");
+                      try {
+                        const prev = getStoredGenerated();
+                        if (prev) {
+                          localStorage.setItem(
+                            STORAGE_KEY,
+                            JSON.stringify({ ...prev, description: "" }),
+                          );
+                        }
+                      } catch (_) {}
+                    }
+                  }}
                   placeholder="https://example.com"
                   className="w-full bg-transparent text-sm text-white outline-none placeholder:text-gray-500"
                 />
@@ -214,10 +283,28 @@ const generateAIContent = async () => {
               <input
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setTitle(next);
+                  if (generated) {
+                    setTitleDirty(next.trim() !== (generated.title || "").trim());
+                  }
+                }}
                 placeholder="GFG BVCOE"
                 className="w-full rounded-xl border border-gray-500/35 bg-[#252536] px-4 py-2.5 text-sm text-white outline-none transition-colors placeholder:text-gray-500 focus:border-cyan-400"
               />
+              {generated && titleDirty && (
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={handleUpdateTitle}
+                    disabled={processingFlow}
+                    className="rounded-xl bg-cyan-500/15 px-4 py-2 text-xs font-semibold text-cyan-200 transition-colors hover:bg-cyan-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Update title
+                  </button>
+                </div>
+              )}
             </label>
           </div>
 
@@ -225,7 +312,8 @@ const generateAIContent = async () => {
             <button
               type="button"
               onClick={handleGenerate}
-              className="rounded-xl bg-cyan-500/20 px-4 py-2.5 text-sm font-semibold text-cyan-300 transition-colors hover:bg-cyan-500/30"
+              disabled={processingFlow}
+              className="rounded-xl bg-cyan-500/20 px-4 py-2.5 text-sm font-semibold text-cyan-300 transition-colors hover:bg-cyan-500/30 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Generate QR
             </button>
@@ -237,16 +325,18 @@ const generateAIContent = async () => {
             >
               Delete current QRs
             </button>
-            <button
-              type="button"
-              onClick={generateAIContent}
-              className="rounded-xl bg-purple-500/20 px-4 py-2.5 text-sm font-semibold text-purple-300 hover:bg-purple-500/30"
-            >
-              {aiLoading ? "Generating..." : "✨ Generate AI Description"}
-            </button>
             {aiDescription && (
               <div className="mt-4 rounded-xl border border-purple-400/30 bg-purple-500/10 p-4">
                 <p className="text-sm text-purple-200">{aiDescription}</p>
+              </div>
+            )}
+            {progressMessage && (
+              <div className="w-full mt-2 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3">
+                {processingFlow ? (
+                  <ShiningText text={progressMessage} className="text-sm font-semibold" />
+                ) : (
+                  <p className="text-sm font-medium text-emerald-300">{progressMessage}</p>
+                )}
               </div>
             )}
             {generated && (
@@ -366,9 +456,19 @@ const generateAIContent = async () => {
               exit={{ opacity: 0 }}
               className="mt-8 rounded-2xl border border-dashed border-gray-500/30 bg-[#202031]/60 p-8 text-center"
             >
-              <p className="text-sm text-gray-400">
-                Fill URL and title, then click <span className="text-cyan-300 font-semibold">Generate QR</span> to display both QR cards.
-              </p>
+              {progressMessage ? (
+                processingFlow ? (
+                  <div className="flex justify-center">
+                    <ShiningText text={progressMessage} className="text-sm font-semibold" />
+                  </div>
+                ) : (
+                  <p className="text-sm font-medium text-emerald-300">{progressMessage}</p>
+                )
+              ) : (
+                <p className="text-sm text-gray-400">
+                  Enter URL, then click <span className="text-cyan-300 font-semibold">Generate QR</span>.
+                </p>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
