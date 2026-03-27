@@ -30,6 +30,7 @@
     "locomotive-scroll": "^4.1.4",
     "lucide-react": "^0.564.0",
     "mongoose": "^8.19.1",
+    "motion": "^12.38.0",
     "path": "^0.12.7",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.1",
