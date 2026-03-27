@@ -78,13 +78,16 @@ const generateAIContent = async () => {
   try {
     setAiLoading(true);
 
-    const res = await fetch(`http://localhost:8080/api/generate-content`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ url: normalizeUrl(urlInput) }),
-    });
+    const res = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/api/generate-content`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: normalizeUrl(urlInput) }),
+      }
+    );
 
     const contentType = res.headers.get("content-type");
 
