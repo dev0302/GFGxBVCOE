@@ -305,8 +305,18 @@ export default function UploadNewEvent() {
                   <Sparkles className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400/70">Optional import</p>
-                  <h2 className="mt-0.5 text-base font-semibold text-richblack-25 sm:text-lg font-rounded">Directly import from an recent upcoming event</h2>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400/70">
+                      Optional import
+                    </p>
+                    <span className="rounded-full border border-emerald-500/40 bg-emerald-500/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-200/95">
+                      New
+                    </span>
+                    
+                  </div>
+                  <h2 className="mt-1.5 text-base font-semibold text-white sm:text-lg">
+                    Directly import from a recent upcoming event
+                  </h2>
                   <p className="mt-1 max-w-xl text-xs leading-relaxed text-gray-500">
                     Open the picker and choose a row — AI fills the form. All publish fields hide until you close the picker or select an event.
                   </p>
