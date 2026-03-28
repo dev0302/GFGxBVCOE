@@ -1,5 +1,6 @@
 const express = require("express");
 const { auth, optionalAuth } = require("../middlewares/AuthZ");
+const Event = require("../models/Event"); 
 const {
   createEvent,
   getAllEvents,
@@ -52,4 +53,26 @@ router.post("/upcoming", auth, requireEventUploadAccess, createUpcomingEvent);
 router.put("/upcoming/:id", auth, requireEventUploadAccess, updateUpcomingEvent);
 router.delete("/upcoming/:id", auth, requireEventUploadAccess, deleteUpcomingEvent);
 
+router.get("/:id", async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: event,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching event",
+    });
+  }
+});
 module.exports = router;

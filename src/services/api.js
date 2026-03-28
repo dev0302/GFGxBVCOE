@@ -127,6 +127,15 @@ export async function deleteUpcomingEvent(id) {
   if (!res.ok) throw new Error(data.message || 'Failed to delete upcoming event');
   return data;
 }
+export async function getEventById(id) {
+  const res = await fetch(`${BASE}/api/v1/events/${id}`);
+  const data = await res.json();
+
+  if (!res.ok) throw new Error(data.message || "Failed to fetch event");
+  return data;
+}
+
+
 
 /** Manage page: includes events scheduled for deletion (so admin can cancel). */
 export async function getEventsForManage() {

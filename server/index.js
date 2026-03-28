@@ -13,6 +13,9 @@ const teamRoutes = require("./routes/teamRoute");
 const activityLogRoutes = require("./routes/activityLogRoute");
 const jamTheWebRoutes = require("./routes/jamTheWebRoute");
 const dashboardRoutes = require("./routes/dashboardRoute");
+const aiRoutes = require("./routes/aiRoutes");
+
+
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -41,11 +44,13 @@ app.use("/api/v1/activity-logs", activityLogRoutes);
 app.use("/api/v1/jamtheweb", jamTheWebRoutes);
 app.use("/api/v1/dashboards", dashboardRoutes);
 app.use("/api", descriptionRouter);
+app.use("/api/v1/ai", aiRoutes);
 
 // ✅ 404 handler LAST — after all routes
 app.use((req, res) => {
   res.status(404).json({ error: `Route ${req.method} ${req.path} not found` });
 });
+app.use(express.json({ limit: "10mb" }));
 
 dbConnect()
   .then(() => {
