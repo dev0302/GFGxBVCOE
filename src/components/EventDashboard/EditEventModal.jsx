@@ -1,10 +1,41 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { updateEvent } from "../../services/api";
-import { inputClass, labelClass } from "./SectionTitle";
+import { inputClass as defaultInputClass, labelClass as defaultLabelClass } from "./SectionTitle";
 import { cloudinaryImageUrl } from "../../utils/cloudinary";
 
-export default function EditEventModal({ event, onClose, onSaved }) {
+function isVideoUrl(url) {
+  return /\.(mp4|webm|mov|avi|mkv|m4v)(\?|$)/i.test(url);
+}
+
+function newId() {
+  return typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `n-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function buildInitialGalleryItems(event) {
+  const urls = event?.galleryImages ?? [];
+  return urls.map((url, i) => ({
+    id: `ex-${i}-${newId()}`,
+    type: "existing",
+    url,
+  }));
+}
+
+function moveItem(arr, from, to) {
+  if (from === to) return arr;
+  const next = [...arr];
+  const [item] = next.splice(from, 1);
+  next.splice(to, 0, item);
+  return next;
+}
+
+const DRAG_MIME = "application/x-gallery-index";
+
+export default function EditEventModal({ event, onClose, onSaved, inputClass: inputClassProp, labelClass: labelClassProp }) {
+  const inputClass = inputClassProp ?? defaultInputClass;
+  const labelClass = labelClassProp ?? defaultLabelClass;
   const [title, setTitle] = useState(event?.title ?? "");
   const [date, setDate] = useState(event?.date ?? "");
   const [time, setTime] = useState(event?.time ?? "");
@@ -18,11 +49,20 @@ export default function EditEventModal({ event, onClose, onSaved }) {
   );
   const [agenda, setAgenda] = useState(event?.agenda?.length ? [...event.agenda] : [""]);
   const [prerequisites, setPrerequisites] = useState(event?.prerequisites?.length ? [...event.prerequisites] : [""]);
-  const [galleryFiles, setGalleryFiles] = useState([]);
-  const [previewUrls, setPreviewUrls] = useState([]);
-  const [removedGalleryUrls, setRemovedGalleryUrls] = useState([]);
+  const [galleryItems, setGalleryItems] = useState(() => buildInitialGalleryItems(event));
   const [saving, setSaving] = useState(false);
+  const [dragFromIndex, setDragFromIndex] = useState(null);
   const fileInputRef = useRef(null);
+  const galleryItemsRef = useRef(galleryItems);
+  galleryItemsRef.current = galleryItems;
+
+  useEffect(() => {
+    return () => {
+      galleryItemsRef.current.forEach((item) => {
+        if (item.type === "new" && item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      });
+    };
+  }, []);
 
   const addSpeaker = () => setSpeakers((s) => [...s, { name: "", title: "" }]);
   const removeSpeaker = (i) => setSpeakers((s) => s.filter((_, idx) => idx !== i));
@@ -37,21 +77,48 @@ export default function EditEventModal({ event, onClose, onSaved }) {
   const addGalleryFiles = (newFiles) => {
     const list = Array.from(newFiles || []);
     if (list.length === 0) return;
-    setGalleryFiles((prev) => [...prev, ...list]);
-    setPreviewUrls((prev) => [...prev, ...list.map((f) => URL.createObjectURL(f))]);
+    setGalleryItems((prev) => [
+      ...prev,
+      ...list.map((file) => ({
+        id: newId(),
+        type: "new",
+        file,
+        previewUrl: URL.createObjectURL(file),
+      })),
+    ]);
   };
-  const removeGalleryFile = (index) => {
-    setGalleryFiles((prev) => prev.filter((_, i) => i !== index));
-    setPreviewUrls((prev) => {
-      const url = prev[index];
-      if (url) URL.revokeObjectURL(url);
-      return prev.filter((_, i) => i !== index);
+
+  const removeGalleryItem = (id) => {
+    setGalleryItems((prev) => {
+      const item = prev.find((x) => x.id === id);
+      if (item?.type === "new" && item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      return prev.filter((x) => x.id !== id);
     });
   };
 
-  const existingGallery = event?.galleryImages ?? [];
-  const keptExistingUrls = existingGallery.filter((url) => !removedGalleryUrls.includes(url));
-  const removeExistingGalleryUrl = (url) => setRemovedGalleryUrls((prev) => [...prev, url]);
+  const handleDragStart = (e, index) => {
+    e.dataTransfer.setData(DRAG_MIME, String(index));
+    e.dataTransfer.effectAllowed = "move";
+    setDragFromIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    setDragFromIndex(null);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDropOnIndex = (e, dropIndex) => {
+    e.preventDefault();
+    const raw = e.dataTransfer.getData(DRAG_MIME);
+    const from = parseInt(raw, 10);
+    if (Number.isNaN(from)) return;
+    setGalleryItems((prev) => moveItem(prev, from, dropIndex));
+    setDragFromIndex(null);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,8 +139,21 @@ export default function EditEventModal({ event, onClose, onSaved }) {
     formData.append("speakers", JSON.stringify(speakers.filter((s) => s.name || s.title)));
     formData.append("agenda", JSON.stringify(agenda.filter(Boolean)));
     formData.append("prerequisites", JSON.stringify(prerequisites.filter(Boolean)));
+
+    const keptExistingUrls = galleryItems.filter((i) => i.type === "existing").map((i) => i.url);
     formData.append("galleryKeepUrls", JSON.stringify(keptExistingUrls));
-    galleryFiles.forEach((file) => formData.append("gallery", file));
+
+    let newIdx = 0;
+    const galleryOrder = galleryItems.map((item) => {
+      if (item.type === "existing") return item.url;
+      const idx = newIdx++;
+      return `__new__${idx}`;
+    });
+    formData.append("galleryOrder", JSON.stringify(galleryOrder));
+
+    galleryItems.forEach((item) => {
+      if (item.type === "new") formData.append("gallery", item.file);
+    });
 
     try {
       await updateEvent(event._id, formData);
@@ -136,14 +216,20 @@ export default function EditEventModal({ event, onClose, onSaved }) {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className={labelClass}>Speakers</label>
-              <button type="button" onClick={addSpeaker} className="text-sm text-cyan-400 hover:text-cyan-300">+ Add</button>
+              <button type="button" onClick={addSpeaker} className="text-sm text-cyan-400 hover:text-cyan-300">
+                + Add
+              </button>
             </div>
             <div className="space-y-2">
               {speakers.map((sp, i) => (
                 <div key={i} className="flex gap-2">
                   <input type="text" value={sp.name} onChange={(e) => updateSpeaker(i, "name", e.target.value)} className={inputClass + " flex-1"} placeholder="Name" />
                   <input type="text" value={sp.title} onChange={(e) => updateSpeaker(i, "title", e.target.value)} className={inputClass + " flex-1"} placeholder="Title" />
-                  {speakers.length > 1 && <button type="button" onClick={() => removeSpeaker(i)} className="px-3 py-2 rounded-lg bg-red-500/20 text-red-400 shrink-0">Remove</button>}
+                  {speakers.length > 1 && (
+                    <button type="button" onClick={() => removeSpeaker(i)} className="px-3 py-2 rounded-lg bg-red-500/20 text-red-400 shrink-0">
+                      Remove
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -151,13 +237,19 @@ export default function EditEventModal({ event, onClose, onSaved }) {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className={labelClass}>Agenda</label>
-              <button type="button" onClick={addAgenda} className="text-sm text-cyan-400 hover:text-cyan-300">+ Add</button>
+              <button type="button" onClick={addAgenda} className="text-sm text-cyan-400 hover:text-cyan-300">
+                + Add
+              </button>
             </div>
             <div className="space-y-2">
               {agenda.map((item, i) => (
                 <div key={i} className="flex gap-2">
                   <input type="text" value={item} onChange={(e) => updateAgenda(i, e.target.value)} className={inputClass} />
-                  {agenda.length > 1 && <button type="button" onClick={() => removeAgenda(i)} className="px-3 py-2 rounded-lg bg-red-500/20 text-red-400 shrink-0">Remove</button>}
+                  {agenda.length > 1 && (
+                    <button type="button" onClick={() => removeAgenda(i)} className="px-3 py-2 rounded-lg bg-red-500/20 text-red-400 shrink-0">
+                      Remove
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -165,30 +257,67 @@ export default function EditEventModal({ event, onClose, onSaved }) {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className={labelClass}>Prerequisites</label>
-              <button type="button" onClick={addPrerequisite} className="text-sm text-cyan-400 hover:text-cyan-300">+ Add</button>
+              <button type="button" onClick={addPrerequisite} className="text-sm text-cyan-400 hover:text-cyan-300">
+                + Add
+              </button>
             </div>
             <div className="space-y-2">
               {prerequisites.map((item, i) => (
                 <div key={i} className="flex gap-2">
                   <input type="text" value={item} onChange={(e) => updatePrerequisite(i, e.target.value)} className={inputClass} />
-                  {prerequisites.length > 1 && <button type="button" onClick={() => removePrerequisite(i)} className="px-3 py-2 rounded-lg bg-red-500/20 text-red-400 shrink-0">Remove</button>}
+                  {prerequisites.length > 1 && (
+                    <button type="button" onClick={() => removePrerequisite(i)} className="px-3 py-2 rounded-lg bg-red-500/20 text-red-400 shrink-0">
+                      Remove
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
           </div>
           <div>
             <label className={labelClass}>Gallery</label>
-            <p className="text-xs text-gray-500 mb-2">Existing uploads (click × to remove). Add new images/videos below.</p>
-            {keptExistingUrls.length > 0 && (
+            <p className="text-xs text-gray-500 mb-2">
+              Drag and drop to reorder. The <span className="text-cyan-400/90 font-medium">first</span> item is the event card thumbnail on the Events page. Click × to remove. Add new
+              files below.
+            </p>
+            {galleryItems.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2 mb-3">
-                {keptExistingUrls.map((url, i) => (
-                  <div key={url + i} className="relative w-16 h-16 rounded-lg overflow-hidden bg-[#252536] shrink-0">
-                    {/\.(mp4|webm|mov|avi|mkv|m4v)(\?|$)/i.test(url) ? (
-                      <video src={url} className="w-full h-full object-cover" muted playsInline />
-                    ) : (
-                      <img src={cloudinaryImageUrl(url)} alt="" className="w-full h-full object-cover" />
+                {galleryItems.map((item, index) => (
+                  <div
+                    key={item.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDropOnIndex(e, index)}
+                    className={`relative w-[4.5rem] h-[4.5rem] rounded-lg overflow-hidden bg-[#252536] shrink-0 cursor-grab active:cursor-grabbing border transition-colors ${
+                      index === 0 ? "border-cyan-500/50 ring-1 ring-cyan-500/30" : "border-transparent"
+                    } ${dragFromIndex === index ? "opacity-60" : ""}`}
+                    title="Drag to reorder"
+                  >
+                    {index === 0 && (
+                      <span className="absolute bottom-0 left-0 right-0 z-[1] bg-black/65 text-[9px] text-center text-cyan-200/95 py-0.5 pointer-events-none">Thumbnail</span>
                     )}
-                    <button type="button" onClick={() => removeExistingGalleryUrl(url)} className="absolute top-0.5 right-0.5 w-5 h-5 rounded bg-red-500 text-white text-xs hover:bg-red-600">×</button>
+                    {item.type === "existing" ? (
+                      isVideoUrl(item.url) ? (
+                        <video src={item.url} className="w-full h-full object-cover pointer-events-none" muted playsInline />
+                      ) : (
+                        <img src={cloudinaryImageUrl(item.url)} alt="" className="w-full h-full object-cover pointer-events-none" />
+                      )
+                    ) : item.file.type.startsWith("video/") ? (
+                      <video src={item.previewUrl} className="w-full h-full object-cover pointer-events-none" muted playsInline />
+                    ) : (
+                      <img src={item.previewUrl} alt="" className="w-full h-full object-cover pointer-events-none" />
+                    )}
+                    <button
+                      type="button"
+                      draggable={false}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={() => removeGalleryItem(item.id)}
+                      className="absolute top-0.5 right-0.5 z-[2] w-5 h-5 rounded bg-red-500 text-white text-xs hover:bg-red-600"
+                    >
+                      ×
+                    </button>
                   </div>
                 ))}
               </div>
@@ -198,26 +327,19 @@ export default function EditEventModal({ event, onClose, onSaved }) {
               type="file"
               accept="image/*,video/*"
               multiple
-              onChange={(e) => { addGalleryFiles(e.target.files); e.target.value = ""; }}
+              onChange={(e) => {
+                addGalleryFiles(e.target.files);
+                e.target.value = "";
+              }}
               className="hidden"
             />
-            <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full py-3 border border-dashed border-gray-500/50 rounded-xl text-gray-400 hover:border-cyan-500/50 hover:text-cyan-400">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full py-3 border border-dashed border-gray-500/50 rounded-xl text-gray-400 hover:border-cyan-500/50 hover:text-cyan-400"
+            >
               Add new images/videos
             </button>
-            {galleryFiles.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {galleryFiles.map((file, i) => (
-                  <div key={"new-" + i} className="relative w-16 h-16 rounded-lg overflow-hidden bg-[#252536]">
-                    {file.type.startsWith("video/") ? (
-                      <video src={previewUrls[i]} className="w-full h-full object-cover" muted playsInline />
-                    ) : (
-                      <img src={previewUrls[i]} alt="" className="w-full h-full object-cover" />
-                    )}
-                    <button type="button" onClick={() => removeGalleryFile(i)} className="absolute top-0.5 right-0.5 w-5 h-5 rounded bg-red-500 text-white text-xs hover:bg-red-600">×</button>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
           <div className="flex gap-3 pt-4">
             <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-500/50 text-gray-300 hover:bg-gray-500/20 font-medium">

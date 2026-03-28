@@ -195,6 +195,7 @@ export default function ManageEvents() {
 
         {editingEv && (
           <EditEventModal
+            key={editingEv._id}
             event={editingEv}
             onClose={() => setEditingEv(null)}
             onSaved={() => { setEditingEv(null); loadManagedEvents(); }}
