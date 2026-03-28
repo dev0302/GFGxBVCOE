@@ -46,7 +46,7 @@ const Timer = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] flex items-center justify-center p-4">
       <div className="timer-card bg-[rgba(255,255,255,0.07)] backdrop-blur-md rounded-2xl p-8 md:p-10 shadow-2xl border border-[rgba(255,255,255,0.1)] max-w-md w-full">
-        <h1 className="text-2xl md:text-3xl font-semibold text-center text-white mb-2">
+        <h1 className="text-2xl md:text-3xl font-semibold text-center text-richblack-25 mb-2">
           Countdown begins
         </h1>
         <p className="text-center text-gray-300 mb-8">
@@ -77,7 +77,7 @@ const Timer = () => {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="text-3xl md:text-4xl font-bold text-white">
+            <div className="text-3xl md:text-4xl font-bold text-richblack-25">
               {timeLeft.hours}:{timeLeft.minutes}:{timeLeft.seconds}
             </div>
             <div className="text-sm text-gray-300 mt-2">Hours : Minutes : Seconds</div>
@@ -86,15 +86,15 @@ const Timer = () => {
         
         <div className="grid grid-cols-3 gap-4 text-center">
           <div className="p-4 bg-[rgba(255,255,255,0.05)] rounded-lg">
-            <div className="text-2xl font-bold text-white">{timeLeft.hours}</div>
+            <div className="text-2xl font-bold text-richblack-25">{timeLeft.hours}</div>
             <div className="text-sm text-gray-300">Hours</div>
           </div>
           <div className="p-4 bg-[rgba(255,255,255,0.05)] rounded-lg">
-            <div className="text-2xl font-bold text-white">{timeLeft.minutes}</div>
+            <div className="text-2xl font-bold text-richblack-25">{timeLeft.minutes}</div>
             <div className="text-sm text-gray-300">Minutes</div>
           </div>
           <div className="p-4 bg-[rgba(255,255,255,0.05)] rounded-lg">
-            <div className="text-2xl font-bold text-white">{timeLeft.seconds}</div>
+            <div className="text-2xl font-bold text-richblack-25">{timeLeft.seconds}</div>
             <div className="text-sm text-gray-300">Seconds</div>
           </div>
         </div>

@@ -138,7 +138,7 @@ const PrintingLoader = ({ isPrinting }) => (
             animate={{ opacity: 1, y: 0 }}
             className="mt-6 text-center"
           >
-            <h3 className="text-white font-bold text-lg flex items-center gap-2">
+            <h3 className="text-richblack-25 font-bold text-lg flex items-center gap-2">
               <Printer className="h-5 w-5 animate-pulse" />
               Generating PDF...
             </h3>
@@ -735,7 +735,7 @@ export default function ManageTeam({
   if (isSociety && !propDepartment) return null;
 
   const inputClass =
-    "w-full px-3 py-2 rounded-lg bg-[#252536] border border-gray-500/40 text-white placeholder-gray-500 focus:border-cyan-500 outline-none text-sm";
+    "w-full px-3 py-2 rounded-lg bg-[#252536] border border-gray-500/40 text-richblack-25 placeholder-gray-500 focus:border-cyan-500 outline-none text-sm";
 
   return (
     <div className="min-h-screen darkthemebg pt-24 pb-16">
@@ -754,7 +754,7 @@ export default function ManageTeam({
                   Back to departments
                 </button>
               )}
-              <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-richblack-25 flex items-center gap-2">
                 <Users className="h-10 w-10 text-cyan-400" />
                 {isSociety
                   ? `Manage society › ${displayDepartment}`
@@ -804,7 +804,7 @@ export default function ManageTeam({
                 <button
                   type="button"
                   onClick={() => setAddMenuOpen((v) => !v)}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold text-sm transition-colors"
                 >
                   <Plus className="h-4 w-4" />
                   Add team
@@ -1134,14 +1134,14 @@ export default function ManageTeam({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-4 border-b border-gray-500/30">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <h2 className="text-lg font-bold text-richblack-25 flex items-center gap-2">
                 <Printer className="h-5 w-5 text-cyan-400" />
                 Print / Export list
               </h2>
               <button
                 type="button"
                 onClick={() => setExportModalOpen(false)}
-                className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30"
+                className="p-2 rounded-lg text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -1172,7 +1172,7 @@ export default function ManageTeam({
                 {EXPORT_COLS.map((k) => (
                   <label
                     key={k}
-                    className="flex items-center gap-2 cursor-pointer text-sm text-gray-200 hover:text-white"
+                    className="flex items-center gap-2 cursor-pointer text-sm text-gray-200 hover:text-richblack-25"
                   >
                     <input
                       type="checkbox"
@@ -1193,7 +1193,7 @@ export default function ManageTeam({
                     members.length === 0 ||
                     selectedExportFields.length === 0
                   }
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-richblack-25 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FileText className="h-4 w-4" />
                   {isPrinting ? "Processing..." : "Generate & Download PDF"}
@@ -1204,7 +1204,7 @@ export default function ManageTeam({
                   disabled={
                     members.length === 0 || selectedExportFields.length === 0
                   }
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-richblack-25 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Download className="h-4 w-4" />
                   Generate & Download Excel
@@ -1227,13 +1227,13 @@ export default function ManageTeam({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="sticky top-0 flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 z-10 rounded-t-2xl">
-              <h2 className="text-lg font-bold text-white">
+              <h2 className="text-lg font-bold text-richblack-25">
                 Add member manually
               </h2>
               <button
                 type="button"
                 onClick={() => setManualOpen(false)}
-                className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors"
+                className="p-2 rounded-lg text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30 transition-colors"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -1364,7 +1364,7 @@ export default function ManageTeam({
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold disabled:opacity-50"
                 >
                   {saving ? "Adding…" : "Add member"}
                 </button>
@@ -1387,7 +1387,7 @@ export default function ManageTeam({
             className="bg-[#1e1e2f] rounded-2xl border border-gray-500/30 p-4 max-w-lg w-full max-h-[90vh] overflow-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-white font-semibold mb-3">Crop photo</h3>
+            <h3 className="text-richblack-25 font-semibold mb-3">Crop photo</h3>
             <ReactCrop
               crop={crop}
               onChange={(pixelCrop) => {
@@ -1421,7 +1421,7 @@ export default function ManageTeam({
                 type="button"
                 onClick={handleCropApply}
                 disabled={photoUploading}
-                className="flex-1 py-2 rounded-xl bg-cyan-600 text-white font-medium disabled:opacity-50"
+                className="flex-1 py-2 rounded-xl bg-cyan-600 text-richblack-25 font-medium disabled:opacity-50"
               >
                 {photoUploading ? (
                   <Spinner className="size-4 text-gray-400" />
@@ -1445,7 +1445,7 @@ export default function ManageTeam({
             className="darkthemebg rounded-2xl border border-gray-500/30 p-6 w-full max-w-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-lg font-bold text-white mb-2">
+            <h2 className="text-lg font-bold text-richblack-25 mb-2">
               Add team by invite link
             </h2>
             <p className="text-sm text-gray-400 mb-4">
@@ -1460,7 +1460,7 @@ export default function ManageTeam({
               type="button"
               onClick={handleGenerateInviteLink}
               disabled={inviteLinkLoading}
-              className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm disabled:opacity-50"
+              className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold text-sm disabled:opacity-50"
             >
               {inviteLinkLoading ? "Generating…" : "Generate invite link"}
             </button>
@@ -1527,14 +1527,14 @@ export default function ManageTeam({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="sticky top-0 flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 z-10 rounded-t-2xl">
-              <h2 className="text-lg font-bold text-white">Edit member</h2>
+              <h2 className="text-lg font-bold text-richblack-25">Edit member</h2>
               <button
                 type="button"
                 onClick={() => {
                   setEditMember(null);
                   setForm(COLS.reduce((acc, k) => ({ ...acc, [k]: "" }), {}));
                 }}
-                className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors"
+                className="p-2 rounded-lg text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30 transition-colors"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -1666,7 +1666,7 @@ export default function ManageTeam({
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold disabled:opacity-50"
                 >
                   {saving ? "Saving…" : "Save changes"}
                 </button>
@@ -1701,14 +1701,14 @@ export default function ManageTeam({
             >
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 shrink-0">
-                <h2 className="text-lg font-bold text-white">{displayDepartment} team</h2>
+                <h2 className="text-lg font-bold text-richblack-25">{displayDepartment} team</h2>
                 <button
                   type="button"
                   onClick={() => {
                     setShowAllTeamOpen(false);
                     setSelectedDetailItem(null);
                   }}
-                  className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors"
+                  className="p-2 rounded-lg text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30 transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -1745,7 +1745,7 @@ export default function ManageTeam({
                           >
                            <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <span className="block truncate font-medium text-white">{name}</span>
+                              <span className="block truncate font-medium text-richblack-25">{name}</span>
                               <span className="block truncate text-xs text-gray-500">{u.email}</span>
                             </div>
                             <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -1770,7 +1770,7 @@ export default function ManageTeam({
                             <button type="button" className="flex-1 flex items-center gap-3 min-w-0 text-left active:scale-[0.98]" onClick={() => setSelectedDetailItem({ type: "predefinedOnly", data: pre })}>
                               <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
                               <div className="flex-1 min-w-0">
-                                <span className="block truncate font-medium text-white">{name}</span>
+                                <span className="block truncate font-medium text-richblack-25">{name}</span>
                                 <span className="block truncate text-xs text-gray-500">{pre.email}</span>
                               </div>
                             </button>
@@ -1818,7 +1818,7 @@ export default function ManageTeam({
                           >
                             <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <span className="block truncate font-medium text-white">{name}</span>
+                              <span className="block truncate font-medium text-richblack-25">{name}</span>
                               <span className="block truncate text-xs text-gray-500">{m.email}</span>
                             </div>
                             <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">{tagLabel}</span>
@@ -1870,14 +1870,14 @@ export default function ManageTeam({
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 shrink-0">
-                <h2 className="text-lg font-bold text-white">Whole society</h2>
+                <h2 className="text-lg font-bold text-richblack-25">Whole society</h2>
                 <button
                   type="button"
                   onClick={() => {
                     setShowSocietyListOpen(false);
                     setSelectedDetailItem(null);
                   }}
-                  className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors"
+                  className="p-2 rounded-lg text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30 transition-colors"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -1911,7 +1911,7 @@ export default function ManageTeam({
                           >
                             <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <span className="block truncate font-medium text-white">{name}</span>
+                              <span className="block truncate font-medium text-richblack-25">{name}</span>
                               <span className="block truncate text-xs text-gray-500">{u.email}</span>
                             </div>
                             <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -1934,7 +1934,7 @@ export default function ManageTeam({
                             <button type="button" className="flex-1 flex items-center gap-3 min-w-0 text-left active:scale-[0.98]" onClick={() => setSelectedDetailItem({ type: "predefinedOnly", data: pre })}>
                               <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
                               <div className="flex-1 min-w-0">
-                                <span className="block truncate font-medium text-white">{name}</span>
+                                <span className="block truncate font-medium text-richblack-25">{name}</span>
                                 <span className="block truncate text-xs text-gray-500">{pre.email}</span>
                               </div>
                             </button>
@@ -1981,7 +1981,7 @@ export default function ManageTeam({
                           >
                             <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <span className="block truncate font-medium text-white">{name}</span>
+                              <span className="block truncate font-medium text-richblack-25">{name}</span>
                               <span className="block truncate text-xs text-gray-500">{m.email}</span>
                             </div>
                             <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">

@@ -309,7 +309,7 @@ export default function ManageSociety() {
   return (
     <div className="min-h-screen darkthemebg pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-4xl">
-        <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-2 mb-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-richblack-25 flex items-center gap-2 mb-2">
           <Users className="h-10 w-10 text-cyan-400" />
           Manage society
         </h1>
@@ -378,7 +378,7 @@ export default function ManageSociety() {
                   // onClick={() => setSelectedDepartment(dept)}
                   className="flex-1 flex items-center justify-between text-left min-w-0"
                 >
-                  <span className="font-medium text-white">{dept}</span>
+                  <span className="font-medium text-richblack-25">{dept}</span>
                   <span className="flex items-center gap-2 text-sm text-gray-400 shrink-0 ml-2">
                     <span className="flex items-center gap-1">
                       {departmentCounts[dept] ?? (
@@ -438,7 +438,7 @@ export default function ManageSociety() {
               >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 shrink-0">
-                  <h2 className="text-lg font-bold text-white">All people</h2>
+                  <h2 className="text-lg font-bold text-richblack-25">All people</h2>
                   <button
                     type="button"
                     onClick={() => {
@@ -513,7 +513,7 @@ export default function ManageSociety() {
                                 onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
                               />
                               <div className="flex-1 min-w-0">
-                                <span className="block truncate font-medium text-white">{name}</span>
+                                <span className="block truncate font-medium text-richblack-25">{name}</span>
                                 <span className="block truncate text-xs text-gray-500">{u.email}</span>
                               </div>
                               <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -549,7 +549,7 @@ export default function ManageSociety() {
                                   onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
                                 />
                                 <div className="flex-1 min-w-0">
-                                  <span className="block truncate font-medium text-white">{name}</span>
+                                  <span className="block truncate font-medium text-richblack-25">{name}</span>
                                   <span className="block truncate text-xs text-gray-500">{pre.email}</span>
                                 </div>
                               </button>
@@ -599,7 +599,7 @@ export default function ManageSociety() {
                                 onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
                               />
                               <div className="flex-1 min-w-0">
-                                <span className="block truncate font-medium text-white">{name}</span>
+                                <span className="block truncate font-medium text-richblack-25">{name}</span>
                                 <span className="block truncate text-xs text-gray-500">{m.email}</span>
                               </div>
                               <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
@@ -677,14 +677,14 @@ export default function ManageSociety() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between p-4 border-b border-gray-500/30">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <h2 className="text-lg font-bold text-richblack-25 flex items-center gap-2">
                   <Printer className="h-5 w-5 text-cyan-400" />
                   Print whole list (all departments)
                 </h2>
                 <button
                   type="button"
                   onClick={() => setPrintAllModalOpen(false)}
-                  className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30"
+                  className="p-2 rounded-lg text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30"
                   aria-label="Close"
                 >
                   <X className="h-5 w-5" />
@@ -714,7 +714,7 @@ export default function ManageSociety() {
                   {EXPORT_COLS.map((k) => (
                     <label
                       key={k}
-                      className="flex items-center gap-2 cursor-pointer text-sm text-gray-200 hover:text-white"
+                      className="flex items-center gap-2 cursor-pointer text-sm text-gray-200 hover:text-richblack-25"
                     >
                       <input
                         type="checkbox"
@@ -731,7 +731,7 @@ export default function ManageSociety() {
                     type="button"
                     onClick={handlePrintAllPDF}
                     disabled={printAllLoading || printAllSelectedFields.length === 0}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-medium text-sm disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-richblack-25 font-medium text-sm disabled:opacity-50"
                   >
                     <FileText className="h-4 w-4" />
                     {printAllLoading ? "Generating…" : "Generate & Download PDF"}
@@ -740,7 +740,7 @@ export default function ManageSociety() {
                     type="button"
                     onClick={handlePrintAllExcel}
                     disabled={printAllLoading || printAllSelectedFields.length === 0}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-medium text-sm disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-richblack-25 font-medium text-sm disabled:opacity-50"
                   >
                     <Download className="h-4 w-4" />
                     {printAllLoading ? "Generating…" : "Generate & Download Excel"}

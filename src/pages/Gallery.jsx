@@ -97,7 +97,7 @@ const setupScroller = (rowRef, speed, direction = "forward") => {
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-6 rounded-2xl">
           <div className="w-full">
-            <h3 className="text-xl font-bold text-white opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 mb-2">
+            <h3 className="text-xl font-bold text-richblack-25 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 mb-2">
               {image.title}
             </h3>
             <div className="w-0 group-hover:w-16 h-0.5 bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-500"></div>
@@ -163,12 +163,12 @@ const setupScroller = (rowRef, speed, direction = "forward") => {
   return (
     <div
       ref={containerRef}
-      className="relative w-full overflow-x-hidden text-white font-nunito bg-[#020617]"
+      className="relative w-full overflow-x-hidden text-richblack-25 font-nunito bg-[#020617]"
     >
       {/* Hero */}
       <section ref={heroRef} className="pt-32 pb-20 relative text-center z-20">
         <div className="max-w-4xl mx-auto px-4">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 font-audiowide">
+          <h1 className="text-5xl md:text-6xl font-bold text-richblack-25 mb-6 font-audiowide">
             Society{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">
               Scrapbook

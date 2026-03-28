@@ -9,7 +9,7 @@ const isVideo = (file) => file?.type?.startsWith("video/") || VIDEO_TYPES.includ
 const SectionTitle = ({ icon, children }) => (
   <div className="flex items-center gap-2 mb-4">
     <span className="text-2xl">{icon}</span>
-    <h2 className="text-lg font-semibold text-white tracking-tight">{children}</h2>
+    <h2 className="text-lg font-semibold text-richblack-25 tracking-tight">{children}</h2>
     <div className="flex-1 h-px bg-gradient-to-r from-cyan-500/40 to-transparent rounded" />
   </div>
 );
@@ -112,7 +112,7 @@ const UploadEventByLink = () => {
     }
   };
 
-  const inputClass = "w-full px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none transition";
+  const inputClass = "w-full px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-richblack-25 placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none transition";
   const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
 
   if (linkStatus === null) {
@@ -127,7 +127,7 @@ const UploadEventByLink = () => {
     return (
       <div className="min-h-screen darkthemebg pt-24 pb-20 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
-          <p className="text-xl font-medium text-white mb-2">Link expired or invalid</p>
+          <p className="text-xl font-medium text-richblack-25 mb-2">Link expired or invalid</p>
           <p className="text-gray-400 mb-6">This upload link has expired or is not valid. Ask for a new link.</p>
           <Link to="/" className="inline-block px-6 py-3 rounded-xl bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 font-medium">
             Go to home
@@ -141,7 +141,7 @@ const UploadEventByLink = () => {
     return (
       <div className="min-h-screen darkthemebg pt-24 pb-20 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
-          <p className="text-xl font-medium text-white mb-2">Event published</p>
+          <p className="text-xl font-medium text-richblack-25 mb-2">Event published</p>
           <p className="text-gray-400 mb-6">Your event has been uploaded successfully and will appear on the Events page.</p>
           <Link to="/events" className="inline-block px-6 py-3 rounded-xl bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 font-medium">
             View events
@@ -158,7 +158,7 @@ const UploadEventByLink = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-sm font-medium mb-3">
             Upload via link
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">Upload event</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-richblack-25 mb-2 tracking-tight">Upload event</h1>
           <p className="text-gray-400">Fill the form below to publish an event. This link expires in 12 hours.</p>
         </div>
 
@@ -223,7 +223,7 @@ const UploadEventByLink = () => {
                   return (
                     <div key={index} className="relative aspect-square rounded-xl overflow-hidden bg-[#252536] border border-gray-500/30">
                       {isVid ? <video src={url} muted playsInline preload="metadata" className="w-full h-full object-cover" /> : <img src={url} alt="" className="w-full h-full object-cover" />}
-                      <button type="button" onClick={() => removeGalleryFile(index)} className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-red-500/90 text-white flex items-center justify-center text-sm font-bold">×</button>
+                      <button type="button" onClick={() => removeGalleryFile(index)} className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-red-500/90 text-richblack-25 flex items-center justify-center text-sm font-bold">×</button>
                     </div>
                   );
                 })}
@@ -277,7 +277,7 @@ const UploadEventByLink = () => {
             </div>
           </section>
 
-          <button type="submit" disabled={loading} className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-semibold shadow-lg shadow-cyan-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+          <button type="submit" disabled={loading} className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-richblack-25 font-semibold shadow-lg shadow-cyan-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
             {loading ? "Publishing…" : "Publish event"}
           </button>
         </form>

@@ -58,8 +58,8 @@ function Navbar() {
   const navLinkClass = ({ isActive }) =>
     `flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
       isActive
-        ? "text-white bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30"
-        : "text-gray-200 hover:text-white hover:bg-green-700/50 backdrop-blur-sm"
+        ? "text-richblack-25 bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30"
+        : "text-gray-200 hover:text-richblack-25 hover:bg-green-700/50 backdrop-blur-sm"
     }`;
 
   const mobileNavLinkClass = ({ isActive }) =>
@@ -170,7 +170,7 @@ font-montserrat opacity-90">
                 </button>
               </NavLink>
               <NavLink to="/signup">
-                <button className="py-2 px-5 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-xl hover:shadow-green-500/40 text-sm">
+                <button className="py-2 px-5 bg-gradient-to-r from-green-500 to-emerald-500 text-richblack-25 font-semibold rounded-full hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-xl hover:shadow-green-500/40 text-sm">
                   Sign up
                 </button>
               </NavLink>
@@ -363,7 +363,7 @@ font-montserrat opacity-90">
                   onClick={() => setIsMenuOpen(false)}
                   className="glowing-btn-wrapper blue rounded-full inline-block"
                 >
-                  <button className="py-3 px-8 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg">
+                  <button className="py-3 px-8 bg-gradient-to-r from-green-500 to-emerald-500 text-richblack-25 font-semibold rounded-full text-lg">
                     Sign up
                   </button>
                 </NavLink>

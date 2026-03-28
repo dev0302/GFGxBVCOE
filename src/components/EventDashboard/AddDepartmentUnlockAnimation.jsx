@@ -158,7 +158,7 @@ export function AddDepartmentUnlockAnimation({ isActive, onComplete }) {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="text-2xl font-semibold text-white"
+                    className="text-2xl font-semibold text-richblack-25"
                   >
                     Adding...
                   </motion.h2>
@@ -171,7 +171,7 @@ export function AddDepartmentUnlockAnimation({ isActive, onComplete }) {
                     className="space-y-2"
                   >
                     <motion.h2
-                      className="text-2xl font-semibold text-white"
+                      className="text-2xl font-semibold text-richblack-25"
                       animate={{ scale: [1, 1.02, 1] }}
                       transition={{ duration: 0.4 }}
                     >

@@ -36,7 +36,7 @@ function NewCard({ person }) {
 
   return (
     <>
-      <div className="flex justify-center items-center font-nunito text-white">
+      <div className="flex justify-center items-center font-nunito text-richblack-25">
         <div className={`relative ${loaded ? "loaded" : ""} w-[280px] h-[420px]`}> 
           {/* Glowing border effect */}
           <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-3xl opacity-20 blur-sm transition-opacity duration-300 group-hover:opacity-40"></div>
@@ -70,7 +70,7 @@ function NewCard({ person }) {
 
             <div className="p-5 py-6 flex flex-col gap-1 flex-grow">
               <div>
-                <p className="text-lg font-bold font-montserrat flex items-center gap-1.5 text-white">
+                <p className="text-lg font-bold font-montserrat flex items-center gap-1.5 text-richblack-25">
                   {name}
                   <span><img src={verify} className="h-4" alt="verified" /></span>
                 </p>
@@ -87,7 +87,7 @@ function NewCard({ person }) {
                     <button
                       type="button"
                       onClick={() => setEmailModalOpen(true)}
-                      className="transition-all hover:text-white hover:[filter:drop-shadow(0_0_4px_theme(colors.cyan.400))] p-0.5 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
+                      className="transition-all hover:text-richblack-25 hover:[filter:drop-shadow(0_0_4px_theme(colors.cyan.400))] p-0.5 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
                       title="Show email"
                       aria-label="Show email"
                     >
@@ -96,13 +96,13 @@ function NewCard({ person }) {
                   )}
                   {linkedinLink && linkedinLink !== "nil" && (
                     <a href={linkedinLink} target="_blank" rel="noopener noreferrer"
-                       className="transition-all hover:text-white hover:[filter:drop-shadow(0_0_4px_theme(colors.cyan.400))]">
+                       className="transition-all hover:text-richblack-25 hover:[filter:drop-shadow(0_0_4px_theme(colors.cyan.400))]">
                       <LinkedInIcon />
                     </a>
                   )}
                   {instaLink && instaLink !== "nil" && (
                     <a href={instaLink} target="_blank" rel="noopener noreferrer"
-                       className="transition-all hover:text-white hover:[filter:drop-shadow(0_0_4px_theme(colors.cyan.400))]">
+                       className="transition-all hover:text-richblack-25 hover:[filter:drop-shadow(0_0_4px_theme(colors.cyan.400))]">
                       <InstagramIcon />
                     </a>
                   )}
@@ -121,7 +121,7 @@ function NewCard({ person }) {
                     transition-all duration-200
                     hover:bg-cyan-500/20
                     hover:border-cyan-400/50
-                    hover:text-white
+                    hover:text-richblack-25
                   "
                 >
                   View Timeline <img src={activity} className="h-4 invert" alt="activity" />
@@ -149,11 +149,11 @@ function NewCard({ person }) {
             <h3 id="email-modal-title" className="text-sm font-semibold text-cyan-400/90 uppercase tracking-wider mb-3">
               Email
             </h3>
-            <p className="text-white font-medium break-all">{email}</p>
+            <p className="text-richblack-25 font-medium break-all">{email}</p>
             <button
               type="button"
               onClick={() => setEmailModalOpen(false)}
-              className="mt-4 w-full py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold transition-colors"
+              className="mt-4 w-full py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold transition-colors"
             >
               Close
             </button>

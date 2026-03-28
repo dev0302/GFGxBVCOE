@@ -240,7 +240,7 @@ export default function GenerateQR() {
     <div className="flex min-h-full w-full justify-center bg-[#1e1e2f] px-4 pb-20 sm:px-6 lg:px-10">
       <div className="w-full max-w-3xl py-10">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Generate QR</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-richblack-25 sm:text-4xl">Generate QR</h1>
           <p className="mt-2 text-sm text-gray-400">
             Enter URL and title, then click Generate to reveal two QR designs with smooth animation.
           </p>
@@ -273,7 +273,7 @@ export default function GenerateQR() {
                     }
                   }}
                   placeholder="https://example.com"
-                  className="w-full bg-transparent text-sm text-white outline-none placeholder:text-gray-500"
+                  className="w-full bg-transparent text-sm text-richblack-25 outline-none placeholder:text-gray-500"
                 />
               </div>
             </label>
@@ -291,7 +291,7 @@ export default function GenerateQR() {
                   }
                 }}
                 placeholder="GFG BVCOE"
-                className="w-full rounded-xl border border-gray-500/35 bg-[#252536] px-4 py-2.5 text-sm text-white outline-none transition-colors placeholder:text-gray-500 focus:border-cyan-400"
+                className="w-full rounded-xl border border-gray-500/35 bg-[#252536] px-4 py-2.5 text-sm text-richblack-25 outline-none transition-colors placeholder:text-gray-500 focus:border-cyan-400"
               />
               {generated && titleDirty && (
                 <div className="mt-3">
@@ -365,7 +365,7 @@ export default function GenerateQR() {
               >
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
-                    <h2 className="text-xl font-semibold text-white">Normal QR</h2>
+                    <h2 className="text-xl font-semibold text-richblack-25">Normal QR</h2>
                     <p className="text-xs text-gray-400">Classic high-contrast QR code</p>
                   </div>
                   <button
@@ -392,7 +392,7 @@ export default function GenerateQR() {
               >
                 <div className="relative z-10 mb-4 flex items-start justify-between gap-3">
                   <div>
-                    <h2 className="flex items-center gap-2 text-xl font-semibold text-white">
+                    <h2 className="flex items-center gap-2 text-xl font-semibold text-richblack-25">
                       <Zap className="h-4 w-4 text-[#2f8d46]" />
                       Stylish QR
                     </h2>
@@ -434,7 +434,7 @@ export default function GenerateQR() {
                       </div>
 
                       <div className="text-center">
-                        <h3 className="text-xl font-bold uppercase italic tracking-widest text-white">
+                        <h3 className="text-xl font-bold uppercase italic tracking-widest text-richblack-25">
                           {generated.title || "GFG BVCOE"}
                         </h3>
                         <div className="mt-2 flex items-center justify-center gap-2 text-[#2f8d46]">
@@ -490,7 +490,7 @@ export default function GenerateQR() {
               className="w-full max-w-md rounded-2xl border border-white/15 bg-gradient-to-br from-[#1f2032] to-[#23243a] p-6 shadow-2xl"
             >
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-sm font-semibold tracking-wide text-white">
+                <h3 className="text-sm font-semibold tracking-wide text-richblack-25">
                   {downloadingType === "stylish" ? "Generating Stylish Poster" : "Generating QR Image"}
                 </h3>
                 <span className="text-[10px] uppercase tracking-wider text-cyan-300">

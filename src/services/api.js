@@ -80,11 +80,19 @@ export async function getEvents() {
   return res.json(); // { success, data }
 }
 
-/** Upcoming events (public). Past events are auto-removed on fetch. */
+/** Upcoming events (public). Past / soft-removed rows are hidden; server purges after 30 days. */
 export async function getUpcomingEvents() {
   const res = await fetch(`${BASE}/api/v1/events/upcoming`);
   const data = await res.json().catch(() => ({ success: false, data: [] }));
   if (!res.ok) throw new Error(data.message || 'Failed to fetch upcoming events');
+  return data;
+}
+
+/** Dashboard upload import: future upcoming + retained (past or removed) within 30 days. Requires auth + event upload access. */
+export async function getUpcomingEventsForImport() {
+  const res = await authFetch("/api/v1/events/upcoming/import-pool");
+  const data = await res.json().catch(() => ({ success: false, data: [] }));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch upcoming events for import");
   return data;
 }
 

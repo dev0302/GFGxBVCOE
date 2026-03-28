@@ -99,7 +99,7 @@ const Contact = () => {
   };
 
     return (
-        <div ref={containerRef} className="min-h-screen darkthemebg overflow-hidden text-white font-nunito py-20 px-4 sm:px-6 lg:px-8">
+        <div ref={containerRef} className="min-h-screen darkthemebg overflow-hidden text-richblack-25 font-nunito py-20 px-4 sm:px-6 lg:px-8">
             <div className="fixed inset-0 opacity-5">
                 <div
                     className="absolute inset-0"
@@ -112,7 +112,7 @@ const Contact = () => {
 
             <div className="relative z-10 max-w-6xl mx-auto mt-10">
                 <div className="text-center mb-16">
-                    <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 font-audiowide tracking-tight">
+                    <h1 className="text-4xl md:text-5xl font-bold text-richblack-25 mb-4 font-audiowide tracking-tight">
                          Get In <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">Touch</span>
                     </h1>
                     <p className="text-lg md:text-xl text-richblack-100 max-w-2xl mx-auto leading-relaxed">
@@ -134,7 +134,7 @@ const Contact = () => {
                                     value={formData.name}
                                     onChange={handleChange}
                                     required
-                                    className="w-full bg-slate-400 bg-opacity-10 rounded-lg px-4 py-3 text-white placeholder-richblack-100 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all duration-300"
+                                    className="w-full bg-slate-400 bg-opacity-10 rounded-lg px-4 py-3 text-richblack-25 placeholder-richblack-100 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all duration-300"
                                     placeholder="Your Name"
                                 />
                             </div>
@@ -147,7 +147,7 @@ const Contact = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     required
-                                    className="w-full bg-slate-400 bg-opacity-10 rounded-lg px-4 py-3 text-white placeholder-richblack-100 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all duration-300"
+                                    className="w-full bg-slate-400 bg-opacity-10 rounded-lg px-4 py-3 text-richblack-25 placeholder-richblack-100 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all duration-300"
                                     placeholder="you@example.com"
                                 />
                             </div>
@@ -160,7 +160,7 @@ const Contact = () => {
                                     value={formData.message}
                                     onChange={handleChange}
                                     required
-                                    className="w-full bg-slate-400 bg-opacity-10 rounded-lg px-4 py-3 text-white placeholder-richblack-100 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all duration-300"
+                                    className="w-full bg-slate-400 bg-opacity-10 rounded-lg px-4 py-3 text-richblack-25 placeholder-richblack-100 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all duration-300"
                                     placeholder="Your message here..."
                                 ></textarea>
                             </div>
@@ -169,7 +169,7 @@ const Contact = () => {
                                     <button
                                     type="submit"
                                     disabled={status === 'sending'}
-                                    className="w-full px-8 py-4 bg-cyan-700 text-white font-semibold text-lg rounded-full transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full px-8 py-4 bg-cyan-700 text-richblack-25 font-semibold text-lg rounded-full transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                     {status === 'sending' ? 'Sending...' : 'Send Message'}
                                     </button>
@@ -192,7 +192,7 @@ const Contact = () => {
                             <div className="space-y-6">
                                 <a href="https://www.google.com/maps/search/?api=1&query=BVCOE+New+Delhi" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-4 group">
                                     <div className="w-12 h-12 bg-cyan-600 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                                        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                        <svg className="w-7 h-7 text-richblack-25" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-bold text-richblack-25 group-hover:text-gray-50 transition-colors duration-300">Our Location</h3>
@@ -201,10 +201,10 @@ const Contact = () => {
                                 </a>
                                 <a href="mailto:geeksforgeeksbvp@gmail.com" className="flex items-center space-x-4 group">
                                     <div className="w-12 h-12 bg-cyan-600 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                                        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                        <svg className="w-7 h-7 text-richblack-25" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-bold text-white group-hover:text-teal-300 transition-colors duration-300">Email Us</h3>
+                                        <h3 className="text-xl font-bold text-richblack-25 group-hover:text-teal-300 transition-colors duration-300">Email Us</h3>
                                         <p className="text-blue-200">geeksforgeeksbvp@gmail.com</p>
                                     </div>
                                 </a>

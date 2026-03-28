@@ -64,7 +64,7 @@ export function Accordion({
               aria-controls={`accordion-content-${index}`}
               id={`accordion-trigger-${index}`}
             >
-              <span className="font-semibold text-white">{item.title}</span>
+              <span className="font-semibold text-richblack-25">{item.title}</span>
               <ChevronDown
                 className={cn(
                   'h-5 w-5 shrink-0 text-gray-400 transition-transform duration-200',

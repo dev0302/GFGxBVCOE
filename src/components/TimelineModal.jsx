@@ -49,7 +49,7 @@ const TimelineModal = ({ person, onClose }) => {
         onClick={(e) => e.stopPropagation()}
         className="
           relative w-[90%] sm:w-full max-w-md max-h-[90vh]
-          rounded-3xl p-6 sm:p-8 text-white
+          rounded-3xl p-6 sm:p-8 text-richblack-25
           bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e]
           backdrop-blur-sm border border-gray-300/20 font-nunito
           flex flex-col
@@ -81,7 +81,7 @@ const TimelineModal = ({ person, onClose }) => {
               <div key={index} className="relative mb-8 last:mb-0">
                 <div className="absolute -left-[31px] sm:-left-[39px] top-1 h-4 w-4 rounded-full bg-cyan-400 ring-4 ring-[#2c2c3e]" />
                 <p className="text-xs font-semibold uppercase tracking-wider text-cyan-400">{item.year}</p>
-                <h3 className="text-md font-bold text-white font-montserrat mt-1">{item.role}</h3>
+                <h3 className="text-md font-bold text-richblack-25 font-montserrat mt-1">{item.role}</h3>
                 <p className="mb-2 text-sm font-medium text-gray-300">{item.project}</p>
                 {item.description && <p className="text-sm text-gray-400">{item.description}</p>}
               </div>
@@ -92,7 +92,7 @@ const TimelineModal = ({ person, onClose }) => {
         </div>
 
         {/* Close */}
-        <button onClick={handleClose} className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full text-white bg-cyan-500/20 border border-cyan-500/30 hover:bg-cyan-500/40 hover:scale-110 transition">
+        <button onClick={handleClose} className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full text-richblack-25 bg-cyan-500/20 border border-cyan-500/30 hover:bg-cyan-500/40 hover:scale-110 transition">
           ✕
         </button>
       </div>

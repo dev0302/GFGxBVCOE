@@ -858,22 +858,77 @@ const removeForceDeleteDepartment = async (req, res) => {
   }
 };
 
-// ---------- Upcoming events (auto-delete on event date) ----------
+// ---------- Upcoming events (soft-remove from UI; hard-delete after retention) ----------
 const UPCOMING_FOLDER = "gfg-events/upcoming";
+/** Days to keep removed / past-due upcoming rows (and poster refs) before DB + Cloudinary purge. */
+const UPCOMING_SOFT_RETENTION_DAYS = 30;
+
+const purgeExpiredUpcomingEvents = async () => {
+  const cutoff = new Date(Date.now() - UPCOMING_SOFT_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  const expired = await UpcomingEvent.find({
+    removedFromListAt: { $ne: null, $lte: cutoff },
+  }).lean();
+  for (const ev of expired) {
+    if (ev.poster) await deleteImageByUrl(ev.poster);
+  }
+  if (expired.length > 0) {
+    await UpcomingEvent.deleteMany({
+      removedFromListAt: { $ne: null, $lte: cutoff },
+    });
+  }
+};
 
 const getUpcomingEvents = async (req, res) => {
   try {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
-    const toRemove = await UpcomingEvent.find({ date: { $lt: startOfToday } }).lean();
-    for (const ev of toRemove) {
-      if (ev.poster) await deleteImageByUrl(ev.poster);
-    }
-    await UpcomingEvent.deleteMany({ date: { $lt: startOfToday } });
-    const list = await UpcomingEvent.find({ date: { $gte: startOfToday } }).sort({ date: 1 }).lean();
+
+    await purgeExpiredUpcomingEvents();
+
+    // Past calendar dates: hide from list and start retention window (same as manual delete).
+    await UpcomingEvent.updateMany(
+      { date: { $lt: startOfToday }, removedFromListAt: null },
+      { $set: { removedFromListAt: startOfToday } }
+    );
+
+    const list = await UpcomingEvent.find({
+      removedFromListAt: null,
+      date: { $gte: startOfToday },
+    })
+      .sort({ date: 1 })
+      .lean();
     return res.status(200).json({ success: true, data: list });
   } catch (error) {
     console.error("getUpcomingEvents error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/** Auth: future upcoming + rows still in 30-day retention (past date or removed from list), for “upload from upcoming” picker. */
+const getUpcomingEventsForImport = async (req, res) => {
+  try {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const retentionStart = new Date(Date.now() - UPCOMING_SOFT_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+
+    await purgeExpiredUpcomingEvents();
+
+    await UpcomingEvent.updateMany(
+      { date: { $lt: startOfToday }, removedFromListAt: null },
+      { $set: { removedFromListAt: startOfToday } }
+    );
+
+    const list = await UpcomingEvent.find({
+      $or: [
+        { removedFromListAt: null, date: { $gte: startOfToday } },
+        { removedFromListAt: { $gte: retentionStart } },
+      ],
+    })
+      .sort({ date: 1 })
+      .lean();
+    return res.status(200).json({ success: true, data: list });
+  } catch (error) {
+    console.error("getUpcomingEventsForImport error:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -969,15 +1024,20 @@ const deleteUpcomingEvent = async (req, res) => {
     if (!event) {
       return res.status(404).json({ success: false, message: "Upcoming event not found." });
     }
-    if (event.poster) {
-      await deleteImageByUrl(event.poster);
+    if (event.removedFromListAt) {
+      return res.status(400).json({ success: false, message: "This upcoming event is already removed." });
     }
     const title = event.title;
-    await UpcomingEvent.findByIdAndDelete(id);
+    // Soft-remove: stay in DB for UPCOMING_SOFT_RETENTION_DAYS (poster deleted on final purge).
+    event.removedFromListAt = new Date();
+    await event.save();
     if (req.user?.id) {
       await logActivity(req.user.id, "upcoming_event_delete", "event", { title }, id, "UpcomingEvent");
     }
-    return res.status(200).json({ success: true, message: "Deleted." });
+    return res.status(200).json({
+      success: true,
+      message: `Removed from list. Data is kept for ${UPCOMING_SOFT_RETENTION_DAYS} days, then deleted automatically.`,
+    });
   } catch (error) {
     console.error("deleteUpcomingEvent error:", error);
     return res.status(500).json({ success: false, message: error.message });
@@ -1008,6 +1068,7 @@ module.exports = {
   requireCanManageForceDeleteConfig,
   requireCanForceDeleteEvent,
   getUpcomingEvents,
+  getUpcomingEventsForImport,
   createUpcomingEvent,
   updateUpcomingEvent,
   deleteUpcomingEvent,

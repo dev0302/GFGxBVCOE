@@ -29,7 +29,7 @@ const ForgotPassword = () => {
   return (
     <div className="min-h-screen darkthemebg pt-24 pb-16 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] border border-gray-500/30 rounded-2xl p-8 shadow-xl">
-        <h1 className="text-2xl font-bold text-white mb-2">
+        <h1 className="text-2xl font-bold text-richblack-25 mb-2">
           {!emailSent ? "Reset your password" : "Check your email"}
         </h1>
         <p className="text-gray-400 text-sm mb-6">
@@ -46,7 +46,7 @@ const ForgotPassword = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none"
+                className="w-full px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-richblack-25 placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none"
                 placeholder="you@example.com"
                 required
               />
@@ -55,7 +55,7 @@ const ForgotPassword = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 text-white font-semibold disabled:opacity-50"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 text-richblack-25 font-semibold disabled:opacity-50"
           >
             {loading ? "Sending…" : !emailSent ? "Send reset link" : "Resend email"}
           </button>

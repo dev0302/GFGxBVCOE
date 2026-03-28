@@ -146,7 +146,7 @@ const GFGBentoGrid = () => {
               <span className="text-sm font-medium text-green-300 uppercase tracking-wider">Featured Events</span>
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-richblack-25 mb-6">
               Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">Highlights</span>
             </h2>
             <p className="text-xl text-green-100 max-w-3xl mx-auto leading-relaxed font-nunito">
@@ -207,7 +207,7 @@ const GFGBentoGrid = () => {
             </span>
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-richblack-25 mb-6">
             Our{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
               Highlights
@@ -352,7 +352,7 @@ const GFGBentoGrid = () => {
             <div className="blue rounded-full">
               <button
                 onClick={handleViewAllEvents}
-                  className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold rounded-[18px] text-lg transition-all duration-300 flex justify-center items-center group"
+                  className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-richblack-25 font-semibold rounded-[18px] text-lg transition-all duration-300 flex justify-center items-center group"
               >
                 <span className="flex items-center justify-center">
                   View All Events 

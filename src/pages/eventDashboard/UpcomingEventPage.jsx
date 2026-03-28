@@ -36,7 +36,8 @@ export default function UpcomingEventPage() {
   const [faqs, setFaqs] = useState([]);
   const [posterFile, setPosterFile] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [deleteConfirmItem, setDeleteConfirmItem] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const addFaq = () => setFaqs((p) => [...p, initialFaq()]);
   const removeFaq = (index) => setFaqs((p) => p.filter((_, i) => i !== index));
@@ -134,14 +135,23 @@ export default function UpcomingEventPage() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const closeDeleteConfirm = () => {
+    if (!deleting) setDeleteConfirmItem(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmItem?._id) return;
+    const id = deleteConfirmItem._id;
+    setDeleting(true);
     try {
       await deleteUpcomingEvent(id);
       toast.success("Deleted");
-      setDeleteConfirmId(null);
+      setDeleteConfirmItem(null);
       load();
     } catch (err) {
       toast.error(err.message || "Failed to delete");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -162,9 +172,9 @@ export default function UpcomingEventPage() {
     <div className="flex min-h-full w-full justify-center bg-[#1e1e2f] pb-20 px-4 sm:px-6 lg:px-10">
       <div className="w-full max-w-3xl py-10 flex flex-col gap-10">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">Upcoming event</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-richblack-25">Upcoming event</h1>
           <p className="mt-2 text-gray-400 text-sm">
-            Events shown below hero on Home and Events page. Past events are auto-removed on the event date.
+            Events shown below hero on Home and Events page. Past dates hide from the public list right away; records stay in the database for 30 days (for publishing from upcoming), then are removed automatically.
           </p>
         </div>
 
@@ -206,7 +216,7 @@ export default function UpcomingEventPage() {
                       </div>
                     )}
                     <div className="min-w-0">
-                      <span className="font-semibold text-white block truncate">{item.title}</span>
+                      <span className="font-semibold text-richblack-25 block truncate">{item.title}</span>
                       <span className="text-xs text-cyan-400/90 block">{formatDate(item.date)}</span>
                       {item.description && (
                         <span className="text-xs text-gray-500 line-clamp-2 max-w-xl mt-0.5">
@@ -224,22 +234,15 @@ export default function UpcomingEventPage() {
                     >
                       <Edit3 className="h-4 w-4" />
                     </button>
-                    {deleteConfirmId === item._id ? (
-                      <span className="flex items-center gap-2 text-sm px-2">
-                        <span className="text-gray-400">Delete?</span>
-                        <button type="button" onClick={() => handleDelete(item._id)} className="text-red-400 hover:text-red-300 font-medium">Yes</button>
-                        <button type="button" onClick={() => setDeleteConfirmId(null)} className="text-gray-400 hover:text-white">No</button>
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setDeleteConfirmId(item._id)}
-                        className="p-2.5 rounded-xl text-red-400 hover:bg-red-500/20 transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => setDeleteConfirmItem(item)}
+                      disabled={deleting}
+                      className="p-2.5 rounded-xl text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 </motion.li>
               ))}
@@ -247,6 +250,64 @@ export default function UpcomingEventPage() {
           )}
         </section>
       </div>
+
+      <AnimatePresence>
+        {deleteConfirmItem && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[55] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm"
+            onClick={closeDeleteConfirm}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-upcoming-title"
+            aria-describedby="delete-upcoming-desc"
+          >
+            <motion.div
+              initial={{ scale: 0.96, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.96, opacity: 0 }}
+              transition={{ type: "spring", damping: 26, stiffness: 320 }}
+              className="w-full max-w-md rounded-2xl border border-gray-500/30 bg-[#1e1e2f] p-5 shadow-2xl sm:p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-4 flex items-start gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-500/20 text-red-400">
+                  <Trash2 className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1 pt-0.5">
+                  <h3 id="delete-upcoming-title" className="text-lg font-semibold text-richblack-25">
+                    Delete upcoming event?
+                  </h3>
+                  <p id="delete-upcoming-desc" className="mt-2 text-sm leading-relaxed text-gray-400">
+                    <span className="font-medium text-gray-300 line-clamp-3 break-words">&ldquo;{deleteConfirmItem.title}&rdquo;</span> disappears from lists immediately. A copy stays in the database for{" "}
+                    <span className="font-medium text-gray-300">30 days</span> (so you can still use it when publishing from upcoming), then it is deleted automatically.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
+                <button
+                  type="button"
+                  onClick={closeDeleteConfirm}
+                  disabled={deleting}
+                  className="w-full rounded-xl border border-gray-500/50 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-500/20 disabled:opacity-50 sm:w-auto sm:px-5"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDelete}
+                  disabled={deleting}
+                  className="w-full rounded-xl bg-red-500 py-3 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50 sm:w-auto sm:px-5"
+                >
+                  {deleting ? "Deleting…" : "Delete"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {formOpen && (
@@ -268,8 +329,8 @@ export default function UpcomingEventPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="sticky top-0 flex items-center justify-between p-5 border-b border-gray-500/30 bg-[#1e1e2f]/98 backdrop-blur-sm z-10 rounded-t-2xl">
-                <h2 className="text-lg font-bold text-white">{editItem ? "Edit upcoming event" : "Add upcoming event"}</h2>
-                <button type="button" onClick={closeForm} className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors">
+                <h2 className="text-lg font-bold text-richblack-25">{editItem ? "Edit upcoming event" : "Add upcoming event"}</h2>
+                <button type="button" onClick={closeForm} className="p-2 rounded-xl text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30 transition-colors">
                   <X className="h-5 w-5" />
                 </button>
               </div>
@@ -433,7 +494,7 @@ export default function UpcomingEventPage() {
                   <button type="button" onClick={closeForm} className="flex-1 py-3 rounded-xl border border-gray-500/50 text-gray-300 hover:bg-gray-500/20 font-medium transition-colors">
                     Cancel
                   </button>
-                  <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold disabled:opacity-50 transition-colors">
+                  <button type="submit" disabled={saving} className="flex-1 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold disabled:opacity-50 transition-colors">
                     {saving ? "Saving…" : editItem ? "Update" : "Add"}
                   </button>
                 </div>

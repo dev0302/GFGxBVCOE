@@ -101,7 +101,7 @@ export default function ManageEvents() {
     <div className="flex min-h-full w-full justify-center bg-[#1e1e2f] pb-20 px-3 sm:px-6 md:px-8 lg:px-10">
       <div className="w-full max-w-3xl py-6 sm:py-8 md:py-10 flex flex-col gap-6 sm:gap-8 md:gap-10">
         <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-white">Manage uploaded events</h1>
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-richblack-25">Manage uploaded events</h1>
           <p className="mt-1.5 sm:mt-2 text-gray-400 text-xs sm:text-sm">
             Only events uploaded through this dashboard. Hardcoded events on the Events page are not listed here.
           </p>
@@ -124,14 +124,14 @@ export default function ManageEvents() {
                       type="button"
                       onClick={() => openForceDeleteConfirm(ev)}
                       disabled={forceDeletingId === ev._id}
-                      className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 px-2 py-1 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] rounded-md bg-rose-600/40 text-white hover:bg-rose-600/80 font-medium disabled:opacity-50"
+                      className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 px-2 py-1 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] rounded-md bg-rose-600/40 text-richblack-25 hover:bg-rose-600/80 font-medium disabled:opacity-50"
                       title="Delete permanently now (no 10-day delay)"
                     >
                       {forceDeletingId === ev._id ? "Deleting…" : "Force delete"}
                     </button>
                   )}
                   <div className="min-w-0 flex-1 order-1">
-                    <span className="font-medium text-white block truncate text-sm sm:text-base">{ev.title}</span>
+                    <span className="font-medium text-richblack-25 block truncate text-sm sm:text-base">{ev.title}</span>
                     <span className="text-xs text-gray-400 block mt-0.5 sm:mt-0">
                       {ev.date} · {ev.category}
                       {ev.scheduledDeleteAt && <span className="ml-1 sm:ml-2 text-amber-400">· Deletes {formatScheduledDate(ev.scheduledDeleteAt)}</span>}
@@ -164,12 +164,12 @@ export default function ManageEvents() {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 shrink-0">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold text-white">Delete event?</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-richblack-25">Delete event?</h3>
               </div>
               <p className="text-gray-400 text-xs sm:text-sm mb-4 sm:mb-6">This event will stay in the database for 10 days. After 10 days it will be automatically deleted if not cancelled. You can cancel the deletion anytime before then.</p>
               <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 justify-end">
                 <button type="button" onClick={closeDeleteConfirm} className="w-full sm:w-auto px-3 py-2 sm:px-4 rounded-lg border border-gray-500/50 text-gray-300 hover:bg-gray-500/20 font-medium text-sm sm:text-base">Cancel</button>
-                <button type="button" onClick={handleConfirmScheduleDelete} className="w-full sm:w-auto px-3 py-2 sm:px-4 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium text-sm sm:text-base">Delete</button>
+                <button type="button" onClick={handleConfirmScheduleDelete} className="w-full sm:w-auto px-3 py-2 sm:px-4 rounded-lg bg-red-500 text-richblack-25 hover:bg-red-600 font-medium text-sm sm:text-base">Delete</button>
               </div>
             </div>
           </div>
@@ -182,12 +182,12 @@ export default function ManageEvents() {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-rose-600/30 flex items-center justify-center text-rose-400 shrink-0">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold text-white">Force delete event?</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-richblack-25">Force delete event?</h3>
               </div>
               <p className="text-gray-400 text-xs sm:text-sm mb-4 sm:mb-6">This will permanently delete the event from the database immediately. This cannot be undone.</p>
               <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 justify-end">
                 <button type="button" onClick={closeForceDeleteConfirm} className="w-full sm:w-auto px-3 py-2 sm:px-4 rounded-lg border border-gray-500/50 text-gray-300 hover:bg-gray-500/20 font-medium text-sm sm:text-base">Cancel</button>
-                <button type="button" onClick={handleConfirmForceDelete} className="w-full sm:w-auto px-3 py-2 sm:px-4 rounded-lg bg-rose-600 text-white hover:bg-rose-700 font-medium text-sm sm:text-base">Force delete</button>
+                <button type="button" onClick={handleConfirmForceDelete} className="w-full sm:w-auto px-3 py-2 sm:px-4 rounded-lg bg-rose-600 text-richblack-25 hover:bg-rose-700 font-medium text-sm sm:text-base">Force delete</button>
               </div>
             </div>
           </div>

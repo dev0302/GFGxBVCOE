@@ -132,8 +132,8 @@ const Events = () => {
 
   return (
     
-      loading ? <div className="flex items-center justify-center min-h-screen text-white text-2xl">
-    <Spinner className="size-4 text-white animate-spin" />
+      loading ? <div className="flex items-center justify-center min-h-screen text-richblack-25 text-2xl">
+    <Spinner className="size-4 text-richblack-25 animate-spin" />
   </div>
        :
         (
@@ -160,7 +160,7 @@ const Events = () => {
                 </span>
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
               </div>
-              <h1 className="font-audiowide text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6">
+              <h1 className="font-audiowide text-4xl sm:text-5xl md:text-6xl font-bold text-richblack-25 mb-6">
                 Discover Our{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
                   Events
@@ -178,7 +178,7 @@ const Events = () => {
           {/* Events Grid */}
           <section
             ref={eventsRef}
-            className="py-16 md:py-18 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] font-['Inter'] text-white w-[95%] sm:w-11/12 mx-auto"
+            className="py-16 md:py-18 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] font-['Inter'] text-richblack-25 w-[95%] sm:w-11/12 mx-auto"
           >
             <div className=" mx-auto w-[98%] px-4 sm:px-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 gap-y-16 md:gap-20 max events-grid">
@@ -203,7 +203,7 @@ const Events = () => {
                         rounded-lg border border-white/10 
                         mb-4 self-start">
                           
-                          <span className="text-xs sm:text-xs font-normal text-white/80 font-nunito">
+                          <span className="text-xs sm:text-xs font-normal text-richblack-25/80 font-nunito">
                             {event.category}
                           </span>
 
@@ -231,7 +231,7 @@ const Events = () => {
                           <div className=" green rounded-lg w-full">
                             <button
                               onClick={() => handleKnowMoreClick(event)}
-                              className="w-full px-6 py-2.5 bg-cyan-700 text-white font-semibold rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50 font-nunito flex items-center justify-center gap-2"
+                              className="w-full px-6 py-2.5 bg-cyan-700 text-richblack-25 font-semibold rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50 font-nunito flex items-center justify-center gap-2"
                             >
                               Know More
                             </button>
@@ -240,7 +240,7 @@ const Events = () => {
                             <div className="blue rounded-lg w-full">
                               <button
                                 onClick={() => navigate(getLeaderboardLink(event))}
-                                className="w-full px-6 py-2.5 bg-slate-700 text-white font-semibold rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50 font-nunito flex items-center justify-center gap-2"
+                                className="w-full px-6 py-2.5 bg-slate-700 text-richblack-25 font-semibold rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50 font-nunito flex items-center justify-center gap-2"
                               >
                                 <Trophy size={16} className="text-amber-400" />
                                 Leaderboard
@@ -260,7 +260,7 @@ const Events = () => {
           <section className="py-16 md:py-20 relative">
             <div className="container mx-auto px-4 sm:px-6 text-center">
               <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-3xl p-8 md:p-12">
-                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+                <h2 className="text-2xl sm:text-3xl font-bold text-richblack-25 mb-4">
                   Want to Host an Event?
                 </h2>
                 <p className="text-base sm:text-lg text-green-100 mb-8 max-w-2xl mx-auto">
@@ -270,7 +270,7 @@ const Events = () => {
                 <div className="glowing-btn-wrapper green rounded-full">
                   <button
                     onClick={handleNavigateToContact}
-                    className="px-8 py-4 bg-cyan-700 text-white font-semibold rounded-full text-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50"
+                    className="px-8 py-4 bg-cyan-700 text-richblack-25 font-semibold rounded-full text-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50"
                   >
                     Contact Us
                   </button>

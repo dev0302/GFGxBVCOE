@@ -70,7 +70,7 @@ const Footer = () => {
               loading="lazy"
               className="w-[55px] h-[55px] rounded-full border-green-400 border-4 object-cover"
             />
-            <h2 className="text-2xl font-bold text-white m-0">GFG Society</h2>
+            <h2 className="text-2xl font-bold text-richblack-25 m-0">GFG Society</h2>
             <p className="text-[0.95rem] opacity-80 leading-6 text-[#cbd5e1]">
               Igniting innovation. Inspiring change.
             </p>
@@ -148,7 +148,7 @@ const Footer = () => {
                       className="relative h-14 w-14 rounded-full border-2 border-white/20 object-cover bg-slate-800 p-0.5 shadow-xl"
                     />
                   </div>
-                  <span className="text-sm font-medium text-white/80 group-hover:text-[#38bdf8] transition-colors duration-300 tracking-wide">
+                  <span className="text-sm font-medium text-richblack-25/80 group-hover:text-[#38bdf8] transition-colors duration-300 tracking-wide">
                     {person.name}
                   </span>
                 </a>
@@ -180,7 +180,7 @@ const Footer = () => {
                       className="relative h-12 w-12 rounded-full border-2 border-white/20 object-cover bg-slate-800 p-0.5 shadow-xl"
                     />
                   </div>
-                  <span className="text-sm font-medium text-white/80 group-hover:text-emerald-400 transition-colors duration-300 tracking-wide">
+                  <span className="text-sm font-medium text-richblack-25/80 group-hover:text-emerald-400 transition-colors duration-300 tracking-wide">
                     {person.name}
                   </span>
                 </a>

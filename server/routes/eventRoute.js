@@ -23,6 +23,7 @@ const {
   requireCanManageForceDeleteConfig,
   requireCanForceDeleteEvent,
   getUpcomingEvents,
+  getUpcomingEventsForImport,
   createUpcomingEvent,
   updateUpcomingEvent,
   deleteUpcomingEvent,
@@ -31,6 +32,7 @@ const {
 const router = express.Router();
 
 router.get("/upcoming", getUpcomingEvents);
+router.get("/upcoming/import-pool", auth, requireEventUploadAccess, getUpcomingEventsForImport);
 router.post("/", optionalAuth, createEvent);
 router.get("/", getAllEvents);
 router.post("/upload-link", auth, requireEventUploadAccess, createUploadLink);

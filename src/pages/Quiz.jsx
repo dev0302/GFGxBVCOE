@@ -89,13 +89,13 @@ function Quiz() {
   };
 
   return (
-    <div className="pt-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-white">
+    <div className="pt-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-richblack-25">
       {step === 'verify' && (
         <div className="mb-8 bg-[#0b1220]/60 border border-emerald-500/20 rounded-2xl p-6 backdrop-blur-xl">
           <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-300 via-emerald-300 to-green-400">Verify Team</h1>
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
             <input value={teamId} onChange={(e) => setTeamId(e.target.value)} placeholder="Enter Team ID" className="sm:col-span-2 bg-[#1f2937] border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-            <button onClick={handleVerify} className="py-3 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-lg">Verify</button>
+            <button onClick={handleVerify} className="py-3 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-richblack-25 font-semibold rounded-lg">Verify</button>
           </div>
         </div>
       )}
@@ -110,7 +110,7 @@ function Quiz() {
           </div>
           <div className="mt-6 flex gap-3">
             <button onClick={() => setStep('verify')} className="py-3 px-6 bg-white/10 border border-white/20 rounded-lg">Re-enter</button>
-            <button onClick={startQuiz} className="py-3 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-lg">Start Quiz</button>
+            <button onClick={startQuiz} className="py-3 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-richblack-25 font-semibold rounded-lg">Start Quiz</button>
           </div>
         </div>
       )}
@@ -168,7 +168,7 @@ function Quiz() {
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="py-3 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-xl hover:shadow-green-500/40"
+            className="py-3 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-richblack-25 font-semibold rounded-full hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-xl hover:shadow-green-500/40"
           >
             {submitting ? "Submitting..." : "Submit Quiz"}
           </button>
