@@ -40,8 +40,7 @@ const EventDescription = ({ event, isExpanded, toggleExpand }) => {
       {showButton && (
         <button
           onClick={() => toggleExpand(event.id)}
-          className="text-xs font-bold uppercase tracking-widest flex items-center gap-1 mb-2 text-cyan-400 hover:text-cyan-300 transition-colors"
-        >
+          className="text-xs font-bold uppercase tracking-widest flex items-center gap-1 mb-2 text-cyan-400 hover:text-cyan-300 transition-colors font-nunito"       >
           {isExpanded ? "Show Less" : "Read More"}
           {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </button>

@@ -236,6 +236,41 @@ const parseJson = (val) => {
   return val || [];
 };
 
+const GALLERY_NEW_TOKEN_PREFIX = "__new__";
+
+/**
+ * Merge kept Cloudinary URLs and newly uploaded URLs in client order.
+ * Order tokens: existing URL strings, or "__new__0", "__new__1", … matching multipart file index.
+ * Returns null if invalid (caller falls back to [...keptUrls, ...newUrls]).
+ */
+function mergeGalleryOrderTokens(keptUrls, newUrls, orderRaw) {
+  const order = parseJson(orderRaw);
+  if (!Array.isArray(order) || order.length === 0) return null;
+  const keptSet = new Set(keptUrls);
+  const merged = [];
+  const seenKept = new Set();
+  const seenNew = new Set();
+  for (const token of order) {
+    if (typeof token !== "string") return null;
+    if (token.startsWith(GALLERY_NEW_TOKEN_PREFIX)) {
+      const idx = parseInt(token.slice(GALLERY_NEW_TOKEN_PREFIX.length), 10);
+      if (Number.isNaN(idx) || idx < 0 || idx >= newUrls.length) return null;
+      if (seenNew.has(idx)) return null;
+      seenNew.add(idx);
+      merged.push(newUrls[idx]);
+    } else {
+      if (!keptSet.has(token)) return null;
+      if (seenKept.has(token)) return null;
+      seenKept.add(token);
+      merged.push(token);
+    }
+  }
+  if (seenKept.size !== keptUrls.length) return null;
+  if (seenNew.size !== newUrls.length) return null;
+  if (merged.length !== keptUrls.length + newUrls.length) return null;
+  return merged;
+}
+
 const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -274,11 +309,14 @@ const updateEvent = async (req, res) => {
     if (speakers !== undefined) event.speakers = parseJson(speakers) || [];
 
     const oldGallery = [...(event.galleryImages || [])];
+    const oldGallerySet = new Set(oldGallery);
     let keptUrls = oldGallery;
     if (req.body.galleryKeepUrls !== undefined && req.body.galleryKeepUrls !== "") {
       const parsed = parseJson(req.body.galleryKeepUrls);
       keptUrls = Array.isArray(parsed) ? parsed : [];
     }
+    // Only URLs that belong to this event can be kept (order preserved).
+    keptUrls = keptUrls.filter((url) => url && oldGallerySet.has(url));
     let newUrls = [];
     if (req.files && req.files.gallery) {
       const files = Array.isArray(req.files.gallery) ? req.files.gallery : [req.files.gallery];
@@ -294,7 +332,11 @@ const updateEvent = async (req, res) => {
         }
       }
     }
-    event.galleryImages = [...keptUrls, ...newUrls];
+    const mergedOrder =
+      req.body.galleryOrder !== undefined && req.body.galleryOrder !== ""
+        ? mergeGalleryOrderTokens(keptUrls, newUrls, req.body.galleryOrder)
+        : null;
+    event.galleryImages = mergedOrder ?? [...keptUrls, ...newUrls];
 
     const removedUrls = oldGallery.filter((url) => !event.galleryImages.includes(url));
     for (const url of removedUrls) {
