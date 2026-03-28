@@ -58,20 +58,44 @@ export function cloudinaryAvatarUrl(url) {
 }
 
 /**
- * Larger avatar variant (e.g. whole-society views).
+ * Larger avatar variant (navbar dropdown, etc.).
  * Ensures a 128x128 cropped avatar with automatic format & quality:
  *   /upload/w_128,h_128,c_fill,f_auto,q_auto/
+ * Replaces any existing transformation segment before `/v{version}/`.
  */
 export function cloudinaryLargeAvatarUrl(url) {
   if (!url || typeof url !== "string") return url;
   if (!url.includes("cloudinary.com")) return url;
   if (url.includes("/video/upload/")) return url;
 
-  const AVATAR_TRANSFORM = "/upload/w_128,h_128,c_fill,f_auto,q_auto/";
+  const T = "w_128,h_128,c_fill,f_auto,q_auto";
+  const needle = `/upload/${T}/`;
+  if (url.includes(needle)) return url;
 
-  if (url.includes(AVATAR_TRANSFORM)) return url;
+  const versioned = url.match(/^(.+\/image\/upload\/)([\s\S]*?)(\/v\d+\/.+)$/);
+  if (versioned) {
+    return `${versioned[1]}${T}${versioned[3]}`;
+  }
+  const vOnly = url.match(/^(.+\/image\/upload\/)(v\d+\/.+)$/);
+  if (vOnly) {
+    return `${vOnly[1]}${T}/${vOnly[2]}`;
+  }
+  return url.replace("/upload/", `/upload/${T}/`);
+}
 
-  return url.replace("/upload/", AVATAR_TRANSFORM);
+/**
+ * Small square crop for compact pickers (e.g. upcoming-event import list).
+ *   /upload/w_80,h_80,c_fill,f_auto,q_auto/
+ */
+export function cloudinaryPickerThumbUrl(url) {
+  if (!url || typeof url !== "string") return url;
+  if (!url.includes("cloudinary.com")) return url;
+  if (url.includes("/video/upload/")) return url;
+
+  const T = "/upload/w_80,h_80,c_fill,f_auto,q_auto/";
+  if (url.match(/\/upload\/w_80,h_80,c_fill/)) return url;
+
+  return url.replace("/upload/", T);
 }
 
 /**

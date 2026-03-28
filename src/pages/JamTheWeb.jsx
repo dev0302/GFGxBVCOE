@@ -194,7 +194,7 @@ export default function JamTheWeb() {
               />
               <div className="absolute -inset-2 bg-green-500/20 rounded-full blur-xl animate-pulse" />
             </div>
-            <h2 className="mt-8 text-2xl sm:text-3xl font-bold text-white text-center">
+            <h2 className="mt-8 text-2xl sm:text-3xl font-bold text-richblack-25 text-center">
               Results will be out soon
             </h2>
             <p className="mt-3 text-gray-400 text-center max-w-md">
@@ -209,13 +209,13 @@ export default function JamTheWeb() {
             <div className="mb-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
               <div>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <h1 className="text-2xl font-semibold text-white">Jam the Web — Results</h1>
+                  <h1 className="text-2xl font-semibold text-richblack-25">Jam the Web — Results</h1>
                   {user && !declared && (
                     <button
                       type="button"
                       onClick={handleDeclare}
                       disabled={declaring}
-                      className="px-4 py-2 text-sm font-semibold text-white bg-amber-500 hover:bg-amber-400 rounded-lg disabled:opacity-50 flex items-center gap-2"
+                      className="px-4 py-2 text-sm font-semibold text-richblack-25 bg-amber-500 hover:bg-amber-400 rounded-lg disabled:opacity-50 flex items-center gap-2"
                     >
                       {declaring ? <Spinner className="size-4" /> : null}
                       {declaring ? "Declaring…" : "Declare Result"}
@@ -241,7 +241,7 @@ export default function JamTheWeb() {
                     type="button"
                     onClick={handleSubmit}
                     disabled={submitting || loading || !teams.length}
-                    className="px-5 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-500 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="px-5 py-2 text-sm font-medium text-richblack-25 bg-green-600 hover:bg-green-500 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
                     {submitting ? <Spinner className="size-4" /> : null}
                     {submitting ? "Submitting…" : "Submit scores"}
@@ -308,13 +308,13 @@ export default function JamTheWeb() {
                                     2nd
                                   </span>
                                 )}
-                                <span className="text-sm font-medium text-white">
+                                <span className="text-sm font-medium text-richblack-25">
                                   {team.team_id ?? idx + 1}
                                 </span>
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="text-sm font-medium text-white">{team.team_name}</div>
+                              <div className="text-sm font-medium text-richblack-25">{team.team_name}</div>
                               <div className="text-sm text-gray-400">{team.email}</div>
                               {team.phone && <div className="text-xs text-gray-500">{team.phone}</div>}
                             </td>
@@ -365,12 +365,12 @@ export default function JamTheWeb() {
                                 <td key={judge} className="px-6 py-4">
                                   <div className="space-y-1.5">
                                     {isViewOnly ? (
-                                      <span className="block text-sm font-medium text-white">{val !== "" ? val : "—"}</span>
+                                      <span className="block text-sm font-medium text-richblack-25">{val !== "" ? val : "—"}</span>
                                     ) : (
                                       <input
                                         type="number"
                                         min="0"
-                                        className="w-14 px-2 py-1.5 text-sm text-white bg-slate-700 border border-slate-600 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                        className="w-14 px-2 py-1.5 text-sm text-richblack-25 bg-slate-700 border border-slate-600 rounded focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                         value={val}
                                         onChange={(e) => handleScoreChange(team._id, judge, e.target.value)}
                                       />
@@ -386,7 +386,7 @@ export default function JamTheWeb() {
                                 </td>
                               );
                             })}
-                            <td className="px-6 py-4 text-sm font-semibold text-white">
+                            <td className="px-6 py-4 text-sm font-semibold text-richblack-25">
                               {team.totalScore || 0}
                             </td>
                           </tr>
@@ -422,11 +422,11 @@ export default function JamTheWeb() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="px-6 py-4 border-b border-slate-600 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">Feedback — {team.team_name}</h3>
+                <h3 className="text-lg font-semibold text-richblack-25">Feedback — {team.team_name}</h3>
                 <button
                   type="button"
                   onClick={() => setFeedbackModal(null)}
-                  className="p-1.5 rounded-lg text-gray-400 hover:bg-slate-700 hover:text-white"
+                  className="p-1.5 rounded-lg text-gray-400 hover:bg-slate-700 hover:text-richblack-25"
                 >
                   <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -440,7 +440,7 @@ export default function JamTheWeb() {
                   return (
                     <div key={judge} className="rounded-lg border border-slate-600 p-4 space-y-2 bg-slate-700/30">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-white">{getJudgeLabel(jIdx)}</span>
+                        <span className="text-sm font-semibold text-richblack-25">{getJudgeLabel(jIdx)}</span>
                         <span className="text-sm font-medium text-gray-400">{val !== "" ? val : "—"}</span>
                       </div>
                       {isViewOnly ? (
@@ -449,7 +449,7 @@ export default function JamTheWeb() {
                         </p>
                       ) : (
                         <textarea
-                          className="w-full px-3 py-2 text-sm text-white bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none min-h-[80px] placeholder:text-gray-500"
+                          className="w-full px-3 py-2 text-sm text-richblack-25 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none min-h-[80px] placeholder:text-gray-500"
                           placeholder="Add feedback…"
                           value={feedback}
                           onChange={(e) => handleFeedbackChange(team._id, judge, e.target.value)}
@@ -465,7 +465,7 @@ export default function JamTheWeb() {
                     type="button"
                     onClick={handleSubmit}
                     disabled={submitting}
-                    className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-500 rounded-lg disabled:opacity-50"
+                    className="px-4 py-2 text-sm font-medium text-richblack-25 bg-green-600 hover:bg-green-500 rounded-lg disabled:opacity-50"
                   >
                     {submitting ? "Saving…" : "Save & close"}
                   </button>

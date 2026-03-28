@@ -181,7 +181,7 @@ export default function JoinTeamByLink() {
   }, [token]);
 
   const inputClass =
-    "w-full px-3 py-2 rounded-lg bg-[#252536] border border-gray-500/40 text-white placeholder-gray-500 focus:border-cyan-500 outline-none text-sm";
+    "w-full px-3 py-2 rounded-lg bg-[#252536] border border-gray-500/40 text-richblack-25 placeholder-gray-500 focus:border-cyan-500 outline-none text-sm";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -223,7 +223,7 @@ export default function JoinTeamByLink() {
 
         {status === "valid" && (
           <div className="rounded-2xl border border-gray-500/30 bg-[#1e1e2f]/80 p-6">
-            <h1 className="text-xl font-bold text-white flex items-center gap-2 mb-1">
+            <h1 className="text-xl font-bold text-richblack-25 flex items-center gap-2 mb-1">
               <Users className="h-6 w-6 text-cyan-400" />
               Join the team
             </h1>
@@ -324,7 +324,7 @@ export default function JoinTeamByLink() {
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold disabled:opacity-50 mt-4"
+                className="w-full py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold disabled:opacity-50 mt-4"
               >
                 {saving ? "Submitting…" : "Submit"}
               </button>
@@ -343,7 +343,7 @@ export default function JoinTeamByLink() {
       {cropImageSrc && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80" onClick={() => { URL.revokeObjectURL(cropImageSrc); setCropImageSrc(null); setCrop(null); }}>
           <div className="bg-[#1e1e2f] rounded-2xl border border-gray-500/30 p-4 max-w-lg w-full max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-white font-semibold mb-3">Crop photo</h3>
+            <h3 className="text-richblack-25 font-semibold mb-3">Crop photo</h3>
             <ReactCrop
               crop={crop}
               onChange={(pixelCrop) => { cropPxRef.current = pixelCrop; setCrop(pixelCrop); }}
@@ -355,9 +355,9 @@ export default function JoinTeamByLink() {
             </ReactCrop>
             <div className="flex gap-2 mt-3">
               <button type="button" onClick={() => { URL.revokeObjectURL(cropImageSrc); setCropImageSrc(null); setCrop(null); }} className="flex-1 py-2 rounded-xl border border-gray-500/50 text-gray-300">Cancel</button>
-              <button type="button" onClick={handleCropApply} disabled={photoUploading} className="flex-1 py-2 rounded-xl bg-cyan-600 text-white font-medium disabled:opacity-50">{photoUploading ? <div className="flex items-center justify-center h-full w-full gap-2">
-  <Spinner className="size-4 text-white animate-spin" />
-  <span className="text-white text-sm font-medium">Uploading</span>
+              <button type="button" onClick={handleCropApply} disabled={photoUploading} className="flex-1 py-2 rounded-xl bg-cyan-600 text-richblack-25 font-medium disabled:opacity-50">{photoUploading ? <div className="flex items-center justify-center h-full w-full gap-2">
+  <Spinner className="size-4 text-richblack-25 animate-spin" />
+  <span className="text-richblack-25 text-sm font-medium">Uploading</span>
 </div> : "Apply & upload"}</button>
             </div>
           </div>

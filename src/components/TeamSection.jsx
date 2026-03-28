@@ -111,7 +111,7 @@ const TeamSection = () => {
       <div className="relative z-10 container mx-auto px-6">
         {/* Header Section */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+          <h2 className="text-4xl md:text-5xl font-bold text-richblack-25 mb-6 leading-tight">
             Meet the Core Team: Driving GFGxBVCOE Forward
           </h2>
           
@@ -159,7 +159,7 @@ const TeamSection = () => {
                 </div>
                 
                 {/* Member Info */}
-                <h3 className={`font-bold mb-1 text-white ${index === 0 ? 'text-xl' : 'text-lg'}`}>
+                <h3 className={`font-bold mb-1 text-richblack-25 ${index === 0 ? 'text-xl' : 'text-lg'}`}>
                   {member.name}
                 </h3>
                 <p className="text-green-200 text-xs mb-1">

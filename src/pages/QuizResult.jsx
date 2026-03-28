@@ -15,7 +15,7 @@ function QuizResult() {
   const { leaderboardEnabled } = useFeatureFlags();
 
   return (
-    <div className="pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto text-white">
+    <div className="pt-24 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto text-richblack-25">
       <div className="bg-[#0b1220]/60 border border-emerald-500/20 rounded-2xl p-6 backdrop-blur-xl">
         <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 via-green-300 to-teal-200">Quiz Result</h1>
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-200">
@@ -61,10 +61,10 @@ function QuizResult() {
           </div>
         </div>
         <div className="mt-10 flex flex-wrap gap-4 justify-center">
-          <button onClick={() => navigate('/')} className="py-3 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-xl hover:shadow-green-500/40">Home</button>
-          <button onClick={() => navigate('/team')} className="py-3 px-6 bg-white/10 border border-white/20 text-white font-semibold rounded-full hover:bg-white/15 transition-all">Team</button>
+          <button onClick={() => navigate('/')} className="py-3 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-richblack-25 font-semibold rounded-full hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-xl hover:shadow-green-500/40">Home</button>
+          <button onClick={() => navigate('/team')} className="py-3 px-6 bg-white/10 border border-white/20 text-richblack-25 font-semibold rounded-full hover:bg-white/15 transition-all">Team</button>
           {leaderboardEnabled && (
-            <button onClick={() => navigate('/leaderboard')} className="py-3 px-6 bg-white/10 border border-white/20 text-white font-semibold rounded-full hover:bg-white/15 transition-all">View Leaderboard</button>
+            <button onClick={() => navigate('/leaderboard')} className="py-3 px-6 bg-white/10 border border-white/20 text-richblack-25 font-semibold rounded-full hover:bg-white/15 transition-all">View Leaderboard</button>
           )}
         </div>
       </div>

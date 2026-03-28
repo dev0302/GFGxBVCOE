@@ -50,11 +50,11 @@ export function MemberDetailModal({ member, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 z-10 shrink-0">
-          <h2 className="text-lg font-bold text-white">Team member</h2>
+          <h2 className="text-lg font-bold text-richblack-25">Team member</h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors"
+            className="p-2 rounded-lg text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30 transition-colors"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -71,7 +71,7 @@ export function MemberDetailModal({ member, onClose }) {
                 e.target.src = avatarPlaceholder(member.name);
               }}
             />
-            <h3 className="text-xl font-bold text-white text-center">
+            <h3 className="text-xl font-bold text-richblack-25 text-center">
               {member.name || "—"}
             </h3>
             {(member.year || member.branch) && (
@@ -183,11 +183,11 @@ export function PredefinedOnlyDetailModal({ predefined, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 z-10 shrink-0">
-          <h2 className="text-lg font-bold text-white">Profile (not registered yet)</h2>
+          <h2 className="text-lg font-bold text-richblack-25">Profile (not registered yet)</h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors"
+            className="p-2 rounded-lg text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30 transition-colors"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -204,7 +204,7 @@ export function PredefinedOnlyDetailModal({ predefined, onClose }) {
                 e.target.src = avatarPlaceholder(pre.name);
               }}
             />
-            <h3 className="text-xl font-bold text-white text-center">{pre.name || "—"}</h3>
+            <h3 className="text-xl font-bold text-richblack-25 text-center">{pre.name || "—"}</h3>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/40">
               Not registered yet
             </span>
@@ -337,11 +337,11 @@ export function ActivityLogModal({ userId, userName, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 shrink-0">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <h2 className="text-lg font-bold text-richblack-25 flex items-center gap-2">
             <Activity className="h-5 w-5 text-cyan-400" />
             {userName ? `Activity log — ${userName}` : "Activity log"}
           </h2>
-          <button type="button" onClick={onClose} className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors" aria-label="Close">
+          <button type="button" onClick={onClose} className="p-2 rounded-lg text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30 transition-colors" aria-label="Close">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -364,7 +364,7 @@ export function ActivityLogModal({ userId, userName, onClose }) {
                   >
                     <div className="shrink-0 w-2 h-2 rounded-full mt-2 bg-cyan-500/80" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-white font-medium">{label}</p>
+                      <p className="text-richblack-25 font-medium">{label}</p>
                       {summary && <p className="text-gray-400 text-sm mt-0.5">{summary}</p>}
                       <p className="text-gray-500 text-xs mt-1">{formatDate(log.createdAt)}</p>
                     </div>
@@ -401,11 +401,11 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 z-10 shrink-0">
-          <h2 className="text-lg font-bold text-white">Profile & details</h2>
+          <h2 className="text-lg font-bold text-richblack-25">Profile & details</h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors"
+            className="p-2 rounded-lg text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30 transition-colors"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -423,7 +423,7 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
                 e.target.src = avatarPlaceholder(fullName);
               }}
             />
-            <h3 className="text-xl font-bold text-white text-center">{fullName}</h3>
+            <h3 className="text-xl font-bold text-richblack-25 text-center">{fullName}</h3>
             {(profile.branch || profile.year || user.accountType) && (
               <p className="text-gray-400 text-sm text-center">
                 {[profile.branch, profile.year].filter(Boolean).join(" • ")}
@@ -630,10 +630,10 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
   const inputBase =
     "w-full rounded-2xl border bg-transparent text-sm outline-none transition-colors";
   const inputTheme = isNavbar
-    ? "border-gray-200/20 text-white placeholder-white/70 focus:border-white/30 bg-white/5"
+    ? "border-gray-200/20 text-richblack-25 placeholder-white/70 focus:border-white/30 bg-white/5"
     : isDark
-      ? "border-gray-500/40 text-white placeholder-gray-500 focus:border-cyan-500 bg-[#252536]"
-      : "border-green-400/40 text-white placeholder-green-200/70 focus:border-green-400 bg-green-900/30";
+      ? "border-gray-500/40 text-richblack-25 placeholder-gray-500 focus:border-cyan-500 bg-[#252536]"
+      : "border-green-400/40 text-richblack-25 placeholder-green-200/70 focus:border-green-400 bg-green-900/30";
   const inputSize =
     variant === "navbar"
       ? "pl-9 pr-4 py-2 max-w-[180px]"
@@ -651,7 +651,7 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
       >
         <div className="relative">
           <SearchIcon
-            className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none ${isNavbar ? "text-white" : isDark ? "text-gray-400" : "text-green-300/90"}`}
+            className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none ${isNavbar ? "text-richblack-25" : isDark ? "text-gray-400" : "text-green-300/90"}`}
             aria-hidden
           />
           <input

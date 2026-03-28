@@ -147,7 +147,7 @@ function Home() {
           {/* Title */}
           <h1
             ref={titleRef}
-            className="text-3xl md:text-5xl font-bold text-white mb-8 tracking-tight pt-8 leading-tight md:leading-tight pb-1"
+            className="text-3xl md:text-5xl font-bold text-richblack-25 mb-8 tracking-tight pt-8 leading-tight md:leading-tight pb-1"
             style={{
               background: "linear-gradient(135deg, #22c55e, #10b981, #059669)",
               backgroundClip: "text",
@@ -181,7 +181,7 @@ function Home() {
                 id="btn-join"
                 className=" px-3 py-3 bg-gradient-to-r 
              from-green-500/50 via-emerald-400/50 to-teal-500/50
-             text-white font-bold rounded-full transition-all duration-500 ease-in-out
+             text-richblack-25 font-bold rounded-full transition-all duration-500 ease-in-out
              transform hover:-translate-y-2 hover:scale-105
              shadow-[0_0_20px_rgba(16,185,129,0.6)]
             
@@ -225,7 +225,7 @@ function Home() {
             {leaderboardEnabled && (
               <button
                 onClick={() => navigate('/leaderboard')}
-                className="px-8 py-4 bg-white/10 border border-white/20 text-white font-semibold rounded-full hover:bg-white/15 transition-all"
+                className="px-8 py-4 bg-white/10 border border-white/20 text-richblack-25 font-semibold rounded-full hover:bg-white/15 transition-all"
               >
                 View Leaderboard
               </button>
@@ -276,7 +276,7 @@ function Home() {
       </div>
 
       {/* About Section */}
-      <section className="py-20 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 text-white text-center">
+      <section className="py-20 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 text-richblack-25 text-center">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 font-audiowide">
             Who We{" "}
@@ -292,7 +292,7 @@ function Home() {
           </p>
           <button
             onClick={() => navigate("/about")}
-            className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full text-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/40"
+            className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-richblack-25 font-semibold rounded-full text-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/40"
           >
             Learn More About Us
           </button>
@@ -300,7 +300,7 @@ function Home() {
       </section>
 
       {/* Team Section */}
-      <section className="py-20 bg-[#161629] text-white relative overflow-hidden border-b-2 border-gray-600 border-opacity-40">
+      <section className="py-20 bg-[#161629] text-richblack-25 relative overflow-hidden border-b-2 border-gray-600 border-opacity-40">
         {/* Animated Background */}
         <div className="absolute inset-0 opacity-5">
           <div
@@ -351,7 +351,7 @@ function Home() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
-                  <h3 className="font-rounded text-2xl font-bold text-white mb-2 group-hover:text-green-300 transition-colors duration-300">
+                  <h3 className="font-rounded text-2xl font-bold text-richblack-25 mb-2 group-hover:text-green-300 transition-colors duration-300">
                     Toshika Goswami
                   </h3>
                   <p className="text-green-300 text-lg font-semibold mb-2">Chair Person</p>
@@ -399,7 +399,7 @@ function Home() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
-                  <h3 className="font-rounded text-xl font-bold text-white mb-1 group-hover:text-blue-300 transition-colors duration-300">
+                  <h3 className="font-rounded text-xl font-bold text-richblack-25 mb-1 group-hover:text-blue-300 transition-colors duration-300">
                     Kartik Bhattacharya
                   </h3>
                   <p className="text-blue-300 font-semibold mb-1">Vice-Chairperson</p>
@@ -458,7 +458,7 @@ function Home() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
-                  <h3 className="font-rounded text-xl font-bold text-white mb-1 group-hover:text-purple-300 transition-colors duration-300">
+                  <h3 className="font-rounded text-xl font-bold text-richblack-25 mb-1 group-hover:text-purple-300 transition-colors duration-300">
                     Archita
                   </h3>
                   <p className="text-purple-300 font-semibold mb-1">Design & Creative Lead</p>
@@ -508,7 +508,7 @@ function Home() {
           <div className="text-center">
             <button
               onClick={() => navigate("/team")}
-              className="group relative px-10 py-5 bg-gradient-to-r from-green-600 to-emerald-700 text-white font-bold rounded-3xl text-lg transition-all duration-500 ease-in-out transform hover:-translate-y-2 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/40 border-2 border-transparent hover:border-emerald-300/50 overflow-hidden"
+              className="group relative px-10 py-5 bg-gradient-to-r from-green-600 to-emerald-700 text-richblack-25 font-bold rounded-3xl text-lg transition-all duration-500 ease-in-out transform hover:-translate-y-2 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/40 border-2 border-transparent hover:border-emerald-300/50 overflow-hidden"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
               <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>

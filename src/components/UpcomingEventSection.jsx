@@ -129,9 +129,9 @@ export default function UpcomingEventSection({ variant = "events" }) {
                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-current ${theme.text}`}></span>
                 <span className={`relative inline-flex rounded-full h-2 w-2 bg-current ${theme.text}`}></span>
               </span>
-              <span className={`text-[10px] uppercase font-bold tracking-[0.2em] text-white/80`}>Live Countdown</span>
+              <span className={`text-[10px] uppercase font-bold tracking-[0.2em] text-richblack-25/80`}>Live Countdown</span>
             </motion.div>
-            <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4">
+            <h2 className="text-4xl md:text-5xl font-black text-richblack-25 tracking-tight mb-4">
               <span className={`bg-gradient-to-r ${theme.accent} bg-clip-text text-transparent`}>UPCOMING</span> EVENT
             </h2>
           </div>
@@ -152,7 +152,7 @@ export default function UpcomingEventSection({ variant = "events" }) {
                   transition={{ delay: i * 0.1 }}
                   className={`${theme.card} backdrop-blur-md rounded-3xl p-6 flex flex-col items-center justify-center border`}
                 >
-                  <span className="text-4xl md:text-5xl font-black text-white tabular-nums tracking-tighter">
+                  <span className="text-4xl md:text-5xl font-black text-richblack-25 tabular-nums tracking-tighter">
                     {String(item.v).padStart(2, "0")}
                   </span>
                   <span className={`text-[10px] uppercase font-bold tracking-widest mt-2 opacity-60 ${theme.text}`}>
@@ -181,8 +181,8 @@ export default function UpcomingEventSection({ variant = "events" }) {
                 
                 {/* Floating Date Badge */}
                 <div className="absolute top-6 left-6 p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center">
-                  <span className="text-2xl font-black text-white leading-none">{dayNum}</span>
-                  <span className="text-[10px] uppercase font-bold text-white/70">{monthShort}</span>
+                  <span className="text-2xl font-black text-richblack-25 leading-none">{dayNum}</span>
+                  <span className="text-[10px] uppercase font-bold text-richblack-25/70">{monthShort}</span>
                 </div>
               </div>
             )}
@@ -201,7 +201,7 @@ export default function UpcomingEventSection({ variant = "events" }) {
                 />
                 
                 <div className="grid grid-cols-1 gap-5 mb-8">
-                  <div className="flex items-center gap-4 text-white/70">
+                  <div className="flex items-center gap-4 text-richblack-25/70">
                     <div className={`p-2 rounded-lg ${theme.bg} border border-white/5`}>
                       <Clock size={18} className={theme.text} />
                     </div>
@@ -211,7 +211,7 @@ export default function UpcomingEventSection({ variant = "events" }) {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-white/70">
+                  <div className="flex items-center gap-4 text-richblack-25/70">
                     <div className={`p-2 rounded-lg ${theme.bg} border border-white/5`}>
                       <MapPin size={18} className={theme.text} />
                     </div>
@@ -222,7 +222,7 @@ export default function UpcomingEventSection({ variant = "events" }) {
                   </div>
 
                   {event.targetAudience && (
-                    <div className="flex items-center gap-4 text-white/70">
+                    <div className="flex items-center gap-4 text-richblack-25/70">
                       <div className={`p-2 rounded-lg ${theme.bg} border border-white/5`}>
                         <Users size={18} className={theme.text} />
                       </div>
@@ -237,7 +237,7 @@ export default function UpcomingEventSection({ variant = "events" }) {
                 <div className="relative">
                   <p 
                     ref={descriptionRef}
-                    className={`text-white/60 text-sm leading-relaxed mb-2 transition-all duration-300 break-words ${!isExpanded ? "line-clamp-3" : ""}`}
+                    className={`text-richblack-25/60 text-sm leading-relaxed mb-2 transition-all duration-300 break-words ${!isExpanded ? "line-clamp-3" : ""}`}
                   >
                     {event.description}
                   </p>
@@ -293,7 +293,7 @@ export default function UpcomingEventSection({ variant = "events" }) {
               viewport={{ once: true, margin: "-50px" }}
               className="mt-16"
             >
-              <h3 className={`text-2xl font-bold text-white mb-6 flex items-center gap-2`}>
+              <h3 className={`text-2xl font-bold text-richblack-25 mb-6 flex items-center gap-2`}>
                 <span className={`bg-gradient-to-r ${theme.accent} bg-clip-text text-transparent`}>FAQ</span>
                 <span className="h-px flex-1 max-w-[80px] bg-white/20 rounded" />
               </h3>
@@ -302,8 +302,8 @@ export default function UpcomingEventSection({ variant = "events" }) {
                   .filter((f) => (f.question || "").trim() || (f.answer || "").trim())
                   .map((f) => ({ title: (f.question || "").trim() || "Question", content: (f.answer || "").trim() || "—" }))}
                 itemClassName={`${theme.card} border`}
-                triggerClassName="text-white/90"
-                contentClassName="text-white/60"
+                triggerClassName="text-richblack-25/90"
+                contentClassName="text-richblack-25/60"
               />
             </motion.div>
           )}

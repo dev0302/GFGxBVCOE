@@ -77,7 +77,7 @@ const ResultImages = () => {
                   className="w-full h-auto object-cover max-h-[70vh]"
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-end">
-                  <div className="p-6 text-white transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <div className="p-6 text-richblack-25 transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <h3 className="text-xl font-semibold">{image.title}</h3>
                     <p className="text-gray-200">{image.description}</p>
                   </div>

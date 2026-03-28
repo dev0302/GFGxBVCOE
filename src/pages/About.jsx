@@ -204,7 +204,7 @@ const About = () => {
               <span className="text-sm font-medium text-green-300 uppercase tracking-wider">About GFG BVCOE</span>
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight font-alfa tracking-tight">
+            <h1 className="text-4xl md:text-6xl font-bold text-richblack-25 mb-6 leading-tight font-alfa tracking-tight">
               <span id="about_us_para" className=" bg-clip-text  font-alfa text-richblack-25">
                    ABOUT US    
               </span>
@@ -225,12 +225,12 @@ const About = () => {
             <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-3xl p-6 md:px-6 py-10 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
               <div className="text-center mb-2">
                 <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-400 rounded-3xl flex items-center justify-center mb-8 mx-auto">
-                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-10 h-10 text-richblack-25" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 font-nunito">
+                <h2 className="text-2xl md:text-3xl font-bold text-richblack-25 mb-6 font-nunito">
                   Our{" "}
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
                     Vision
@@ -250,11 +250,11 @@ const About = () => {
             <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-3xl p-6 md:px-6 py-10 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
               <div className="text-center mb-2">
                 <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-3xl flex items-center justify-center mb-8 mx-auto">
-                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-10 h-10 text-richblack-25" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 font-nunito">
+                <h2 className="text-2xl md:text-3xl font-bold text-richblack-25 mb-6 font-nunito">
                   Our{" "}
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
                     Mission
@@ -275,11 +275,11 @@ const About = () => {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-400 rounded-3xl flex items-center justify-center mb-8 mx-auto">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-10 h-10 text-richblack-25" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 font-nunito">
+              <h2 className="text-2xl md:text-3xl font-bold text-richblack-25 mb-6 font-nunito">
                 What Sets Us{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
                   Apart?
@@ -298,7 +298,7 @@ const About = () => {
         <section ref={benefitsRef} className="py-6 px-6 font-nunito">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-2xl md:text-4xl font-bold text-white mb-8 font-nunito">
+              <h2 className="text-2xl md:text-4xl font-bold text-richblack-25 mb-8 font-nunito">
                 What You'll Get from{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
                   Geeks for Geeks
@@ -309,11 +309,11 @@ const About = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 benefits-grid">
               <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-2xl p-8 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group flex flex-col items-center justify-center">
                 <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-400 rounded-2xl flex items-center justify-center mb-6 mx-auto">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8 text-richblack-25" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-4 font-montserrat">Project Showcases</h3>
+                <h3 className="text-xl font-bold text-richblack-25 mb-4 font-montserrat">Project Showcases</h3>
                 <p className="text-center text-gray-300 leading-relaxed">
                   Engage in impactful project showcases, gaining recognition within our dynamic community.
                 </p>
@@ -321,11 +321,11 @@ const About = () => {
 
               <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-2xl p-8 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group flex flex-col items-center justify-center">
                 <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-400 rounded-2xl flex items-center justify-center mb-6 mx-auto">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8 text-richblack-25" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>
-                <h3 className="text-center text-xl font-bold text-white mb-4 font-montserrat">Personalized Mentorship</h3>
+                <h3 className="text-center text-xl font-bold text-richblack-25 mb-4 font-montserrat">Personalized Mentorship</h3>
                 <p className="text-center text-gray-300 leading-relaxed font-nunito">
                   Receive personalized mentorship tailored to your individual technical journey from experienced members.
                 </p>
@@ -333,11 +333,11 @@ const About = () => {
 
               <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-2xl p-8 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group flex flex-col items-center justify-center">
                 <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-cyan-400 rounded-2xl flex items-center justify-center mb-6 mx-auto">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8 text-richblack-25" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
-                <h3 className="text-center text-xl font-bold text-white mb-4 font-montserrat">Community Connections</h3>
+                <h3 className="text-center text-xl font-bold text-richblack-25 mb-4 font-montserrat">Community Connections</h3>
                 <p className="text-center text-gray-300 leading-relaxed font-nunito">
                   Cultivate lasting connections within a close-knit community where collaboration and shared learning thrive.
                 </p>
@@ -345,11 +345,11 @@ const About = () => {
 
               <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-2xl p-8 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group flex flex-col items-center justify-center">
                 <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-400 rounded-2xl flex items-center justify-center mb-6 mx-auto">
-                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8 text-richblack-25" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
                 </div>
-                <h3 className="text-center text-xl font-bold text-white mb-4 font-montserrat">Exclusive Events</h3>
+                <h3 className="text-center text-xl font-bold text-richblack-25 mb-4 font-montserrat">Exclusive Events</h3>
                 <p className="text-center text-gray-300 leading-relaxed font-nunito">
                   Access exclusive events, workshops, and seminars for hands-on experiences and valuable networking opportunities.
                 </p>
@@ -362,7 +362,7 @@ const About = () => {
         <section ref={ctaRef} className="py-6 mt-12 mb-12 px-6">
           <div className="max-w-6xl mx-auto">
             <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border-2 border-gray-300 border-opacity-20 rounded-3xl p-8 md:p-12 text-center transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
-              <h2 className="text-2xl md:text-4xl font-bold text-white mb-8 font-nunito">
+              <h2 className="text-2xl md:text-4xl font-bold text-richblack-25 mb-8 font-nunito">
                 Want to Join{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">
                   Geeks for Geeks?
@@ -375,14 +375,14 @@ const About = () => {
   onClick={() =>
     window.open("https://chat.whatsapp.com/Dr1gPgzmQgtJyFoXAvAnDC", "_blank")
   }
-  className="px-8 py-4 md:px-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold text-lg rounded-full border border-green-300/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-500/25 font-nunito md:text-xl"
+  className="px-8 py-4 md:px-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-richblack-25 font-bold text-lg rounded-full border border-green-300/30 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-green-500/25 font-nunito md:text-xl"
 >
   Get Started Today
 </button>
               <div className="mt-8">
                 <button
                   onClick={() => setLeaderboardEnabled(!leaderboardEnabled)}
-                  className={`px-6 py-3 rounded-full border ${leaderboardEnabled ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300' : 'bg-white/5 border-white/10 text-white'} `}
+                  className={`px-6 py-3 rounded-full border ${leaderboardEnabled ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300' : 'bg-white/5 border-white/10 text-richblack-25'} `}
                 >
                   {leaderboardEnabled ? 'Turn Off Leaderboard Buttons' : 'Turn On Leaderboard Buttons'}
                 </button>

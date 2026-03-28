@@ -60,7 +60,7 @@ export const OtpInput = ({ value, onChange, disabled }) => {
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             className={`w-full aspect-square text-center text-2xl font-bold rounded-2xl bg-[#252536]/50 border-2 outline-none transition-all
               ${value[i] 
-                ? "border-cyan-500 text-white" 
+                ? "border-cyan-500 text-richblack-25" 
                 : "border-gray-500/30 text-gray-400 focus:bg-[#252536]"
               } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-text"}`}
           />

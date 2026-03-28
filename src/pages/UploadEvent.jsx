@@ -13,7 +13,7 @@ const isVideo = (file) => file?.type?.startsWith("video/") || VIDEO_TYPES.includ
 const SectionTitle = ({ icon, children }) => (
   <div className="flex items-center gap-2 mb-4">
     <span className="text-2xl">{icon}</span>
-    <h2 className="text-lg font-semibold text-white tracking-tight">{children}</h2>
+    <h2 className="text-lg font-semibold text-richblack-25 tracking-tight">{children}</h2>
     <div className="flex-1 h-px bg-gradient-to-r from-cyan-500/40 to-transparent rounded" />
   </div>
 );
@@ -312,7 +312,7 @@ const UploadEvent = () => {
   };
 
   const inputClass =
-    "w-full px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none transition";
+    "w-full px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-richblack-25 placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none transition";
   const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
 
   return (
@@ -324,7 +324,7 @@ const UploadEvent = () => {
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
             Event management
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-richblack-25 mb-2 tracking-tight">
             Upload new event
           </h1>
           <p className="text-gray-400">
@@ -476,7 +476,7 @@ const UploadEvent = () => {
                           <img src={url} alt="" className="w-full h-full object-cover" />
                         )}
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <span className="text-xs text-white/90 font-medium">
+                          <span className="text-xs text-richblack-25/90 font-medium">
                             {isVid ? "Video" : "Image"}
                           </span>
                         </div>
@@ -486,7 +486,7 @@ const UploadEvent = () => {
                             e.stopPropagation();
                             removeGalleryFile(index);
                           }}
-                          className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-red-500/90 text-white flex items-center justify-center text-sm font-bold hover:bg-red-500 transition"
+                          className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-red-500/90 text-richblack-25 flex items-center justify-center text-sm font-bold hover:bg-red-500 transition"
                         >
                           ×
                         </button>
@@ -592,7 +592,7 @@ const UploadEvent = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-semibold shadow-lg shadow-cyan-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-richblack-25 font-semibold shadow-lg shadow-cyan-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {loading ? "Publishing…" : "Publish event"}
           </button>
@@ -672,7 +672,7 @@ const UploadEvent = () => {
                   <ul className="space-y-2">
                     {allowedConfig.extra.map((d) => (
                       <li key={d} className="flex items-center justify-between gap-3 px-4 py-2 rounded-xl bg-[#252536] border border-gray-500/20">
-                        <span className="text-white font-medium">{getAccountTypeLabel(d) || d}</span>
+                        <span className="text-richblack-25 font-medium">{getAccountTypeLabel(d) || d}</span>
                         <button
                           type="button"
                           onClick={() => handleRemoveAllowedDept(d)}
@@ -692,7 +692,7 @@ const UploadEvent = () => {
                   <select
                     value={addDeptValue}
                     onChange={(e) => setAddDeptValue(e.target.value)}
-                    className="px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-white focus:border-cyan-500 outline-none min-w-[200px]"
+                    className="px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-richblack-25 focus:border-cyan-500 outline-none min-w-[200px]"
                   >
                     <option value="">Select department</option>
                     {AUTH_DEPARTMENTS.filter((d) => !allowedConfig.all?.includes(d)).map((d) => (
@@ -735,7 +735,7 @@ const UploadEvent = () => {
                   className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-2 sm:gap-3 px-3 py-3 sm:px-5 sm:py-4 rounded-lg sm:rounded-xl bg-[#252536] border border-gray-500/20 hover:border-gray-500/40 transition-colors"
                 >
                   <div className="min-w-0 flex-1 order-1">
-                    <span className="font-medium text-white block truncate text-sm sm:text-base">{ev.title}</span>
+                    <span className="font-medium text-richblack-25 block truncate text-sm sm:text-base">{ev.title}</span>
                     <span className="text-xs text-gray-400 block mt-0.5 sm:mt-0">
                       {ev.date} · {ev.category}
                       {ev.scheduledDeleteAt && (
@@ -794,7 +794,7 @@ const UploadEvent = () => {
                     <line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" />
                   </svg>
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold text-white">Delete event?</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-richblack-25">Delete event?</h3>
               </div>
               <p className="text-gray-400 text-xs sm:text-sm mb-4 sm:mb-6">
                 This event will stay in the database for 10 days. After 10 days it will be automatically deleted if not cancelled. You can cancel the deletion anytime before then.
@@ -810,7 +810,7 @@ const UploadEvent = () => {
                 <button
                   type="button"
                   onClick={handleConfirmScheduleDelete}
-                  className="w-full sm:w-auto px-3 py-2 sm:px-4 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium text-sm sm:text-base"
+                  className="w-full sm:w-auto px-3 py-2 sm:px-4 rounded-lg bg-red-500 text-richblack-25 hover:bg-red-600 font-medium text-sm sm:text-base"
                 >
                   Delete
                 </button>

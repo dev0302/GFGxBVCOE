@@ -40,7 +40,7 @@ function Leaderboard() {
   };
 
   return (
-    <div className="pt-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto text-white">
+    <div className="pt-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto text-richblack-25">
       <div className="relative mb-8">
         <div className="absolute inset-0 blur-3xl opacity-30 bg-gradient-to-r from-emerald-500/30 via-teal-400/20 to-green-500/30 -z-10 rounded-3xl" />
         <div className="bg-[#0b1220]/60 border border-emerald-500/20 rounded-2xl p-6 backdrop-blur-xl shadow-2xl shadow-emerald-900/20">

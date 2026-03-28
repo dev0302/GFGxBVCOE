@@ -7,6 +7,7 @@ import {
   isSocietyRole,
   userCanManageEvents,
 } from "../../services/api";
+import { cloudinaryLargeAvatarUrl } from "../../utils/cloudinary";
 import {
   Calendar,
   ChevronDown,
@@ -41,7 +42,14 @@ function ProfileDropDown({
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  useEffect(() => {
+    setAvatarLoadedButton(!user?.image);
+    setAvatarLoadedMenu(!user?.image);
+  }, [user?.image]);
+
   if (!user) return null;
+
+  const avatarImgSrc = user.image ? cloudinaryLargeAvatarUrl(user.image) : "";
 
   const borderCls = isDarkNavbar
     ? "border-gray-500/50 hover:border-cyan-500/60"
@@ -118,7 +126,7 @@ function ProfileDropDown({
               <div className="absolute inset-0 rounded-full bg-gray-500/50 animate-pulse" />
             )}
             <img
-              src={user.image}
+              src={avatarImgSrc}
               alt=""
               onLoad={() => setAvatarLoadedButton(true)}
               onError={() => setAvatarLoadedButton(true)}
@@ -129,7 +137,7 @@ function ProfileDropDown({
           </div>
         ) : (
           <div
-            className={`flex ${avatarSize} items-center justify-center rounded-full bg-green-700/80 text-xs font-semibold text-white`}
+            className={`flex ${avatarSize} items-center justify-center rounded-full bg-green-700/80 text-xs font-semibold text-richblack-25`}
           >
             {user.firstName?.[0]}
             {user.lastName?.[0]}
@@ -159,7 +167,7 @@ function ProfileDropDown({
                   <div className="absolute inset-0 rounded-full bg-gray-500/50 animate-pulse" />
                 )}
                 <img
-                  src={user.image}
+                  src={avatarImgSrc}
                   alt=""
                   onLoad={() => setAvatarLoadedMenu(true)}
                   onError={() => setAvatarLoadedMenu(true)}
@@ -169,13 +177,13 @@ function ProfileDropDown({
                 />
               </div>
             ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-600/80 text-xs font-semibold text-white">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-600/80 text-xs font-semibold text-richblack-25">
                 {user.firstName?.[0]}
                 {user.lastName?.[0]}
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-semibold text-white">
+              <div className="truncate text-sm font-semibold text-richblack-25">
                 {user.firstName} {user.lastName}
               </div>
               <div className="truncate text-xs text-gray-400">
@@ -325,7 +333,7 @@ function ProfileDropDown({
                   role="menu"
                 >
                   <div className="px-4 py-3 border-b border-gray-500/30">
-                    <div className="text-xs font-semibold text-white">Department dashboards</div>
+                    <div className="text-xs font-semibold text-richblack-25">Department dashboards</div>
                     <div className="text-[10px] text-gray-400">Jump to a department dashboard</div>
                   </div>
                   <div
@@ -406,7 +414,7 @@ function ProfileDropDown({
               await onLogout?.();
               navigate("/");
             }}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-500/90 to-red-500/90 px-3 py-2 text-xs font-semibold text-white shadow transition-colors duration-300 ease-out hover:from-rose-500 hover:to-red-500"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-500/90 to-red-500/90 px-3 py-2 text-xs font-semibold text-richblack-25 shadow transition-colors duration-300 ease-out hover:from-rose-500 hover:to-red-500"
           >
             <LogOut className="h-3.5 w-3.5" />
             <span>Logout</span>

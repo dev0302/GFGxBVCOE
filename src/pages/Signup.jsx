@@ -172,7 +172,7 @@ const Signup = () => {
   };
 
   const inputClass =
-    "w-full px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none";
+    "w-full px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-richblack-25 placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none";
   const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
 
   return (
@@ -186,7 +186,7 @@ const Signup = () => {
         </div>
       )}
       <div className="w-full max-w-md bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] border border-gray-500/30 rounded-2xl p-8 shadow-xl">
-        <h1 className="text-2xl font-bold text-white mb-2">Sign up</h1>
+        <h1 className="text-2xl font-bold text-richblack-25 mb-2">Sign up</h1>
         <p className="text-gray-400 text-sm mb-6">
           Only allowed emails can register. Choose your department and verify with OTP.
         </p>
@@ -223,7 +223,7 @@ const Signup = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 text-white font-semibold disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 text-richblack-25 font-semibold disabled:opacity-50"
             >
               {loading ? "Sending OTP…" : "Send OTP"}
             </button>
@@ -279,7 +279,7 @@ const Signup = () => {
                               opacity: otp.length > i ? 1 : 0.4,
                             }}
                             transition={{ type: "spring", stiffness: 400, damping: 22 }}
-                            className="w-9 h-11 sm:w-10 sm:h-12 rounded-xl bg-cyan-500/40 border border-cyan-400/60 flex items-center justify-center text-xl font-bold text-white shadow-lg"
+                            className="w-9 h-11 sm:w-10 sm:h-12 rounded-xl bg-cyan-500/40 border border-cyan-400/60 flex items-center justify-center text-xl font-bold text-richblack-25 shadow-lg"
                           >
                             {otp[i] || ""}
                           </motion.div>
@@ -348,7 +348,7 @@ const Signup = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-richblack-25 transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -369,7 +369,7 @@ const Signup = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-richblack-25 transition-colors"
                   aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                 >
                   {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -387,7 +387,7 @@ const Signup = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 text-white font-semibold disabled:opacity-50"
+                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 text-richblack-25 font-semibold disabled:opacity-50"
               >
                 {loading ? "Creating account…" : "Create account"}
               </button>

@@ -60,7 +60,7 @@ export default function GenerateLink() {
     <div className="flex min-h-full w-full justify-center bg-[#1e1e2f] pb-20 px-4 sm:px-6 lg:px-10">
       <div className="w-full max-w-3xl py-10 flex flex-col gap-10">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">Generate upload event link</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-richblack-25">Generate upload event link</h1>
           <p className="mt-2 text-gray-400 text-sm">
             Create a link that anyone can use to open the upload form without logging in. Expires in 12 hours.
           </p>

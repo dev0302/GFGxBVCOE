@@ -173,8 +173,8 @@ export default function EditEventModal({ event, onClose, onSaved, inputClass: in
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-500/20">
-          <h3 className="text-lg font-semibold text-white">Edit event</h3>
-          <button type="button" onClick={onClose} className="p-2 rounded-lg text-gray-400 hover:bg-gray-500/20 hover:text-white">
+          <h3 className="text-lg font-semibold text-richblack-25">Edit event</h3>
+          <button type="button" onClick={onClose} className="p-2 rounded-lg text-gray-400 hover:bg-gray-500/20 hover:text-richblack-25">
             ×
           </button>
         </div>
@@ -314,7 +314,7 @@ export default function EditEventModal({ event, onClose, onSaved, inputClass: in
                       draggable={false}
                       onPointerDown={(e) => e.stopPropagation()}
                       onClick={() => removeGalleryItem(item.id)}
-                      className="absolute top-0.5 right-0.5 z-[2] w-5 h-5 rounded bg-red-500 text-white text-xs hover:bg-red-600"
+                      className="absolute top-0.5 right-0.5 z-[2] w-5 h-5 rounded bg-red-500 text-richblack-25 text-xs hover:bg-red-600"
                     >
                       ×
                     </button>
@@ -345,7 +345,7 @@ export default function EditEventModal({ event, onClose, onSaved, inputClass: in
             <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-500/50 text-gray-300 hover:bg-gray-500/20 font-medium">
               Cancel
             </button>
-            <button type="submit" disabled={saving} className="px-4 py-2 rounded-lg bg-cyan-500 text-white hover:bg-cyan-600 font-medium disabled:opacity-50">
+            <button type="submit" disabled={saving} className="px-4 py-2 rounded-lg bg-cyan-500 text-richblack-25 hover:bg-cyan-600 font-medium disabled:opacity-50">
               {saving ? "Saving…" : "Save changes"}
             </button>
           </div>

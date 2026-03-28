@@ -237,14 +237,14 @@ const Profile = () => {
   // profile bar
 
   const inputClass =
-    "w-full px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-white placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none";
+    "w-full px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-richblack-25 placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none";
   const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
 
   return (
     <div className="min-h-screen darkthemebg pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-2xl">
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">My profile</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-richblack-25 mb-2">My profile</h1>
           <p className="text-gray-400 text-sm">Manage your details and display picture</p>
         </div>
 
@@ -268,14 +268,14 @@ const Profile = () => {
                     className="h-20 w-20 rounded-full object-cover border-2 border-gray-500/50"
                   />
                 ) : (
-                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-cyan-600/80 text-2xl font-semibold text-white">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-cyan-600/80 text-2xl font-semibold text-richblack-25">
                     {user.firstName?.[0]}
                     {user.lastName?.[0]}
                   </div>
                 )}
               </div>
               <div className="space-y-3 min-w-0">
-                <p className="text-sm font-medium text-white">
+                <p className="text-sm font-medium text-richblack-25">
                   {user.firstName} {user.lastName}
                 </p>
                 <p className="text-xs text-gray-400 truncate">{user.email}</p>
@@ -284,13 +284,13 @@ const Profile = () => {
                     type="file"
                     accept="image/*"
                     onChange={handleAvatarChange}
-                    className="text-xs text-gray-400 file:mr-2 file:rounded-lg file:border-0 file:bg-cyan-600 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-cyan-500"
+                    className="text-xs text-gray-400 file:mr-2 file:rounded-lg file:border-0 file:bg-cyan-600 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-richblack-25 hover:file:bg-cyan-500"
                   />
                   <button
                     type="button"
                     onClick={handleAvatarSave}
                     disabled={savingAvatar || !avatarFile}
-                    className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium disabled:opacity-50"
+                    className="px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-richblack-25 text-sm font-medium disabled:opacity-50"
                   >
                     {savingAvatar ? "Saving…" : "Save picture"}
                   </button>
@@ -302,7 +302,7 @@ const Profile = () => {
             <div className="bg-[#252536]/40 border border-gray-500/20 rounded-2xl p-5 shadow-inner backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-white">Profile completion</span>
+                    <span className="text-sm font-semibold text-richblack-25">Profile completion</span>
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full bg-white/10 ${completionPercent === 100 ? "text-emerald-400" : "text-cyan-400"}`}>
                       {completionPercent}%
                     </span>
@@ -456,7 +456,7 @@ const Profile = () => {
                               </span>
                             )}
                             {item.role && (
-                              <span className="text-sm font-semibold text-white">{item.role}</span>
+                              <span className="text-sm font-semibold text-richblack-25">{item.role}</span>
                             )}
                           </div>
                           {item.project && (
@@ -661,7 +661,7 @@ const Profile = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold disabled:opacity-50"
                 >
                   {saving ? "Saving…" : "Save changes"}
                 </button>
@@ -670,7 +670,7 @@ const Profile = () => {
 
             {/* Change password */}
             <div className="border-t border-gray-500/30 pt-8">
-              <h2 className="text-lg font-semibold text-white mb-1">Change password</h2>
+              <h2 className="text-lg font-semibold text-richblack-25 mb-1">Change password</h2>
               <p className="text-sm text-gray-400 mb-4">Update your account password. You will need your current password.</p>
               <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
                 <div>
@@ -711,7 +711,7 @@ const Profile = () => {
                 <button
                   type="submit"
                   disabled={savingPassword}
-                  className="px-6 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold disabled:opacity-50"
                 >
                   {savingPassword ? "Updating…" : "Update password"}
                 </button>
@@ -720,7 +720,7 @@ const Profile = () => {
 
             {/* Delete account */}
             <div className="border-t border-gray-500/30 pt-8">
-              <h2 className="text-lg font-semibold text-white mb-1">Delete account</h2>
+              <h2 className="text-lg font-semibold text-richblack-25 mb-1">Delete account</h2>
               <p className="text-sm text-gray-400 mb-4">
                 Permanently delete your account and all associated profile data. This cannot be undone.
               </p>
@@ -749,14 +749,14 @@ const Profile = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 id="delete-account-title" className="text-lg font-bold text-white flex items-center gap-2">
+                <h2 id="delete-account-title" className="text-lg font-bold text-richblack-25 flex items-center gap-2">
                   <Trash2 className="h-5 w-5 text-red-400" />
                   Delete account?
                 </h2>
                 <button
                   type="button"
                   onClick={() => !deletingAccount && setShowDeleteConfirm(false)}
-                  className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-500/30 transition-colors"
+                  className="p-2 rounded-lg text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30 transition-colors"
                   aria-label="Close"
                 >
                   <X className="h-5 w-5" />
@@ -778,7 +778,7 @@ const Profile = () => {
                   type="button"
                   onClick={handleDeleteAccount}
                   disabled={deletingAccount}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-medium text-sm disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-richblack-25 font-medium text-sm disabled:opacity-50"
                 >
                   {deletingAccount ? "Deleting…" : "Yes, delete my account"}
                 </button>

@@ -75,7 +75,7 @@ export default function ForceDeletePermissions() {
     <div className="flex min-h-full w-full justify-center bg-[#1e1e2f] pb-20 px-4 sm:px-6 lg:px-10">
       <div className="w-full max-w-3xl py-10 flex flex-col gap-10">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">Force delete permissions</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-richblack-25">Force delete permissions</h1>
           <p className="mt-2 text-gray-400 text-sm">
             Faculty Incharge, Chairperson and Vice-Chairperson can add or remove departments that are allowed to use "Force delete" on events (immediate permanent delete, no 10-day delay). Faculty Incharge, Chairperson and Vice-Chairperson are always allowed.
           </p>
@@ -103,7 +103,7 @@ export default function ForceDeletePermissions() {
                   <ul className="space-y-2">
                     {config.extra.map((d) => (
                       <li key={d} className="flex items-center justify-between gap-3 px-4 py-2 rounded-xl bg-[#252536] border border-gray-500/20">
-                        <span className="text-white font-medium">{getAccountTypeLabel(d) || d}</span>
+                        <span className="text-richblack-25 font-medium">{getAccountTypeLabel(d) || d}</span>
                         {canManage && (
                           <button
                             type="button"
@@ -126,7 +126,7 @@ export default function ForceDeletePermissions() {
                     <select
                       value={addDeptValue}
                       onChange={(e) => setAddDeptValue(e.target.value)}
-                      className="px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-white focus:border-cyan-500 outline-none min-w-[200px]"
+                      className="px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-richblack-25 focus:border-cyan-500 outline-none min-w-[200px]"
                     >
                       <option value="">Select department</option>
                       {AUTH_DEPARTMENTS.filter((d) => !config.all?.includes(d)).map((d) => (

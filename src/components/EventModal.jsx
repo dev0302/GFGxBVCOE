@@ -237,7 +237,7 @@ const EventModal = ({ event, onClose }) => {
           className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-red-400/40 border border-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-red z-10"
         >
           <svg
-            className="w-5 h-5 text-white/80"
+            className="w-5 h-5 text-richblack-25/80"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -341,7 +341,7 @@ const EventModal = ({ event, onClose }) => {
               </span>
             </div>
 
-            <h2 className="text-3xl md:text-4xl font-semibold text-white mb-4 leading-tight tracking-wide">
+            <h2 className="text-3xl md:text-4xl font-semibold text-richblack-25 mb-4 leading-tight tracking-wide">
               {event.title}
             </h2>
 
@@ -353,7 +353,7 @@ const EventModal = ({ event, onClose }) => {
             <div className="space-y-8">
               {/* Speakers */}
               <div>
-                <h3 className="text-xl font-semibold text-white mb-4 border-b border-gray-400/20 pb-3 tracking-wide">
+                <h3 className="text-xl font-semibold text-richblack-25 mb-4 border-b border-gray-400/20 pb-3 tracking-wide">
                   Speakers
                 </h3>
                 <div className="space-y-4">
@@ -376,7 +376,7 @@ const EventModal = ({ event, onClose }) => {
                         </svg>
                       </div>
                       <div>
-                        <p className="font-medium text-white text-base">
+                        <p className="font-medium text-richblack-25 text-base">
                           {speaker.name}
                         </p>
                         <p className="text-sm text-gray-300 font-light">
@@ -390,7 +390,7 @@ const EventModal = ({ event, onClose }) => {
 
               {/* Agenda */}
               <div>
-                <h3 className="text-xl font-semibold text-white mb-4 border-b border-gray-400/20 pb-3 tracking-wide">
+                <h3 className="text-xl font-semibold text-richblack-25 mb-4 border-b border-gray-400/20 pb-3 tracking-wide">
                   Agenda
                 </h3>
                 <ul className="space-y-3">
@@ -412,7 +412,7 @@ const EventModal = ({ event, onClose }) => {
 
               {/* Prerequisites */}
               <div>
-                <h3 className="text-xl font-semibold text-white mb-4 border-b border-gray-400/20 pb-3 tracking-wide">
+                <h3 className="text-xl font-semibold text-richblack-25 mb-4 border-b border-gray-400/20 pb-3 tracking-wide">
                   Prerequisites
                 </h3>
                 <ul className="space-y-3">

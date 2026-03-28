@@ -17,10 +17,13 @@ const upcomingEventSchema = new mongoose.Schema(
     otherLinks: { type: String, default: "" }, // JSON string: [{ label, url }]
     otherDocs: { type: String, default: "" }, // JSON string or comma-separated URLs
     faqs: { type: [faqSchema], default: [] },
+    /** When set, hidden from lists but kept in DB until purged after UPCOMING_SOFT_RETENTION_DAYS. */
+    removedFromListAt: { type: Date, default: null },
   },
   { timestamps: true }
 );
 
 upcomingEventSchema.index({ date: 1 });
+upcomingEventSchema.index({ removedFromListAt: 1 });
 
 module.exports = mongoose.model("UpcomingEvent", upcomingEventSchema);

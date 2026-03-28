@@ -12,7 +12,7 @@ const Loader = () => {
         <div className="absolute inset-0 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
         <div className="absolute inset-2 border-4 border-pink-500 border-t-transparent rounded-full animate-spin reverse"></div>
       </div>
-      <p className="text-white text-lg font-medium">Loading results...</p>
+      <p className="text-richblack-25 text-lg font-medium">Loading results...</p>
     </div>
   );
 };
@@ -26,7 +26,7 @@ const ResultPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] font-['Inter'] text-white">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] font-['Inter'] text-richblack-25">
 
 
       {/* Main content */}
@@ -82,7 +82,7 @@ const ResultPage = () => {
               </button>
             </NavLink>
             <NavLink to="/contact" className="flex-1">
-              <button className="w-full py-2.5 px-4 rounded-lg bg-cyan-700 text-white text-sm transition-all duration-300 hover:scale-105 hover:opacity-95">
+              <button className="w-full py-2.5 px-4 rounded-lg bg-cyan-700 text-richblack-25 text-sm transition-all duration-300 hover:scale-105 hover:opacity-95">
                 Contact us
               </button>
             </NavLink>
