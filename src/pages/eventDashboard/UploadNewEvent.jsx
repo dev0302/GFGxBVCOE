@@ -1,12 +1,21 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { createEvent } from "../../services/api";
 import { toast } from "sonner";
+import {
+  getUpcomingEvents,
+
+} from "../../services/api";
 import { SectionTitle, inputClass, labelClass } from "../../components/EventDashboard/SectionTitle";
+import {Spinner} from "../../components/ui/spinner"
+// import { getRecentEvents, getEventById } from "../../services/api";
 
 const VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg", "video/quicktime"];
 const isVideo = (file) => file?.type?.startsWith("video/") || VIDEO_TYPES.includes(file?.type);
-
+const BASE = import.meta.env.VITE_API_BASE_URL;
 export default function UploadNewEvent() {
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [selectedEventId, setSelectedEventId] = useState("");
+  const [importing, setImporting] = useState(false);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
   const previewUrlsRef = useRef([]);
@@ -27,9 +36,75 @@ export default function UploadNewEvent() {
 
   previewUrlsRef.current = previewUrls;
   useEffect(() => {
+    getUpcomingEvents()
+      .then((res) => {
+        if (res.success) setUpcomingEvents(res.data);
+      })
+      .catch(() => toast.error("Failed to load upcoming events"));
+  }, []);
+  useEffect(() => {
     return () => previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
   }, []);
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
+  const handleImportEvent = async () => {
+    if (!selectedEventId) {
+      toast.error("Select an event first");
+      return;
+    }
 
+    setIsAutoFilling(true);
+
+    try {
+      const selected = upcomingEvents.find(
+        (ev) => ev._id === selectedEventId
+      );
+
+      if (!selected) throw new Error("Event not found");
+
+      console.log("Sending to AI:", selected);
+
+      const res = await fetch(`${BASE}/api/v1/ai/format-event`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ rawData: selected }),
+      });
+
+      const result = await res.json();
+
+      // console.log("AI response:", result);
+
+      if (!result.success) throw new Error("AI failed");
+
+      const data = result.data;
+
+      // 🎯 Fill form
+      setTitle(data.title || "");
+      setDate(data.date?.slice(0, 10) || "");
+      setTime(data.time || "");
+      setLocation(data.location || "");
+      setCategory(data.category || "");
+      setDescription(data.description || "");
+      setModalDescription(data.modalDescription || "");
+      setTargetAudience(data.targetAudience || "");
+
+      setSpeakers(
+        data.speakers?.length ? data.speakers : [{ name: "", title: "" }]
+      );
+      setAgenda(data.agenda?.length ? data.agenda : [""]);
+      setPrerequisites(
+        data.prerequisites?.length ? data.prerequisites : [""]
+      );
+
+      toast.success("Event auto-filled with AI ✨");
+    } catch (err) {
+      console.error("IMPORT ERROR:", err);
+      toast.error("Failed to import event");
+    } finally {
+      setIsAutoFilling(false);
+    }
+  };
   const addGalleryFiles = useCallback((newFiles) => {
     const list = Array.from(newFiles || []);
     if (list.length === 0) return;
@@ -114,6 +189,7 @@ export default function UploadNewEvent() {
     }).finally(() => setLoading(false));
   };
 
+
   return (
     <div className="flex min-h-full w-full justify-center bg-[#1e1e2f] pb-20 px-4 sm:px-6 lg:px-10">
       <div className="w-full max-w-3xl py-10 flex flex-col gap-10">
@@ -125,6 +201,57 @@ export default function UploadNewEvent() {
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-10">
+
+          <div className="mb-6 p-5 rounded-2xl bg-[#252536]/60 border border-gray-500/20 backdrop-blur-md shadow-sm">
+            <div className="flex items-center gap-4">
+
+              <label className={`${labelClass} text-sm font-medium text-gray-300 whitespace-nowrap`}>
+                Import event
+              </label>
+
+              <div className="relative flex-1">
+                <select
+                  value={selectedEventId}
+                  onChange={(e) => setSelectedEventId(e.target.value)}
+                  className={`${inputClass} w-full appearance-none pr-10 rounded-xl bg-[#1f1f2e] border border-gray-500/20 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all`}
+                  disabled={isAutoFilling}
+                >
+                  <option value="">Choose event</option>
+                  {upcomingEvents.map((ev) => (
+                    <option key={ev._id} value={ev._id}>
+                      {ev.title}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400 text-xs">
+                  ▼
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleImportEvent}
+                disabled={isAutoFilling}
+                className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2 transition-all text-white text-sm font-medium whitespace-nowrap shadow-md shadow-cyan-900/20"
+              >
+                {isAutoFilling ? (
+                  <>
+                    <Spinner className="w-4 h-4" />
+                    Filling...
+                  </>
+                ) : (
+                  "Auto-fill with AI ✨"
+                )}
+              </button>
+
+            </div>
+
+            <p className="mt-2 text-xs text-gray-400">
+              AI autofill may make mistakes — please review details.
+            </p>
+          </div>
+
           <section className="bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">
             <SectionTitle icon="📋">Event details</SectionTitle>
             <div className="space-y-4">
