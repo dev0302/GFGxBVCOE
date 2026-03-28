@@ -42,7 +42,6 @@ REQUIRED JSON FORMAT:
   "description": string,
   "modalDescription": string,
   "targetAudience": string,
-  "speakers": [{ "name": string, "title": string }],
   "agenda": [string],
   "prerequisites": [string]
 }
