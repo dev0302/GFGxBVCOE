@@ -652,6 +652,7 @@ export default function UploadNewEvent() {
                 onAvatarClick={handleSendUploadRequest}
                 registerAvatarRef={registerAvatarRef}
                 selfAnchorRef={selfAnchorRef}
+                disableActions={Boolean(outgoingWait)}
               />
               <LiveUploadProgress items={progressItems} />
               <SharedGallery
