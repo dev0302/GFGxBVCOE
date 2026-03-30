@@ -111,7 +111,7 @@ font-montserrat opacity-90">
             <Search
               variant="navbar"
               placeholder="Search members…"
-              className="shrink-0"
+              className="shrink-0l"
             />
           )}
           <ul ref={navList} className="flex gap-6 text-sm">
