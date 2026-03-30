@@ -32,7 +32,6 @@ function ProfileDropDown({
   const [open, setOpen] = useState(false);
   const [deptFlyoutOpen, setDeptFlyoutOpen] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
-  const [isMobileScreen, setIsMobileScreen] = useState(false);
   const ref = useRef(null);
   const [avatarLoadedButton, setAvatarLoadedButton] = useState(!user?.image);
   const [avatarLoadedMenu, setAvatarLoadedMenu] = useState(!user?.image);
@@ -57,19 +56,6 @@ function ProfileDropDown({
     });
     return () => unsubscribe();
   }, [open]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return undefined;
-    const mq = window.matchMedia("(max-width: 640px)");
-    const update = () => setIsMobileScreen(mq.matches);
-    update();
-    if (typeof mq.addEventListener === "function") {
-      mq.addEventListener("change", update);
-      return () => mq.removeEventListener("change", update);
-    }
-    mq.addListener(update);
-    return () => mq.removeListener(update);
-  }, []);
 
   if (!user) return null;
 
@@ -306,6 +292,25 @@ function ProfileDropDown({
           <button
             onClick={() => {
               setOpen(false);
+              navigate("/jam-the-web");
+            }}
+            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
+          >
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+              <Layout className="h-4 w-4" />
+            </span>
+            <span className="flex-1">
+              <span className="block text-xs font-medium">
+                Jam The Web Result
+              </span>
+              <span className="block text-[10px] text-gray-500">
+                View & edit scores
+              </span>
+            </span>
+          </button>
+          <button
+            onClick={() => {
+              setOpen(false);
               navigate("/profile");
             }}
             className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
@@ -353,12 +358,11 @@ function ProfileDropDown({
               {/* Hover / click flyout: all department dashboards */}
               <div
                 className="relative"
-                onMouseEnter={() => {
-                  if (!isMobileScreen) setDeptFlyoutOpen(true);
-                }}
-                onMouseLeave={() => {
-                  if (!isMobileScreen) setDeptFlyoutOpen(false);
-                }}
+                // onMouseEnter={() => setDeptFlyoutOpen(true)}
+                // onMouseLeave={() => setDeptFlyoutOpen(false)}
+                onMouseEnter={() =>  setDeptFlyoutOpen(true)}
+                onMouseLeave={() =>  setDeptFlyoutOpen(false)}
+                onClick={() => isMobile && setDeptFlyoutOpen(prev => !prev)}
                 tabIndex={0}
               >
                 <button
@@ -383,7 +387,7 @@ function ProfileDropDown({
                 </button>
 
                 <div
-                  className={`absolute -top-60 right-full mr-[-200px] sm:mr-1 w-72 max-w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl border border-gray-500/40 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] shadow-xl backdrop-blur-sm overflow-hidden z-[70] transition-all duration-200 ease-out max-sm:relative max-sm:right-0 max-sm:top-0 max-sm:mt-2 max-sm:mr-0 max-sm:w-full ${
+                  className={`absolute -top-60 right-full mr-[-200px] sm:mr-1 w-72 max-w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl border border-gray-500/40 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] shadow-xl backdrop-blur-sm overflow-hidden z-[70] transition-all duration-200 ease-out ${
                     deptFlyoutOpen
                       ? "pointer-events-auto opacity-100 translate-x-0 scale-100"
                       : "pointer-events-none opacity-0 translate-x-1 scale-95"
@@ -465,7 +469,7 @@ function ProfileDropDown({
           )}
         </div>
 
-        <div className="rounded-b-2xl border-t border-gray-500/30 bg-gray-900/50 px-3 py-2.5">
+        <div className="border-t border-gray-500/30 bg-gray-900/50 px-3 py-2.5">
           <button
             onClick={async () => {
               setOpen(false);
