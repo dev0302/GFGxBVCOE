@@ -17,17 +17,14 @@ function notifySubscribers() {
 
 export function connectPresenceSocket() {
   const token = getAuthToken();
-  if (!token || !BASE) return null;
+  if (!BASE) return null;
 
   if (socket) return socket;
 
   socket = io(BASE, {
     transports: ["websocket", "polling"],
     withCredentials: true,
-    auth: { token },
-    extraHeaders: {
-      Authorization: `Bearer ${token}`,
-    },
+    ...(token ? { auth: { token } } : {}),
   });
 
   socket.on("online-users", (users = []) => {
