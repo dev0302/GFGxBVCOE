@@ -70,7 +70,8 @@ exports.isAdmin = (req, res, next) => {
 /** Dashboard (signup config): Faculty Incharge, Chairperson, Vice-Chairperson */
 exports.canAccessDashboard = (req, res, next) => {
   try {
-    if (!SOCIETY_ROLES.includes(req.user?.accountType)) {
+    const accountType = String(req.user?.accountType || '').trim();
+    if (!SOCIETY_ROLES.includes(accountType)) {
       return res.status(403).json({
         success: false,
         message: "Dashboard access is limited to Faculty Incharge, Chairperson and Vice-Chairperson.",

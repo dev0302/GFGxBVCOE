@@ -408,7 +408,8 @@ export function getAccountTypeLabel(accountType) {
 /** True if user can access "Manage society" (all departments) */
 export const SOCIETY_ROLES = ['ADMIN', 'Chairperson', 'Vice-Chairperson'];
 export function isSocietyRole(accountType) {
-  return SOCIETY_ROLES.includes(accountType);
+  const t = String(accountType || '').trim();
+  return SOCIETY_ROLES.includes(t);
 }
 
 /** Core roles that can always access /uploadevent. Extra roles come from server (user.canManageEvents). */

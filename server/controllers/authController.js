@@ -301,7 +301,8 @@ exports.login = async (req, res) => {
     user.token = token;
     user.password = undefined;
     const eventUploadAllowed = await getEventUploadAllowedList();
-    user.canManageEvents = eventUploadAllowed.includes(user.accountType);
+    const accountType = String(user.accountType || '').trim();
+    user.canManageEvents = eventUploadAllowed.includes(accountType);
 
     // Dashboards access: EM dashboard uses existing event-upload allowed list,
     // while other department dashboards use DashboardAccessConfig.
@@ -316,11 +317,11 @@ exports.login = async (req, res) => {
     ];
 
     const dashboardAccess = new Set();
-    if (SOCIETY_ROLES.includes(user.accountType)) {
+    if (SOCIETY_ROLES.includes(accountType)) {
       dashboardAccess.add("Event Management");
       nonEmDashboardKeys.forEach((k) => dashboardAccess.add(k));
     } else {
-      if (eventUploadAllowed.includes(user.accountType)) dashboardAccess.add("Event Management");
+      if (eventUploadAllowed.includes(accountType)) dashboardAccess.add("Event Management");
 
       const docs = await DashboardAccessConfig.find({
         dashboardKey: { $in: nonEmDashboardKeys },
@@ -331,9 +332,9 @@ exports.login = async (req, res) => {
       }
 
       nonEmDashboardKeys.forEach((k) => {
-        if (k === user.accountType) {
+        if (k === accountType) {
           dashboardAccess.add(k);
-        } else if ((extraByKey[k] || []).includes(user.accountType)) {
+        } else if ((extraByKey[k] || []).includes(accountType)) {
           dashboardAccess.add(k);
         }
       });
@@ -537,7 +538,8 @@ exports.me = async (req, res) => {
     }
     const user = userDoc.toObject();
     const eventUploadAllowed = await getEventUploadAllowedList();
-    user.canManageEvents = eventUploadAllowed.includes(user.accountType);
+    const accountType = String(user.accountType || '').trim();
+    user.canManageEvents = eventUploadAllowed.includes(accountType);
 
     // Dashboards access: EM dashboard uses existing event-upload allowed list,
     // while other department dashboards use DashboardAccessConfig.
@@ -552,11 +554,11 @@ exports.me = async (req, res) => {
     ];
 
     const dashboardAccess = new Set();
-    if (SOCIETY_ROLES.includes(user.accountType)) {
+    if (SOCIETY_ROLES.includes(accountType)) {
       dashboardAccess.add("Event Management");
       nonEmDashboardKeys.forEach((k) => dashboardAccess.add(k));
     } else {
-      if (eventUploadAllowed.includes(user.accountType)) dashboardAccess.add("Event Management");
+      if (eventUploadAllowed.includes(accountType)) dashboardAccess.add("Event Management");
 
       const docs = await DashboardAccessConfig.find({
         dashboardKey: { $in: nonEmDashboardKeys },
@@ -567,9 +569,9 @@ exports.me = async (req, res) => {
       }
 
       nonEmDashboardKeys.forEach((k) => {
-        if (k === user.accountType) {
+        if (k === accountType) {
           dashboardAccess.add(k);
-        } else if ((extraByKey[k] || []).includes(user.accountType)) {
+        } else if ((extraByKey[k] || []).includes(accountType)) {
           dashboardAccess.add(k);
         }
       });
