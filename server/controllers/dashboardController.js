@@ -41,12 +41,13 @@ async function getDashboardAllowedList(dashboardKey) {
 async function requireDashboardAccess(req, res, next) {
   try {
     const { dashboardKey } = req.params;
+    const accountType = String(req.user?.accountType || '').trim();
     if (!isKnownDashboardKey(dashboardKey)) {
       return res.status(404).json({ success: false, message: "Unknown dashboard." });
     }
 
     const { all } = await getDashboardAllowedList(dashboardKey);
-    if (!all.includes(req.user?.accountType)) {
+    if (!all.includes(accountType)) {
       return res.status(403).json({ success: false, message: "You do not have access to this dashboard." });
     }
     next();
@@ -57,7 +58,8 @@ async function requireDashboardAccess(req, res, next) {
 
 function requireCanManageDashboardConfig(req, res, next) {
   const { dashboardKey } = req.params;
-  const canManage = computeCoreRoles(dashboardKey).includes(req.user?.accountType);
+  const accountType = String(req.user?.accountType || '').trim();
+  const canManage = computeCoreRoles(dashboardKey).includes(accountType);
   if (!canManage) {
     return res.status(403).json({
       success: false,

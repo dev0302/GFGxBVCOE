@@ -123,16 +123,15 @@ function ProfileDropDown({
         {user.image ? (
           <div className={`relative ${avatarSize}`}>
             {!avatarLoadedButton && (
-              <div className="absolute inset-0 rounded-full bg-gray-500/50 animate-pulse" />
+              <div className="absolute inset-0 rounded-full bg-gray-500/50" />
             )}
             <img
-              src={avatarImgSrc}
+              key={avatarImgSrc}
+              src={avatarImgSrc || user.image}
               alt=""
               onLoad={() => setAvatarLoadedButton(true)}
               onError={() => setAvatarLoadedButton(true)}
-              className={`${avatarSize} rounded-full object-cover border border-gray-600/50 transition-opacity duration-300 ${
-                avatarLoadedButton ? "opacity-100" : "opacity-0"
-              }`}
+              className={`${avatarSize} rounded-full object-cover border border-gray-600/50 opacity-100`}
             />
           </div>
         ) : (
@@ -164,16 +163,15 @@ function ProfileDropDown({
             {user.image ? (
               <div className="relative h-8 w-8">
                 {!avatarLoadedMenu && (
-                  <div className="absolute inset-0 rounded-full bg-gray-500/50 animate-pulse" />
+                  <div className="absolute inset-0 rounded-full bg-gray-500/50" />
                 )}
                 <img
-                  src={avatarImgSrc}
+                  key={`menu-${avatarImgSrc}`}
+                  src={avatarImgSrc || user.image}
                   alt=""
                   onLoad={() => setAvatarLoadedMenu(true)}
                   onError={() => setAvatarLoadedMenu(true)}
-                  className={`h-8 w-8 rounded-full object-cover border border-gray-500/50 transition-opacity duration-300 ${
-                    avatarLoadedMenu ? "opacity-100" : "opacity-0"
-                  }`}
+                  className="h-8 w-8 rounded-full object-cover border border-gray-500/50 opacity-100"
                 />
               </div>
             ) : (
@@ -300,8 +298,12 @@ function ProfileDropDown({
               {/* Hover / click flyout: all department dashboards */}
               <div
                 className="relative"
-                onMouseEnter={() => setDeptFlyoutOpen(true)}
-                onMouseLeave={() => setDeptFlyoutOpen(false)}
+                // onMouseEnter={() => setDeptFlyoutOpen(true)}
+                // onMouseLeave={() => setDeptFlyoutOpen(false)}
+                onMouseEnter={() =>  setDeptFlyoutOpen(true)}
+                onMouseLeave={() =>  setDeptFlyoutOpen(false)}
+                onClick={() => isMobile && setDeptFlyoutOpen(prev => !prev)}
+                tabIndex={0}
               >
                 <button
                   type="button"
