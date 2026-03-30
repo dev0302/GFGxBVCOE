@@ -73,13 +73,27 @@ function emitOnlineUsers() {
   io.emit("online-users", users);
 }
 
+function getTokenFromCookieHeader(cookieHeader = "") {
+  if (!cookieHeader || typeof cookieHeader !== "string") return null;
+  const parts = cookieHeader.split(";").map((s) => s.trim());
+  for (const part of parts) {
+    if (part.startsWith("Token=")) {
+      return decodeURIComponent(part.slice("Token=".length));
+    }
+  }
+  return null;
+}
+
 io.use(async (socket, next) => {
   try {
     const rawAuthHeader = socket.handshake.headers?.authorization || "";
     const headerToken = rawAuthHeader.startsWith("Bearer ")
       ? rawAuthHeader.slice(7)
       : null;
-    const token = socket.handshake.auth?.token || headerToken;
+    const cookieToken = getTokenFromCookieHeader(
+      socket.handshake.headers?.cookie || ""
+    );
+    const token = socket.handshake.auth?.token || headerToken || cookieToken;
     if (!token) {
       return next(new Error("Missing token"));
     }
