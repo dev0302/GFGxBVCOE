@@ -251,7 +251,7 @@ Permissions depend on role assigned by Faculty Incharge.
 
 ---
 
-## 🚀 Getting Started (Local Setup)
+## 🚀 Getting Started (Local Setup).
 
 ```bash
 # Clone the repository
