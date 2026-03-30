@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import {
   getJamTheWebTeams,
@@ -10,6 +10,7 @@ import {
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import resultImg from "../images/result.png";
+import gsap from "gsap";
 
 const JUDGES = ["Dev", "Siddhant", "Gaurav"];
 const JUDGE_LABELS_VIEW = ["Judge 1", "Judge 2", "Judge 3"];
@@ -25,9 +26,38 @@ export default function JamTheWeb() {
   const [sortedByScore, setSortedByScore] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState(null);
 
-  const isViewOnly = !user;
-  const showResults = declared || user;
-  const showComingSoon = !declared && !user;
+  // Logged-in users should start in view-only mode.
+  const [editMode, setEditMode] = useState(false);
+  const resultsCardRef = useRef(null);
+
+  const isViewOnly = !user || !editMode;
+  const showResults = declared || (!!user && editMode);
+  const showComingSoon = !declared && !editMode;
+
+  // Animate table rows when switching into edit mode.
+  useEffect(() => {
+    if (!editMode) return;
+    if (!resultsCardRef.current) return;
+
+    const card = resultsCardRef.current;
+    const rows = card.querySelectorAll("tbody tr");
+    if (!rows || !rows.length) return;
+
+    // Let React paint the inputs before animating them.
+    requestAnimationFrame(() => {
+      gsap.fromTo(
+        rows,
+        { opacity: 0, y: 10 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.03,
+          duration: 0.35,
+          ease: "power2.out",
+        }
+      );
+    });
+  }, [editMode]);
 
   const fetchDeclared = useCallback(() => {
     getJamTheWebResultsDeclared()
@@ -200,6 +230,15 @@ export default function JamTheWeb() {
             <p className="mt-3 text-gray-400 text-center max-w-md">
               Stay tuned! Results will be visible here once declared.
             </p>
+            {user && (
+              <button
+                type="button"
+                onClick={() => setEditMode(true)}
+                className="mt-8 px-5 py-2 text-sm font-semibold text-richblack-25 bg-cyan-600 hover:bg-cyan-500 rounded-lg disabled:opacity-50"
+              >
+                Edit result
+              </button>
+            )}
           </div>
         )}
 
@@ -223,12 +262,16 @@ export default function JamTheWeb() {
                   )}
                 </div>
                 <p className="mt-1 text-gray-400">
-                  {isViewOnly
-                    ? "View scores and feedback. Sign in to edit."
-                    : "Enter scores from Dev, Siddhant and Gaurav."}
+                  {isViewOnly ? (
+                    user
+                      ? "View scores and feedback. Click edit result to update."
+                      : "View scores and feedback. Sign in to edit."
+                  ) : (
+                    "Enter scores from Dev, Siddhant and Gaurav."
+                  )}
                 </p>
               </div>
-              {!isViewOnly && (
+              {!isViewOnly ? (
                 <div className="flex gap-3">
                   <button
                     type="button"
@@ -236,6 +279,13 @@ export default function JamTheWeb() {
                     className="px-4 py-2 text-sm font-medium text-gray-200 bg-slate-700/80 border border-slate-600 rounded-lg hover:bg-slate-600/80"
                   >
                     {sortedByScore ? "By team ID" : "By score"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditMode(false)}
+                    className="px-4 py-2 text-sm font-semibold text-richblack-25 bg-slate-700/70 hover:bg-slate-700 rounded-lg disabled:opacity-50"
+                  >
+                    Go back to view mode
                   </button>
                   <button
                     type="button"
@@ -247,7 +297,17 @@ export default function JamTheWeb() {
                     {submitting ? "Submitting…" : "Submit scores"}
                   </button>
                 </div>
-              )}
+              ) : user ? (
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setEditMode(true)}
+                    className="px-4 py-2 text-sm font-semibold text-richblack-25 bg-cyan-600 hover:bg-cyan-500 rounded-lg disabled:opacity-50"
+                  >
+                    Edit result
+                  </button>
+                </div>
+              ) : null}
             </div>
 
             {loading ? (
@@ -257,7 +317,10 @@ export default function JamTheWeb() {
             ) : !teams.length ? (
               <div className="text-center py-16 text-gray-400">No teams found.</div>
             ) : (
-              <div className="bg-slate-800/60 rounded-lg border border-slate-600/50 shadow-xl overflow-hidden">
+              <div
+                ref={resultsCardRef}
+                className="bg-slate-800/60 rounded-lg border border-slate-600/50 shadow-xl overflow-hidden"
+              >
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-slate-600/50">
                     <thead>
@@ -403,7 +466,9 @@ export default function JamTheWeb() {
             )}
 
             {isViewOnly && teams.length > 0 && (
-              <p className="mt-4 text-sm text-gray-500">Sign in to edit scores and feedback.</p>
+              <p className="mt-4 text-sm text-gray-500">
+                {user ? "Click edit result to update scores and feedback." : "Sign in to edit scores and feedback."}
+              </p>
             )}
           </>
         )}
