@@ -123,7 +123,7 @@ function ProfileDropDown({
         {user.image ? (
           <div className={`relative ${avatarSize}`}>
             {!avatarLoadedButton && (
-              <div className="absolute inset-0 rounded-full bg-gray-500/50" />
+              <div className="absolute inset-0 z-0 rounded-full bg-gray-500/50 pointer-events-none" />
             )}
             <img
               key={avatarImgSrc}
@@ -131,7 +131,7 @@ function ProfileDropDown({
               alt=""
               onLoad={() => setAvatarLoadedButton(true)}
               onError={() => setAvatarLoadedButton(true)}
-              className={`${avatarSize} rounded-full object-cover border border-gray-600/50 opacity-100`}
+              className={`${avatarSize} relative z-10 rounded-full object-cover border border-gray-600/50 opacity-100`}
             />
           </div>
         ) : (
@@ -163,7 +163,7 @@ function ProfileDropDown({
             {user.image ? (
               <div className="relative h-8 w-8">
                 {!avatarLoadedMenu && (
-                  <div className="absolute inset-0 rounded-full bg-gray-500/50" />
+                  <div className="absolute inset-0 z-0 rounded-full bg-gray-500/50 pointer-events-none" />
                 )}
                 <img
                   key={`menu-${avatarImgSrc}`}
@@ -171,7 +171,7 @@ function ProfileDropDown({
                   alt=""
                   onLoad={() => setAvatarLoadedMenu(true)}
                   onError={() => setAvatarLoadedMenu(true)}
-                  className="h-8 w-8 rounded-full object-cover border border-gray-500/50 opacity-100"
+                  className="h-8 w-8 relative z-10 rounded-full object-cover border border-gray-500/50 opacity-100"
                 />
               </div>
             ) : (
