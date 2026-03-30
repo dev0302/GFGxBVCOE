@@ -65,12 +65,19 @@ const io = new Server(httpServer, {
 });
 
 const onlineUsers = new Map();
+const socketIdToUserId = new Map();
 
 function emitOnlineUsers() {
   const users = Array.from(onlineUsers.values())
     .map((entry) => entry.user)
     .sort((a, b) => a.name.localeCompare(b.name));
   io.emit("online-users", users);
+}
+
+function emitToUser(userId, eventName, payload) {
+  const entry = onlineUsers.get(String(userId));
+  if (!entry) return;
+  entry.socketIds.forEach((sid) => io.to(sid).emit(eventName, payload));
 }
 
 function getTokenFromCookieHeader(cookieHeader = "") {
@@ -131,10 +138,101 @@ io.on("connection", (socket) => {
       socketIds: new Set([socket.id]),
     });
   }
+  socketIdToUserId.set(socket.id, id);
 
   emitOnlineUsers();
 
+  socket.on("join-dashboard", () => {
+    emitOnlineUsers();
+  });
+
+  socket.on("send-upload-request", (payload = {}) => {
+    const receiverId = String(payload.receiverId || "");
+    if (!receiverId) return;
+    emitToUser(receiverId, "receive-upload-request", {
+      requestId: payload.requestId,
+      senderId: id,
+      senderName: socket.user.name,
+      senderImage: socket.user.image,
+      eventMeta: payload.eventMeta || null,
+      at: Date.now(),
+    });
+  });
+
+  socket.on("upload-request-opened", (payload = {}) => {
+    const targetUserId = String(payload.targetUserId || "");
+    if (!targetUserId) return;
+    emitToUser(targetUserId, "upload-request-opened", {
+      ...payload,
+      senderId: id,
+      at: Date.now(),
+    });
+  });
+
+  socket.on("upload-request-closed", (payload = {}) => {
+    const targetUserId = String(payload.targetUserId || "");
+    if (!targetUserId) return;
+    emitToUser(targetUserId, "upload-request-closed", {
+      ...payload,
+      senderId: id,
+      at: Date.now(),
+    });
+  });
+
+  socket.on("upload-progress", (payload = {}) => {
+    const targetUserId = String(payload.targetUserId || "");
+    if (!targetUserId) return;
+    emitToUser(targetUserId, "upload-progress", {
+      ...payload,
+      senderId: id,
+      at: Date.now(),
+    });
+  });
+
+  socket.on("upload-complete", (payload = {}) => {
+    const targetUserId = String(payload.targetUserId || "");
+    if (!targetUserId) return;
+    emitToUser(targetUserId, "upload-complete", {
+      ...payload,
+      senderId: id,
+      at: Date.now(),
+    });
+  });
+
+  socket.on("new-image-added", (payload = {}) => {
+    const targetUserId = String(payload.targetUserId || "");
+    if (!targetUserId) return;
+    const eventPayload = {
+      ...payload,
+      senderId: id,
+      at: Date.now(),
+    };
+    emitToUser(targetUserId, "new-image-added", eventPayload);
+    emitToUser(targetUserId, "image-added", eventPayload);
+  });
+
+  socket.on("image-removed", (payload = {}) => {
+    const targetUserId = String(payload.targetUserId || "");
+    if (!targetUserId) return;
+    emitToUser(targetUserId, "image-removed", {
+      ...payload,
+      senderId: id,
+      at: Date.now(),
+    });
+  });
+
+  socket.on("images-sync", (payload = {}) => {
+    const targetUserId = String(payload.targetUserId || "");
+    if (!targetUserId) return;
+    emitToUser(targetUserId, "images-sync", {
+      ...payload,
+      senderId: id,
+      at: Date.now(),
+    });
+  });
+
   socket.on("disconnect", () => {
+    socketIdToUserId.delete(socket.id);
     const entry = onlineUsers.get(id);
     if (!entry) return;
     entry.socketIds.delete(socket.id);
