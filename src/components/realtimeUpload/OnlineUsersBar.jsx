@@ -6,6 +6,7 @@ export default function OnlineUsersBar({
   onAvatarClick,
   registerAvatarRef,
   selfAnchorRef,
+  disableActions = false,
 }) {
   const peers = users.filter((u) => u?.id && u.id !== currentUserId);
 
@@ -24,6 +25,7 @@ export default function OnlineUsersBar({
               key={u.id}
               user={u}
               registerRef={registerAvatarRef}
+              disabled={disableActions}
               onClick={() => onAvatarClick?.(u)}
             />
           ))

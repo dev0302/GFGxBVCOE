@@ -25,9 +25,6 @@ export function UploadTransferProvider({ children }) {
     };
     const onProgress = (payload = {}) => {
       if (!payload.fileId) return;
-      setOutgoingWait((prev) =>
-        prev && prev.requestId === payload.requestId ? null : prev
-      );
       setProgressItems((prev) => {
         const i = prev.findIndex((x) => x.fileId === payload.fileId);
         if (i === -1) return [...prev, { ...payload, progress: payload.progress || 0 }];
@@ -44,9 +41,6 @@ export function UploadTransferProvider({ children }) {
     };
     const onImageAdded = (payload = {}) => {
       if (!payload.fileId) return;
-      setOutgoingWait((prev) =>
-        prev && prev.requestId === payload.requestId ? null : prev
-      );
       setSharedImages((prev) => (prev.some((x) => x.fileId === payload.fileId) ? prev : [...prev, payload]));
     };
     const onImageRemoved = (payload = {}) => {

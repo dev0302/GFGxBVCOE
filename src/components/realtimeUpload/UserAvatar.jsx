@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { cloudinaryTinyAvatarUrl } from "../../utils/cloudinary";
 import { animateAvatarHover } from "./animations";
 
-export default function UserAvatar({ user, onClick, registerRef }) {
+export default function UserAvatar({ user, onClick, registerRef, disabled = false }) {
   const ref = useRef(null);
   const src = user?.image ? cloudinaryTinyAvatarUrl(user.image) : "";
 
@@ -24,9 +24,12 @@ export default function UserAvatar({ user, onClick, registerRef }) {
       ref={attachRef}
       title={user?.name || "Online user"}
       onClick={onClick}
+      disabled={disabled}
       onMouseEnter={() => animateAvatarHover(ref.current, true)}
       onMouseLeave={() => animateAvatarHover(ref.current, false)}
-      className="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cyan-300/20 bg-slate-800"
+      className={`group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cyan-300/20 bg-slate-800 ${
+        disabled ? "cursor-not-allowed opacity-45" : ""
+      }`}
     >
       {src ? (
         <img src={src} alt={user.name} className="h-9 w-9 rounded-full object-cover" loading="lazy" />
