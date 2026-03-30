@@ -233,8 +233,8 @@ function ProfileDropDown({
           </div>
         </div>
 
-        <div className="border-b border-gray-500/30 px-4 py-3">
-          <div className="mb-2 text-[10px] font-medium uppercase tracking-[0.12em] text-gray-400">
+        <div className="border-b border-gray-500/30 px-4 py-2">
+          <div className="mb-2 text-[8px] font-medium uppercase tracking-[0.12em] text-gray-400">
             Online now
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -261,7 +261,7 @@ function ProfileDropDown({
                         <img
                           src={avatarSrc}
                           alt={person.name}
-                          className="h-8 w-8 rounded-full object-cover"
+                          className="h-7 w-7 rounded-full object-cover"
                           loading="lazy"
                         />
                       ) : (
