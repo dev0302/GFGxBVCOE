@@ -292,25 +292,6 @@ function ProfileDropDown({
           <button
             onClick={() => {
               setOpen(false);
-              navigate("/jam-the-web");
-            }}
-            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
-          >
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
-              <Layout className="h-4 w-4" />
-            </span>
-            <span className="flex-1">
-              <span className="block text-xs font-medium">
-                Jam The Web Result
-              </span>
-              <span className="block text-[10px] text-gray-500">
-                View & edit scores
-              </span>
-            </span>
-          </button>
-          <button
-            onClick={() => {
-              setOpen(false);
               navigate("/profile");
             }}
             className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
@@ -469,7 +450,7 @@ function ProfileDropDown({
           )}
         </div>
 
-        <div className="border-t border-gray-500/30 bg-gray-900/50 px-3 py-2.5">
+        <div className="rounded-b-2xl border-t border-gray-500/30 bg-gray-900/50 px-3 py-2.5">
           <button
             onClick={async () => {
               setOpen(false);
