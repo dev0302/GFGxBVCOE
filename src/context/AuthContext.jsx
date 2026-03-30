@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getMe, login as apiLogin, logout as apiLogout } from "../services/api";
 import { setUser as setUserInStore } from "../redux/slices/authSlice.jsx";
+import { connectPresenceSocket, disconnectPresenceSocket } from "../services/presenceSocket";
 
 const AuthContext = createContext(null);
 
@@ -35,6 +36,19 @@ export function AuthProvider({ children }) {
       cancelled = true;
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    if (!user) {
+      disconnectPresenceSocket();
+      return;
+    }
+
+    connectPresenceSocket();
+
+    return () => {
+      disconnectPresenceSocket();
+    };
+  }, [user?._id]);
 
   const login = async (email, password) => {
     const res = await apiLogin({ email, password });
