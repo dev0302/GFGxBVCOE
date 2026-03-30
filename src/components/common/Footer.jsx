@@ -55,30 +55,45 @@ const Footer = () => {
     setLocStatsStatus("loading");
     setLocStatsError(null);
 
-    const fetchStats = async () => {
+    const MAX_RETRIES = 10;
+    const RETRY_DELAY_MS = 2000;
+
+    const fetchStats = async (attempt = 0) => {
       try {
         const res = await fetch(
-          "https://api.github.com/repos/dev0302/GFGxBVCOE/contributors",
+          "https://api.github.com/repos/dev0302/GFGxBVCOE/stats/contributors",
           {
             headers: {
               Accept: "application/vnd.github+json",
               ...(githubToken
-                ? { Authorization: `token ${githubToken}` }
+                ? { Authorization: `Bearer ${githubToken}` }
                 : {}),
             },
           }
         );
 
+        // GitHub returns 202 while the stats are being computed.
+        if (res.status === 202) {
+          if (attempt < MAX_RETRIES) {
+            setTimeout(() => fetchStats(attempt + 1), RETRY_DELAY_MS);
+          } else {
+            setLocStatsStatus("error");
+            setLocStatsError("GitHub stats still processing. Try again later.");
+          }
+          return;
+        }
+
         const data = await res.json();
         if (Array.isArray(data)) {
           const cleaned = data
+            .filter((c) => c?.author?.login)
             .slice(0, 10)
             .map((c) => ({
-              name: c.login,
-              avatarUrl: c.avatar_url,
-              profileUrl: c.html_url,
-              additions: c.contributions || 0,
-              deletions: 0,
+              name: c.author.login,
+              avatarUrl: c.author.avatar_url,
+              profileUrl: c.author.html_url,
+              additions: (c.weeks || []).reduce((s, w) => s + (w?.a || 0), 0),
+              deletions: (c.weeks || []).reduce((s, w) => s + (w?.d || 0), 0),
             }))
             .sort((a, b) => b.additions - a.additions);
 
