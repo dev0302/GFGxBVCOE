@@ -1,10 +1,14 @@
 require("dotenv").config();
 const express = require("express");
+const http = require("http");
 const dbConnect = require("./config/database");
 const { cloudinaryConnect } = require("./config/cloudinary");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
+const jwt = require("jsonwebtoken");
+const { Server } = require("socket.io");
+const User = require("./models/User");
 
 const descriptionRouter = require("./routes/generateDescription");
 const eventRoutes = require("./routes/eventRoute");
@@ -18,6 +22,7 @@ const aiRoutes = require("./routes/aiRoutes");
 
 
 const app = express();
+const httpServer = http.createServer(app);
 const PORT = process.env.PORT || 8080;
 
 // ✅ Middleware first
@@ -52,10 +57,86 @@ app.use((req, res) => {
 });
 app.use(express.json({ limit: "10mb" }));
 
+const io = new Server(httpServer, {
+  cors: {
+    origin: true,
+    credentials: true,
+  },
+});
+
+const onlineUsers = new Map();
+
+function emitOnlineUsers() {
+  const users = Array.from(onlineUsers.values())
+    .map((entry) => entry.user)
+    .sort((a, b) => a.name.localeCompare(b.name));
+  io.emit("online-users", users);
+}
+
+io.use(async (socket, next) => {
+  try {
+    const rawAuthHeader = socket.handshake.headers?.authorization || "";
+    const headerToken = rawAuthHeader.startsWith("Bearer ")
+      ? rawAuthHeader.slice(7)
+      : null;
+    const token = socket.handshake.auth?.token || headerToken;
+    if (!token) {
+      return next(new Error("Missing token"));
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id)
+      .select("firstName lastName image")
+      .lean();
+
+    if (!user) {
+      return next(new Error("User not found"));
+    }
+
+    socket.user = {
+      id: String(user._id),
+      name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User",
+      image: user.image || "",
+    };
+
+    next();
+  } catch (err) {
+    next(new Error("Unauthorized"));
+  }
+});
+
+io.on("connection", (socket) => {
+  const { id } = socket.user;
+  const existing = onlineUsers.get(id);
+
+  if (existing) {
+    existing.socketIds.add(socket.id);
+  } else {
+    onlineUsers.set(id, {
+      user: socket.user,
+      socketIds: new Set([socket.id]),
+    });
+  }
+
+  emitOnlineUsers();
+
+  socket.on("disconnect", () => {
+    const entry = onlineUsers.get(id);
+    if (!entry) return;
+    entry.socketIds.delete(socket.id);
+    if (entry.socketIds.size === 0) {
+      onlineUsers.delete(id);
+    }
+    emitOnlineUsers();
+  });
+});
+
 dbConnect()
   .then(() => {
     cloudinaryConnect();
-    app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
+    httpServer.listen(PORT, () =>
+      console.log(`Server running on port: ${PORT}`)
+    );
   })
   .catch((err) => {
     console.log("Server could not start:", err);

@@ -84,6 +84,31 @@ export function cloudinaryLargeAvatarUrl(url) {
 }
 
 /**
+ * Tiny avatar variant for compact online indicators.
+ * Ensures a 64x64 cropped avatar with automatic format & quality:
+ *   /upload/w_64,h_64,c_fill,f_auto,q_auto/
+ */
+export function cloudinaryTinyAvatarUrl(url) {
+  if (!url || typeof url !== "string") return url;
+  if (!url.includes("cloudinary.com")) return url;
+  if (url.includes("/video/upload/")) return url;
+
+  const T = "w_64,h_64,c_fill,f_auto,q_auto";
+  const needle = `/upload/${T}/`;
+  if (url.includes(needle)) return url;
+
+  const versioned = url.match(/^(.+\/image\/upload\/)([\s\S]*?)(\/v\d+\/.+)$/);
+  if (versioned) {
+    return `${versioned[1]}${T}${versioned[3]}`;
+  }
+  const vOnly = url.match(/^(.+\/image\/upload\/)(v\d+\/.+)$/);
+  if (vOnly) {
+    return `${vOnly[1]}${T}/${vOnly[2]}`;
+  }
+  return url.replace("/upload/", `/upload/${T}/`);
+}
+
+/**
  * Small square crop for compact pickers (e.g. upcoming-event import list).
  *   /upload/w_80,h_80,c_fill,f_auto,q_auto/
  */
