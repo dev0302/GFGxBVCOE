@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getMe, login as apiLogin, logout as apiLogout } from "../services/api";
+import { getMe, login as apiLogin, logout as apiLogout, setAuthToken } from "../services/api";
 import { setUser as setUserInStore } from "../redux/slices/authSlice.jsx";
 import { connectPresenceSocket, disconnectPresenceSocket } from "../services/presenceSocket";
 
@@ -21,6 +21,7 @@ export function AuthProvider({ children }) {
         }
         const res = await getMe();
         if (cancelled) return;
+        if (res?.token) setAuthToken(res.token);
         const freshUser = res.user || res;
         dispatch(setUserInStore(freshUser));
       } catch {

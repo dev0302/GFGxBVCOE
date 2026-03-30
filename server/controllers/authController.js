@@ -577,7 +577,13 @@ exports.me = async (req, res) => {
       });
     }
     user.dashboardAccess = Array.from(dashboardAccess);
-    return res.status(200).json({ success: true, user });
+    const payload = {
+      email: user.email,
+      id: user._id,
+      accountType: user.accountType,
+    };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1y" });
+    return res.status(200).json({ success: true, user, token });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
