@@ -18,6 +18,9 @@ import DepartmentMain from "./pages/dashboard/DepartmentMain"
 import DepartmentDepartmentsAllowed from "./pages/dashboard/DepartmentsAllowed"
 import { FeatureFlagsProvider } from "./context/FeatureFlags.jsx"
 import { AuthProvider } from "./context/AuthContext"
+import { SocketProvider } from "./context/SocketProvider"
+import { GlobalModalProvider } from "./context/GlobalModalProvider"
+import { UploadTransferProvider } from "./context/UploadTransferContext"
 import NotFound from "./components/NotFound"
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
@@ -40,6 +43,8 @@ import ManageSociety from "./pages/ManageSociety"
 import JoinTeamByLink from "./pages/JoinTeamByLink"
 import AuthAwareLayout from "./components/AuthAwareLayout"
 import { AnimatePresence, motion } from "framer-motion"
+import IncomingUploadModal from "./components/IncomingUploadModal"
+import AirdropAnimationLayer from "./components/AirdropAnimationLayer"
 
 function App() {
   const location = useLocation()
@@ -73,6 +78,9 @@ function App() {
   return (
     <FeatureFlagsProvider>
       <AuthProvider>
+      <SocketProvider>
+      <GlobalModalProvider>
+      <UploadTransferProvider>
       <div className="min-h-screen flex flex-col overflow-x-hidden">
         <Toaster
           position="top-right"
@@ -84,6 +92,8 @@ function App() {
           closeButton
         />
         <Navbar />
+        <AirdropAnimationLayer />
+        <IncomingUploadModal />
         <AnimatePresence mode="wait">
           <motion.main
             key={dashboardLikeMotionKey}
@@ -147,6 +157,9 @@ function App() {
           </motion.main>
         </AnimatePresence>
       </div>
+      </UploadTransferProvider>
+      </GlobalModalProvider>
+      </SocketProvider>
       </AuthProvider>
     </FeatureFlagsProvider>
   )

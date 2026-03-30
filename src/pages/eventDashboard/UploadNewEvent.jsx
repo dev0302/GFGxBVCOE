@@ -8,10 +8,24 @@ import { PulseLoader, TextShimmerLoader } from "../../components/ui/loader";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Sparkles, Calendar, MapPin, X } from "lucide-react";
 import { cloudinaryAvatarUrl, cloudinaryPickerThumbUrl } from "../../utils/cloudinary";
+import { useAuth } from "../../context/AuthContext";
+import { useUploadTransfer } from "../../context/UploadTransferContext";
+import OnlineUsersBar from "../../components/OnlineUsersBar";
+import LiveUploadProgress from "../../components/LiveUploadProgress";
+import SharedGallery from "../../components/SharedGallery";
+import { triggerAirdropAnimation } from "../../animations/airdropAnimation";
 
 const VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg", "video/quicktime"];
 const isVideo = (file) => file?.type?.startsWith("video/") || VIDEO_TYPES.includes(file?.type);
 const BASE = import.meta.env.VITE_API_BASE_URL;
+function dataUrlToFile(dataUrl, filename = "shared-image.jpg") {
+  const [meta, data] = String(dataUrl || "").split(",");
+  const mime = meta?.match(/data:(.*?);base64/)?.[1] || "image/jpeg";
+  const binary = atob(data || "");
+  const buf = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) buf[i] = binary.charCodeAt(i);
+  return new File([buf], filename, { type: mime });
+}
 function formatUpcomingDate(value) {
   if (value == null || value === "") return "";
   const dt = value instanceof Date ? value : new Date(value);
@@ -45,6 +59,17 @@ function getMostRecentlyTouchedUpcomingId(events) {
 }
 
 export default function UploadNewEvent() {
+  const { user } = useAuth();
+  const {
+    onlineUsers,
+    outgoingWait,
+    progressItems,
+    sharedImages,
+    setSharedImages,
+    sendUploadRequest,
+    emitImageRemoved,
+    registerLocalAddFilesHandler,
+  } = useUploadTransfer();
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [upcomingLoading, setUpcomingLoading] = useState(true);
   const [selectedEventId, setSelectedEventId] = useState("");
@@ -64,6 +89,8 @@ export default function UploadNewEvent() {
   const [targetAudience, setTargetAudience] = useState("");
   const [galleryFiles, setGalleryFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
+  const avatarRefs = useRef({});
+  const selfAnchorRef = useRef(null);
   const [speakers, setSpeakers] = useState([{ name: "", title: "" }]);
   const [agenda, setAgenda] = useState([""]);
   const [prerequisites, setPrerequisites] = useState([""]);
@@ -186,6 +213,9 @@ export default function UploadNewEvent() {
       return next;
     });
   }, []);
+  useEffect(() => {
+    return registerLocalAddFilesHandler(addGalleryFiles);
+  }, [addGalleryFiles, registerLocalAddFilesHandler]);
   const removeGalleryFile = useCallback((index) => {
     setGalleryFiles((prev) => prev.filter((_, i) => i !== index));
     setPreviewUrls((prev) => {
@@ -194,6 +224,34 @@ export default function UploadNewEvent() {
       return prev.filter((_, i) => i !== index);
     });
   }, []);
+
+  const registerAvatarRef = useCallback((id, node) => {
+    if (!id) return;
+    if (node) avatarRefs.current[id] = node;
+    else delete avatarRefs.current[id];
+  }, []);
+
+  const handleSendUploadRequest = useCallback(
+    async (targetUser) => {
+      if (!targetUser?.id || !user?._id) return;
+      const requestId = `${user._id}-${targetUser.id}-${Date.now()}`;
+      const fromEl = avatarRefs.current[targetUser.id] || selfAnchorRef.current;
+      const toEl = avatarRefs.current[targetUser.id] || null;
+      await triggerAirdropAnimation({
+        fromEl,
+        toEl,
+        imageUrl: previewUrls[0] || "",
+      });
+      sendUploadRequest({
+        requestId,
+        receiverId: targetUser.id,
+        receiverName: targetUser.name,
+        eventMeta: { title: title || "", date: date || "" },
+      });
+      toast.success(`Upload request sent to ${targetUser.name}`);
+    },
+    [user?._id, sendUploadRequest, title, date, previewUrls]
+  );
 
   const addSpeaker = () => setSpeakers((s) => [...s, { name: "", title: "" }]);
   const removeSpeaker = (i) => setSpeakers((s) => s.filter((_, idx) => idx !== i));
@@ -222,6 +280,7 @@ export default function UploadNewEvent() {
     setSpeakers([{ name: "", title: "" }]);
     setAgenda([""]);
     setPrerequisites([""]);
+    setSharedImages([]);
     setShowAiReviewNotice(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -232,7 +291,7 @@ export default function UploadNewEvent() {
       toast.error("Missing required fields");
       return;
     }
-    if (galleryFiles.length === 0) {
+    if (galleryFiles.length === 0 && sharedImages.length === 0) {
       toast.error("Add at least one image or video in the gallery.");
       return;
     }
@@ -250,6 +309,15 @@ export default function UploadNewEvent() {
     formData.append("agenda", JSON.stringify(agenda.filter(Boolean)));
     formData.append("prerequisites", JSON.stringify(prerequisites.filter(Boolean)));
     galleryFiles.forEach((file) => formData.append("gallery", file));
+    sharedImages.forEach((img, idx) => {
+      if (!img?.preview) return;
+      try {
+        formData.append(
+          "gallery",
+          dataUrlToFile(img.preview, img.name || `shared-${idx + 1}.jpg`)
+        );
+      } catch (_) {}
+    });
 
     toast.promise(createEvent(formData), {
       loading: "Uploading event…",
@@ -577,17 +645,50 @@ export default function UploadNewEvent() {
 
                 <section className="bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">
             <SectionTitle icon="🖼️">Gallery (images & videos) *</SectionTitle>
-            <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple onChange={(e) => { addGalleryFiles(e.target.files); e.target.value = ""; }} className="hidden" />
-            <div
-              onDrop={(e) => { e.preventDefault(); addGalleryFiles(e.dataTransfer.files); }}
-              onDragOver={(e) => e.preventDefault()}
-              onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-gray-500/50 rounded-xl p-8 text-center cursor-pointer hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-colors"
-            >
-              <div className="text-4xl mb-2 opacity-80">📁</div>
-              <p className="text-gray-300 font-medium">Drop files here or click to browse</p>
-              <p className="text-sm text-gray-500 mt-1">Images and videos. Multiple files supported.</p>
+            <div className="mb-4 space-y-3">
+              <OnlineUsersBar
+                users={onlineUsers}
+                currentUserId={user?._id}
+                onAvatarClick={handleSendUploadRequest}
+                registerAvatarRef={registerAvatarRef}
+                selfAnchorRef={selfAnchorRef}
+              />
+              <LiveUploadProgress items={progressItems} />
+              <SharedGallery
+                images={sharedImages}
+                onRemove={(img) => {
+                  if (!img?.fileId) return;
+                  if (!img?.senderId) return;
+                  emitImageRemoved({
+                    targetUserId: img.senderId,
+                    fileId: img.fileId,
+                    requestId: img.requestId,
+                  });
+                }}
+              />
             </div>
+            <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple onChange={(e) => { addGalleryFiles(e.target.files); e.target.value = ""; }} className="hidden" />
+            {outgoingWait ? (
+              <div className="rounded-xl border border-amber-400/30 bg-amber-500/[0.08] p-6 text-center">
+                <p className="text-sm font-semibold text-amber-200">
+                  Waiting for receiving files from {outgoingWait.receiverName}
+                </p>
+                <p className="mt-1 text-xs text-amber-100/70">
+                  Upload box is hidden until they close request or start uploading.
+                </p>
+              </div>
+            ) : (
+              <div
+                onDrop={(e) => { e.preventDefault(); addGalleryFiles(e.dataTransfer.files); }}
+                onDragOver={(e) => e.preventDefault()}
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-gray-500/50 rounded-xl p-8 text-center cursor-pointer hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-colors"
+              >
+                <div className="text-4xl mb-2 opacity-80">📁</div>
+                <p className="text-gray-300 font-medium">Drop files here or click to browse</p>
+                <p className="text-sm text-gray-500 mt-1">Images and videos. Multiple files supported.</p>
+              </div>
+            )}
             {galleryFiles.length > 0 && (
               <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {galleryFiles.map((file, index) => {
