@@ -1,12 +1,19 @@
 import gfgLogo from "../../images/gfgLogo.png";
-import { Instagram, Linkedin, Monitor } from "react-feather";
+import { Instagram, Linkedin, Monitor, ChevronDown } from "react-feather";
 import dev from "../../images/dev.png";
 import himank from "../../images/himank.webp";
 import gaurav from "../../images/gaurav.jpg";
 import vansh from "../../images/vansh.png";
 import harpreet from "../../images/harpreet.png";
+import { useEffect, useState } from "react";
 
 const Footer = () => {
+  const [locStats, setLocStats] = useState([]);
+  const [isMatrixOpen, setIsMatrixOpen] = useState(false); // Toggle state
+  const [hasFetchedLocStats, setHasFetchedLocStats] = useState(false);
+  const [locStatsStatus, setLocStatsStatus] = useState("idle"); // idle | loading | success | error
+  const [locStatsError, setLocStatsError] = useState(null);
+
   const devs = [
     {
       name: "Dev",
@@ -38,6 +45,65 @@ const Footer = () => {
       link: "https://www.linkedin.com/in/harpreet-singh-257b19362",
     },
   ];
+
+  const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
+
+  useEffect(() => {
+    if (!isMatrixOpen || hasFetchedLocStats) return;
+
+    setHasFetchedLocStats(true);
+    setLocStatsStatus("loading");
+    setLocStatsError(null);
+
+    const fetchStats = async () => {
+      try {
+        const res = await fetch(
+          "https://api.github.com/repos/dev0302/GFGxBVCOE/contributors",
+          {
+            headers: {
+              Accept: "application/vnd.github+json",
+              ...(githubToken
+                ? { Authorization: `token ${githubToken}` }
+                : {}),
+            },
+          }
+        );
+
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          const cleaned = data
+            .slice(0, 10)
+            .map((c) => ({
+              name: c.login,
+              avatarUrl: c.avatar_url,
+              profileUrl: c.html_url,
+              additions: c.contributions || 0,
+              deletions: 0,
+            }))
+            .sort((a, b) => b.additions - a.additions);
+
+          setLocStats(cleaned);
+          setLocStatsStatus("success");
+        } else {
+          // Sometimes GitHub can respond with `{}` or an error object.
+          setLocStatsStatus("error");
+          setLocStatsError(data?.message || "Unexpected GitHub stats response");
+          console.warn("Unexpected GitHub stats response:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching GitHub stats:", error);
+        setLocStatsStatus("error");
+        setLocStatsError(error?.message || "Failed to fetch GitHub stats");
+      }
+    };
+
+    fetchStats();
+  }, [isMatrixOpen, hasFetchedLocStats]);
+
+  const maxAdditions =
+    locStats.length > 0
+      ? Math.max(...locStats.map((c) => c.additions))
+      : 1;
 
   return (
     <section
@@ -187,6 +253,119 @@ const Footer = () => {
               ))}
             </div>
           </div>
+        </div>
+
+        {/* TOGGLEABLE LOC CONTRIBUTION MATRIX */}
+        <div className="mt-16 mx-auto max-w-2xl bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl shadow-2xl transition-all duration-500">
+            {/* Clickable Header */}
+            <button
+              type="button"
+              onClick={() => setIsMatrixOpen((v) => !v)}
+              className="w-full flex items-center justify-between p-6 hover:bg-white/[0.02] transition-colors group"
+            >
+              <div className="flex flex-col gap-1 items-start">
+                <h4 className="text-[11px] text-gray-400 uppercase tracking-[0.2em] font-bold">
+                  Open Source Contribution Matrix
+                </h4>
+                <div
+                  className={`h-0.5 bg-emerald-500/50 rounded-full transition-all duration-500 ${
+                    isMatrixOpen ? "w-24" : "w-12"
+                  }`}
+                />
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="hidden sm:inline text-[9px] font-mono text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20 animate-pulse">
+                  Live Repository Stats
+                </span>
+                <ChevronDown
+                  size={20}
+                  className={`text-gray-400 group-hover:text-emerald-400 transition-transform duration-500 ${
+                    isMatrixOpen ? "rotate-180" : "rotate-0"
+                  }`}
+                />
+              </div>
+            </button>
+
+            {/* Collapsible Body */}
+            <div
+              className={`transition-all duration-500 ease-in-out ${
+                isMatrixOpen
+                  ? "max-h-[1000px] opacity-100 pb-8 px-6"
+                  : "max-h-0 opacity-0 overflow-hidden"
+              }`}
+            >
+              {locStatsStatus === "loading" ? (
+                <div className="py-10 text-center text-sm text-gray-400">
+                  Loading GitHub contribution stats...
+                </div>
+              ) : locStatsStatus === "error" && locStats.length === 0 ? (
+                <div className="py-10 text-center text-sm text-gray-400">
+                  Couldn’t load stats.
+                  {locStatsError ? (
+                    <div className="mt-2 text-[12px] opacity-70 break-words">
+                      {locStatsError}
+                    </div>
+                  ) : null}
+                </div>
+              ) : locStats.length === 0 ? (
+                <div className="py-10 text-center text-sm text-gray-400">
+                  Open this section to load stats.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 pt-4 border-t border-white/5">
+                  {locStats.map((c, i) => (
+                    <div key={i} className="flex flex-col gap-2 group">
+                      <div className="flex justify-between items-end">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <a
+                            href={c.profileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="shrink-0"
+                            aria-label={`${c.name} on GitHub`}
+                            title={c.name}
+                          >
+                            <img
+                              src={c.avatarUrl}
+                              alt={c.name}
+                              loading="lazy"
+                              className="h-5 w-5 rounded-full border border-white/15 object-cover bg-slate-800"
+                            />
+                          </a>
+                          <a
+                            href={c.profileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-semibold text-white/90 group-hover:text-emerald-400 transition-colors tracking-tight truncate"
+                            title={c.name}
+                          >
+                            {c.name}
+                          </a>
+                        </div>
+                        <div className="text-[10px] font-mono flex gap-2">
+                          <span className="text-emerald-400">
+                            +{c.additions.toLocaleString()}
+                          </span>
+                          <span className="text-red-400/60">
+                            -{c.deletions.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="h-[5px] w-full bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-emerald-600 via-emerald-400 to-green-300 rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(52,211,153,0.3)]"
+                          style={{
+                            width: isMatrixOpen
+                              ? `${(c.additions / maxAdditions) * 100}%`
+                              : "0%",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
         </div>
 
         <div className="mt-12 pt-8 text-center text-[11px] border-t border-white/5">
