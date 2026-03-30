@@ -2,10 +2,14 @@ const BASE = import.meta.env.VITE_API_BASE_URL;
 
 const AUTH_TOKEN_KEY = "gfg_auth_token";
 
-/** Get stored auth token (survives refresh; works when cookies are blocked in production). */
+/** Get stored auth token (survives refresh/reopen; works when cookies are blocked in production). */
 export function getAuthToken() {
   try {
-    return sessionStorage.getItem(AUTH_TOKEN_KEY) || null;
+    return (
+      localStorage.getItem(AUTH_TOKEN_KEY) ||
+      sessionStorage.getItem(AUTH_TOKEN_KEY) ||
+      null
+    );
   } catch {
     return null;
   }
@@ -14,8 +18,13 @@ export function getAuthToken() {
 /** Store token after login/signup so requests can use Authorization header. */
 export function setAuthToken(token) {
   try {
-    if (token) sessionStorage.setItem(AUTH_TOKEN_KEY, token);
-    else sessionStorage.removeItem(AUTH_TOKEN_KEY);
+    if (token) {
+      localStorage.setItem(AUTH_TOKEN_KEY, token);
+      sessionStorage.setItem(AUTH_TOKEN_KEY, token); // keep compatibility for current tab
+    } else {
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+      sessionStorage.removeItem(AUTH_TOKEN_KEY);
+    }
   } catch (_) { }
 }
 
