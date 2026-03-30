@@ -19,7 +19,19 @@ export function connectPresenceSocket() {
   const token = getAuthToken();
   if (!BASE) return null;
 
-  if (socket) return socket;
+  if (socket) {
+    const currentAuthToken = socket.auth?.token;
+    if (token && currentAuthToken !== token) {
+      socket.auth = { ...(socket.auth || {}), token };
+      if (socket.connected) {
+        socket.disconnect();
+      }
+      socket.connect();
+    } else if (!socket.connected) {
+      socket.connect();
+    }
+    return socket;
+  }
 
   socket = io(BASE, {
     transports: ["websocket", "polling"],
@@ -36,6 +48,14 @@ export function connectPresenceSocket() {
   socket.on("disconnect", () => {
     onlineUsersCache = [];
     notifySubscribers();
+  });
+
+  socket.on("connect_error", () => {
+    const latestToken = getAuthToken();
+    if (latestToken && socket && socket.auth?.token !== latestToken) {
+      socket.auth = { ...(socket.auth || {}), token: latestToken };
+      socket.connect();
+    }
   });
 
   return socket;
