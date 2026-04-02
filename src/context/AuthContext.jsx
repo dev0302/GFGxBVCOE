@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getMe, login as apiLogin, logout as apiLogout, setAuthToken } from "../services/api";
+import { getMe, login as apiLogin, logout as apiLogout, setAuthToken, sendPresenceHeartbeat } from "../services/api";
 import { setUser as setUserInStore } from "../redux/slices/authSlice.jsx";
 import { connectPresenceSocket, disconnectPresenceSocket } from "../services/presenceSocket";
 
@@ -48,6 +48,27 @@ export function AuthProvider({ children }) {
 
     return () => {
       disconnectPresenceSocket();
+    };
+  }, [user?._id]);
+
+  useEffect(() => {
+    if (!user?._id) return undefined;
+
+    const ping = () => {
+      sendPresenceHeartbeat();
+    };
+
+    ping();
+    const intervalId = setInterval(ping, 90_000);
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") ping();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [user?._id]);
 

@@ -27,6 +27,8 @@ const userSchema = new mongoose.Schema(
     },
     additionalDetails: { type: mongoose.Schema.Types.ObjectId, ref: "Profile" },
     image: { type: String, default: "" },
+    /** Updated on site open (heartbeat + socket connect) for “last seen” roster */
+    lastSeen: { type: Date, default: null, index: true },
   },
   { timestamps: true }
 );

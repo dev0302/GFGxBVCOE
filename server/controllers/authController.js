@@ -530,6 +530,45 @@ exports.changePassword = async (req, res) => {
   }
 };
 
+/** POST — bump lastSeen for current user (throttle on client; cheap on server). */
+exports.presenceHeartbeat = async (req, res) => {
+  try {
+    await User.updateOne({ _id: req.user.id }, { $set: { lastSeen: new Date() } });
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("presenceHeartbeat error:", error);
+    return res.status(500).json({ success: false, message: "Could not update presence." });
+  }
+};
+
+/** GET — all users with last activity, newest first (for profile dropdown roster). */
+exports.getLastSeenFeed = async (req, res) => {
+  try {
+    const users = await User.find({})
+      .select("firstName lastName image lastSeen")
+      .limit(600)
+      .lean();
+
+    users.sort((a, b) => {
+      const ta = a.lastSeen ? new Date(a.lastSeen).getTime() : -Infinity;
+      const tb = b.lastSeen ? new Date(b.lastSeen).getTime() : -Infinity;
+      return tb - ta;
+    });
+
+    const rows = users.map((u) => ({
+      id: String(u._id),
+      name: `${u.firstName || ""} ${u.lastName || ""}`.trim() || "User",
+      image: u.image || "",
+      lastSeen: u.lastSeen ? new Date(u.lastSeen).toISOString() : null,
+    }));
+
+    return res.status(200).json({ success: true, users: rows });
+  } catch (error) {
+    console.error("getLastSeenFeed error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 exports.me = async (req, res) => {
   try {
     const userDoc = await User.findById(req.user.id).populate("additionalDetails").select("-password");

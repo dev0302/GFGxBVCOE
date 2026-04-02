@@ -140,6 +140,8 @@ io.on("connection", (socket) => {
   }
   socketIdToUserId.set(socket.id, id);
 
+  User.updateOne({ _id: id }, { $set: { lastSeen: new Date() } }).catch(() => {});
+
   emitOnlineUsers();
 
   socket.on("join-dashboard", () => {
