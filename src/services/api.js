@@ -524,6 +524,25 @@ export async function getMe() {
   return data;
 }
 
+/** Bump server-side lastSeen for the current user (no-op on failure). */
+export async function sendPresenceHeartbeat() {
+  try {
+    const res = await authFetch('/api/v1/auth/presence/heartbeat', { method: 'POST' });
+    const data = await res.json().catch(() => ({}));
+    return res.ok && data.success !== false;
+  } catch {
+    return false;
+  }
+}
+
+/** All users’ lastSeen, newest first (auth required). */
+export async function fetchLastSeenFeed() {
+  const res = await authFetch('/api/v1/auth/presence/last-seen');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load activity');
+  return Array.isArray(data.users) ? data.users : [];
+}
+
 /** Stream enrich-profile SSE events; onMessage({ event, message }) for each event; resolves when stream ends. */
 export function enrichProfileSSE({ onMessage }) {
   const token = getAuthToken();

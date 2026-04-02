@@ -18,6 +18,8 @@ const {
   getAllPeople,
   sendSignupInvite,
   deleteAccount,
+  presenceHeartbeat,
+  getLastSeenFeed,
 } = require("../controllers/authController");
 const {
   getAllSignupConfigs,
@@ -38,6 +40,8 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 router.post("/changepassword", auth, changePassword);
 router.get("/me", auth, me);
+router.post("/presence/heartbeat", auth, presenceHeartbeat);
+router.get("/presence/last-seen", auth, getLastSeenFeed);
 router.get("/search-people", auth, searchPeople);
 router.get("/all-users", auth, canAccessDashboard, getAllUsers);
 router.get("/all-people", auth, getAllPeople);
