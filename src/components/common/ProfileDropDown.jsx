@@ -9,6 +9,7 @@ import {
   getAccountTypeLabel,
   isSocietyRole,
   userCanManageEvents,
+  userCanAccessLeadershipTransition,
 } from "../../services/api";
 import { subscribeOnlineUsers } from "../../services/presenceSocket";
 import { cloudinaryLargeAvatarUrl, cloudinaryTinyAvatarUrl } from "../../utils/cloudinary";
@@ -19,6 +20,7 @@ import {
   Grid,
   Layout,
   LogOut,
+  TrendingUp,
   User,
   Users,
 } from "react-feather";
@@ -405,6 +407,25 @@ function ProfileDropDown({
               </span>
             </button>
           )}
+          {userCanAccessLeadershipTransition(user) && (
+            <button
+              onClick={() => {
+                setOpen(false);
+                navigate("/leadership-transition");
+              }}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+                <TrendingUp className="h-4 w-4" />
+              </span>
+              <span className="flex-1">
+                <span className="block text-xs font-medium">Leadership Transition</span>
+                <span className="block text-[10px] text-gray-500">
+                  Promotions & role management
+                </span>
+              </span>
+            </button>
+          )}
           <button
             onClick={() => {
               setOpen(false);
@@ -675,7 +696,7 @@ function ProfileDropDown({
                     )}
                     {!lastSeenLoading && !lastSeenError && lastSeenRows.length === 0 && (
                       <motion.p
-                        className="py-6 text-center text-xs text-gray-500"
+                        className="py-6 text-center text-xs text-gray-500 "
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.2 }}
@@ -703,7 +724,7 @@ function ProfileDropDown({
                             <motion.div
                               key={row.id}
                               variants={lastSeenListItem}
-                              className="mb-1.5 flex items-center gap-2.5 rounded-2xl border border-white/5 bg-white/[0.03] px-2.5 py-2"
+                              className="mb-1.5 flex items-center gap-2.5 rounded-2xl border border-white/5 bg-white/[0.03] px-2.5 py-2 mt-1"
                             >
                               <div className="relative shrink-0">
                                 {av ? (

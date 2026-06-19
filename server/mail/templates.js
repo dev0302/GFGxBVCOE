@@ -117,6 +117,135 @@ exports.passwordChangedTemplate = () => {
   return wrapCard(inner);
 };
 
+function roleTransitionBlock(previousRole, newRole) {
+  return `
+    <div style="${BASE_STYLES.box} margin: 24px 0; text-align: center;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px 0;">
+        Role transition
+      </p>
+      <p style="color: #94a3b8; font-size: 14px; margin: 0 0 8px 0;">
+        ${previousRole || "Member"}
+      </p>
+      <p style="color: #22d3ee; font-size: 18px; margin: 0; font-weight: bold;">↓</p>
+      <p style="color: #e5e7eb; font-size: 18px; font-weight: bold; margin: 8px 0 0 0;">
+        ${newRole}
+      </p>
+    </div>
+  `;
+}
+
+function signupButtonBlock(signupLink, label = "Sign up now") {
+  return `
+    <div style="margin: 20px 0;">
+      <a href="${signupLink}" style="${BASE_STYLES.button}">${label}</a>
+    </div>
+  `;
+}
+
+function websiteButtonBlock(websiteUrl, label = "Visit GFGxBVCOE") {
+  const url = websiteUrl.replace(/\/$/, "");
+  return `
+    <div style="margin: 20px 0;">
+      <a href="${url}" style="${BASE_STYLES.button}">${label}</a>
+    </div>
+  `;
+}
+
+function celebrationHeader() {
+  return `
+    <div style="margin-bottom: 24px;">
+      <div style="display: inline-block; background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 100%); border-radius: 50%; width: 56px; height: 56px; line-height: 56px; font-size: 28px; margin-bottom: 16px;">
+        🎉
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Promotion congratulations for existing registered users.
+ * data: { name, previousRole, newRole, newDepartment, websiteUrl }
+ */
+exports.promotionExistingUserTemplate = (data) => {
+  const {
+    name,
+    previousRole,
+    newRole,
+    newDepartment,
+    websiteUrl = "https://www.gfg-bvcoe.com",
+  } = data;
+  const deptLine = newDepartment ? `<strong style="color: #e5e7eb;">${newDepartment}</strong>` : "";
+  const inner = `
+    ${celebrationHeader()}
+    <h1 style="${BASE_STYLES.title}">Congratulations on your promotion!</h1>
+    <p style="${BASE_STYLES.body}">
+      Hello <strong style="color: #e5e7eb;">${name || "there"}</strong>,
+      we're thrilled to share that you've been promoted within GFG BVCOE.
+    </p>
+  ${roleTransitionBlock(previousRole, newRole)}
+    <p style="${BASE_STYLES.body}">
+      Your new leadership role in ${deptLine || "the society"} is now active on the platform.
+      Log in anytime to collaborate with the team and access your updated permissions.
+    </p>
+    ${websiteButtonBlock(websiteUrl, "Open GFGxBVCOE")}
+    <p style="${BASE_STYLES.footer}">
+      Thank you for your dedication to GFG BVCOE. We look forward to working with you in this new role.
+    </p>
+  `;
+  return wrapCard(inner);
+};
+
+/**
+ * Promotion congratulations for people not yet registered — includes signup CTAs.
+ * data: { name, email, previousRole, newRole, newDepartment, websiteUrl, signupLink }
+ */
+exports.promotionNewUserTemplate = (data) => {
+  const {
+    name,
+    email,
+    previousRole,
+    newRole,
+    newDepartment,
+    websiteUrl = "https://www.gfg-bvcoe.com",
+    signupLink,
+  } = data;
+  const signupUrl = signupLink || `${websiteUrl.replace(/\/$/, "")}/signup`;
+  const deptLabel = newDepartment || "GFG BVCOE";
+  const inner = `
+    ${signupButtonBlock(signupUrl, "Sign up to get started")}
+    ${celebrationHeader()}
+    <h1 style="${BASE_STYLES.title}">Congratulations on your leadership role!</h1>
+    <p style="${BASE_STYLES.body}">
+      Hello <strong style="color: #e5e7eb;">${name || "there"}</strong>,
+      you've been appointed to a leadership position in GFG BVCOE. We're excited to welcome you aboard!
+    </p>
+    ${roleTransitionBlock(previousRole, newRole)}
+    <div style="${BASE_STYLES.box} margin: 24px 0; text-align: left;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px 0;">
+        Your signup details
+      </p>
+      <p style="color: #94a3b8; font-size: 13px; margin: 0 0 8px 0;">
+        <span style="color: #64748b;">Approved email:</span><br/>
+        <strong style="color: #22d3ee;">${email}</strong>
+      </p>
+      <p style="color: #94a3b8; font-size: 13px; margin: 12px 0 0 0;">
+        <span style="color: #64748b;">Department / role:</span><br/>
+        <strong style="color: #e5e7eb;">${deptLabel}</strong>
+        · <strong style="color: #e5e7eb;">${newRole}</strong>
+      </p>
+    </div>
+    <p style="${BASE_STYLES.body}">
+      Please sign up using the approved email above so we can grant you access and continue working together on the platform.
+    </p>
+    ${signupButtonBlock(signupUrl, "Complete your signup")}
+  ${websiteButtonBlock(websiteUrl, "Visit our website")}
+    <p style="${BASE_STYLES.footer}">
+      Sign up with <strong style="color: #94a3b8;">${email}</strong> to unlock your leadership access.
+      If you didn't expect this email, you can safely ignore it.
+    </p>
+  `;
+  return wrapCard(inner);
+};
+
 /**
  * Signup invite for predefined profile (not yet registered).
  * pre: { name, email, image, branch, year, position }

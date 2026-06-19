@@ -437,6 +437,14 @@ export function userCanManageEvents(user) {
   return user.canManageEvents === true || (user.canManageEvents !== false && canManageEvents(user.accountType));
 }
 
+/** Society roles + users on the Leadership Transition allowed list. */
+export function userCanAccessLeadershipTransition(user) {
+  if (!user) return false;
+  if (user.canAccessLeadershipTransition === true) return true;
+  if (user.canAccessLeadershipTransition === false) return false;
+  return isSocietyRole(user.accountType);
+}
+
 export async function sendOTP({ email, department }) {
   const res = await authFetch('/api/v1/auth/sendotp', {
     method: 'POST',
@@ -893,4 +901,78 @@ export async function submitJamTheWebScores(teams) {
   return data;
 }
 
+// Leadership Transition
+export async function getLeadershipPositions() {
+  const res = await authFetch("/api/v1/leadership-transition/positions");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch positions");
+  return data;
+}
+
+export async function getLeadershipPeople() {
+  const res = await authFetch("/api/v1/leadership-transition/people");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch people");
+  return data;
+}
+
+export async function getLeadershipConfig() {
+  const res = await authFetch("/api/v1/leadership-transition/config");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch config");
+  return data;
+}
+
+export async function addLeadershipAllowedUser(userId) {
+  const res = await authFetch("/api/v1/leadership-transition/config/add", {
+    method: "POST",
+    body: JSON.stringify({ userId }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to add user");
+  return data;
+}
+
+export async function removeLeadershipAllowedUser(userId) {
+  const res = await authFetch("/api/v1/leadership-transition/config/remove", {
+    method: "POST",
+    body: JSON.stringify({ userId }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to remove user");
+  return data;
+}
+
+export async function promoteLeadershipPerson(payload) {
+  const res = await authFetch("/api/v1/leadership-transition/promote", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to promote");
+  return data;
+}
+
+export async function getLeadershipHistory() {
+  const res = await authFetch("/api/v1/leadership-transition/history");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch history");
+  return data;
+}
+
+export async function getLeadershipPendingEmails() {
+  const res = await authFetch("/api/v1/leadership-transition/pending-emails");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch pending emails");
+  return data;
+}
+
+export async function sendLeadershipPromotionEmails() {
+  const res = await authFetch("/api/v1/leadership-transition/pending-emails/send", {
+    method: "POST",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to send promotion emails");
+  return data;
+}
 

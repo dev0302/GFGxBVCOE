@@ -1,5 +1,6 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
+const { userCanAccessLeadershipTransition } = require("../utils/leadershipAccess");
 
 exports.auth = async (req, res, next) => {
   try {
@@ -62,6 +63,29 @@ exports.isAdmin = (req, res, next) => {
     return res.status(500).json({
       success: false,
       message: "Admin check failed.",
+      error: err.message,
+    });
+  }
+};
+
+/** Leadership Transition: society roles + users on the allowed list */
+exports.canAccessLeadershipTransition = async (req, res, next) => {
+  try {
+    const allowed = await userCanAccessLeadershipTransition(
+      req.user?.id,
+      req.user?.accountType
+    );
+    if (!allowed) {
+      return res.status(403).json({
+        success: false,
+        message: "Leadership Transition access is not granted for your account.",
+      });
+    }
+    next();
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Access check failed.",
       error: err.message,
     });
   }

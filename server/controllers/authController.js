@@ -14,6 +14,7 @@ const { imageUpload, uploadImageFromUrl } = require("../config/cloudinary");
 const { getTeamMemberModel } = require("../models/TeamMember");
 const { getEventUploadAllowedList } = require("./eventController");
 const DashboardAccessConfig = require("../models/DashboardAccessConfig");
+const { userCanAccessLeadershipTransition } = require("../utils/leadershipAccess");
 const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
 
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
@@ -340,6 +341,10 @@ exports.login = async (req, res) => {
       });
     }
     user.dashboardAccess = Array.from(dashboardAccess);
+    user.canAccessLeadershipTransition = await userCanAccessLeadershipTransition(
+      user._id,
+      accountType
+    );
 
     const isProduction = process.env.NODE_ENV === "production";
     const options = {
@@ -616,6 +621,10 @@ exports.me = async (req, res) => {
       });
     }
     user.dashboardAccess = Array.from(dashboardAccess);
+    user.canAccessLeadershipTransition = await userCanAccessLeadershipTransition(
+      user._id,
+      accountType
+    );
     const payload = {
       email: user.email,
       id: user._id,
