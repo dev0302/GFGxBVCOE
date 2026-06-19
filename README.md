@@ -572,4 +572,8 @@ npm run build
 
 ## License
 
-No dedicated `LICENSE` file is currently included. Add one before reusing this project as an open-source template.
+This project is proprietary and is provided for portfolio and demonstration purposes only.
+
+Copyright © 2026 Dev Malik and GeeksforGeeks BVCOE.
+
+Unauthorized copying, modification, distribution, or commercial use of this software is prohibited. See the [LICENSE](./LICENSE) file for details.
