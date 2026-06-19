@@ -45,6 +45,10 @@ import AuthAwareLayout from "./components/AuthAwareLayout"
 import { AnimatePresence, motion } from "framer-motion"
 import IncomingUploadModal from "./components/IncomingUploadModal"
 import AirdropAnimationLayer from "./components/AirdropAnimationLayer"
+import LeadershipTransitionLayout from "./components/LeadershipTransition/LeadershipTransitionLayout"
+import Promotions from "./pages/leadershipTransition/Promotions"
+import LeadershipPersonsAllowed from "./pages/leadershipTransition/PersonsAllowed"
+import LeadershipHistory from "./pages/leadershipTransition/History"
 
 function App() {
   const location = useLocation()
@@ -58,11 +62,13 @@ function App() {
 
   const isDashboardLike =
     location.pathname.startsWith("/em-dashboard") ||
-    location.pathname.startsWith("/dashboard/");
+    location.pathname.startsWith("/dashboard/") ||
+    location.pathname.startsWith("/leadership-transition");
 
   // Keep this stable for tab switches so layouts (sidebars) don't remount.
   const dashboardLikeMotionKey = (() => {
     if (location.pathname.startsWith("/em-dashboard")) return "/em-dashboard";
+    if (location.pathname.startsWith("/leadership-transition")) return "/leadership-transition";
     if (location.pathname.startsWith("/dashboard/")) {
       const parts = location.pathname.split("/");
       const departmentKey = parts[2] || "unknown";
@@ -138,6 +144,14 @@ function App() {
                 <Route path="/reset-password/:token" element={<ResetPassword />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/dashboard" element={<AdminSignupConfig />} />
+                <Route path="/leadership-transition">
+                  <Route element={<LeadershipTransitionLayout />}>
+                    <Route index element={<Navigate to="/leadership-transition/promotions" replace />} />
+                    <Route path="promotions" element={<Promotions />} />
+                    <Route path="history" element={<LeadershipHistory />} />
+                    <Route path="persons-allowed" element={<LeadershipPersonsAllowed />} />
+                  </Route>
+                </Route>
                 <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/manage-team" element={<ManageTeam />} />

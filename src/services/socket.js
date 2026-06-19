@@ -5,12 +5,22 @@ const BASE = import.meta.env.VITE_API_BASE_URL;
 
 let socket = null;
 const onlineUsersSubscribers = new Set();
+const leadershipUpdateSubscribers = new Set();
 let onlineUsersCache = [];
+let leadershipUpdateCache = null;
 
 function notifyOnlineUsers() {
   onlineUsersSubscribers.forEach((cb) => {
     try {
       cb(onlineUsersCache);
+    } catch (_) {}
+  });
+}
+
+function notifyLeadershipUpdates() {
+  leadershipUpdateSubscribers.forEach((cb) => {
+    try {
+      cb(leadershipUpdateCache);
     } catch (_) {}
   });
 }
@@ -40,6 +50,11 @@ export function connectSocket(tokenOverride) {
     if (!Array.isArray(users)) return;
     onlineUsersCache = users;
     notifyOnlineUsers();
+  });
+
+  socket.on("leadership-transition-update", (payload = {}) => {
+    leadershipUpdateCache = payload;
+    notifyLeadershipUpdates();
   });
 
   socket.on("disconnect", () => {
@@ -87,6 +102,13 @@ export function subscribeOnlineUsers(callback) {
   onlineUsersSubscribers.add(callback);
   callback(onlineUsersCache);
   return () => onlineUsersSubscribers.delete(callback);
+}
+
+export function subscribeLeadershipUpdates(callback) {
+  if (typeof callback !== "function") return () => {};
+  leadershipUpdateSubscribers.add(callback);
+  if (leadershipUpdateCache) callback(leadershipUpdateCache);
+  return () => leadershipUpdateSubscribers.delete(callback);
 }
 
 export function joinDashboard(payload = {}) {
