@@ -280,3 +280,128 @@ exports.signupInviteTemplate = (pre, signupLink) => {
   `;
   return wrapCard(inner);
 };
+
+function formatTenureDate(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+}
+
+function timelineBlock(timeline) {
+  const items = Array.isArray(timeline) ? timeline.filter((t) => t?.role || t?.project) : [];
+  if (!items.length) return "";
+  const rows = items
+    .slice(0, 6)
+    .map(
+      (t) => `
+      <tr>
+        <td style="padding: 10px 12px; border-bottom: 1px solid #334155; color: #64748b; font-size: 12px; vertical-align: top;">${t.year || "—"}</td>
+        <td style="padding: 10px 12px; border-bottom: 1px solid #334155; color: #e5e7eb; font-size: 13px; vertical-align: top;">
+          <strong>${t.role || "Role"}</strong>
+          ${t.project ? `<br/><span style="color: #94a3b8;">${t.project}</span>` : ""}
+          ${t.description ? `<br/><span style="color: #64748b; font-size: 12px;">${t.description}</span>` : ""}
+        </td>
+      </tr>
+    `
+    )
+    .join("");
+  return `
+    <div style="${BASE_STYLES.box} margin: 24px 0; text-align: left; padding: 0; overflow: hidden;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0; padding: 16px 16px 8px;">
+        Your journey with us
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+        ${rows}
+      </table>
+    </div>
+  `;
+}
+
+function activityHighlightsBlock(highlights, totalCount) {
+  const items = Array.isArray(highlights) ? highlights : [];
+  if (!items.length && !totalCount) return "";
+  const rows = items
+    .map(
+      (h) => `
+      <li style="color: #94a3b8; font-size: 13px; margin: 0 0 8px 0; line-height: 1.5;">
+        <span style="color: #e5e7eb;">${(h.action || "Activity").replace(/_/g, " ")}</span>
+        <span style="color: #64748b;"> · ${h.category || "general"}</span>
+      </li>
+    `
+    )
+    .join("");
+  return `
+    <div style="${BASE_STYLES.box} margin: 24px 0; text-align: left;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px 0;">
+        Platform contributions
+      </p>
+      ${totalCount ? `<p style="color: #22d3ee; font-size: 14px; font-weight: bold; margin: 0 0 12px 0;">${totalCount} recorded activit${totalCount === 1 ? "y" : "ies"}</p>` : ""}
+      ${rows ? `<ul style="margin: 0; padding-left: 18px;">${rows}</ul>` : ""}
+    </div>
+  `;
+}
+
+function farewellHeader() {
+  return `
+    <div style="margin-bottom: 24px;">
+      <div style="display: inline-block; background: linear-gradient(135deg, #f472b6 0%, #a78bfa 50%, #22d3ee 100%); border-radius: 50%; width: 56px; height: 56px; line-height: 56px; font-size: 28px; margin-bottom: 16px;">
+        ✨
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Tenure end / farewell email for members completing their session.
+ * data: { name, email, role, department, timeline, activityLogCount, activityHighlights, tenureStartedAt, websiteUrl, registered }
+ */
+exports.tenureEndTemplate = (data) => {
+  const {
+    name,
+    role,
+    department,
+    timeline = [],
+    activityLogCount = 0,
+    activityHighlights = [],
+    tenureStartedAt,
+    websiteUrl = "https://www.gfg-bvcoe.com",
+    registered = true,
+  } = data;
+
+  const startedLabel = formatTenureDate(tenureStartedAt);
+  const deptLine = department
+    ? `<strong style="color: #e5e7eb;">${department}</strong>`
+    : "GFG BVCOE";
+
+  const inner = `
+    ${farewellHeader()}
+    <h1 style="${BASE_STYLES.title}">Thank you for your incredible tenure</h1>
+    <p style="${BASE_STYLES.body}">
+      Dear <strong style="color: #e5e7eb;">${name || "there"}</strong>,
+      as your time with GFG BVCOE comes to a close, we want to celebrate everything you've contributed.
+    </p>
+    <div style="${BASE_STYLES.box} margin: 24px 0; text-align: center;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px 0;">
+        Your role
+      </p>
+      <p style="color: #e5e7eb; font-size: 20px; font-weight: bold; margin: 0 0 8px 0;">
+        ${role || "Member"}
+      </p>
+      <p style="color: #94a3b8; font-size: 13px; margin: 0;">
+        ${deptLine}${startedLabel ? ` · Since ${startedLabel}` : ""}
+      </p>
+    </div>
+    ${timelineBlock(timeline)}
+    ${activityHighlightsBlock(activityHighlights, activityLogCount)}
+    <p style="${BASE_STYLES.body}">
+      Your profile, timeline, and activity history have been preserved in our alumni records.
+      ${registered ? "Your platform access will end within 24 hours — please save anything you need before then." : ""}
+    </p>
+    ${websiteButtonBlock(websiteUrl, "Visit GFGxBVCOE")}
+    <p style="${BASE_STYLES.footer}">
+      With gratitude from the entire GFG BVCOE family. Once a GFGian, always a GFGian.
+    </p>
+  `;
+  return wrapCard(inner);
+};

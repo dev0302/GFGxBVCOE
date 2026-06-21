@@ -6,6 +6,7 @@ const BASE = import.meta.env.VITE_API_BASE_URL;
 let socket = null;
 const onlineUsersSubscribers = new Set();
 const leadershipUpdateSubscribers = new Set();
+const tenureEndedSubscribers = new Set();
 let onlineUsersCache = [];
 let leadershipUpdateCache = null;
 
@@ -55,6 +56,14 @@ export function connectSocket(tokenOverride) {
   socket.on("leadership-transition-update", (payload = {}) => {
     leadershipUpdateCache = payload;
     notifyLeadershipUpdates();
+  });
+
+  socket.on("tenure-ended", (payload = {}) => {
+    tenureEndedSubscribers.forEach((cb) => {
+      try {
+        cb(payload);
+      } catch (_) {}
+    });
   });
 
   socket.on("disconnect", () => {
@@ -109,6 +118,12 @@ export function subscribeLeadershipUpdates(callback) {
   leadershipUpdateSubscribers.add(callback);
   if (leadershipUpdateCache) callback(leadershipUpdateCache);
   return () => leadershipUpdateSubscribers.delete(callback);
+}
+
+export function subscribeTenureEnded(callback) {
+  if (typeof callback !== "function") return () => {};
+  tenureEndedSubscribers.add(callback);
+  return () => tenureEndedSubscribers.delete(callback);
 }
 
 export function joinDashboard(payload = {}) {

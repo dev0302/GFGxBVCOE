@@ -6,6 +6,7 @@ import {
   getLeadershipPeople,
   getLeadershipPositions,
   promoteLeadershipPerson,
+  endLeadershipSession,
   getLeadershipPendingEmails,
   sendLeadershipPromotionEmails,
   getAccountTypeLabel,
@@ -13,7 +14,7 @@ import {
 import { subscribeLeadershipUpdates } from "../../services/socket";
 import { cloudinaryTinyAvatarUrl } from "../../utils/cloudinary";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Search as SearchIcon, X } from "react-feather";
+import { Check, Search as SearchIcon, X, TrendingUp, LogOut } from "react-feather";
 
 const GMAIL_ICON_SRC = "/gmail-icon.png";
 
@@ -48,8 +49,11 @@ export default function Promotions() {
   const [positions, setPositions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [promoting, setPromoting] = useState(false);
+  const [endingSession, setEndingSession] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState(null);
+  const [personAction, setPersonAction] = useState(null);
   const [pendingPromotion, setPendingPromotion] = useState(null);
+  const [pendingEndSession, setPendingEndSession] = useState(false);
   const [search, setSearch] = useState("");
   const [pendingEmails, setPendingEmails] = useState([]);
   const [emailPanelOpen, setEmailPanelOpen] = useState(false);
@@ -92,6 +96,7 @@ export default function Promotions() {
       loadData();
       if (
         payload?.type === "promotion" ||
+        payload?.type === "end-session" ||
         payload?.type === "pending-emails-sent" ||
         payload?.pendingEmailCount != null
       ) {
@@ -127,9 +132,37 @@ export default function Promotions() {
   }, [positions]);
 
   const closePersonModal = () => {
-    if (promoting) return;
+    if (promoting || endingSession) return;
     setPendingPromotion(null);
+    setPendingEndSession(false);
+    setPersonAction(null);
     setSelectedPerson(null);
+  };
+
+  const handleEndSession = async () => {
+    if (!selectedPerson || endingSession) return;
+    setEndingSession(true);
+    try {
+      const res = await endLeadershipSession({
+        personType: selectedPerson.type,
+        personId: selectedPerson.id,
+        sourceDepartment: selectedPerson.sourceDepartment || undefined,
+      });
+      if (res.success) {
+        setPeople(res.data || []);
+        if (res.pendingEmailCount != null) {
+          await loadPendingEmails();
+        }
+        toast.success(res.message || "Session ended successfully");
+        setPendingEndSession(false);
+        setPersonAction(null);
+        setSelectedPerson(null);
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to end session");
+    } finally {
+      setEndingSession(false);
+    }
   };
 
   const handlePromote = async (position) => {
@@ -194,7 +227,7 @@ export default function Promotions() {
               Leadership promotions
             </h1>
             <p className="mt-2 text-sm text-gray-400">
-              Hover a person and click to promote. Changes sync in real time for all
+              Click a person to promote them or end their tenure. Changes sync in real time for all
               authorized users.
             </p>
           </div>
@@ -204,7 +237,7 @@ export default function Promotions() {
             onClick={() => setEmailPanelOpen(true)}
             disabled={loadingPendingEmails}
             className="shrink-0 self-start inline-flex items-center gap-2 rounded-lg border border-gray-500/30 bg-[#252540]/90 px-3 py-2 text-sm leading-none text-gray-300 shadow-sm transition hover:border-cyan-500/40 hover:bg-[#2a2a45] disabled:opacity-60"
-            aria-label={`${pendingCount} promotion emails queued`}
+            aria-label={`${pendingCount} queued emails`}
           >
             <img
               src={GMAIL_ICON_SRC}
@@ -272,7 +305,7 @@ export default function Promotions() {
                     </span>
                   </div>
                   <span className="pointer-events-none absolute inset-x-0 -top-8 mx-auto hidden w-fit rounded-md border border-cyan-500/30 bg-[#151525] px-2 py-1 text-[10px] font-medium text-cyan-300 shadow-lg group-hover:block">
-                    Click to promote
+                    Click to manage
                   </span>
                 </button>
               ))
@@ -306,10 +339,10 @@ export default function Promotions() {
                   />
                   <div>
                     <h2 className="text-lg font-semibold text-richblack-25">
-                      Queued promotion emails
+                      Queued emails
                     </h2>
                     <p className="text-xs text-gray-500">
-                      {pendingCount} recipient{pendingCount === 1 ? "" : "s"} waiting
+                      Promotions & tenure farewells · {pendingCount} waiting
                     </p>
                   </div>
                 </div>
@@ -329,8 +362,8 @@ export default function Promotions() {
                   </div>
                 ) : pendingEmails.length === 0 ? (
                   <p className="py-10 text-center text-sm text-gray-500">
-                    Promote someone to queue a congratulations email here. The count
-                    grows as more people are promoted.
+                    Promote someone or end a tenure to queue emails here. The count
+                    grows as more actions are taken.
                   </p>
                 ) : (
                   <ul className="space-y-2">
@@ -348,24 +381,48 @@ export default function Promotions() {
                           </div>
                           <span
                             className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                              item.registered
-                                ? "bg-emerald-500/15 text-emerald-300"
-                                : "bg-amber-500/15 text-amber-300"
+                              item.emailType === "end_session"
+                                ? "bg-fuchsia-500/15 text-fuchsia-300"
+                                : item.registered
+                                  ? "bg-emerald-500/15 text-emerald-300"
+                                  : "bg-amber-500/15 text-amber-300"
                             }`}
                           >
-                            {item.registered ? "Signed up" : "Needs signup"}
+                            {item.emailType === "end_session"
+                              ? "Tenure end"
+                              : item.registered
+                                ? "Signed up"
+                                : "Needs signup"}
                           </span>
                         </div>
-                        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
-                          <span className="rounded-md bg-gray-500/15 px-2 py-0.5 text-gray-400">
-                            {item.previousRole || "Member"}
-                          </span>
-                          <span className="text-cyan-400">→</span>
-                          <span className="rounded-md bg-cyan-500/15 px-2 py-0.5 font-medium text-cyan-300">
-                            {item.newRole}
-                          </span>
-                        </div>
-                        {item.newDepartment && (
+                        {item.emailType === "end_session" ? (
+                          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
+                            <span className="rounded-md bg-fuchsia-500/15 px-2 py-0.5 font-medium text-fuchsia-300">
+                              {item.previousRole || "Member"}
+                            </span>
+                            {item.tenureDepartment && (
+                              <span className="text-[10px] text-gray-500">
+                                {getAccountTypeLabel(item.tenureDepartment) || item.tenureDepartment}
+                              </span>
+                            )}
+                            {item.activityLogCount > 0 && (
+                              <span className="text-[10px] text-gray-500">
+                                · {item.activityLogCount} activities
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
+                            <span className="rounded-md bg-gray-500/15 px-2 py-0.5 text-gray-400">
+                              {item.previousRole || "Member"}
+                            </span>
+                            <span className="text-cyan-400">→</span>
+                            <span className="rounded-md bg-cyan-500/15 px-2 py-0.5 font-medium text-cyan-300">
+                              {item.newRole}
+                            </span>
+                          </div>
+                        )}
+                        {item.emailType !== "end_session" && item.newDepartment && (
                           <p className="mt-1.5 text-[10px] text-gray-500">
                             {getAccountTypeLabel(item.newDepartment) || item.newDepartment}
                           </p>
@@ -417,7 +474,11 @@ export default function Promotions() {
               <div className="sticky top-0 flex items-start justify-between gap-3 border-b border-gray-500/20 bg-[#1e1e2f] px-5 py-4">
                 <div>
                   <p className="text-xs uppercase tracking-wider text-cyan-400">
-                    Promote to
+                    {personAction === "promote"
+                      ? "Promote to"
+                      : personAction === "end_session"
+                        ? "End tenure"
+                        : "Choose action"}
                   </p>
                   <h2 className="text-lg font-semibold text-richblack-25">
                     {selectedPerson.name || selectedPerson.email}
@@ -433,7 +494,93 @@ export default function Promotions() {
                 </button>
               </div>
 
+              {!personAction && (
+                <div className="space-y-3 p-5">
+                  <p className="text-sm text-gray-400">
+                    What would you like to do with this person?
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setPersonAction("promote")}
+                    className="flex w-full items-center gap-3 rounded-xl border border-cyan-500/25 bg-cyan-500/5 px-4 py-4 text-left transition hover:border-cyan-500/40 hover:bg-cyan-500/10"
+                  >
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-300">
+                      <TrendingUp className="h-5 w-5" />
+                    </span>
+                    <span>
+                      <span className="block text-sm font-semibold text-richblack-25">Promote</span>
+                      <span className="block text-xs text-gray-500">
+                        Move to a new leadership role
+                      </span>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPersonAction("end_session")}
+                    className="flex w-full items-center gap-3 rounded-xl border border-fuchsia-500/25 bg-fuchsia-500/5 px-4 py-4 text-left transition hover:border-fuchsia-500/40 hover:bg-fuchsia-500/10"
+                  >
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-fuchsia-500/15 text-fuchsia-300">
+                      <LogOut className="h-5 w-5" />
+                    </span>
+                    <span>
+                      <span className="block text-sm font-semibold text-richblack-25">End session</span>
+                      <span className="block text-xs text-gray-500">
+                        Archive to alumni, remove from society, 24h account grace
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              )}
+
+              {personAction === "end_session" && (
+                <div className="space-y-4 p-5">
+                  <div className="rounded-xl border border-fuchsia-500/20 bg-fuchsia-500/5 px-4 py-3 text-sm text-gray-300">
+                    <p className="font-medium text-fuchsia-200">This will:</p>
+                    <ul className="mt-2 list-inside list-disc space-y-1 text-xs text-gray-400">
+                      <li>Archive their profile, timeline & activity logs to alumni</li>
+                      <li>Remove them from signup configs, team roster & society</li>
+                      <li>Queue a farewell email with their contributions</li>
+                      {selectedPerson.registered && (
+                        <li>Give them 24 hours before their account is deleted</li>
+                      )}
+                    </ul>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={endingSession}
+                    onClick={() => setPendingEndSession(true)}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-500 to-fuchsia-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-fuchsia-500/20 transition hover:from-fuchsia-400 hover:to-fuchsia-500 disabled:opacity-50"
+                  >
+                    {endingSession ? (
+                      <>
+                        <Spinner className="size-4 text-white" />
+                        Ending session…
+                      </>
+                    ) : (
+                      <>End tenure session</>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={endingSession}
+                    onClick={() => setPersonAction(null)}
+                    className="w-full rounded-xl border border-gray-500/40 px-4 py-2.5 text-sm font-medium text-gray-300 transition hover:bg-gray-500/15 disabled:opacity-50"
+                  >
+                    Back
+                  </button>
+                </div>
+              )}
+
+              {personAction === "promote" && (
               <div className="space-y-5 p-5">
+                <button
+                  type="button"
+                  disabled={promoting}
+                  onClick={() => setPersonAction(null)}
+                  className="text-xs font-medium text-gray-500 transition hover:text-gray-300 disabled:opacity-50"
+                >
+                  ← Back to actions
+                </button>
                 <div>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
                     Society core
@@ -475,11 +622,12 @@ export default function Promotions() {
                   </div>
                 ))}
               </div>
+              )}
 
-              {promoting && (
+              {(promoting || endingSession) && (
                 <div className="flex items-center justify-center gap-2 border-t border-gray-500/20 px-5 py-4 text-sm text-gray-400">
                   <Spinner className="size-4 text-cyan-400" />
-                  Updating roles and signup access…
+                  {endingSession ? "Archiving and removing access…" : "Updating roles and signup access…"}
                 </div>
               )}
             </motion.div>
@@ -561,6 +709,74 @@ export default function Promotions() {
                           </>
                         ) : (
                           <>Yes, promote!</>
+                        )}
+                      </button>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+
+              {pendingEndSession && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-[110] flex items-center justify-center p-4"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!endingSession) setPendingEndSession(false);
+                  }}
+                  role="alertdialog"
+                  aria-modal="true"
+                >
+                  <motion.div
+                    initial={{ scale: 0.9, opacity: 0, y: 12 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.9, opacity: 0, y: 12 }}
+                    transition={{ type: "spring", damping: 22, stiffness: 340 }}
+                    className="w-full max-w-sm rounded-3xl border border-fuchsia-500/25 bg-gradient-to-b from-[#252540] to-[#1e1e2f] p-6 shadow-[0_0_40px_rgba(244,114,182,0.12)]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="mb-5 flex flex-col items-center text-center">
+                      <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-fuchsia-400/30 to-violet-500/20 shadow-inner">
+                        <LogOut className="h-7 w-7 text-fuchsia-300" strokeWidth={2.5} />
+                      </div>
+                      <h3 className="text-lg font-semibold text-richblack-25">
+                        End tenure session?
+                      </h3>
+                      <p className="mt-3 text-sm leading-relaxed text-gray-400">
+                        End{" "}
+                        <span className="font-medium text-gray-200">
+                          {selectedPerson.name || selectedPerson.email}
+                        </span>
+                        &apos;s tenure? They will be archived as alumni and removed from the society roster.
+                        {selectedPerson.registered && (
+                          <> Their account will be deleted after 24 hours.</>
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setPendingEndSession(false)}
+                        disabled={endingSession}
+                        className="w-full rounded-xl border border-gray-500/40 px-4 py-2.5 text-sm font-medium text-gray-300 transition hover:bg-gray-500/15 disabled:opacity-50 sm:w-auto"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleEndSession}
+                        disabled={endingSession}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-500 to-fuchsia-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-fuchsia-500/20 transition hover:from-fuchsia-400 hover:to-fuchsia-500 disabled:opacity-50 sm:w-auto"
+                      >
+                        {endingSession ? (
+                          <>
+                            <Spinner className="size-4 text-white" />
+                            Ending…
+                          </>
+                        ) : (
+                          <>Yes, end session</>
                         )}
                       </button>
                     </div>
