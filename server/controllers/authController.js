@@ -549,7 +549,7 @@ exports.presenceHeartbeat = async (req, res) => {
 /** GET — all users with last activity, newest first (for profile dropdown roster). */
 exports.getLastSeenFeed = async (req, res) => {
   try {
-    const users = await User.find({})
+    const users = await User.find({ tenureEndedAt: null })
       .select("firstName lastName image lastSeen")
       .limit(600)
       .lean();
@@ -625,6 +625,11 @@ exports.me = async (req, res) => {
       user._id,
       accountType
     );
+    if (user.tenureEndedAt) {
+      user.canAccessLeadershipTransition = false;
+      user.dashboardAccess = [];
+      user.canManageEvents = false;
+    }
     const payload = {
       email: user.email,
       id: user._id,

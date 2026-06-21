@@ -953,6 +953,16 @@ export async function promoteLeadershipPerson(payload) {
   return data;
 }
 
+export async function endLeadershipSession(payload) {
+  const res = await authFetch("/api/v1/leadership-transition/end-session", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to end session");
+  return data;
+}
+
 export async function getLeadershipHistory() {
   const res = await authFetch("/api/v1/leadership-transition/history");
   const data = await res.json().catch(() => ({}));

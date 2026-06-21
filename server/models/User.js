@@ -29,6 +29,9 @@ const userSchema = new mongoose.Schema(
     image: { type: String, default: "" },
     /** Updated on site open (heartbeat + socket connect) for “last seen” roster */
     lastSeen: { type: Date, default: null, index: true },
+    /** Set when tenure ends — user gets 24h grace period before account deletion */
+    tenureEndedAt: { type: Date, default: null, index: true },
+    sessionExpiresAt: { type: Date, default: null, index: true },
   },
   { timestamps: true }
 );

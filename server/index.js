@@ -19,7 +19,7 @@ const jamTheWebRoutes = require("./routes/jamTheWebRoute");
 const dashboardRoutes = require("./routes/dashboardRoute");
 const aiRoutes = require("./routes/aiRoutes");
 const leadershipTransitionRoutes = require("./routes/leadershipTransitionRoute");
-const { setIo } = require("./utils/socketBus");
+const { setIo, setEmitToUser } = require("./utils/socketBus");
 
 
 
@@ -83,6 +83,8 @@ function emitToUser(userId, eventName, payload) {
   if (!entry) return;
   entry.socketIds.forEach((sid) => io.to(sid).emit(eventName, payload));
 }
+
+setEmitToUser(emitToUser);
 
 function getTokenFromCookieHeader(cookieHeader = "") {
   if (!cookieHeader || typeof cookieHeader !== "string") return null;

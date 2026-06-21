@@ -1,6 +1,7 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const { userCanAccessLeadershipTransition } = require("../utils/leadershipAccess");
+const { checkAndFinalizeExpiredSession } = require("../utils/tenureSession");
 
 exports.auth = async (req, res, next) => {
   try {
@@ -21,6 +22,27 @@ exports.auth = async (req, res, next) => {
         message: "Invalid or expired token.",
         error: err.message,
       });
+    }
+
+    const tenureStatus = await checkAndFinalizeExpiredSession(req.user.id);
+    if (tenureStatus.expired) {
+      const isProduction = process.env.NODE_ENV === "production";
+      res.clearCookie("Token", {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
+        path: "/",
+      });
+      return res.status(401).json({
+        success: false,
+        message: "Your session has ended. Thank you for your contributions to GFG BVCOE.",
+        code: "TENURE_SESSION_EXPIRED",
+      });
+    }
+
+    if (tenureStatus.tenureEndedAt) {
+      req.tenureEnded = true;
+      req.sessionExpiresAt = tenureStatus.sessionExpiresAt;
     }
 
     next();
@@ -71,6 +93,12 @@ exports.isAdmin = (req, res, next) => {
 /** Leadership Transition: society roles + users on the allowed list */
 exports.canAccessLeadershipTransition = async (req, res, next) => {
   try {
+    if (req.tenureEnded) {
+      return res.status(403).json({
+        success: false,
+        message: "Your tenure has ended. Platform access is limited until your session expires.",
+      });
+    }
     const allowed = await userCanAccessLeadershipTransition(
       req.user?.id,
       req.user?.accountType
@@ -94,6 +122,12 @@ exports.canAccessLeadershipTransition = async (req, res, next) => {
 /** Dashboard (signup config): Faculty Incharge, Chairperson, Vice-Chairperson */
 exports.canAccessDashboard = (req, res, next) => {
   try {
+    if (req.tenureEnded) {
+      return res.status(403).json({
+        success: false,
+        message: "Your tenure has ended. Dashboard access is no longer available.",
+      });
+    }
     const accountType = String(req.user?.accountType || '').trim();
     if (!SOCIETY_ROLES.includes(accountType)) {
       return res.status(403).json({

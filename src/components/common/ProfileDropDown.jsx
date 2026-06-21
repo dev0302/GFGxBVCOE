@@ -37,6 +37,37 @@ function formatLastSeenLabel(iso) {
   return d.toLocaleString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+function useSessionCountdown(sessionExpiresAt) {
+  const [remaining, setRemaining] = useState(null);
+
+  useEffect(() => {
+    if (!sessionExpiresAt) {
+      setRemaining(null);
+      return undefined;
+    }
+
+    const tick = () => {
+      const ms = new Date(sessionExpiresAt).getTime() - Date.now();
+      if (ms <= 0) {
+        setRemaining("00:00:00");
+        return;
+      }
+      const h = Math.floor(ms / 3_600_000);
+      const m = Math.floor((ms % 3_600_000) / 60_000);
+      const s = Math.floor((ms % 60_000) / 1000);
+      setRemaining(
+        `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+      );
+    };
+
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [sessionExpiresAt]);
+
+  return remaining;
+}
+
 const lastSeenListContainer = {
   hidden: { opacity: 0 },
   show: {
@@ -159,6 +190,9 @@ function ProfileDropDown({
     };
   }, [lastSeenOpen, open]);
 
+  const sessionCountdown = useSessionCountdown(user?.sessionExpiresAt);
+  const tenureEnding = Boolean(user?.tenureEndedAt && user?.sessionExpiresAt);
+
   if (!user) return null;
 
   const avatarImgSrc = user.image ? cloudinaryLargeAvatarUrl(user.image) : "";
@@ -245,13 +279,31 @@ function ProfileDropDown({
               onError={() => setAvatarLoadedButton(true)}
               className={`${avatarSize} relative z-10 rounded-full object-cover border border-gray-600/50 opacity-100`}
             />
+            {tenureEnding && sessionCountdown && (
+              <span
+                className="absolute -bottom-1 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border border-fuchsia-400/40 bg-[#151525]/95 px-1.5 py-0.5 font-mono text-[8px] font-bold leading-none text-fuchsia-300 shadow-lg"
+                title="Time remaining before your account is removed"
+              >
+                {sessionCountdown}
+              </span>
+            )}
           </div>
         ) : (
-          <div
-            className={`flex ${avatarSize} items-center justify-center rounded-full bg-green-700/80 text-xs font-semibold text-richblack-25`}
-          >
-            {user.firstName?.[0]}
-            {user.lastName?.[0]}
+          <div className={`relative ${avatarSize}`}>
+            <div
+              className={`flex ${avatarSize} items-center justify-center rounded-full bg-green-700/80 text-xs font-semibold text-richblack-25`}
+            >
+              {user.firstName?.[0]}
+              {user.lastName?.[0]}
+            </div>
+            {tenureEnding && sessionCountdown && (
+              <span
+                className="absolute -bottom-1 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border border-fuchsia-400/40 bg-[#151525]/95 px-1.5 py-0.5 font-mono text-[8px] font-bold leading-none text-fuchsia-300 shadow-lg"
+                title="Time remaining before your account is removed"
+              >
+                {sessionCountdown}
+              </span>
+            )}
           </div>
         )}
         {(!avatarOnly || showChevron) && (
@@ -302,6 +354,12 @@ function ProfileDropDown({
               </div>
             </div>
           </div>
+          {tenureEnding && (
+            <div className="mt-2 rounded-lg border border-fuchsia-500/25 bg-fuchsia-500/10 px-2.5 py-2 text-[10px] leading-snug text-fuchsia-200">
+              Your tenure has ended. Account access ends in{" "}
+              <span className="font-mono font-bold">{sessionCountdown || "—"}</span>.
+            </div>
+          )}
           <div className="mt-2 flex items-center justify-between text-[10px]">
             <span className="inline-flex rounded-full bg-cyan-500/20 px-2 py-0.5 font-medium text-cyan-300">
               {user.additionalDetails?.position ||
@@ -388,7 +446,7 @@ function ProfileDropDown({
         </div>
 
         <div className="px-1 py-1.5">
-          {isSocietyRole(user.accountType) && (
+          {!tenureEnding && isSocietyRole(user.accountType) && (
             <button
               onClick={() => {
                 setOpen(false);
@@ -443,6 +501,8 @@ function ProfileDropDown({
               </span>
             </span>
           </button>
+          {!tenureEnding && (
+          <>
           <button
             onClick={() => {
               setOpen(false);
@@ -584,6 +644,8 @@ function ProfileDropDown({
                 </button>
               );
             })
+          )}
+          </>
           )}
         </div>
 
