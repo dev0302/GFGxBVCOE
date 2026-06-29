@@ -20,6 +20,11 @@ const dashboardRoutes = require("./routes/dashboardRoute");
 const aiRoutes = require("./routes/aiRoutes");
 const leadershipTransitionRoutes = require("./routes/leadershipTransitionRoute");
 const { setIo, setEmitToUser } = require("./utils/socketBus");
+const { setDraftIo } = require("./utils/leadershipDraftBus");
+const {
+  handleJoinLeadershipPromotions,
+  handleLeaveLeadershipPromotions,
+} = require("./utils/leadershipPromotionsSocket");
 
 
 
@@ -67,6 +72,7 @@ const io = new Server(httpServer, {
   },
 });
 setIo(io);
+setDraftIo(io);
 
 const onlineUsers = new Map();
 const socketIdToUserId = new Map();
@@ -239,7 +245,20 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("join-leadership-promotions", () => {
+    handleJoinLeadershipPromotions(socket, io).catch((err) =>
+      console.error("join-leadership-promotions error:", err)
+    );
+  });
+
+  socket.on("leave-leadership-promotions", () => {
+    handleLeaveLeadershipPromotions(socket, io).catch((err) =>
+      console.error("leave-leadership-promotions error:", err)
+    );
+  });
+
   socket.on("disconnect", () => {
+    handleLeaveLeadershipPromotions(socket, io).catch(() => {});
     socketIdToUserId.delete(socket.id);
     const entry = onlineUsers.get(id);
     if (!entry) return;

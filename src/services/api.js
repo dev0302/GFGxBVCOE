@@ -414,6 +414,18 @@ export function getAccountTypeLabel(accountType) {
   return ACCOUNT_TYPE_LABELS[accountType] ?? accountType ?? '';
 }
 
+/** Full role label for history/emails — e.g. Technical → Technical Member */
+export function formatLeadershipRoleLabel(value) {
+  if (!value) return 'Member';
+  const trimmed = String(value).trim();
+  if (!trimmed) return 'Member';
+  if (/\b(Member|Lead|Head)$/i.test(trimmed)) return trimmed;
+  if (SOCIETY_ROLES.includes(trimmed)) return getAccountTypeLabel(trimmed) || trimmed;
+  const teamDepartments = AUTH_DEPARTMENTS.filter((d) => !SOCIETY_ROLES.includes(d));
+  if (teamDepartments.includes(trimmed)) return `${trimmed} Member`;
+  return trimmed;
+}
+
 /** True if user can access "Manage society" (all departments) */
 export const SOCIETY_ROLES = ['ADMIN', 'Chairperson', 'Vice-Chairperson'];
 export function isSocietyRole(accountType) {
@@ -949,7 +961,7 @@ export async function promoteLeadershipPerson(payload) {
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to promote");
+  if (!res.ok) throw new Error(data.message || "Failed to queue promotion");
   return data;
 }
 
@@ -959,8 +971,99 @@ export async function endLeadershipSession(payload) {
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to end session");
+  if (!res.ok) throw new Error(data.message || "Failed to queue session end");
   return data;
+}
+
+export async function getLeadershipDraft() {
+  const res = await authFetch("/api/v1/leadership-transition/draft/active");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch draft session");
+  return data;
+}
+
+export async function finalizeLeadershipDraft() {
+  const res = await authFetch("/api/v1/leadership-transition/draft/finalize", {
+    method: "POST",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to finalize draft");
+  return data;
+}
+
+export async function approveLeadershipDraft() {
+  const res = await authFetch("/api/v1/leadership-transition/draft/approve", {
+    method: "POST",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to approve");
+  return data;
+}
+
+export async function revokeLeadershipDraftApproval() {
+  const res = await authFetch("/api/v1/leadership-transition/draft/revoke-approval", {
+    method: "POST",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to revoke approval");
+  return data;
+}
+
+export async function discardLeadershipDraft(reason) {
+  const res = await authFetch("/api/v1/leadership-transition/draft/discard", {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to discard draft");
+  return data;
+}
+
+export async function applyLeadershipDraft() {
+  const res = await authFetch("/api/v1/leadership-transition/draft/apply", {
+    method: "POST",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to apply changes");
+  return data;
+}
+
+export async function removeLeadershipDraftChange(changeId) {
+  const res = await authFetch(`/api/v1/leadership-transition/draft/changes/${changeId}`, {
+    method: "DELETE",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to remove change");
+  return data;
+}
+
+export async function getLeadershipAppliedSessions() {
+  const res = await authFetch("/api/v1/leadership-transition/draft/sessions");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch sessions");
+  return data;
+}
+
+export function getLeadershipReportDownloadUrl(sessionId) {
+  const base = import.meta.env.VITE_API_BASE_URL || "";
+  return `${base}/api/v1/leadership-transition/draft/report/${sessionId}`;
+}
+
+export async function downloadLeadershipReport(sessionId) {
+  const res = await authFetch(`/api/v1/leadership-transition/draft/report/${sessionId}`);
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || "Failed to download report");
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${sessionId}-report.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 export async function getLeadershipHistory() {

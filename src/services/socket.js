@@ -56,6 +56,7 @@ export function connectSocket(tokenOverride) {
   socket.on("leadership-transition-update", (payload = {}) => {
     leadershipUpdateCache = payload;
     notifyLeadershipUpdates();
+    notifyDraftEvent("leadership-transition-update", payload);
   });
 
   socket.on("tenure-ended", (payload = {}) => {
@@ -129,5 +130,99 @@ export function subscribeTenureEnded(callback) {
 export function joinDashboard(payload = {}) {
   if (!socket) return;
   socket.emit("join-dashboard", payload);
+}
+
+const draftEventSubscribers = new Map();
+let draftStateCache = null;
+let presenceCache = [];
+
+function notifyDraftEvent(event, payload) {
+  const subs = draftEventSubscribers.get(event);
+  if (subs) {
+    subs.forEach((cb) => {
+      try {
+        cb(payload);
+      } catch (_) {}
+    });
+  }
+  const allSubs = draftEventSubscribers.get("*");
+  if (allSubs) {
+    allSubs.forEach((cb) => {
+      try {
+        cb({ event, ...payload });
+      } catch (_) {}
+    });
+  }
+}
+
+function wireDraftSocketEvents(sock) {
+  const draftEvents = [
+    "draft-created",
+    "draft-updated",
+    "collaborator-joined",
+    "collaborator-left",
+    "approval-added",
+    "approval-removed",
+    "draft-discarded",
+    "changes-applied",
+    "leadership-presence",
+    "leadership-draft-state",
+  ];
+
+  draftEvents.forEach((event) => {
+    sock.off(event);
+    sock.on(event, (payload = {}) => {
+      if (event === "leadership-draft-state") {
+        draftStateCache = payload.session || null;
+        presenceCache = payload.collaborators || [];
+      }
+      if (event === "leadership-presence") {
+        presenceCache = payload.collaborators || [];
+      }
+      if (payload.session !== undefined) {
+        draftStateCache = payload.session;
+      }
+      notifyDraftEvent(event, payload);
+    });
+  });
+}
+
+export function joinLeadershipPromotions() {
+  const sock = connectSocket();
+  if (!sock) return;
+  wireDraftSocketEvents(sock);
+  sock.emit("join-leadership-promotions");
+}
+
+export function leaveLeadershipPromotions() {
+  if (!socket) return;
+  socket.emit("leave-leadership-promotions");
+}
+
+export function subscribeLeadershipDraftEvents(callback, event = "*") {
+  if (typeof callback !== "function") return () => {};
+  if (!draftEventSubscribers.has(event)) {
+    draftEventSubscribers.set(event, new Set());
+  }
+  draftEventSubscribers.get(event).add(callback);
+
+  if (event === "*" || event === "leadership-draft-state") {
+    if (draftStateCache !== null || presenceCache.length) {
+      callback({ event: "leadership-draft-state", session: draftStateCache, collaborators: presenceCache });
+    }
+  }
+  if (event === "leadership-presence" && presenceCache.length) {
+    callback({ collaborators: presenceCache });
+  }
+
+  return () => draftEventSubscribers.get(event)?.delete(callback);
+}
+
+export function getLeadershipDraftCache() {
+  return draftStateCache;
+}
+
+export function getLeadershipPresenceCache() {
+  return presenceCache;
 }
 

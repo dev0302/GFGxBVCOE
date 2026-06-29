@@ -22,6 +22,9 @@ const pendingPromotionEmailSchema = new mongoose.Schema(
     activityLogCount: { type: Number, default: 0 },
     activityHighlights: { type: mongoose.Schema.Types.Mixed, default: [] },
     tenureStartedAt: { type: Date, default: null },
+    /** Full profile snapshot for farewell emails */
+    farewellSnapshot: { type: mongoose.Schema.Types.Mixed, default: null },
+    emailSentAt: { type: Date, default: null },
   },
   { _id: true }
 );

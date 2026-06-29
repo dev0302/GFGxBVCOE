@@ -20,6 +20,7 @@ const {
   getAllLeadershipPositions,
   findPositionById,
   SOCIETY_ROLES,
+  formatPreviousRoleLabel,
 } = require("../utils/leadershipPositions");
 
 const ALL_SIGNUP_DEPARTMENTS = [
@@ -77,14 +78,6 @@ function getFrontendBaseUrl(req) {
   ).replace(/\/$/, "");
 }
 
-function formatPreviousRoleLabel(details, oldAccountType, oldSignupDepts) {
-  const position = details?.position?.trim();
-  if (position && position !== "Member") return position;
-  if (oldAccountType) return oldAccountType;
-  if (oldSignupDepts?.length) return oldSignupDepts.join(", ");
-  return "Member";
-}
-
 async function queuePendingPromotionEmail(config, entry) {
   const emailNorm = (entry.email || "").trim().toLowerCase();
   if (!emailNorm) return config;
@@ -109,6 +102,8 @@ async function queuePendingPromotionEmail(config, entry) {
     activityLogCount: entry.activityLogCount || 0,
     activityHighlights: entry.activityHighlights || [],
     tenureStartedAt: entry.tenureStartedAt || null,
+    farewellSnapshot: entry.farewellSnapshot || null,
+    emailSentAt: entry.emailSentAt || null,
   };
 
   if (existingIdx >= 0) {
@@ -139,6 +134,9 @@ function serializePendingEmails(config) {
     activityLogCount: item.activityLogCount || 0,
     activityHighlights: item.activityHighlights || [],
     tenureStartedAt: item.tenureStartedAt,
+    emailSentAt: item.emailSentAt || null,
+    branch: item.farewellSnapshot?.branch || "",
+    year: item.farewellSnapshot?.year || "",
   }));
 }
 
@@ -504,6 +502,12 @@ exports.removeAllowedUser = async (req, res) => {
   }
 };
 
+const {
+  addPromotionToDraft,
+  addEndSessionToDraft,
+  serializeSessionForClient,
+} = require("../services/leadershipDraftService");
+
 exports.promotePerson = async (req, res) => {
   try {
     const { personType, personId, sourceDepartment, targetPositionId } = req.body;
@@ -515,158 +519,26 @@ exports.promotePerson = async (req, res) => {
       });
     }
 
-    const position = findPositionById(targetPositionId);
-    if (!position) {
-      return res.status(400).json({ success: false, message: "Invalid target position." });
-    }
-
-    let rawData = null;
-    if (personType === "user") {
-      rawData = await User.findById(personId).populate("additionalDetails").lean();
-    } else if (personType === "predefinedOnly") {
-      rawData = await PredefinedProfile.findById(personId).lean();
-    } else if (personType === "teamMember") {
-      const dept = sourceDepartment;
-      if (!dept || !TEAM_DEPARTMENTS.includes(dept)) {
-        return res.status(400).json({
-          success: false,
-          message: "sourceDepartment is required for team members.",
-        });
-      }
-      const Model = getTeamMemberModel(dept);
-      rawData = await Model.findById(personId).lean();
-    } else {
-      return res.status(400).json({ success: false, message: "Invalid personType." });
-    }
-
-    if (!rawData) {
-      return res.status(404).json({ success: false, message: "Person not found." });
-    }
-
-    const details = extractPersonDetails(personType, rawData, sourceDepartment);
-    if (!details?.email) {
-      return res.status(400).json({
-        success: false,
-        message: "Person must have an email for leadership transition.",
-      });
-    }
-
-    const emailNorm = details.email;
-    const newDept = position.accountType;
-    const positionTitle = position.positionTitle;
-    const oldSignupDepts = await findSignupDepartmentsForEmail(emailNorm);
-    const oldAccountType = details.currentAccountType || "";
-    const isCoreRoleChange =
-      ["Chairperson", "Vice-Chairperson"].includes(newDept) ||
-      ["Chairperson", "Vice-Chairperson"].includes(oldAccountType);
-    const sameDepartment =
-      !isCoreRoleChange &&
-      personType !== "teamMember" &&
-      ((personType === "user" && oldAccountType === newDept) ||
-        (personType === "predefinedOnly" && oldSignupDepts.includes(newDept)));
-
-    if (sameDepartment) {
-      if (personType === "user") {
-        const userDoc = await User.findById(personId).populate("additionalDetails");
-        if (userDoc?.additionalDetails) {
-          userDoc.additionalDetails.position = positionTitle;
-          userDoc.additionalDetails.p0 = positionTitle;
-          await userDoc.additionalDetails.save();
-        }
-      } else {
-        // Not registered yet — store details in PredefinedProfile for signup autofill.
-        await upsertPredefinedProfile(details, positionTitle);
-      }
-    } else {
-      await removeEmailFromAllSignupConfigs(emailNorm, newDept);
-      await addEmailToSignupConfig(newDept, emailNorm);
-
-      if (personType === "user") {
-        const userDoc = await User.findById(personId).populate("additionalDetails");
-        if (userDoc) {
-          userDoc.accountType = newDept;
-          await userDoc.save();
-          if (userDoc.additionalDetails) {
-            userDoc.additionalDetails.position = positionTitle;
-            userDoc.additionalDetails.p0 = positionTitle;
-            await userDoc.additionalDetails.save();
-          } else {
-            const profile = await Profile.create({
-              position: positionTitle,
-              p0: positionTitle,
-            });
-            userDoc.additionalDetails = profile._id;
-            await userDoc.save();
-          }
-        }
-      } else {
-        // Not registered yet — store details in PredefinedProfile for signup autofill.
-        await upsertPredefinedProfile(
-          { ...details, position: positionTitle, p0: positionTitle },
-          positionTitle
-        );
-      }
-
-      if (personType === "teamMember") {
-        await removeTeamMemberByEmail(emailNorm, sourceDepartment);
-      } else {
-        await removeTeamMemberByEmail(emailNorm);
-      }
-    }
-
-    if (req.user?.id) {
-      await logActivity(
-        req.user.id,
-        "leadership_promote",
-        "leadership_transition",
-        {
-          email: emailNorm,
-          name: details.name,
-          from: oldAccountType || oldSignupDepts.join(", "),
-          to: positionTitle,
-          personType,
-        },
-        personId,
-        "LeadershipTransition"
-      );
-    }
-
-    const config = await getOrCreateConfig();
-    const previousRoleLabel = formatPreviousRoleLabel(
-      details,
-      oldAccountType,
-      oldSignupDepts
-    );
-    await queuePendingPromotionEmail(config, {
-      emailType: "promotion",
-      name: details.name || emailNorm,
-      email: emailNorm,
-      previousRole: previousRoleLabel,
-      newRole: positionTitle,
-      newDepartment: newDept,
-      registered: personType === "user",
+    const session = await addPromotionToDraft(req.user, {
       personType,
-      personId: String(personId),
+      personId,
+      sourceDepartment,
+      targetPositionId,
     });
 
     const data = await buildPeopleList();
-    const pendingEmails = serializePendingEmails(config);
-    emitLeadershipUpdate({
-      type: "promotion",
-      email: emailNorm,
-      position: positionTitle,
-      pendingEmailCount: pendingEmails.length,
-    });
+    emitLeadershipUpdate({ type: "draft-updated" });
 
+    const lastChange = session.pendingChanges[session.pendingChanges.length - 1];
     return res.status(200).json({
       success: true,
-      message: `${details.name || emailNorm} promoted to ${positionTitle}.`,
+      message: `${lastChange?.personName || "Person"} queued for promotion to ${lastChange?.newRole || "new role"}.`,
       data,
-      pendingEmailCount: pendingEmails.length,
+      draft: serializeSessionForClient(session),
     });
   } catch (error) {
     console.error("promotePerson error:", error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -702,11 +574,79 @@ async function collectActivityLogsForPerson(personType, details) {
 }
 
 function buildActivityHighlights(activityLogs) {
-  return (activityLogs || []).slice(0, 8).map((log) => ({
+  return (activityLogs || []).slice(0, 12).map((log) => ({
     action: log.action,
     category: log.category,
     when: log.createdAt,
+    details: log.details || null,
   }));
+}
+
+function buildFarewellEmailPayload(details, roleLabel, oldSignupDepts, activityLogs, registered) {
+  const profile = details.profileData || {};
+  const department =
+    details.currentAccountType ||
+    (oldSignupDepts?.length ? oldSignupDepts.join(", ") : "");
+
+  return {
+    name: details.name || "",
+    email: details.email || "",
+    role: roleLabel || "Member",
+    department,
+    branch: details.branch || profile.branch || "",
+    year: details.year || profile.year || profile.yearOfStudy || "",
+    section: details.section || profile.section || "",
+    nonTechSociety: details.non_tech_society || profile.non_tech_society || "",
+    about: profile.about || "",
+    contact: details.contact || profile.phoneNumber || "",
+    position: details.position || profile.position || "",
+    p0: details.p0 || profile.p0 || "",
+    p1: details.p1 || profile.p1 || "",
+    p2: details.p2 || profile.p2 || "",
+    image: details.image || "",
+    socials: {
+      instagram: details.instaLink || profile.socials?.instagram || "",
+      linkedin: details.linkedinLink || profile.socials?.linkedin || "",
+      github: profile.socials?.github || "",
+    },
+    signupDepartments: oldSignupDepts || [],
+    timeline: Array.isArray(details.timeline) ? details.timeline : [],
+    activityLogCount: (activityLogs || []).length,
+    activityHighlights: buildActivityHighlights(activityLogs),
+    tenureStartedAt: details.userCreatedAt || details.tenureStartedAt || null,
+    tenureEndedAt: new Date(),
+    registered: Boolean(registered),
+  };
+}
+
+function resolveFarewellPayloadFromQueueItem(item, websiteUrl) {
+  if (item.farewellSnapshot && typeof item.farewellSnapshot === "object") {
+    return { ...item.farewellSnapshot, websiteUrl };
+  }
+
+  return {
+    name: item.name || item.email,
+    email: item.email,
+    role: item.previousRole || "Member",
+    department: item.tenureDepartment || "",
+    timeline: item.timeline || [],
+    activityLogCount: item.activityLogCount || 0,
+    activityHighlights: item.activityHighlights || [],
+    tenureStartedAt: item.tenureStartedAt,
+    tenureEndedAt: new Date(),
+    websiteUrl,
+    registered: Boolean(item.registered),
+  };
+}
+
+async function sendFarewellEmail(item, websiteUrl) {
+  const email = (item.email || "").trim().toLowerCase();
+  if (!email) return false;
+
+  const payload = resolveFarewellPayloadFromQueueItem(item, websiteUrl);
+  const subject = `A heartfelt farewell – Thank you, ${payload.name || "GFGian"}`;
+  const html = tenureEndTemplate(payload);
+  return mailSender(email, subject, html);
 }
 
 async function archiveToAlumni({
@@ -792,135 +732,25 @@ exports.endSession = async (req, res) => {
       });
     }
 
-    let rawData = null;
-    if (personType === "user") {
-      rawData = await User.findById(personId).populate("additionalDetails").lean();
-      if (rawData?.tenureEndedAt) {
-        return res.status(400).json({
-          success: false,
-          message: "This person's tenure has already ended.",
-        });
-      }
-    } else if (personType === "predefinedOnly") {
-      rawData = await PredefinedProfile.findById(personId).lean();
-    } else if (personType === "teamMember") {
-      const dept = sourceDepartment;
-      if (!dept || !TEAM_DEPARTMENTS.includes(dept)) {
-        return res.status(400).json({
-          success: false,
-          message: "sourceDepartment is required for team members.",
-        });
-      }
-      const Model = getTeamMemberModel(dept);
-      rawData = await Model.findById(personId).lean();
-    } else {
-      return res.status(400).json({ success: false, message: "Invalid personType." });
-    }
-
-    if (!rawData) {
-      return res.status(404).json({ success: false, message: "Person not found." });
-    }
-
-    const details = extractPersonDetails(personType, rawData, sourceDepartment);
-    if (personType === "user" && rawData.additionalDetails) {
-      details.profileData = rawData.additionalDetails;
-      details.contact = rawData.contact || "";
-      details.userCreatedAt = rawData.createdAt || null;
-    }
-
-    if (!details?.email) {
-      return res.status(400).json({
-        success: false,
-        message: "Person must have an email to end their session.",
-      });
-    }
-
-    const emailNorm = details.email;
-    const oldSignupDepts = await findSignupDepartmentsForEmail(emailNorm);
-    const activityLogs = await collectActivityLogsForPerson(personType, details);
-    const roleLabel = formatPreviousRoleLabel(
-      details,
-      details.currentAccountType,
-      oldSignupDepts
-    );
-
-    await archiveToAlumni({
-      details,
+    const session = await addEndSessionToDraft(req.user, {
       personType,
       personId,
-      oldSignupDepts,
-      activityLogs,
-      endedBy: req.user?.id || null,
-    });
-
-    await purgePersonFromSociety(emailNorm, details.userId || null);
-
-    if (personType === "user") {
-      const userDoc = await User.findById(personId);
-      if (userDoc) {
-        const expiresAt = getSessionExpiresAt();
-        userDoc.tenureEndedAt = new Date();
-        userDoc.sessionExpiresAt = expiresAt;
-        await userDoc.save();
-        emitTenureEnded(String(personId), {
-          sessionExpiresAt: expiresAt,
-          tenureEndedAt: userDoc.tenureEndedAt,
-        });
-      }
-    }
-
-    if (req.user?.id) {
-      await logActivity(
-        req.user.id,
-        "leadership_end_session",
-        "leadership_transition",
-        {
-          email: emailNorm,
-          name: details.name,
-          role: roleLabel,
-          personType,
-          activityLogCount: activityLogs.length,
-        },
-        personId,
-        "LeadershipTransition"
-      );
-    }
-
-    const config = await getOrCreateConfig();
-    await queuePendingPromotionEmail(config, {
-      emailType: "end_session",
-      name: details.name || emailNorm,
-      email: emailNorm,
-      previousRole: roleLabel,
-      newRole: "",
-      newDepartment: "",
-      registered: personType === "user",
-      personType,
-      personId: String(personId),
-      tenureDepartment: details.currentAccountType || oldSignupDepts.join(", "),
-      timeline: details.timeline || [],
-      activityLogCount: activityLogs.length,
-      activityHighlights: buildActivityHighlights(activityLogs),
-      tenureStartedAt: details.userCreatedAt || null,
+      sourceDepartment,
     });
 
     const data = await buildPeopleList();
-    const pendingEmails = serializePendingEmails(config);
-    emitLeadershipUpdate({
-      type: "end-session",
-      email: emailNorm,
-      pendingEmailCount: pendingEmails.length,
-    });
+    emitLeadershipUpdate({ type: "draft-updated" });
 
+    const lastChange = session.pendingChanges[session.pendingChanges.length - 1];
     return res.status(200).json({
       success: true,
-      message: `${details.name || emailNorm}'s tenure has ended. They have 24 hours before their account is removed.`,
+      message: `${lastChange?.personName || "Person"} queued for session end.`,
       data,
-      pendingEmailCount: pendingEmails.length,
+      draft: serializeSessionForClient(session),
     });
   } catch (error) {
     console.error("endSession error:", error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -970,21 +800,18 @@ exports.sendPendingPromotionEmails = async (req, res) => {
       const emailType = item.emailType || "promotion";
 
       if (emailType === "end_session") {
-        const payload = {
-          name: item.name || email,
-          email,
-          role: item.previousRole || "Member",
-          department: item.tenureDepartment || "",
-          timeline: item.timeline || [],
-          activityLogCount: item.activityLogCount || 0,
-          activityHighlights: item.activityHighlights || [],
-          tenureStartedAt: item.tenureStartedAt,
-          websiteUrl,
-          registered: Boolean(item.registered),
-        };
-        const subject = `Thank you for your tenure at GFG BVCOE – ${item.previousRole || "Member"}`;
-        const html = tenureEndTemplate(payload);
-        const mailResult = await mailSender(email, subject, html);
+        if (item.emailSentAt) {
+          sent += 1;
+          results.push({
+            email,
+            success: true,
+            emailType: "end_session",
+            message: "Farewell email already sent",
+          });
+          continue;
+        }
+
+        const mailResult = await sendFarewellEmail(item, websiteUrl);
         if (mailResult) {
           sent += 1;
           results.push({ email, success: true, emailType: "end_session" });
@@ -1062,3 +889,5 @@ exports.sendPendingPromotionEmails = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+exports.buildPeopleList = buildPeopleList;
