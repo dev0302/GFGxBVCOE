@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
-import { Clock, TrendingUp, UserPlus, UserMinus } from "react-feather";
+import { Clock, TrendingUp, UserPlus, UserMinus, FileText, CheckCircle } from "react-feather";
 import { Spinner } from "@/components/ui/spinner";
 import { SectionTitle } from "../../components/EventDashboard/SectionTitle";
-import { getAccountTypeLabel, getLeadershipHistory } from "../../services/api";
+import { getAccountTypeLabel, getLeadershipHistory, formatLeadershipRoleLabel, getLeadershipAppliedSessions, downloadLeadershipReport } from "../../services/api";
 import { subscribeLeadershipUpdates } from "../../services/socket";
 import { cloudinaryTinyAvatarUrl } from "../../utils/cloudinary";
 
 const FILTERS = [
   { id: "all", label: "All events" },
   { id: "promotions", label: "Promotions" },
+  { id: "sessions", label: "Applied sessions" },
   { id: "access", label: "Access" },
 ];
 
@@ -38,6 +39,30 @@ const ACTION_META = {
     dot: "bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.35)]",
     badge: "bg-amber-500/15 text-amber-300 border-amber-500/25",
     rowHover: "hover:border-amber-500/30 hover:bg-amber-500/[0.04]",
+  },
+  leadership_session_applied: {
+    label: "Session applied",
+    icon: CheckCircle,
+    filter: "sessions",
+    dot: "bg-violet-400 shadow-[0_0_10px_rgba(167,139,250,0.4)]",
+    badge: "bg-violet-500/15 text-violet-300 border-violet-500/25",
+    rowHover: "hover:border-violet-500/30 hover:bg-violet-500/[0.04]",
+  },
+  leadership_draft_discarded: {
+    label: "Draft discarded",
+    icon: Clock,
+    filter: "sessions",
+    dot: "bg-gray-400",
+    badge: "bg-gray-500/15 text-gray-300 border-gray-500/25",
+    rowHover: "hover:border-gray-500/30 hover:bg-white/[0.03]",
+  },
+  leadership_draft_abandoned: {
+    label: "Draft abandoned",
+    icon: Clock,
+    filter: "sessions",
+    dot: "bg-gray-400",
+    badge: "bg-gray-500/15 text-gray-300 border-gray-500/25",
+    rowHover: "hover:border-gray-500/30 hover:bg-white/[0.03]",
   },
 };
 
@@ -110,7 +135,7 @@ function Avatar({ image, name, size = "md" }) {
 }
 
 function RoleBadge({ value, muted = false }) {
-  const label = getAccountTypeLabel(value) || value;
+  const label = formatLeadershipRoleLabel(value) || getAccountTypeLabel(value) || value;
   if (!label) return null;
 
   return (
@@ -205,6 +230,28 @@ function HistoryEntry({ log, isLast }) {
                 </div>
               )}
 
+              {log.action === "leadership_session_applied" && (
+                <div className="mt-2 space-y-2">
+                  <p className="text-xs text-gray-400">
+                    Session {details.sessionId} · {details.changeCount} change(s) applied
+                  </p>
+                  {details.sessionId && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        downloadLeadershipReport(details.sessionId).catch((e) =>
+                          toast.error(e.message || "Download failed")
+                        )
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-violet-500/30 bg-violet-500/10 px-2.5 py-1 text-[11px] font-medium text-violet-200 hover:bg-violet-500/20"
+                    >
+                      <FileText className="h-3 w-3" />
+                      Download PDF
+                    </button>
+                  )}
+                </div>
+              )}
+
               {log.action === "leadership_allowed_add" && (
                 <p className="mt-1.5 text-xs text-gray-400">
                   Added to leadership transition access list
@@ -251,13 +298,18 @@ function EmptyState({ title, description }) {
 
 export default function History() {
   const [logs, setLogs] = useState([]);
+  const [appliedSessions, setAppliedSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
 
   const loadHistory = useCallback(async () => {
     try {
-      const res = await getLeadershipHistory();
-      if (res.success) setLogs(res.data || []);
+      const [historyRes, sessionsRes] = await Promise.all([
+        getLeadershipHistory(),
+        getLeadershipAppliedSessions(),
+      ]);
+      if (historyRes.success) setLogs(historyRes.data || []);
+      if (sessionsRes.success) setAppliedSessions(sessionsRes.data || []);
     } catch (err) {
       toast.error(err.message || "Failed to load history");
     } finally {
@@ -280,11 +332,20 @@ export default function History() {
     const access = logs.filter((l) =>
       ["leadership_allowed_add", "leadership_allowed_remove"].includes(l.action)
     ).length;
-    return { total: logs.length, promotions, access };
-  }, [logs]);
+    const sessions = logs.filter((l) =>
+      ["leadership_session_applied", "leadership_draft_discarded", "leadership_draft_abandoned"].includes(l.action)
+    ).length + appliedSessions.length;
+    return { total: logs.length, promotions, access, sessions };
+  }, [logs, appliedSessions]);
 
   const filteredLogs = useMemo(() => {
     if (filter === "all") return logs;
+    if (filter === "sessions") {
+      return logs.filter((log) => {
+        const meta = ACTION_META[log.action];
+        return meta?.filter === "sessions";
+      });
+    }
     return logs.filter((log) => {
       const meta = ACTION_META[log.action];
       return meta?.filter === filter;
@@ -311,6 +372,7 @@ export default function History() {
     () => ({
       all: stats.total,
       promotions: stats.promotions,
+      sessions: stats.sessions,
       access: stats.access,
     }),
     [stats]
@@ -337,10 +399,11 @@ export default function History() {
           </p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-4">
           {[
             { label: "Total events", value: stats.total, accent: "text-richblack-25" },
             { label: "Promotions", value: stats.promotions, accent: "text-cyan-300" },
+            { label: "Sessions", value: stats.sessions, accent: "text-violet-300" },
             { label: "Access changes", value: stats.access, accent: "text-emerald-300" },
           ].map((stat) => (
             <div
@@ -382,6 +445,44 @@ export default function History() {
             );
           })}
         </div>
+
+        {appliedSessions.length > 0 && (filter === "all" || filter === "sessions") && (
+          <section className="rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-500/5 to-[#151525]/80 p-4 sm:p-6">
+            <SectionTitle icon="📄">Applied leadership sessions ({appliedSessions.length})</SectionTitle>
+            <div className="mt-4 space-y-2">
+              {appliedSessions.map((session) => (
+                <div
+                  key={session.sessionId}
+                  className="flex flex-col gap-3 rounded-xl border border-gray-500/20 bg-[#151525]/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-richblack-25">{session.sessionId}</p>
+                    <p className="text-xs text-gray-500">
+                      {session.changeCount} changes · Applied by {session.appliedByName || "—"}
+                    </p>
+                    <p className="text-[10px] text-gray-600">
+                      {session.appliedAt
+                        ? new Date(session.appliedAt).toLocaleString()
+                        : ""}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      downloadLeadershipReport(session.sessionId).catch((e) =>
+                        toast.error(e.message || "Download failed")
+                      )
+                    }
+                    className="inline-flex items-center gap-2 self-start rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-2 text-sm font-medium text-violet-200 hover:bg-violet-500/20"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Download PDF
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="rounded-2xl border border-gray-500/20 bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 p-4 shadow-xl sm:p-6">
           <SectionTitle icon="🕐">

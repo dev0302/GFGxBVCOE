@@ -37,35 +37,78 @@ function formatLastSeenLabel(iso) {
   return d.toLocaleString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-function useSessionCountdown(sessionExpiresAt) {
-  const [remaining, setRemaining] = useState(null);
+function useSessionHoursLeft(sessionExpiresAt) {
+  const [hoursLeft, setHoursLeft] = useState(null);
 
   useEffect(() => {
     if (!sessionExpiresAt) {
-      setRemaining(null);
+      setHoursLeft(null);
       return undefined;
     }
 
     const tick = () => {
       const ms = new Date(sessionExpiresAt).getTime() - Date.now();
       if (ms <= 0) {
-        setRemaining("00:00:00");
+        setHoursLeft(0);
         return;
       }
-      const h = Math.floor(ms / 3_600_000);
-      const m = Math.floor((ms % 3_600_000) / 60_000);
-      const s = Math.floor((ms % 60_000) / 1000);
-      setRemaining(
-        `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
-      );
+      setHoursLeft(Math.ceil(ms / 3_600_000));
     };
 
     tick();
-    const id = setInterval(tick, 1000);
+    const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
   }, [sessionExpiresAt]);
 
-  return remaining;
+  return hoursLeft;
+}
+
+function formatHoursLeftLabel(hours, { compact = false } = {}) {
+  if (hours == null) return null;
+  if (hours <= 0) return compact ? "0h" : "0 hours left";
+  if (hours === 1) return compact ? "1h left" : "1 hour left";
+  return compact ? `${hours}h left` : `${hours} hours left`;
+}
+
+function SessionHoursBadge({ hoursLeft, compact = false }) {
+  const label = formatHoursLeftLabel(hoursLeft, { compact });
+  if (!label) return null;
+
+  return (
+    <span
+      className={
+        compact
+          ? "absolute -bottom-1 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border border-emerald-400/45 bg-gradient-to-r from-emerald-950/95 to-green-900/95 px-1.5 py-0.5 text-[8px] font-semibold leading-none text-emerald-300 shadow-lg shadow-emerald-950/50"
+          : "inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-500/15 px-2 py-0.5 text-[11px] font-bold text-emerald-300"
+      }
+      title="Time remaining before your account is removed"
+    >
+      {label}
+    </span>
+  );
+}
+
+function SessionEndingNotice({ hoursLeft }) {
+  const label = formatHoursLeftLabel(hoursLeft);
+  if (label == null) return null;
+
+  return (
+    <div className="mt-3 overflow-hidden rounded-xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/15 via-green-600/10 to-emerald-950/30 px-3 py-2.5 shadow-inner shadow-emerald-950/20">
+      <div className="flex items-start gap-2.5">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-400/25 bg-emerald-500/20 text-emerald-300">
+          <Clock className="h-4 w-4" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold text-emerald-100">Session ending soon</p>
+          <p className="mt-0.5 text-[10px] leading-snug text-emerald-200/85">
+            Your tenure has ended. You have{" "}
+            <span className="font-bold text-emerald-300">{label}</span> of account access
+            remaining.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 const lastSeenListContainer = {
@@ -190,7 +233,7 @@ function ProfileDropDown({
     };
   }, [lastSeenOpen, open]);
 
-  const sessionCountdown = useSessionCountdown(user?.sessionExpiresAt);
+  const sessionHoursLeft = useSessionHoursLeft(user?.sessionExpiresAt);
   const tenureEnding = Boolean(user?.tenureEndedAt && user?.sessionExpiresAt);
 
   if (!user) return null;
@@ -279,13 +322,8 @@ function ProfileDropDown({
               onError={() => setAvatarLoadedButton(true)}
               className={`${avatarSize} relative z-10 rounded-full object-cover border border-gray-600/50 opacity-100`}
             />
-            {tenureEnding && sessionCountdown && (
-              <span
-                className="absolute -bottom-1 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border border-fuchsia-400/40 bg-[#151525]/95 px-1.5 py-0.5 font-mono text-[8px] font-bold leading-none text-fuchsia-300 shadow-lg"
-                title="Time remaining before your account is removed"
-              >
-                {sessionCountdown}
-              </span>
+            {tenureEnding && sessionHoursLeft != null && (
+              <SessionHoursBadge hoursLeft={sessionHoursLeft} compact />
             )}
           </div>
         ) : (
@@ -296,13 +334,8 @@ function ProfileDropDown({
               {user.firstName?.[0]}
               {user.lastName?.[0]}
             </div>
-            {tenureEnding && sessionCountdown && (
-              <span
-                className="absolute -bottom-1 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border border-fuchsia-400/40 bg-[#151525]/95 px-1.5 py-0.5 font-mono text-[8px] font-bold leading-none text-fuchsia-300 shadow-lg"
-                title="Time remaining before your account is removed"
-              >
-                {sessionCountdown}
-              </span>
+            {tenureEnding && sessionHoursLeft != null && (
+              <SessionHoursBadge hoursLeft={sessionHoursLeft} compact />
             )}
           </div>
         )}
@@ -354,12 +387,7 @@ function ProfileDropDown({
               </div>
             </div>
           </div>
-          {tenureEnding && (
-            <div className="mt-2 rounded-lg border border-fuchsia-500/25 bg-fuchsia-500/10 px-2.5 py-2 text-[10px] leading-snug text-fuchsia-200">
-              Your tenure has ended. Account access ends in{" "}
-              <span className="font-mono font-bold">{sessionCountdown || "—"}</span>.
-            </div>
-          )}
+          {tenureEnding && <SessionEndingNotice hoursLeft={sessionHoursLeft} />}
           <div className="mt-2 flex items-center justify-between text-[10px]">
             <span className="inline-flex rounded-full bg-cyan-500/20 px-2 py-0.5 font-medium text-cyan-300">
               {user.additionalDetails?.position ||

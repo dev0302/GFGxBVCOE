@@ -8,7 +8,7 @@ const BASE_STYLES = {
   box: "background-color: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 20px; margin: 30px 0;",
   footer: "color: #64748b; margin: 20px 0 0 0; font-size: 12px;",
   link: "color: #22d3ee; text-decoration: none;",
-  button: "display: inline-block; background-color: #22d3ee; color: #0f172a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; margin: 10px 0;",
+  button: "display: inline-block; background-color: #5FB53F; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; margin: 10px 0;",
 };
 
 function wrapCard(innerHtml) {
@@ -161,6 +161,33 @@ function celebrationHeader() {
   `;
 }
 
+function inspirationalQuoteBlock(quote, author) {
+  return `
+    <div style="border-left: 3px solid #22d3ee; padding: 18px 22px; margin: 28px 0; text-align: left; background-color: rgba(30, 41, 59, 0.6); border-radius: 0 6px 6px 0;">
+      <p style="color: #cbd5e1; font-size: 15px; line-height: 1.75; margin: 0 0 10px 0; font-style: italic;">
+        &ldquo;${escapeHtml(quote)}&rdquo;
+      </p>
+      ${author
+      ? `<p style="color: #64748b; font-size: 12px; margin: 0; letter-spacing: 0.3px;">&mdash; ${escapeHtml(author)}</p>`
+      : ""
+    }
+    </div>
+  `;
+}
+
+function firstNameFromName(name) {
+  const trimmed = String(name || "").trim();
+  if (!trimmed) return "there";
+  return trimmed.split(/\s+/)[0];
+}
+
+function quotedDetail(value) {
+  if (!value || !String(value).trim()) return "";
+  return `
+    <span style="color: #64748b;">&ldquo;</span><span style="color: #e5e7eb; font-style: italic;">${escapeHtml(value)}</span><span style="color: #64748b;">&rdquo;</span>
+  `;
+}
+
 /**
  * Promotion congratulations for existing registered users.
  * data: { name, previousRole, newRole, newDepartment, websiteUrl }
@@ -182,13 +209,21 @@ exports.promotionExistingUserTemplate = (data) => {
       we're thrilled to share that you've been promoted within GFG BVCOE.
     </p>
   ${roleTransitionBlock(previousRole, newRole)}
+    ${inspirationalQuoteBlock(
+    "Leadership is not about being in charge. It is about taking care of those in your charge.",
+    "Simon Sinek"
+  )}
     <p style="${BASE_STYLES.body}">
       Your new leadership role in ${deptLine || "the society"} is now active on the platform.
       Log in anytime to collaborate with the team and access your updated permissions.
     </p>
+    ${inspirationalQuoteBlock(
+    "The way to get started is to quit talking and begin doing. Your chapter with GFG BVCOE just turned a page — make it count.",
+    "Walt Disney"
+  )}
     ${websiteButtonBlock(websiteUrl, "Open GFGxBVCOE")}
     <p style="${BASE_STYLES.footer}">
-      Thank you for your dedication to GFG BVCOE. We look forward to working with you in this new role.
+      Thank you for your dedication to GFG BVCOE. We believe in you, and we look forward to everything you'll build in this new role.
     </p>
   `;
   return wrapCard(inner);
@@ -219,6 +254,10 @@ exports.promotionNewUserTemplate = (data) => {
       you've been appointed to a leadership position in GFG BVCOE. We're excited to welcome you aboard!
     </p>
     ${roleTransitionBlock(previousRole, newRole)}
+    ${inspirationalQuoteBlock(
+    "Great leaders don't set out to be a leader. They set out to make a difference — and that is exactly what we see in you.",
+    "GFG BVCOE"
+  )}
     <div style="${BASE_STYLES.box} margin: 24px 0; text-align: left;">
       <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px 0;">
         Your signup details
@@ -236,6 +275,10 @@ exports.promotionNewUserTemplate = (data) => {
     <p style="${BASE_STYLES.body}">
       Please sign up using the approved email above so we can grant you access and continue working together on the platform.
     </p>
+    ${inspirationalQuoteBlock(
+    "The best way to find yourself is to lose yourself in the service of others. Step in — your team is waiting for you.",
+    "Mahatma Gandhi"
+  )}
     ${signupButtonBlock(signupUrl, "Complete your signup")}
   ${websiteButtonBlock(websiteUrl, "Visit our website")}
     <p style="${BASE_STYLES.footer}">
@@ -285,22 +328,193 @@ function formatTenureDate(iso) {
   if (!iso) return null;
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function formatActivityDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function profileImageBlock(image, name) {
+  if (!image || !String(image).trim()) return "";
+  const url = image.startsWith("http")
+    ? image
+    : `https://www.gfg-bvcoe.com${image.startsWith("/") ? "" : "/"}${image}`;
+  return `
+    <p style="margin: 0 0 20px 0;">
+      <img src="${escapeHtml(url)}" alt="${escapeHtml(name)}" width="88" height="88"
+        style="width: 88px; height: 88px; border-radius: 50%; object-fit: cover; border: 3px solid #334155;" />
+    </p>
+  `;
+}
+
+function profileDetailRow(label, value) {
+  if (!value || !String(value).trim()) return "";
+  return `
+    <tr>
+      <td style="padding: 8px 0; color: #64748b; font-size: 12px; width: 38%; vertical-align: top;">${escapeHtml(label)}</td>
+      <td style="padding: 8px 0; color: #e5e7eb; font-size: 13px; vertical-align: top;">${quotedDetail(value)}</td>
+    </tr>
+  `;
+}
+
+function profileSummaryBlock(data) {
+  const rows = [
+    profileDetailRow("Email", data.email),
+    profileDetailRow("Contact", data.contact),
+    profileDetailRow("Branch", data.branch),
+    profileDetailRow("Year", data.year),
+    profileDetailRow("Section", data.section),
+    profileDetailRow("Non-tech society", data.nonTechSociety),
+    profileDetailRow("Department", data.department),
+    profileDetailRow("Leadership role", data.role),
+  ]
+    .filter(Boolean)
+    .join("");
+
+  if (!rows) return "";
+
+  return `
+    <div style="${BASE_STYLES.box} margin: 24px 0; text-align: left; padding: 20px;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 14px 0;">
+        Your profile with us
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+        ${rows}
+      </table>
+    </div>
+  `;
+}
+
+function leadershipRolesBlock(data) {
+  const roles = [
+    { label: "Primary role", value: data.p0 || data.position },
+    { label: "Secondary role", value: data.p1 },
+    { label: "Additional role", value: data.p2 },
+  ].filter((item) => item.value && String(item.value).trim());
+
+  if (!roles.length) return "";
+
+  const rows = roles
+    .map(
+      (item) => `
+      <li style="color: #e5e7eb; font-size: 13px; margin: 0 0 8px 0; line-height: 1.5;">
+        <span style="color: #64748b;">${escapeHtml(item.label)}:</span> ${quotedDetail(item.value)}
+      </li>
+    `
+    )
+    .join("");
+
+  return `
+    <div style="${BASE_STYLES.box} margin: 24px 0; text-align: left;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px 0;">
+        Roles you held
+      </p>
+      <ul style="margin: 0; padding-left: 18px;">${rows}</ul>
+    </div>
+  `;
+}
+
+function aboutBlock(about) {
+  if (!about || !String(about).trim()) return "";
+  return `
+    <div style="${BASE_STYLES.box} margin: 24px 0; text-align: left;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px 0;">
+        About you
+      </p>
+      <p style="color: #94a3b8; font-size: 14px; line-height: 1.7; margin: 0; white-space: pre-line;">
+        &ldquo;${escapeHtml(about)}&rdquo;
+      </p>
+    </div>
+  `;
+}
+
+function socialsBlock(socials = {}) {
+  const links = [
+    { label: "Instagram", value: socials.instagram },
+    { label: "LinkedIn", value: socials.linkedin },
+    { label: "GitHub", value: socials.github },
+  ].filter((item) => item.value && String(item.value).trim());
+
+  if (!links.length) return "";
+
+  const rows = links
+    .map(
+      (item) => `
+      <li style="margin: 0 0 8px 0;">
+        <a href="${escapeHtml(item.value)}" style="${BASE_STYLES.link}; font-size: 13px;">${escapeHtml(item.label)}</a>
+      </li>
+    `
+    )
+    .join("");
+
+  return `
+    <div style="${BASE_STYLES.box} margin: 24px 0; text-align: left;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px 0;">
+        Connect with you
+      </p>
+      <ul style="margin: 0; padding-left: 18px;">${rows}</ul>
+    </div>
+  `;
+}
+
+function signupDepartmentsBlock(departments) {
+  const items = Array.isArray(departments) ? departments.filter(Boolean) : [];
+  if (!items.length) return "";
+
+  return `
+    <div style="${BASE_STYLES.box} margin: 24px 0; text-align: left;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px 0;">
+        Departments you served
+      </p>
+      <p style="color: #e5e7eb; font-size: 14px; margin: 0; line-height: 1.6;">
+        ${items.map((dept) => quotedDetail(dept)).join(" · ")}
+      </p>
+    </div>
+  `;
+}
+
+function tenurePeriodBlock(startedAt, endedAt) {
+  const startedLabel = formatTenureDate(startedAt);
+  const endedLabel = formatTenureDate(endedAt) || formatTenureDate(new Date());
+  if (!startedLabel && !endedLabel) return "";
+
+  return `
+    <div style="${BASE_STYLES.box} margin: 24px 0; text-align: center;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px 0;">
+        Your tenure
+      </p>
+      <p style="color: #e5e7eb; font-size: 16px; font-weight: bold; margin: 0;">
+        &ldquo;${startedLabel ? `${startedLabel} – ${endedLabel}` : `Until ${endedLabel}`}&rdquo;
+      </p>
+    </div>
+  `;
 }
 
 function timelineBlock(timeline) {
   const items = Array.isArray(timeline) ? timeline.filter((t) => t?.role || t?.project) : [];
   if (!items.length) return "";
   const rows = items
-    .slice(0, 6)
+    .slice(0, 10)
     .map(
       (t) => `
       <tr>
-        <td style="padding: 10px 12px; border-bottom: 1px solid #334155; color: #64748b; font-size: 12px; vertical-align: top;">${t.year || "—"}</td>
+        <td style="padding: 10px 12px; border-bottom: 1px solid #334155; color: #64748b; font-size: 12px; vertical-align: top;">${quotedDetail(t.year || "—")}</td>
         <td style="padding: 10px 12px; border-bottom: 1px solid #334155; color: #e5e7eb; font-size: 13px; vertical-align: top;">
-          <strong>${t.role || "Role"}</strong>
-          ${t.project ? `<br/><span style="color: #94a3b8;">${t.project}</span>` : ""}
-          ${t.description ? `<br/><span style="color: #64748b; font-size: 12px;">${t.description}</span>` : ""}
+          <strong>${quotedDetail(t.role || "Role")}</strong>
+          ${t.project ? `<br/><span style="color: #94a3b8;">${quotedDetail(t.project)}</span>` : ""}
+          ${t.description ? `<br/><span style="color: #64748b; font-size: 12px;">${quotedDetail(t.description)}</span>` : ""}
         </td>
       </tr>
     `
@@ -324,9 +538,10 @@ function activityHighlightsBlock(highlights, totalCount) {
   const rows = items
     .map(
       (h) => `
-      <li style="color: #94a3b8; font-size: 13px; margin: 0 0 8px 0; line-height: 1.5;">
-        <span style="color: #e5e7eb;">${(h.action || "Activity").replace(/_/g, " ")}</span>
-        <span style="color: #64748b;"> · ${h.category || "general"}</span>
+      <li style="color: #94a3b8; font-size: 13px; margin: 0 0 10px 0; line-height: 1.5;">
+        <span style="color: #e5e7eb;">${quotedDetail((h.action || "Activity").replace(/_/g, " "))}</span>
+        <span style="color: #64748b;"> · ${quotedDetail(h.category || "general")}</span>
+        ${h.when ? `<span style="color: #64748b;"> · ${quotedDetail(formatActivityDate(h.when))}</span>` : ""}
       </li>
     `
     )
@@ -354,49 +569,98 @@ function farewellHeader() {
 
 /**
  * Tenure end / farewell email for members completing their session.
- * data: { name, email, role, department, timeline, activityLogCount, activityHighlights, tenureStartedAt, websiteUrl, registered }
+ * data: {
+ *   name, email, role, department, branch, year, section, nonTechSociety, about, contact,
+ *   position, p0, p1, p2, image, socials, signupDepartments, timeline, activityLogCount,
+ *   activityHighlights, tenureStartedAt, tenureEndedAt, websiteUrl, registered
+ * }
  */
 exports.tenureEndTemplate = (data) => {
   const {
     name,
+    email,
     role,
     department,
+    branch,
+    year,
+    section,
+    nonTechSociety,
+    about,
+    contact,
+    position,
+    p0,
+    p1,
+    p2,
+    image,
+    socials = {},
+    signupDepartments = [],
     timeline = [],
     activityLogCount = 0,
     activityHighlights = [],
     tenureStartedAt,
+    tenureEndedAt,
     websiteUrl = "https://www.gfg-bvcoe.com",
     registered = true,
   } = data;
 
-  const startedLabel = formatTenureDate(tenureStartedAt);
-  const deptLine = department
-    ? `<strong style="color: #e5e7eb;">${department}</strong>`
-    : "GFG BVCOE";
+  const profileData = {
+    name,
+    email,
+    role,
+    department,
+    branch,
+    year,
+    section,
+    nonTechSociety,
+    contact,
+    position,
+    p0,
+    p1,
+    p2,
+  };
+
+  const firstName = firstNameFromName(name);
 
   const inner = `
     ${farewellHeader()}
-    <h1 style="${BASE_STYLES.title}">Thank you for your incredible tenure</h1>
-    <p style="${BASE_STYLES.body}">
-      Dear <strong style="color: #e5e7eb;">${name || "there"}</strong>,
-      as your time with GFG BVCOE comes to a close, we want to celebrate everything you've contributed.
+    ${profileImageBlock(image, name)}
+    <p style="color: #e5e7eb; font-size: 19px; font-weight: 600; margin: 0 0 20px 0; font-style: italic; line-height: 1.5;">
+      Your chapter closes here, ${escapeHtml(firstName)}.
     </p>
+    <h1 style="${BASE_STYLES.title}">Thank you for an unforgettable journey</h1>
+    <p style="${BASE_STYLES.body}">
+      Someone will eventually sit in the seat you're leaving. They'll inherit the systems you built,
+      the events you ran, and the standard you quietly set &mdash; even if they never know your name.
+      <strong style="color: #e5e7eb;">We do.</strong> So before your access closes, here's everything
+      on file about your time with GFG BVCOE, kept for good in our alumni archive.
+    </p>
+    ${tenurePeriodBlock(tenureStartedAt, tenureEndedAt)}
     <div style="${BASE_STYLES.box} margin: 24px 0; text-align: center;">
       <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 12px 0;">
-        Your role
+        Final leadership role
       </p>
       <p style="color: #e5e7eb; font-size: 20px; font-weight: bold; margin: 0 0 8px 0;">
-        ${role || "Member"}
+        ${quotedDetail(role || position || "Member")}
       </p>
-      <p style="color: #94a3b8; font-size: 13px; margin: 0;">
-        ${deptLine}${startedLabel ? ` · Since ${startedLabel}` : ""}
-      </p>
+      ${department
+      ? `<p style="color: #94a3b8; font-size: 13px; margin: 0;">${quotedDetail(department)}</p>`
+      : ""
+    }
     </div>
+    ${profileSummaryBlock(profileData)}
+    ${leadershipRolesBlock(profileData)}
+    ${aboutBlock(about)}
+    ${signupDepartmentsBlock(signupDepartments)}
+    ${socialsBlock(socials)}
     ${timelineBlock(timeline)}
     ${activityHighlightsBlock(activityHighlights, activityLogCount)}
     <p style="${BASE_STYLES.body}">
       Your profile, timeline, and activity history have been preserved in our alumni records.
       ${registered ? "Your platform access will end within 24 hours — please save anything you need before then." : ""}
+    </p>
+    <p style="${BASE_STYLES.body}">
+      Thank you for the energy, leadership, and care you brought to GFG BVCOE.
+      We are proud of everything you built here, and we hope you'll stay connected with the community.
     </p>
     ${websiteButtonBlock(websiteUrl, "Visit GFGxBVCOE")}
     <p style="${BASE_STYLES.footer}">
