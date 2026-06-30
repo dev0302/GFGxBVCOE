@@ -142,8 +142,6 @@ function ProfileDropDown({
   const { hasPendingChanges } = useSocketContext();
   const [open, setOpen] = useState(false);
   const [deptFlyoutOpen, setDeptFlyoutOpen] = useState(false);
-  const [sessionFlyoutOpen, setSessionFlyoutOpen] = useState(false);
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [lastSeenOpen, setLastSeenOpen] = useState(false);
   const [lastSeenRows, setLastSeenRows] = useState([]);
@@ -510,103 +508,29 @@ function ProfileDropDown({
             </button>
           )}
           {userCanAccessLeadershipTransition(user) && (
-            <div
-              className="relative"
-              onMouseEnter={() => setSessionFlyoutOpen(true)}
-              onMouseLeave={() => setSessionFlyoutOpen(false)}
-              onClick={() => isMobile && setSessionFlyoutOpen((prev) => !prev)}
-              tabIndex={0}
+            <button
+              onClick={() => {
+                setOpen(false);
+                navigate("/leadership-transition");
+              }}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300 relative"
             >
-              <button
-                type="button"
-                onClick={() => setSessionFlyoutOpen((v) => !v)}
-                className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
-                aria-haspopup="menu"
-                aria-expanded={sessionFlyoutOpen}
-              >
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
-                  <TrendingUp className="h-4 w-4" />
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+                <TrendingUp className="h-4 w-4" />
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-xs font-medium">Leadership Transition</span>
+                <span className="block text-[10px] text-gray-500">
+                  Promotions & role management
                 </span>
-                <span className="flex-1 min-w-0">
-                  <span className="block text-xs font-medium truncate">Session Management</span>
-                  <span className="block text-[10px] text-gray-500 truncate">
-                    Leadership & Recruitment
-                  </span>
+              </span>
+              {hasPendingChanges && (
+                <span className="mr-1 flex h-2 w-2 shrink-0 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
                 </span>
-                {hasPendingChanges && (
-                  <span className="mr-1 flex h-2 w-2 shrink-0 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
-                  </span>
-                )}
-                <ChevronDown
-                  className={`h-3.5 w-3.5 shrink-0 transition-transform duration-150 ${sessionFlyoutOpen ? "rotate-90" : "rotate-90 opacity-70"}`}
-                />
-              </button>
-
-              <div
-                className={`absolute -top-12 right-full mr-[-200px] sm:mr-1 w-72 max-w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl border border-gray-500/40 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] shadow-xl backdrop-blur-sm overflow-hidden z-[70] transition-all duration-200 ease-out ${
-                  sessionFlyoutOpen
-                    ? "pointer-events-auto opacity-100 translate-x-0 scale-100"
-                    : "pointer-events-none opacity-0 translate-x-1 scale-95"
-                }`}
-                role="menu"
-              >
-                <div className="px-4 py-3 border-b border-gray-500/30">
-                  <div className="text-xs font-semibold text-richblack-25">Session Management</div>
-                  <div className="text-[10px] text-gray-400">Manage transition & recruitment</div>
-                </div>
-                <div className="px-1 py-1.5 space-y-0.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOpen(false);
-                      setSessionFlyoutOpen(false);
-                      navigate("/leadership-transition");
-                    }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300 relative"
-                    role="menuitem"
-                  >
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
-                      <TrendingUp className="h-4 w-4" />
-                    </span>
-                    <span className="flex-1 min-w-0">
-                      <span className="block text-xs font-medium">Leadership Transition</span>
-                      <span className="block text-[10px] text-gray-500">
-                        Promotions & role management
-                      </span>
-                    </span>
-                    {hasPendingChanges && (
-                      <span className="mr-1 flex h-2 w-2 shrink-0 relative animate-pulse">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
-                      </span>
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOpen(false);
-                      setSessionFlyoutOpen(false);
-                      navigate("/recruitment-portal");
-                    }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
-                    role="menuitem"
-                  >
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
-                      <Users className="h-4 w-4" />
-                    </span>
-                    <span className="flex-1 min-w-0">
-                      <span className="block text-xs font-medium">Freshers Recruitment Portal</span>
-                      <span className="block text-[10px] text-gray-500">
-                        Manage registration & interviews
-                      </span>
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
+              )}
+            </button>
           )}
           <button
             onClick={() => {
