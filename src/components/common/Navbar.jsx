@@ -44,7 +44,6 @@ function Navbar() {
     "/em-dashboard",
     "/leadership-transition",
     "/jam-the-web",
-    "/recruitment-portal",
     "/login",
     "/signup",
     "/forgot-password",
@@ -56,8 +55,7 @@ function Navbar() {
     location.pathname.startsWith("/leadership-transition/") ||
     location.pathname.startsWith("/dashboard/") ||
     location.pathname.startsWith("/reset-password/") ||
-    location.pathname.startsWith("/join-team/") ||
-    location.pathname.startsWith("/recruitment/");
+    location.pathname.startsWith("/join-team/");
 
   const navLinkClass = ({ isActive }) =>
     `flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
