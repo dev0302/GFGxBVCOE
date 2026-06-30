@@ -49,6 +49,8 @@ import LeadershipTransitionLayout from "./components/LeadershipTransition/Leader
 import Promotions from "./pages/leadershipTransition/Promotions"
 import LeadershipPersonsAllowed from "./pages/leadershipTransition/PersonsAllowed"
 import LeadershipHistory from "./pages/leadershipTransition/History"
+import RecruitmentPortal from "./pages/RecruitmentPortal"
+import PublicRecruitmentForm from "./pages/PublicRecruitmentForm"
 
 function App() {
   const location = useLocation()
@@ -166,6 +168,8 @@ function App() {
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/quiz/result" element={<QuizResult />} />
                 <Route path="/jam-the-web" element={<JamTheWeb />} />
+                <Route path="/recruitment-portal" element={<RecruitmentPortal />} />
+                <Route path="/recruitment/form/:formId" element={<PublicRecruitmentForm />} />
               {/* </Route> */}
             </Routes>
           </motion.main>

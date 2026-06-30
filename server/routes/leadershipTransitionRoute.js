@@ -40,6 +40,7 @@ router.post("/draft/revoke-approval", auth, canAccessLeadershipTransition, revok
 router.post("/draft/discard", auth, canAccessLeadershipTransition, discardDraft);
 router.post("/draft/apply", auth, canAccessLeadershipTransition, applyDraft);
 router.delete("/draft/changes/:changeId", auth, canAccessLeadershipTransition, removeDraftChange);
+
 router.get("/draft/report/:sessionId", auth, canAccessLeadershipTransition, downloadReport);
 router.get("/draft/sessions", auth, canAccessLeadershipTransition, getAppliedSessions);
 

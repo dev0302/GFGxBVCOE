@@ -2,6 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Clock, Users, TrendingUp } from "react-feather";
 import { useAuth } from "../../context/AuthContext";
 import { isSocietyRole } from "../../services/api";
+import { useSocketContext } from "../../context/SocketProvider";
 
 const sidebarLinks = [
   { name: "Promotions", path: "/leadership-transition/promotions", icon: TrendingUp },
@@ -17,6 +18,7 @@ const sidebarLinks = [
 export default function LeadershipTransitionSidebar() {
   const location = useLocation();
   const { user } = useAuth();
+  const { hasPendingChanges } = useSocketContext();
 
   const matchRoute = (path) => {
     if (path === "/leadership-transition/promotions") {
@@ -54,6 +56,12 @@ export default function LeadershipTransitionSidebar() {
               )}
               <Icon className="h-5 w-5 shrink-0" />
               <span className="hidden md:inline truncate">{link.name}</span>
+              {link.name === "Promotions" && hasPendingChanges && (
+                <span className="absolute right-2 top-2 flex h-2.5 w-2.5 z-10">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500 border border-[#1e1e2f]"></span>
+                </span>
+              )}
             </NavLink>
           );
         })}

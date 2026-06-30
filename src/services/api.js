@@ -1066,6 +1066,7 @@ export async function downloadLeadershipReport(sessionId) {
   URL.revokeObjectURL(url);
 }
 
+
 export async function getLeadershipHistory() {
   const res = await authFetch("/api/v1/leadership-transition/history");
   const data = await res.json().catch(() => ({}));
@@ -1086,6 +1087,106 @@ export async function sendLeadershipPromotionEmails() {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to send promotion emails");
+  return data;
+}
+
+// ---------- Freshers Recruitment Portal APIs ----------
+
+export async function createRecruitmentForm(payload = {}) {
+  const res = await authFetch("/api/v1/recruitment/forms", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to generate form");
+  return data;
+}
+
+export async function getRecruitmentForms() {
+  const res = await authFetch("/api/v1/recruitment/forms");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch forms");
+  return data;
+}
+
+export async function getRecruitmentFormPublic(formId) {
+  const res = await fetch(`${BASE}/api/v1/recruitment/forms/public/${formId}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch form details");
+  return data;
+}
+
+export async function updateRecruitmentForm(formId, payload = {}) {
+  const res = await authFetch(`/api/v1/recruitment/forms/${formId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to update form");
+  return data;
+}
+
+export async function deleteRecruitmentForm(formId) {
+  const res = await authFetch(`/api/v1/recruitment/forms/${formId}`, {
+    method: "DELETE",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to delete form");
+  return data;
+}
+
+export async function getRecruitmentSubmissions(formId) {
+  const res = await authFetch(`/api/v1/recruitment/submissions/form/${formId}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch submissions");
+  return data;
+}
+
+export async function submitRecruitmentForm(payload = {}) {
+  const res = await fetch(`${BASE}/api/v1/recruitment/submissions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  // Handle duplicate check specifically (409 Conflict)
+  if (res.status === 409) {
+    const data = await res.json().catch(() => ({}));
+    const err = new Error(data.message || "Duplicate submission");
+    err.duplicate = true;
+    throw err;
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to submit form");
+  return data;
+}
+
+export async function getSubmissionByEditToken(editToken) {
+  const res = await fetch(`${BASE}/api/v1/recruitment/submissions/edit/${editToken}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch submission details");
+  return data;
+}
+
+export async function updateSubmissionByEditToken(editToken, payload = {}) {
+  const res = await fetch(`${BASE}/api/v1/recruitment/submissions/edit/${editToken}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to update submission");
+  return data;
+}
+
+export async function uploadRecruitmentSubmissionPhoto(file) {
+  const formData = new FormData();
+  formData.append("photo", file);
+  const res = await fetch(`${BASE}/api/v1/recruitment/submissions/upload-photo`, {
+    method: "POST",
+    body: formData,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to upload photo");
   return data;
 }
 
