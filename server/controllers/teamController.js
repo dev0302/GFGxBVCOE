@@ -421,6 +421,22 @@ exports.uploadTeamPhoto = async (req, res) => {
 };
 
 // ---------- Team invite link (join by link) ----------
+function parseExpiresInToHours(val) {
+  if (!val || typeof val !== "string") return 12; // default 12h
+  const clean = val.toLowerCase().trim();
+  const match = clean.match(/^(\d+)(h|hr|d|day|days)?$/);
+  if (!match) return 12;
+  const num = parseInt(match[1], 10);
+  const unit = match[2];
+  if (!unit || unit.startsWith("h")) {
+    return num;
+  }
+  if (unit.startsWith("d")) {
+    return num * 24;
+  }
+  return 12;
+}
+
 exports.createInviteLink = async (req, res) => {
   try {
     const department = resolveDepartment(req);
@@ -432,11 +448,13 @@ exports.createInviteLink = async (req, res) => {
           : "Department not found.",
       });
     }
+    const { expiresIn } = req.body;
+    const hours = parseExpiresInToHours(expiresIn);
     const token = TeamInviteLink.generateToken();
-    const expiresAt = new Date(Date.now() + TeamInviteLink.INVITE_LINK_EXPIRY_HOURS * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
     await TeamInviteLink.create({ token, department, expiresAt });
     if (req.user?.id) {
-      await logActivity(req.user.id, "invite_link_create", "invite_link", { department }, "", "TeamInviteLink");
+      await logActivity(req.user.id, "invite_link_create", "invite_link", { department, expiresIn: expiresIn || "12h" }, "", "TeamInviteLink");
     }
     return res.status(201).json({
       success: true,

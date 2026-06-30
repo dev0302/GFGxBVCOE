@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useAuth } from "./AuthContext";
-import { getAuthToken } from "../services/api";
+import { getAuthToken, getLeadershipDraft, userCanAccessLeadershipTransition } from "../services/api";
 import {
   connectSocket,
   disconnectSocket,
   joinDashboard,
   subscribeOnlineUsers,
+  subscribeLeadershipUpdates,
   updateSocketToken,
   getSocket,
 } from "../services/socket";
@@ -16,6 +17,7 @@ export function SocketProvider({ children }) {
   const { user } = useAuth();
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [socketInstance, setSocketInstance] = useState(null);
+  const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
   useEffect(() => {
     if (!user?._id) {
@@ -45,14 +47,59 @@ export function SocketProvider({ children }) {
     }
   }, [user?.token]);
 
+  useEffect(() => {
+    if (!user?._id || !userCanAccessLeadershipTransition(user)) {
+      setHasPendingChanges(false);
+      return;
+    }
+
+    // Load initial status
+    getLeadershipDraft()
+      .then((res) => {
+        if (res.success && res.data) {
+          const count = res.data.pendingChanges?.length ?? 0;
+          setHasPendingChanges(count > 0);
+        } else {
+          setHasPendingChanges(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching initial draft changes count:", err);
+      });
+
+    // Realtime changes listener
+    const unsub = subscribeLeadershipUpdates((payload) => {
+      if (!payload) return;
+      if (payload.type === "draft-updated" || payload.type === "draft-created") {
+        getLeadershipDraft()
+          .then((res) => {
+            if (res.success && res.data) {
+              const count = res.data.pendingChanges?.length ?? 0;
+              setHasPendingChanges(count > 0);
+            } else {
+              setHasPendingChanges(false);
+            }
+          })
+          .catch((err) => {
+            console.error("Error refetching draft changes on update:", err);
+          });
+      } else if (payload.type === "draft-discarded" || payload.type === "changes-applied") {
+        setHasPendingChanges(false);
+      }
+    });
+
+    return () => unsub?.();
+  }, [user?._id]);
+
   const value = useMemo(
     () => ({
       socket: socketInstance,
       onlineUsers,
       joinDashboard,
       getSocket,
+      hasPendingChanges,
     }),
-    [socketInstance, onlineUsers]
+    [socketInstance, onlineUsers, hasPendingChanges]
   );
 
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;

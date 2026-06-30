@@ -18,7 +18,7 @@ const {
   upsertCollaborator,
 } = require("../services/leadershipDraftService");
 const { getUserApprovalInfo, resolveUserRoleLabel } = require("../utils/leadershipApproval");
-const { REPORTS_DIR } = require("../utils/leadershipReportPdf");
+const { REPORTS_DIR, generateLeadershipReportPdf } = require("../utils/leadershipReportPdf");
 
 async function buildUserCollaboratorInfo(userId) {
   const user = await User.findById(userId).populate("additionalDetails").lean();
@@ -226,6 +226,7 @@ exports.downloadReport = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 exports.getAppliedSessions = async (_req, res) => {
   try {

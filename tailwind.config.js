@@ -17,7 +17,7 @@ export default {
   				'sans-serif'
   			],
   			alfa: [
-  				'Alfa Slab One"',
+  				'Alfa Slab One',
   				'serif'
   			],
   			audiowide: [

@@ -27,7 +27,7 @@ import { cloudinaryTinyAvatarUrl } from "../../utils/cloudinary";
 import { CollaboratorAvatars } from "../../components/LeadershipTransition/CollaboratorAvatars";
 import { useAuth } from "../../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, CheckCircle, Search as SearchIcon, X, TrendingUp, LogOut, FileText, Users } from "react-feather";
+import { Check, CheckCircle, Clock, Search as SearchIcon, X, TrendingUp, LogOut, FileText, Users } from "react-feather";
 
 const CORE_APPROVAL_HINT =
   "At least one person from: Faculty Incharge, Chairperson, or Vice-Chairperson.";
@@ -438,6 +438,15 @@ export default function Promotions() {
 
   return (
     <div className="flex min-h-full w-full justify-center bg-[#1e1e2f] pb-20 px-4 sm:px-6 lg:px-10">
+      <style>{`
+        @keyframes slow-pulse {
+          0%, 100% { opacity: 0.35; }
+          50% { opacity: 1; }
+        }
+        .animate-slow-pulse {
+          animation: slow-pulse 2.2s ease-in-out infinite;
+        }
+      `}</style>
       <div className="w-full max-w-5xl py-10 flex flex-col gap-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -448,6 +457,7 @@ export default function Promotions() {
               Queue changes collaboratively, collect approvals, then apply. Changes sync in real
               time for all authorized users.
             </p>
+
           </div>
 
           <div className="shrink-0 self-start rounded-xl border border-gray-500/25 bg-[#252540]/80 px-3 py-2">
@@ -505,7 +515,9 @@ export default function Promotions() {
                     type="button"
                     disabled={actionLoading || changeCounts.total === 0}
                     onClick={handleFinalize}
-                    className="rounded-lg bg-cyan-600 px-3 py-2 text-sm font-semibold text-white hover:bg-cyan-500 disabled:opacity-50"
+                    className={`rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500 transition-all duration-300 disabled:opacity-50 ${
+                      changeCounts.total > 0 && !actionLoading ? "animate-slow-pulse hover:animate-none" : ""
+                    }`}
                   >
                     Finalize
                   </button>
@@ -563,7 +575,7 @@ export default function Promotions() {
         </div>
 
         <section className="rounded-2xl border border-gray-500/20 bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 p-4 sm:p-6 shadow-xl">
-          <SectionTitle icon="👥">Society roster ({filteredPeople.length})</SectionTitle>
+          <SectionTitle icon="👥">Active society members ({filteredPeople.length})</SectionTitle>
           <div className="mt-4 grid gap-2">
             {filteredPeople.length === 0 ? (
               <p className="py-8 text-center text-sm text-gray-500">No people found.</p>
@@ -689,6 +701,7 @@ export default function Promotions() {
               onClick={(e) => e.stopPropagation()}
               className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-cyan-500/25 bg-[#1e1e2f] shadow-2xl"
             >
+
               <div className="flex items-start justify-between gap-3 border-b border-gray-500/20 px-6 py-5">
                 <div>
                   <h2 className="text-xl font-bold text-richblack-25">
@@ -715,8 +728,24 @@ export default function Promotions() {
                       {draft.pendingChanges
                         .filter((c) => c.changeType !== "end_session")
                         .map((c) => (
-                          <li key={c.id}>
-                            {c.personName} → {c.newRole}
+                          <li key={c.id} className="flex items-center justify-between py-1.5 border-b border-gray-500/10 last:border-0">
+                            <span className="truncate text-sm text-gray-300">
+                              {c.personName} → <span className="font-semibold text-cyan-300">{c.newRole}</span>
+                            </span>
+                            {userHasApproved ? (
+                              <span className="flex items-center gap-1 text-xs font-semibold text-emerald-400 shrink-0 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">
+                                <Check className="h-3 w-3" /> Approved
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled={actionLoading}
+                                onClick={handleApprove}
+                                className="rounded bg-cyan-500/10 hover:bg-cyan-500 hover:text-white px-2.5 py-1 text-xs font-bold text-cyan-300 border border-cyan-400/40 transition-all duration-300 disabled:opacity-50 shrink-0 animate-slow-pulse hover:animate-none"
+                              >
+                                Add My Approval
+                              </button>
+                            )}
                           </li>
                         ))}
                     </ul>
@@ -746,45 +775,95 @@ export default function Promotions() {
                   </p>
                 </div>
 
-                <div className="space-y-4 rounded-xl border border-gray-500/25 bg-[#151525]/60 p-4">
-                  <div>
-                    <ApprovalSectionLabel title="Core Approval" hint={CORE_APPROVAL_HINT} />
-                    {approvalStatus?.coreApproval ? (
-                      <ApprovalApproverRow
-                        approval={approvalStatus.coreApproval}
-                        collaborators={draft.collaborators}
-                      />
-                    ) : (
-                      <p className="mt-2 text-sm leading-relaxed text-gray-500">
-                        Pending approval from at least one of:{" "}
-                        <span className="text-gray-300">Faculty Incharge</span>,{" "}
-                        <span className="text-gray-300">Chairperson</span>, or{" "}
-                        <span className="text-gray-300">Vice-Chairperson</span>.
-                      </p>
-                    )}
+                <div className="space-y-4 rounded-2xl border border-cyan-500/10 bg-[#16162d]/90 p-5 shadow-inner">
+                  {/* Core Approval Card */}
+                  <div className="rounded-xl border border-gray-500/10 bg-[#121224]/75 p-4 transition-all hover:border-cyan-500/20">
+                    <div className="flex items-start gap-3">
+                      <div className={`mt-0.5 rounded-full p-1.5 shrink-0 ${approvalStatus?.coreApproval ? 'bg-emerald-500/15 text-emerald-400' : 'bg-pink-500/15 text-pink-300'}`}>
+                        {approvalStatus?.coreApproval ? <CheckCircle className="h-4.5 w-4.5" /> : <Clock className="h-4.5 w-4.5" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <ApprovalSectionLabel title="Core Approval" hint={CORE_APPROVAL_HINT} />
+                          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                            approvalStatus?.coreApproval ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-pink-500/10 text-pink-300 border border-pink-500/20'
+                          }`}>
+                            {approvalStatus?.coreApproval ? 'Approved' : 'Pending'}
+                          </span>
+                        </div>
+                        {approvalStatus?.coreApproval ? (
+                          <div className="mt-1">
+                            <ApprovalApproverRow
+                              approval={approvalStatus.coreApproval}
+                              collaborators={draft.collaborators}
+                            />
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-xs leading-relaxed text-gray-400">
+                            Awaiting verification from:{" "}
+                            <span className="font-semibold text-gray-300">Faculty Incharge</span>,{" "}
+                            <span className="font-semibold text-gray-300">Chairperson</span>, or{" "}
+                            <span className="font-semibold text-gray-300">Vice-Chairperson</span>.
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Department Approval Card */}
+                  <div className="rounded-xl border border-gray-500/10 bg-[#121224]/75 p-4 transition-all hover:border-cyan-500/20">
+                    <div className="flex items-start gap-3">
+                      <div className={`mt-0.5 rounded-full p-1.5 shrink-0 ${approvalStatus?.departmentApproval ? 'bg-emerald-500/15 text-emerald-400' : 'bg-pink-500/15 text-pink-300'}`}>
+                        {approvalStatus?.departmentApproval ? <CheckCircle className="h-4.5 w-4.5" /> : <Clock className="h-4.5 w-4.5" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <ApprovalSectionLabel title="Department Approval" hint={DEPARTMENT_APPROVAL_HINT} />
+                          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                            approvalStatus?.departmentApproval ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-pink-500/10 text-pink-300 border border-pink-500/20'
+                          }`}>
+                            {approvalStatus?.departmentApproval ? 'Approved' : 'Pending'}
+                          </span>
+                        </div>
+                        {approvalStatus?.departmentApproval ? (
+                          <div className="mt-1">
+                            <ApprovalApproverRow
+                              approval={approvalStatus.departmentApproval}
+                              collaborators={draft.collaborators}
+                            />
+                          </div>
+                        ) : (
+                          <p className="mt-2 text-xs leading-relaxed text-gray-400">
+                            Awaiting review from any:{" "}
+                            <span className="font-semibold text-gray-300">Department Head</span> or{" "}
+                            <span className="font-semibold text-gray-300">Department Lead</span>.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Approval Progress Footer Card */}
                   <div className="border-t border-gray-500/15 pt-4">
-                    <ApprovalSectionLabel
-                      title="Department Approval"
-                      hint={DEPARTMENT_APPROVAL_HINT}
-                    />
-                    {approvalStatus?.departmentApproval ? (
-                      <ApprovalApproverRow
-                        approval={approvalStatus.departmentApproval}
-                        collaborators={draft.collaborators}
+                    <div className="flex items-center justify-between text-xs text-gray-400">
+                      <span className="font-semibold uppercase tracking-wider text-[10px]">Session Approval Status</span>
+                      <span className="rounded-full bg-cyan-500/10 px-2.5 py-0.5 font-bold text-cyan-300">
+                        {approvalStatus?.completedCount ?? 0} of {approvalStatus?.requiredCount ?? 2} Completed
+                      </span>
+                    </div>
+                    <div className="mt-2 h-1.5 w-full rounded-full bg-gray-800/80 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          (approvalStatus?.completedCount ?? 0) >= (approvalStatus?.requiredCount ?? 2)
+                            ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]"
+                            : "bg-cyan-400"
+                        }`}
+                        style={{
+                          width: `${((approvalStatus?.completedCount ?? 0) / (approvalStatus?.requiredCount ?? 2)) * 100}%`,
+                        }}
                       />
-                    ) : (
-                      <p className="mt-2 text-sm leading-relaxed text-gray-500">
-                        Pending approval from at least one{" "}
-                        <span className="text-gray-300">Department Head</span> or{" "}
-                        <span className="text-gray-300">Department Lead</span>.
-                      </p>
-                    )}
+                    </div>
                   </div>
-                  <p className="border-t border-gray-500/15 pt-4 text-sm text-cyan-200">
-                    Status: {approvalStatus?.completedCount ?? 0} of{" "}
-                    {approvalStatus?.requiredCount ?? 2} required approvals completed
-                  </p>
                 </div>
               </div>
 
