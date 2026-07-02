@@ -77,7 +77,7 @@ const LABELS = {
   photo: "Photo",
   non_tech_society: "Non-tech society",
 };
-
+// lets see whats going on
 const YEAR_OPTIONS = ["1st", "2nd", "3rd", "4th"];
 const BRANCH_OPTIONS = ["CSE", "AIML", "IT", "EEE", "ECE", "ICE"];
 const ORG_NAME = "GFG BVCOE";
