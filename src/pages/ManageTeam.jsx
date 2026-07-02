@@ -615,13 +615,8 @@ export default function ManageTeam({
             INVITE_LINK_STORAGE_PREFIX + displayDepartment,
             JSON.stringify(res.data),
           );
-<<<<<<< Updated upstream
-        } catch (_) { }
-        toast.success("Invite link created. Valid for 12 hours.");
-=======
         } catch (_) {}
         toast.success(`Invite link created. Valid for ${expiresIn}.`);
->>>>>>> Stashed changes
       }
     } catch (e) {
       toast.error(e.message || "Failed to create invite link");
