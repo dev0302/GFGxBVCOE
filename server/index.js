@@ -18,6 +18,13 @@ const activityLogRoutes = require("./routes/activityLogRoute");
 const jamTheWebRoutes = require("./routes/jamTheWebRoute");
 const dashboardRoutes = require("./routes/dashboardRoute");
 const aiRoutes = require("./routes/aiRoutes");
+const leadershipTransitionRoutes = require("./routes/leadershipTransitionRoute");
+const { setIo, setEmitToUser } = require("./utils/socketBus");
+const { setDraftIo } = require("./utils/leadershipDraftBus");
+const {
+  handleJoinLeadershipPromotions,
+  handleLeaveLeadershipPromotions,
+} = require("./utils/leadershipPromotionsSocket");
 
 
 
@@ -48,6 +55,7 @@ app.use("/api/v1/team", teamRoutes);
 app.use("/api/v1/activity-logs", activityLogRoutes);
 app.use("/api/v1/jamtheweb", jamTheWebRoutes);
 app.use("/api/v1/dashboards", dashboardRoutes);
+app.use("/api/v1/leadership-transition", leadershipTransitionRoutes);
 app.use("/api", descriptionRouter);
 app.use("/api/v1/ai", aiRoutes);
 
@@ -63,6 +71,8 @@ const io = new Server(httpServer, {
     credentials: true,
   },
 });
+setIo(io);
+setDraftIo(io);
 
 const onlineUsers = new Map();
 const socketIdToUserId = new Map();
@@ -79,6 +89,8 @@ function emitToUser(userId, eventName, payload) {
   if (!entry) return;
   entry.socketIds.forEach((sid) => io.to(sid).emit(eventName, payload));
 }
+
+setEmitToUser(emitToUser);
 
 function getTokenFromCookieHeader(cookieHeader = "") {
   if (!cookieHeader || typeof cookieHeader !== "string") return null;
@@ -139,6 +151,8 @@ io.on("connection", (socket) => {
     });
   }
   socketIdToUserId.set(socket.id, id);
+
+  User.updateOne({ _id: id }, { $set: { lastSeen: new Date() } }).catch(() => {});
 
   emitOnlineUsers();
 
@@ -231,7 +245,20 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("join-leadership-promotions", () => {
+    handleJoinLeadershipPromotions(socket, io).catch((err) =>
+      console.error("join-leadership-promotions error:", err)
+    );
+  });
+
+  socket.on("leave-leadership-promotions", () => {
+    handleLeaveLeadershipPromotions(socket, io).catch((err) =>
+      console.error("leave-leadership-promotions error:", err)
+    );
+  });
+
   socket.on("disconnect", () => {
+    handleLeaveLeadershipPromotions(socket, io).catch(() => {});
     socketIdToUserId.delete(socket.id);
     const entry = onlineUsers.get(id);
     if (!entry) return;

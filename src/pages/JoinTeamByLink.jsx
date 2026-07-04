@@ -191,7 +191,7 @@ export default function JoinTeamByLink() {
     if (!form.section?.trim()) { toast.error("Section is required"); return; }
     if (!form.email?.trim()) { toast.error("Email is required"); return; }
     if (!form.contact?.trim()) { toast.error("Contact is required"); return; }
-    if (!form.photo?.trim()) { toast.error("Photo is required (upload or paste link)"); return; }
+    if (!form.photo?.trim()) { toast.error("Photo is required (please upload a photo)"); return; }
     setSaving(true);
     try {
       await addTeamMemberByInviteLink(token, form);
@@ -273,14 +273,6 @@ export default function JoinTeamByLink() {
                         </label>
                         <span className="text-xs text-gray-500">Max 5MB · then crop</span>
                       </div>
-                      <input
-                        type="text"
-                        value={form.photo}
-                        onChange={(e) => setForm((p) => ({ ...p, photo: e.target.value }))}
-                        className={inputClass}
-                        placeholder="Or paste image link (Cloudinary or Drive URL)"
-                        required
-                      />
                       {form.photo && (
                         <div className="relative w-24 h-24 rounded-full overflow-hidden border border-gray-500/50 bg-[#252536]">
                           <img
