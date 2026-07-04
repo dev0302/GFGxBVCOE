@@ -14,6 +14,7 @@ const { imageUpload, uploadImageFromUrl } = require("../config/cloudinary");
 const { getTeamMemberModel } = require("../models/TeamMember");
 const { getEventUploadAllowedList } = require("./eventController");
 const DashboardAccessConfig = require("../models/DashboardAccessConfig");
+const { userCanAccessLeadershipTransition } = require("../utils/leadershipAccess");
 const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
 
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
@@ -340,6 +341,10 @@ exports.login = async (req, res) => {
       });
     }
     user.dashboardAccess = Array.from(dashboardAccess);
+    user.canAccessLeadershipTransition = await userCanAccessLeadershipTransition(
+      user._id,
+      accountType
+    );
 
     const isProduction = process.env.NODE_ENV === "production";
     const options = {
@@ -530,6 +535,45 @@ exports.changePassword = async (req, res) => {
   }
 };
 
+/** POST — bump lastSeen for current user (throttle on client; cheap on server). */
+exports.presenceHeartbeat = async (req, res) => {
+  try {
+    await User.updateOne({ _id: req.user.id }, { $set: { lastSeen: new Date() } });
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("presenceHeartbeat error:", error);
+    return res.status(500).json({ success: false, message: "Could not update presence." });
+  }
+};
+
+/** GET — all users with last activity, newest first (for profile dropdown roster). */
+exports.getLastSeenFeed = async (req, res) => {
+  try {
+    const users = await User.find({ tenureEndedAt: null })
+      .select("firstName lastName image lastSeen")
+      .limit(600)
+      .lean();
+
+    users.sort((a, b) => {
+      const ta = a.lastSeen ? new Date(a.lastSeen).getTime() : -Infinity;
+      const tb = b.lastSeen ? new Date(b.lastSeen).getTime() : -Infinity;
+      return tb - ta;
+    });
+
+    const rows = users.map((u) => ({
+      id: String(u._id),
+      name: `${u.firstName || ""} ${u.lastName || ""}`.trim() || "User",
+      image: u.image || "",
+      lastSeen: u.lastSeen ? new Date(u.lastSeen).toISOString() : null,
+    }));
+
+    return res.status(200).json({ success: true, users: rows });
+  } catch (error) {
+    console.error("getLastSeenFeed error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 exports.me = async (req, res) => {
   try {
     const userDoc = await User.findById(req.user.id).populate("additionalDetails").select("-password");
@@ -577,6 +621,15 @@ exports.me = async (req, res) => {
       });
     }
     user.dashboardAccess = Array.from(dashboardAccess);
+    user.canAccessLeadershipTransition = await userCanAccessLeadershipTransition(
+      user._id,
+      accountType
+    );
+    if (user.tenureEndedAt) {
+      user.canAccessLeadershipTransition = false;
+      user.dashboardAccess = [];
+      user.canManageEvents = false;
+    }
     const payload = {
       email: user.email,
       id: user._id,

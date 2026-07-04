@@ -185,6 +185,7 @@ export default function ManageTeam({
   const [inviteLinkData, setInviteLinkData] = useState(null);
   const [inviteLinkLoading, setInviteLinkLoading] = useState(false);
   const [inviteLinkSuspending, setInviteLinkSuspending] = useState(false);
+  const [expiresIn, setExpiresIn] = useState("12h");
   const [editMember, setEditMember] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -606,7 +607,10 @@ export default function ManageTeam({
   const handleGenerateInviteLink = async () => {
     setInviteLinkLoading(true);
     try {
-      const payload = department ? { department } : {};
+      const payload = {
+        ...(department ? { department } : {}),
+        expiresIn,
+      };
       const res = await createTeamInviteLink(payload);
       if (res.success && res.data) {
         setInviteLinkData(res.data);
@@ -615,7 +619,11 @@ export default function ManageTeam({
             INVITE_LINK_STORAGE_PREFIX + displayDepartment,
             JSON.stringify(res.data),
           );
+<<<<<<< HEAD
         } catch (_) {}
+=======
+        } catch (_) { }
+>>>>>>> 7a59c5726cb7a4ebda4d88e60a4c0429cd3c54d0
         toast.success(`Invite link created. Valid for ${expiresIn}.`);
       }
     } catch (e) {
@@ -1459,18 +1467,36 @@ export default function ManageTeam({
               . Anyone who opens it can fill the same form and get added to this
               department.
             </p>
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-gray-400 mb-1.5">
+                Link Expiry Time
+              </label>
+              <select
+                value={expiresIn}
+                onChange={(e) => setExpiresIn(e.target.value)}
+                className="w-full rounded-xl border border-gray-500/30 bg-[#1e1e2f] px-3.5 py-2.5 text-sm text-gray-200 focus:border-cyan-500 focus:outline-none"
+              >
+                <option value="12h">12 hours (Default)</option>
+                <option value="24h">24 hours</option>
+                <option value="36h">36 hours</option>
+                <option value="48hr">48 hours</option>
+                <option value="3d">3 days</option>
+                <option value="4d">4 days</option>
+                <option value="7d">7 days</option>
+              </select>
+            </div>
             <button
               type="button"
               onClick={handleGenerateInviteLink}
               disabled={inviteLinkLoading}
-              className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold text-sm disabled:opacity-50"
+              className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold text-sm disabled:opacity-50 w-full"
             >
               {inviteLinkLoading ? "Generating…" : "Generate invite link"}
             </button>
             {inviteLinkData?.token && (
               <div className="mt-4 p-4 rounded-xl bg-[#252536] border border-gray-500/20">
                 <p className="text-xs text-gray-400 mb-2">
-                  Share this link (valid for 12 hours):
+                  Share this link (valid for {expiresIn}):
                 </p>
                 <p className="text-sm font-mono break-all text-cyan-300 mb-2">
                   {typeof window !== "undefined"

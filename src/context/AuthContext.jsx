@@ -1,8 +1,9 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getMe, login as apiLogin, logout as apiLogout, setAuthToken } from "../services/api";
+import { getMe, login as apiLogin, logout as apiLogout, setAuthToken, sendPresenceHeartbeat } from "../services/api";
 import { setUser as setUserInStore } from "../redux/slices/authSlice.jsx";
 import { connectPresenceSocket, disconnectPresenceSocket } from "../services/presenceSocket";
+import { subscribeTenureEnded } from "../services/socket";
 
 const AuthContext = createContext(null);
 
@@ -50,6 +51,57 @@ export function AuthProvider({ children }) {
       disconnectPresenceSocket();
     };
   }, [user?._id]);
+
+  useEffect(() => {
+    if (!user?._id) return undefined;
+
+    return subscribeTenureEnded(async () => {
+      try {
+        const res = await getMe();
+        if (res?.token) setAuthToken(res.token);
+        const freshUser = res.user || res;
+        dispatch(setUserInStore(freshUser));
+      } catch (_) {}
+    });
+  }, [user?._id, dispatch]);
+
+  useEffect(() => {
+    if (!user?._id) return undefined;
+
+    const ping = () => {
+      sendPresenceHeartbeat();
+    };
+
+    ping();
+    const intervalId = setInterval(ping, 90_000);
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") ping();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [user?._id]);
+
+  useEffect(() => {
+    if (!user?.sessionExpiresAt) return undefined;
+
+    const checkExpiry = async () => {
+      const expiresAt = new Date(user.sessionExpiresAt).getTime();
+      if (Number.isNaN(expiresAt) || expiresAt > Date.now()) return;
+      try {
+        await apiLogout();
+      } catch (_) {}
+      dispatch(setUserInStore(null));
+    };
+
+    checkExpiry();
+    const intervalId = setInterval(checkExpiry, 5000);
+    return () => clearInterval(intervalId);
+  }, [user?.sessionExpiresAt, user?._id, dispatch]);
 
   const login = async (email, password) => {
     const res = await apiLogin({ email, password });

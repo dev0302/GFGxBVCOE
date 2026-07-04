@@ -42,6 +42,7 @@ function Navbar() {
     "/manage-team",
     "/manage-society",
     "/em-dashboard",
+    "/leadership-transition",
     "/jam-the-web",
     "/login",
     "/signup",
@@ -51,6 +52,7 @@ function Navbar() {
   const isDarkNavbar =
     darkRoutes.includes(location.pathname) ||
     location.pathname.startsWith("/em-dashboard/") ||
+    location.pathname.startsWith("/leadership-transition/") ||
     location.pathname.startsWith("/dashboard/") ||
     location.pathname.startsWith("/reset-password/") ||
     location.pathname.startsWith("/join-team/");

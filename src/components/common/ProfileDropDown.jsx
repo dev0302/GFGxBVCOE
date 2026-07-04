@@ -1,23 +1,133 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import {
   AUTH_DEPARTMENTS,
+  fetchLastSeenFeed,
   getAccountTypeLabel,
   isSocietyRole,
   userCanManageEvents,
+  userCanAccessLeadershipTransition,
 } from "../../services/api";
 import { subscribeOnlineUsers } from "../../services/presenceSocket";
 import { cloudinaryLargeAvatarUrl, cloudinaryTinyAvatarUrl } from "../../utils/cloudinary";
 import {
   Calendar,
   ChevronDown,
+  Clock,
   Grid,
   Layout,
   LogOut,
+  TrendingUp,
   User,
   Users,
 } from "react-feather";
+import { useSocketContext } from "../../context/SocketProvider";
+
+function formatLastSeenLabel(iso) {
+  if (!iso) return "No visit logged yet";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  const sec = Math.floor((Date.now() - d.getTime()) / 1000);
+  if (sec < 45) return "Just now";
+  if (sec < 3600) return `${Math.floor(sec / 60)} min ago`;
+  if (sec < 86_400) return `${Math.floor(sec / 3600)} hr ago`;
+  if (sec < 604_800) return `${Math.floor(sec / 86_400)} days ago`;
+  return d.toLocaleString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+function useSessionHoursLeft(sessionExpiresAt) {
+  const [hoursLeft, setHoursLeft] = useState(null);
+
+  useEffect(() => {
+    if (!sessionExpiresAt) {
+      setHoursLeft(null);
+      return undefined;
+    }
+
+    const tick = () => {
+      const ms = new Date(sessionExpiresAt).getTime() - Date.now();
+      if (ms <= 0) {
+        setHoursLeft(0);
+        return;
+      }
+      setHoursLeft(Math.ceil(ms / 3_600_000));
+    };
+
+    tick();
+    const id = setInterval(tick, 60_000);
+    return () => clearInterval(id);
+  }, [sessionExpiresAt]);
+
+  return hoursLeft;
+}
+
+function formatHoursLeftLabel(hours, { compact = false } = {}) {
+  if (hours == null) return null;
+  if (hours <= 0) return compact ? "0h" : "0 hours left";
+  if (hours === 1) return compact ? "1h left" : "1 hour left";
+  return compact ? `${hours}h left` : `${hours} hours left`;
+}
+
+function SessionHoursBadge({ hoursLeft, compact = false }) {
+  const label = formatHoursLeftLabel(hoursLeft, { compact });
+  if (!label) return null;
+
+  return (
+    <span
+      className={
+        compact
+          ? "absolute -bottom-1 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border border-emerald-400/45 bg-gradient-to-r from-emerald-950/95 to-green-900/95 px-1.5 py-0.5 text-[8px] font-semibold leading-none text-emerald-300 shadow-lg shadow-emerald-950/50"
+          : "inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-500/15 px-2 py-0.5 text-[11px] font-bold text-emerald-300"
+      }
+      title="Time remaining before your account is removed"
+    >
+      {label}
+    </span>
+  );
+}
+
+function SessionEndingNotice({ hoursLeft }) {
+  const label = formatHoursLeftLabel(hoursLeft);
+  if (label == null) return null;
+
+  return (
+    <div className="mt-3 overflow-hidden rounded-xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/15 via-green-600/10 to-emerald-950/30 px-3 py-2.5 shadow-inner shadow-emerald-950/20">
+      <div className="flex items-start gap-2.5">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-400/25 bg-emerald-500/20 text-emerald-300">
+          <Clock className="h-4 w-4" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold text-emerald-100">Session ending soon</p>
+          <p className="mt-0.5 text-[10px] leading-snug text-emerald-200/85">
+            Your tenure has ended. You have{" "}
+            <span className="font-bold text-emerald-300">{label}</span> of account access
+            remaining.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const lastSeenListContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.035, delayChildren: 0.08 },
+  },
+};
+
+const lastSeenListItem = {
+  hidden: { opacity: 0, x: -10 },
+  show: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+  },
+};
 
 function ProfileDropDown({
   onLogout,
@@ -29,20 +139,53 @@ function ProfileDropDown({
 }) {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { hasPendingChanges } = useSocketContext();
   const [open, setOpen] = useState(false);
   const [deptFlyoutOpen, setDeptFlyoutOpen] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [lastSeenOpen, setLastSeenOpen] = useState(false);
+  const [lastSeenRows, setLastSeenRows] = useState([]);
+  const [lastSeenLoading, setLastSeenLoading] = useState(false);
+  const [lastSeenError, setLastSeenError] = useState(null);
+  const [lastSeenPlacement, setLastSeenPlacement] = useState(null);
   const ref = useRef(null);
+  const dropdownPanelRef = useRef(null);
   const [avatarLoadedButton, setAvatarLoadedButton] = useState(!user?.image);
   const [avatarLoadedMenu, setAvatarLoadedMenu] = useState(!user?.image);
 
+  const onlineIdSet = useMemo(
+    () => new Set((onlineUsers || []).map((p) => String(p.id))),
+    [onlineUsers]
+  );
+
   useEffect(() => {
     const onClick = (e) => {
+      if (e.target?.closest?.("[data-last-seen-modal]")) return;
       if (!ref.current?.contains(e.target)) setOpen(false);
     };
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
+
+  useEffect(() => {
+    if (!lastSeenOpen) return;
+    let cancelled = false;
+    setLastSeenLoading(true);
+    setLastSeenError(null);
+    fetchLastSeenFeed()
+      .then((rows) => {
+        if (!cancelled) setLastSeenRows(rows);
+      })
+      .catch((err) => {
+        if (!cancelled) setLastSeenError(err?.message || "Could not load");
+      })
+      .finally(() => {
+        if (!cancelled) setLastSeenLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [lastSeenOpen]);
 
   useEffect(() => {
     setAvatarLoadedButton(!user?.image);
@@ -56,6 +199,44 @@ function ProfileDropDown({
     });
     return () => unsubscribe();
   }, [open]);
+
+  useEffect(() => {
+    if (!open) setLastSeenOpen(false);
+  }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setLastSeenPlacement(null);
+      return;
+    }
+    if (!lastSeenOpen) return;
+    const update = () => {
+      const el = dropdownPanelRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const inset = 6;
+      const w = Math.max(200, r.width - inset * 2);
+      let left = r.left + (r.width - w) / 2;
+      const gap = 8;
+      const maxH = 420;
+      let top = r.bottom + gap;
+      if (top + maxH > window.innerHeight - 8) {
+        top = Math.max(8, r.top - maxH - gap);
+      }
+      left = Math.min(Math.max(8, left), window.innerWidth - w - 8);
+      setLastSeenPlacement({ top, left, width: w });
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [lastSeenOpen, open]);
+
+  const sessionHoursLeft = useSessionHoursLeft(user?.sessionExpiresAt);
+  const tenureEnding = Boolean(user?.tenureEndedAt && user?.sessionExpiresAt);
 
   if (!user) return null;
 
@@ -143,13 +324,33 @@ function ProfileDropDown({
               onError={() => setAvatarLoadedButton(true)}
               className={`${avatarSize} relative z-10 rounded-full object-cover border border-gray-600/50 opacity-100`}
             />
+            {hasPendingChanges && (
+              <span className="absolute top-0 right-0 z-30 flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500 border border-[#1e1e2f]"></span>
+              </span>
+            )}
+            {tenureEnding && sessionHoursLeft != null && (
+              <SessionHoursBadge hoursLeft={sessionHoursLeft} compact />
+            )}
           </div>
         ) : (
-          <div
-            className={`flex ${avatarSize} items-center justify-center rounded-full bg-green-700/80 text-xs font-semibold text-richblack-25`}
-          >
-            {user.firstName?.[0]}
-            {user.lastName?.[0]}
+          <div className={`relative ${avatarSize}`}>
+            <div
+              className={`flex ${avatarSize} items-center justify-center rounded-full bg-green-700/80 text-xs font-semibold text-richblack-25`}
+            >
+              {user.firstName?.[0]}
+              {user.lastName?.[0]}
+            </div>
+            {hasPendingChanges && (
+              <span className="absolute top-0 right-0 z-30 flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500 border border-[#1e1e2f]"></span>
+              </span>
+            )}
+            {tenureEnding && sessionHoursLeft != null && (
+              <SessionHoursBadge hoursLeft={sessionHoursLeft} compact />
+            )}
           </div>
         )}
         {(!avatarOnly || showChevron) && (
@@ -162,6 +363,7 @@ function ProfileDropDown({
       </button>
 
       <div
+        ref={dropdownPanelRef}
         className={`absolute ${dropdownPosition} ${dropdownWidth} rounded-2xl ${menuBg} shadow-xl backdrop-blur-sm transition-all duration-150 ease-out z-[60] ${
           open
             ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
@@ -199,6 +401,7 @@ function ProfileDropDown({
               </div>
             </div>
           </div>
+          {tenureEnding && <SessionEndingNotice hoursLeft={sessionHoursLeft} />}
           <div className="mt-2 flex items-center justify-between text-[10px]">
             <span className="inline-flex rounded-full bg-cyan-500/20 px-2 py-0.5 font-medium text-cyan-300">
               {user.additionalDetails?.position ||
@@ -220,8 +423,23 @@ function ProfileDropDown({
         </div>
 
         <div className="border-b border-gray-500/30 px-4 py-2">
-          <div className="mb-2 text-[8px] font-medium uppercase tracking-[0.12em] text-gray-400">
-            Online now
+          <div className="mb-2 flex min-h-7 items-center justify-between gap-2 pr-0.5">
+            <span className="flex h-7 items-center text-[8px] font-medium uppercase leading-none tracking-[0.12em] text-gray-400">
+              Online now
+            </span>
+            <button
+              type="button"
+              title="Recent activity — who was on the site"
+              aria-label="Open last activity list"
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                setLastSeenOpen(true);
+              }}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-cyan-500/35 bg-cyan-500/10 text-cyan-300 shadow-[0_0_12px_rgba(34,211,238,0.12)] transition hover:border-cyan-400/50 hover:bg-cyan-500/18 hover:text-cyan-200 absolute right-4 mt-2"
+            >
+              <Clock className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+            </button>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {onlineUsers.length ? (
@@ -270,7 +488,7 @@ function ProfileDropDown({
         </div>
 
         <div className="px-1 py-1.5">
-          {isSocietyRole(user.accountType) && (
+          {!tenureEnding && isSocietyRole(user.accountType) && (
             <button
               onClick={() => {
                 setOpen(false);
@@ -287,6 +505,31 @@ function ProfileDropDown({
                   Manage signup access
                 </span>
               </span>
+            </button>
+          )}
+          {userCanAccessLeadershipTransition(user) && (
+            <button
+              onClick={() => {
+                setOpen(false);
+                navigate("/leadership-transition");
+              }}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300 relative"
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+                <TrendingUp className="h-4 w-4" />
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-xs font-medium">Leadership Transition</span>
+                <span className="block text-[10px] text-gray-500">
+                  Promotions & role management
+                </span>
+              </span>
+              {hasPendingChanges && (
+                <span className="mr-1 flex h-2 w-2 shrink-0 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
+                </span>
+              )}
             </button>
           )}
           <button
@@ -306,6 +549,8 @@ function ProfileDropDown({
               </span>
             </span>
           </button>
+          {!tenureEnding && (
+          <>
           <button
             onClick={() => {
               setOpen(false);
@@ -448,6 +693,8 @@ function ProfileDropDown({
               );
             })
           )}
+          </>
+          )}
         </div>
 
         <div className="rounded-b-2xl border-t border-gray-500/30 bg-gray-900/50 px-3 py-2.5">
@@ -464,6 +711,173 @@ function ProfileDropDown({
           </button>
         </div>
       </div>
+
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {lastSeenOpen && lastSeenPlacement && (
+              <>
+                <motion.button
+                  key="last-seen-backdrop"
+                  type="button"
+                  aria-label="Close last activity"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.22, ease: "easeOut" }}
+                  className="pointer-events-auto fixed inset-0 z-[300] bg-black/35 backdrop-blur-[0px]"
+                  data-last-seen-modal
+                  onClick={() => setLastSeenOpen(false)}
+                />
+                <motion.div
+                  key="last-seen-panel"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="last-seen-title"
+                  style={{
+                    top: lastSeenPlacement.top,
+                    left: lastSeenPlacement.left,
+                    width: lastSeenPlacement.width,
+                  }}
+                  initial={{ opacity: 0, scale: 0.94, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96, y: -8 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  className="pointer-events-auto fixed z-[301] flex max-h-[min(420px,58vh)] flex-col overflow-hidden rounded-2xl border border-fuchsia-500/20 bg-gradient-to-br from-[#1a1528] via-[#1e1e2f] to-[#162a32] shadow-xl shadow-black/40 mt-16"
+                  data-last-seen-modal
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  <motion.div
+                    className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-fuchsia-500/20 blur-3xl"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.35, delay: 0.05, ease: "easeOut" }}
+                  />
+                  <div className="pointer-events-none absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-cyan-500/15 blur-2xl" />
+                  <motion.div
+                    className="relative z-[1] shrink-0 border-b border-white/10 px-3 py-2.5"
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.22, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 pr-1">
+                        <h2 id="last-seen-title" className="font-montserrat text-xs font-bold text-richblack-25">
+                          Last activity
+                        </h2>
+                        <p className="mt-0.5 text-[9px] leading-snug text-gray-400">
+                          Newest first · when someone opens the site
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setLastSeenOpen(false)}
+                        className="shrink-0 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-medium text-gray-300 transition hover:bg-white/10"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </motion.div>
+                  <div
+                    data-lenis-prevent="true"
+                    className="relative z-[1] min-h-0 flex-1 overflow-y-auto overscroll-contain px-2.5 py-1.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30"
+                    style={{ WebkitOverflowScrolling: "touch" }}
+                    onWheel={(e) => e.stopPropagation()}
+                  >
+                    {lastSeenLoading && (
+                      <motion.p
+                        className="py-8 text-center text-xs text-gray-500"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        Loading…
+                      </motion.p>
+                    )}
+                    {!lastSeenLoading && lastSeenError && (
+                      <motion.p
+                        className="py-6 text-center text-xs text-rose-300/90"
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {lastSeenError}
+                      </motion.p>
+                    )}
+                    {!lastSeenLoading && !lastSeenError && lastSeenRows.length === 0 && (
+                      <motion.p
+                        className="py-6 text-center text-xs text-gray-500 "
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        No members yet.
+                      </motion.p>
+                    )}
+                    {!lastSeenLoading && !lastSeenError && lastSeenRows.length > 0 && (
+                      <motion.div
+                        className="space-y-0"
+                        variants={lastSeenListContainer}
+                        initial="hidden"
+                        animate="show"
+                      >
+                        {lastSeenRows.map((row) => {
+                          const isOnline = onlineIdSet.has(String(row.id));
+                          const av = row.image ? cloudinaryTinyAvatarUrl(row.image) : "";
+                          const initials = String(row.name || "U")
+                            .split(/\s+/)
+                            .filter(Boolean)
+                            .slice(0, 2)
+                            .map((s) => s[0]?.toUpperCase())
+                            .join("");
+                          return (
+                            <motion.div
+                              key={row.id}
+                              variants={lastSeenListItem}
+                              className="mb-1.5 flex items-center gap-2.5 rounded-2xl border border-white/5 bg-white/[0.03] px-2.5 py-2 mt-1"
+                            >
+                              <div className="relative shrink-0">
+                                {av ? (
+                                  <img
+                                    src={av}
+                                    alt=""
+                                    className="h-9 w-9 rounded-full object-cover ring-1 ring-white/10"
+                                    loading="lazy"
+                                  />
+                                ) : (
+                                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-700 text-[11px] font-semibold text-richblack-25">
+                                    {initials || "?"}
+                                  </div>
+                                )}
+                                {isOnline && (
+                                  <span
+                                    className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-[#1e1e2f] bg-emerald-400"
+                                    title="Online"
+                                  />
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="truncate text-xs font-semibold text-gray-100">{row.name}</div>
+                                <div className="mt-0.5 truncate text-[10px] text-gray-500">
+                                  {isOnline ? (
+                                    <span className="text-emerald-400/95">Online now</span>
+                                  ) : (
+                                    formatLastSeenLabel(row.lastSeen)
+                                  )}
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
     </div>
   );
 }
