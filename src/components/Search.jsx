@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { getSearchPeople, getAccountTypeLabel, sendSignupInvite, getActivityLogs, isSocietyRole } from "../services/api";
-import { driveLinkToImageUrl, avatarPlaceholder, photoPreviewUrl } from "../utils/teamMemberUtils";
+import { driveLinkToImageUrl, avatarPlaceholder, photoPreviewUrl, photoProfileModalUrl, photoOriginalUrl, resolvePredefinedImageUrl } from "../utils/teamMemberUtils";
 import { Search as SearchIcon, X, Mail, Activity } from "react-feather";
 import "./Search.css";
 import { Spinner } from "./ui/spinner";
@@ -33,9 +33,11 @@ const TEAM_LABELS = {
 
 export function MemberDetailModal({ member, onClose }) {
   if (!member) return null;
-  const photoUrl = (member.photo || member.image_drive_link)
-    ? photoPreviewUrl(member.photo || member.image_drive_link)
+  const rawPhoto = member.photo || member.image_drive_link;
+  const photoUrl = rawPhoto
+    ? photoPreviewUrl(rawPhoto)
     : avatarPlaceholder(member.name);
+  const originalPhotoUrl = rawPhoto ? photoOriginalUrl(rawPhoto) : null;
 
   return (
     <div
@@ -62,14 +64,12 @@ export function MemberDetailModal({ member, onClose }) {
         </div>
         <div className="p-6 space-y-6 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }} data-lenis-prevent>
           <div className="flex flex-col items-center gap-3">
-            <img
+            <ClickableProfilePhoto
               src={photoUrl}
+              originalSrc={originalPhotoUrl}
               alt={member.name || "Member"}
               className="h-24 w-24 rounded-full object-cover border-2 border-gray-500/50"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = avatarPlaceholder(member.name);
-              }}
+              onFallback={() => avatarPlaceholder(member.name)}
             />
             <h3 className="text-xl font-bold text-richblack-25 text-center">
               {member.name || "—"}
@@ -140,6 +140,42 @@ export function MemberDetailModal({ member, onClose }) {
 
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
 
+function ClickableProfilePhoto({ src, originalSrc, alt, className, onFallback }) {
+  const isClickable = Boolean(originalSrc) && !originalSrc.includes("ui-avatars.com");
+
+  const handleClick = () => {
+    if (isClickable) {
+      window.open(originalSrc, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={`${className}${isClickable ? " cursor-pointer hover:opacity-90 transition-opacity" : ""}`}
+      onClick={isClickable ? handleClick : undefined}
+      onError={(e) => {
+        e.target.onerror = null;
+        e.target.src = onFallback?.() || avatarPlaceholder(alt);
+      }}
+      role={isClickable ? "button" : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      aria-label={isClickable ? `Open ${alt} photo in new tab` : undefined}
+      onKeyDown={
+        isClickable
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleClick();
+              }
+            }
+          : undefined
+      }
+    />
+  );
+}
+
 function DetailRow({ label, value, link }) {
   const isEmpty = value == null || String(value).trim() === "";
   return (
@@ -164,11 +200,8 @@ export function PredefinedOnlyDetailModal({ predefined, onClose }) {
   if (!predefined) return null;
   const pre = predefined;
   const imagePath = (pre.image || "").trim();
-  const imgSrc = imagePath
-    ? imagePath.startsWith("http")
-      ? imagePath
-      : `${PREDEFINED_IMAGE_BASE}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`
-    : avatarPlaceholder(pre.name);
+  const originalSrc = imagePath ? resolvePredefinedImageUrl(imagePath) : null;
+  const imgSrc = originalSrc || avatarPlaceholder(pre.name);
 
   return (
     <div
@@ -195,14 +228,12 @@ export function PredefinedOnlyDetailModal({ predefined, onClose }) {
         </div>
         <div className="p-6 space-y-8 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }} data-lenis-prevent>
           <div className="flex flex-col items-center gap-3">
-            <img
+            <ClickableProfilePhoto
               src={imgSrc}
+              originalSrc={originalSrc}
               alt={pre.name || "—"}
               className="h-28 w-28 rounded-full object-cover border-2 border-gray-500/50"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = avatarPlaceholder(pre.name);
-              }}
+              onFallback={() => avatarPlaceholder(pre.name)}
             />
             <h3 className="text-xl font-bold text-richblack-25 text-center">{pre.name || "—"}</h3>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/40">
@@ -386,7 +417,9 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
   const profile = user.additionalDetails || {};
   const pre = user.predefinedProfile || {};
   const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email || "—";
-  const imgSrc = user.image || (pre.image ? `${pre.image}` : null) || avatarPlaceholder(fullName);
+  const rawImage = user.image || (pre.image ? resolvePredefinedImageUrl(pre.image) : null);
+  const imgSrc = rawImage ? photoProfileModalUrl(rawImage) : avatarPlaceholder(fullName);
+  const originalSrc = rawImage ? photoOriginalUrl(rawImage) : null;
 
   return (
     <div
@@ -414,14 +447,12 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
         <div className="p-6 space-y-8 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }} data-lenis-prevent>
           {/* Header: photo + name */}
           <div className="flex flex-col items-center gap-3">
-            <img
+            <ClickableProfilePhoto
               src={imgSrc}
+              originalSrc={originalSrc}
               alt={fullName}
               className="h-28 w-28 rounded-full object-cover border-2 border-gray-500/50"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = avatarPlaceholder(fullName);
-              }}
+              onFallback={() => avatarPlaceholder(fullName)}
             />
             <h3 className="text-xl font-bold text-richblack-25 text-center">{fullName}</h3>
             {(profile.branch || profile.year || user.accountType) && (

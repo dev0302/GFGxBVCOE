@@ -13,6 +13,7 @@ const pendingChangeSchema = new mongoose.Schema(
     targetPositionId: { type: String, default: "" },
     personName: { type: String, default: "" },
     personEmail: { type: String, default: "" },
+    personImage: { type: String, default: "" },
     previousRole: { type: String, default: "" },
     newRole: { type: String, default: "" },
     newDepartment: { type: String, default: "" },

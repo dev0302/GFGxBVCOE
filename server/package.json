@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "postinstall": "playwright install chromium",
+    "setup:playwright": "playwright install chromium"
   },
   "keywords": [],
   "author": "",

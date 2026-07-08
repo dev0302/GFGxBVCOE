@@ -2,9 +2,11 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { chromium } = require("playwright");
+const { resolveChangePersonImage } = require("../services/leadershipApplyService");
 
 const REPORTS_DIR = path.join(__dirname, "..", "reports", "leadership");
 const ORG_NAME = process.env.ORG_NAME || "GeeksforGeeks Student Chapter – BVCOE";
+const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -22,6 +24,70 @@ function formatDate(date) {
   });
 }
 
+/** Session start time — when "Start session" was clicked (draft created). */
+function getTransitionDate(session) {
+  return session?.createdAt || session?.effectiveDate || session?.appliedAt || null;
+}
+
+function getDriveFileId(url) {
+  if (!url || typeof url !== "string") return null;
+  const trimmed = url.trim();
+  const match =
+    trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+    trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : null;
+}
+
+function toPdfImageUrl(image) {
+  if (!image || typeof image !== "string") return "";
+  const trimmed = image.trim();
+  if (!trimmed) return "";
+
+  let url = trimmed;
+  if (!/^https?:\/\//i.test(url)) {
+    url = `${PREDEFINED_IMAGE_BASE}${url.startsWith("/") ? "" : "/"}${url}`;
+  }
+
+  const driveId = getDriveFileId(url);
+  if (driveId) {
+    return `https://drive.google.com/thumbnail?id=${driveId}&sz=w200`;
+  }
+
+  if (url.includes("cloudinary.com") && url.includes("/upload/")) {
+    const transform = "e_grayscale,w_72,h_72,c_fill,f_auto,q_auto";
+    if (url.includes(transform)) return url;
+    return url.replace("/upload/", `/upload/${transform}/`);
+  }
+
+  return url;
+}
+
+function renderMemberCell(change) {
+  const name = escapeHtml(change.personName || "—");
+  const imgUrl = toPdfImageUrl(change.personImage);
+
+  if (!imgUrl) {
+    return `<span class="member-name">${name}</span>`;
+  }
+
+  return `
+    <div class="member-cell">
+      <img src="${escapeHtml(imgUrl)}" alt="" class="member-photo" />
+      <span class="member-name">${name}</span>
+    </div>`;
+}
+
+async function enrichSessionForReport(session) {
+  const doc = session.toObject?.() || { ...session };
+  const pendingChanges = await Promise.all(
+    (doc.pendingChanges || []).map(async (change) => ({
+      ...change,
+      personImage: change.personImage || (await resolveChangePersonImage(change)),
+    }))
+  );
+  return { ...doc, pendingChanges };
+}
+
 function buildReportHtml(session) {
   const promotions = (session.pendingChanges || []).filter(
     (c) => c.changeType === "promotion" || c.changeType === "role_change"
@@ -35,17 +101,17 @@ function buildReportHtml(session) {
   const approvalStatus = session.approvals || [];
   const coreApprover = approvalStatus.find((a) => a.category === "core");
   const deptApprover = approvalStatus.find((a) => a.category === "department");
-  const effectiveDate = session.effectiveDate || session.appliedAt || new Date();
+  const transitionDate = getTransitionDate(session);
 
   const promotionRows = promotions
     .map(
       (p) => `
       <tr>
-        <td style="font-weight: 600; color: #1d1d1f;">${escapeHtml(p.personName)}</td>
+        <td>${renderMemberCell(p)}</td>
         <td style="color: #515154;">${escapeHtml(p.previousRole)}</td>
         <td style="color: #1d1d1f; font-weight: 600;">${escapeHtml(p.newRole)}</td>
         <td style="color: #515154;">${escapeHtml(p.newDepartment || p.previousDepartment)}</td>
-        <td style="color: #86868b;">${formatDate(effectiveDate)}</td>
+        <td style="color: #86868b;">${formatDate(transitionDate)}</td>
       </tr>`
     )
     .join("");
@@ -54,7 +120,7 @@ function buildReportHtml(session) {
     .map(
       (t) => `
       <tr>
-        <td style="font-weight: 600; color: #1d1d1f;">${escapeHtml(t.personName)}</td>
+        <td>${renderMemberCell(t)}</td>
         <td style="color: #515154;">${escapeHtml(t.previousDepartment)}</td>
         <td style="color: #1d1d1f; font-weight: 600;">${escapeHtml(t.newDepartment)}</td>
         <td style="color: #515154;">${escapeHtml(t.newRole || t.previousRole)}</td>
@@ -66,10 +132,10 @@ function buildReportHtml(session) {
     .map(
       (e) => `
       <tr>
-        <td style="font-weight: 600; color: #1d1d1f;">${escapeHtml(e.personName)}</td>
+        <td>${renderMemberCell(e)}</td>
         <td style="color: #515154;">${escapeHtml(e.previousRole)}</td>
         <td style="color: #515154;">${escapeHtml(e.previousDepartment)}</td>
-        <td style="color: #86868b;">${formatDate(effectiveDate)}</td>
+        <td style="color: #86868b;">${formatDate(transitionDate)}</td>
         <td><span style="display: inline-block; background-color: #f5f5f7; border: 1px solid #d2d2d7; color: #1d1d1f; font-size: 7pt; font-weight: 600; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Terminated</span></td>
       </tr>`
     )
@@ -215,6 +281,26 @@ function buildReportHtml(session) {
     tr:nth-child(even) td {
       background: #fafafa;
     }
+    .member-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .member-photo {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid #c7c7cc;
+      filter: grayscale(100%);
+      flex-shrink: 0;
+      background: #f5f5f7;
+    }
+    .member-name {
+      font-weight: 600;
+      color: #1d1d1f;
+      line-height: 1.25;
+    }
     .approval-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -314,7 +400,7 @@ function buildReportHtml(session) {
     </div>
     <div class="meta-card">
       <div class="meta-label">Transition Date</div>
-      <div class="meta-value">${formatDate(session.appliedAt || new Date())}</div>
+      <div class="meta-value">${formatDate(transitionDate)}</div>
     </div>
   </div>
 
@@ -455,7 +541,8 @@ async function generateLeadershipReportPdf(session) {
 
   const filename = `${session.sessionId}-${hash}.pdf`;
   const filepath = path.join(REPORTS_DIR, filename);
-  const html = buildReportHtml({ ...session.toObject?.() || session, documentHash: hash });
+  const reportSession = await enrichSessionForReport(session);
+  const html = buildReportHtml({ ...reportSession, documentHash: hash });
 
   const browser = await chromium.launch({ headless: true });
   try {

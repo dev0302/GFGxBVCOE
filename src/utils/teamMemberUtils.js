@@ -1,4 +1,6 @@
-import { cloudinaryAvatarUrl, cloudinaryLargeAvatarUrl } from "./cloudinary";
+import { cloudinaryAvatarUrl, cloudinaryLargeAvatarUrl, cloudinaryOriginalUrl, cloudinaryProfileAvatarUrl } from "./cloudinary";
+
+const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
 
 /** Extract Google Drive file ID from share link. */
 function getDriveFileId(url) {
@@ -19,6 +21,41 @@ export function driveLinkToImageUrl(url) {
     return `https://drive.google.com/thumbnail?id=${id}&sz=w400`;
   }
   return url || "";
+}
+
+/** Full-size Google Drive image URL for opening in a new tab. */
+export function driveLinkToOriginalImageUrl(url) {
+  const id = getDriveFileId(url);
+  if (id) {
+    return `https://drive.google.com/uc?export=view&id=${id}`;
+  }
+  return url || "";
+}
+
+export function resolvePredefinedImageUrl(imagePath) {
+  const trimmed = (imagePath || "").trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `${PREDEFINED_IMAGE_BASE}${trimmed.startsWith("/") ? "" : "/"}${trimmed}`;
+}
+
+/** Original-quality URL for profile/member photos (opens full asset in a new tab). */
+export function photoOriginalUrl(url) {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+
+  if (/drive\.google\.com/i.test(trimmed) || getDriveFileId(trimmed)) {
+    return driveLinkToOriginalImageUrl(trimmed);
+  }
+
+  if (/cloudinary\.com/i.test(trimmed)) {
+    return cloudinaryOriginalUrl(trimmed);
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+
+  return resolvePredefinedImageUrl(trimmed);
 }
 
 /**
@@ -74,6 +111,30 @@ export function photoPreviewLargeAvatarUrl(url) {
 
   const driveUrl = driveLinkToImageUrl(trimmed);
   return driveUrl || trimmed;
+}
+
+/**
+ * Profile modal avatar preview (Profile & details):
+ * - Cloudinary URLs → 256x256 avatar transform
+ * - Google Drive links → w512 thumbnail for sharp display at fixed CSS size
+ * - Other https URLs → unchanged
+ */
+export function photoProfileModalUrl(url) {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+
+  if (/drive\.google\.com/i.test(trimmed) || getDriveFileId(trimmed)) {
+    const id = getDriveFileId(trimmed);
+    if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w512`;
+  }
+
+  if (/cloudinary\.com/i.test(trimmed)) {
+    return cloudinaryProfileAvatarUrl(trimmed);
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+
+  return resolvePredefinedImageUrl(trimmed) || trimmed;
 }
 
 /** Placeholder avatar URL when no photo or image fails (initials from name). */
