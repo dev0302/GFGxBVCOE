@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { chromium } = require("playwright");
 const { resolveChangePersonImage } = require("../services/leadershipApplyService");
+const { uploadRawFromPath } = require("../config/cloudinary");
 
 const REPORTS_DIR = path.join(__dirname, "..", "reports", "leadership");
 const ORG_NAME = process.env.ORG_NAME || "GeeksforGeeks Student Chapter – BVCOE";
@@ -558,7 +559,33 @@ async function generateLeadershipReportPdf(session) {
     await browser.close();
   }
 
-  return { filepath, filename, documentHash: hash };
+  let reportPdfUrl = "";
+  try {
+    const upload = await uploadRawFromPath(filepath, "leadership-reports", `${session.sessionId}-${hash}`);
+    reportPdfUrl = upload.secure_url || upload.url || "";
+  } catch (error) {
+    console.error("Leadership report Cloudinary upload failed:", error.message);
+  }
+
+  return { filepath, filename, documentHash: hash, reportPdfUrl };
 }
 
-module.exports = { generateLeadershipReportPdf, REPORTS_DIR, buildReportHtml };
+function resolveLocalReportPath(storedPath) {
+  if (!storedPath || /^https?:\/\//i.test(storedPath)) return null;
+
+  const filename = path.basename(String(storedPath).replace(/\\/g, "/"));
+  if (!filename.toLowerCase().endsWith(".pdf")) return null;
+
+  const filepath = path.resolve(REPORTS_DIR, filename);
+  const reportsRoot = path.resolve(REPORTS_DIR);
+  if (!filepath.startsWith(reportsRoot)) return null;
+
+  return filepath;
+}
+
+module.exports = {
+  generateLeadershipReportPdf,
+  REPORTS_DIR,
+  buildReportHtml,
+  resolveLocalReportPath,
+};
