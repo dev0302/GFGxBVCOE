@@ -77,7 +77,7 @@ const LABELS = {
   photo: "Photo",
   non_tech_society: "Non-tech society",
 };
-
+// lets see whats going on
 const YEAR_OPTIONS = ["1st", "2nd", "3rd", "4th"];
 const BRANCH_OPTIONS = ["CSE", "AIML", "IT", "EEE", "ECE", "ICE"];
 const ORG_NAME = "GFG BVCOE";
@@ -85,10 +85,10 @@ const EXPORT_COLS = COLS.filter((k) => k !== "photo");
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
 
 const iosRowVariants = {
-  hidden: { 
-    opacity: 0, 
-    y: 20, 
-    scale: 0.96 
+  hidden: {
+    opacity: 0,
+    y: 20,
+    scale: 0.96,
   },
   visible: (idx) => ({
     opacity: 1,
@@ -99,9 +99,9 @@ const iosRowVariants = {
       damping: 25,
       stiffness: 300,
       mass: 0.8,
-      delay: Math.min(idx * 0.06, 0.8), 
-    }
-  })
+      delay: Math.min(idx * 0.06, 0.8),
+    },
+  }),
 };
 
 const PrintingLoader = ({ isPrinting }) => (
@@ -142,7 +142,9 @@ const PrintingLoader = ({ isPrinting }) => (
               <Printer className="h-5 w-5 animate-pulse" />
               Generating PDF...
             </h3>
-            <p className="text-gray-400 text-sm">Please do not close this tab</p>
+            <p className="text-gray-400 text-sm">
+              Please do not close this tab
+            </p>
           </motion.div>
           <div className="w-48 h-1.5 bg-gray-700 rounded-full mt-4 overflow-hidden">
             <motion.div
@@ -202,9 +204,8 @@ export default function ManageTeam({
   const imgCropRef = useRef(null);
   const cropPxRef = useRef(null);
 
-  const department = isSociety ? propDepartment : undefined;
+  const department = isSociety ? propDepartment : user?.accountType;
   // console.log(department);
-  
 
   const getCroppedImg = (imageEl, cropPx) => {
     if (!imageEl || !cropPx?.width || !cropPx?.height)
@@ -272,11 +273,11 @@ export default function ManageTeam({
         : crop.unit === "px"
           ? { x: crop.x, y: crop.y, width: crop.width, height: crop.height }
           : {
-            x: (crop.x / 100) * nw,
-            y: (crop.y / 100) * nh,
-            width: (crop.width / 100) * nw,
-            height: (crop.height / 100) * nh,
-          };
+              x: (crop.x / 100) * nw,
+              y: (crop.y / 100) * nh,
+              width: (crop.width / 100) * nw,
+              height: (crop.height / 100) * nh,
+            };
     try {
       let blob = await getCroppedImg(imageEl, cropPx);
       if (!blob) return;
@@ -319,8 +320,10 @@ export default function ManageTeam({
     setWholeTeamLoading(true);
     try {
       const departments = isSociety
-        ? (await getTeamDepartments()).data || []
-        : [user?.accountType].filter(Boolean);
+        ? department
+          ? [department]
+          : (await getTeamDepartments()).data || []
+        : [department].filter(Boolean);
       if (!departments.length) {
         setWholeTeamList([]);
         return;
@@ -372,7 +375,7 @@ export default function ManageTeam({
 
   useEffect(() => {
     if (showAllTeamOpen && user) loadWholeTeam();
-  }, [showAllTeamOpen, user]);
+  }, [showAllTeamOpen, user, department]);
 
   useEffect(() => {
     if (showAllTeamOpen) {
@@ -500,7 +503,7 @@ export default function ManageTeam({
       const pre = row.predefinedProfile || {};
       const name = row.registered
         ? [u?.firstName, u?.lastName].filter(Boolean).join(" ").trim() ||
-        row.email
+          row.email
         : pre?.name || row.email;
       return {
         name,
@@ -586,7 +589,6 @@ export default function ManageTeam({
   };
 
   const displayDepartment = department || user?.accountType || "";
-  
 
   const loadStoredInviteLink = () => {
     try {
@@ -598,7 +600,7 @@ export default function ManageTeam({
           return d;
         localStorage.removeItem(key);
       }
-    } catch (_) { }
+    } catch (_) {}
     return null;
   };
 
@@ -646,7 +648,7 @@ export default function ManageTeam({
           localStorage.removeItem(
             INVITE_LINK_STORAGE_PREFIX + displayDepartment,
           );
-        } catch (_) { }
+        } catch (_) {}
         toast.success("Link suspended. It can no longer be used.");
       })
       .catch((e) => toast.error(e.message || "Failed to suspend link"))
@@ -771,9 +773,11 @@ export default function ManageTeam({
                 </span>
                 {(() => {
                   const rosterArr = roster || [];
-                  const rosterEmails = new Set(rosterArr.map((r) => (r.email || "").toLowerCase()));
+                  const rosterEmails = new Set(
+                    rosterArr.map((r) => (r.email || "").toLowerCase()),
+                  );
                   const extraCount = (members || []).filter(
-                    (m) => !rosterEmails.has((m.email || "").toLowerCase())
+                    (m) => !rosterEmails.has((m.email || "").toLowerCase()),
                   ).length;
                   const totalMembers = rosterArr.length + extraCount;
                   return totalMembers > 0 ? (
@@ -821,7 +825,6 @@ export default function ManageTeam({
                       aria-hidden
                     />
                     <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-56 rounded-xl darkthemebg border border-gray-500/30 shadow-xl py-1 z-50">
-
                       <button
                         type="button"
                         onClick={() => {
@@ -1030,15 +1033,15 @@ export default function ManageTeam({
                         const pre = row.predefinedProfile || {};
                         const name = row.registered
                           ? [u?.firstName, u?.lastName]
-                            .filter(Boolean)
-                            .join(" ")
-                            .trim() || row.email
+                              .filter(Boolean)
+                              .join(" ")
+                              .trim() || row.email
                           : pre?.name || row.email;
                         const tagLabel = row.registered
                           ? profile?.position ||
-                          getAccountTypeLabel(u?.accountType) ||
-                          u?.accountType ||
-                          ""
+                            getAccountTypeLabel(u?.accountType) ||
+                            u?.accountType ||
+                            ""
                           : null;
                         const photoUrl = row.registered
                           ? u?.image
@@ -1549,7 +1552,9 @@ export default function ManageTeam({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="sticky top-0 flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 z-10 rounded-t-2xl">
-              <h2 className="text-lg font-bold text-richblack-25">Edit member</h2>
+              <h2 className="text-lg font-bold text-richblack-25">
+                Edit member
+              </h2>
               <button
                 type="button"
                 onClick={() => {
@@ -1723,7 +1728,9 @@ export default function ManageTeam({
             >
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 shrink-0">
-                <h2 className="text-lg font-bold text-richblack-25">{displayDepartment} team</h2>
+                <h2 className="text-lg font-bold text-richblack-25">
+                  {displayDepartment} team
+                </h2>
                 <button
                   type="button"
                   onClick={() => {
@@ -1743,7 +1750,9 @@ export default function ManageTeam({
                     <Spinner className="size-4 text-gray-400" />
                   </div>
                 ) : wholeTeamList.length === 0 ? (
-                  <div className="py-12 text-center text-gray-500">No one in the list.</div>
+                  <div className="py-12 text-center text-gray-500">
+                    No one in the list.
+                  </div>
                 ) : (
                   <ul className="space-y-1">
                     {wholeTeamList.map((item, idx) => {
@@ -1754,21 +1763,43 @@ export default function ManageTeam({
                       if (item.type === "registered") {
                         const u = item.data;
                         key = `reg-${u._id}-${idx}`;
-                        const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "—";
-                        const src = u.image ? photoPreviewUrl(u.image) : avatarPlaceholder(name);
-                        const position = u.additionalDetails?.position && String(u.additionalDetails.position).trim();
-                        const roleLabel = position || item.department || getAccountTypeLabel(u.accountType) || u.accountType || "Member";
+                        const name =
+                          [u.firstName, u.lastName].filter(Boolean).join(" ") ||
+                          u.email ||
+                          "—";
+                        const src = u.image
+                          ? photoPreviewUrl(u.image)
+                          : avatarPlaceholder(name);
+                        const position =
+                          u.additionalDetails?.position &&
+                          String(u.additionalDetails.position).trim();
+                        const roleLabel =
+                          position ||
+                          item.department ||
+                          getAccountTypeLabel(u.accountType) ||
+                          u.accountType ||
+                          "Member";
 
                         content = (
                           <button
                             type="button"
                             className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-all border border-transparent hover:border-gray-500/30 active:scale-[0.98]"
-                            onClick={() => setSelectedDetailItem({ type: "user", data: u })}
+                            onClick={() =>
+                              setSelectedDetailItem({ type: "user", data: u })
+                            }
                           >
-                           <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
+                            <img
+                              src={src}
+                              alt=""
+                              className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
+                            />
                             <div className="flex-1 min-w-0">
-                              <span className="block truncate font-medium text-richblack-25">{name}</span>
-                              <span className="block truncate text-xs text-gray-500">{u.email}</span>
+                              <span className="block truncate font-medium text-richblack-25">
+                                {name}
+                              </span>
+                              <span className="block truncate text-xs text-gray-500">
+                                {u.email}
+                              </span>
                             </div>
                             <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                               {roleLabel}
@@ -1785,18 +1816,41 @@ export default function ManageTeam({
                         const name = pre.name || pre.email || "—";
                         const isSending = sendingInviteTo === email;
                         const imagePath = (pre.image || "").trim();
-                        const src = imagePath ? (imagePath.startsWith("http") ? imagePath : `${PREDEFINED_IMAGE_BASE}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`) : avatarPlaceholder(name);
+                        const src = imagePath
+                          ? imagePath.startsWith("http")
+                            ? imagePath
+                            : `${PREDEFINED_IMAGE_BASE}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`
+                          : avatarPlaceholder(name);
 
                         content = (
                           <div className="w-full flex items-center gap-3 p-3 rounded-xl border border-transparent hover:border-gray-500/30 hover:bg-gray-500/10 transition-all">
-                            <button type="button" className="flex-1 flex items-center gap-3 min-w-0 text-left active:scale-[0.98]" onClick={() => setSelectedDetailItem({ type: "predefinedOnly", data: pre })}>
-                              <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
+                            <button
+                              type="button"
+                              className="flex-1 flex items-center gap-3 min-w-0 text-left active:scale-[0.98]"
+                              onClick={() =>
+                                setSelectedDetailItem({
+                                  type: "predefinedOnly",
+                                  data: pre,
+                                })
+                              }
+                            >
+                              <img
+                                src={src}
+                                alt=""
+                                className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
+                              />
                               <div className="flex-1 min-w-0">
-                                <span className="block truncate font-medium text-richblack-25">{name}</span>
-                                <span className="block truncate text-xs text-gray-500">{pre.email}</span>
+                                <span className="block truncate font-medium text-richblack-25">
+                                  {name}
+                                </span>
+                                <span className="block truncate text-xs text-gray-500">
+                                  {pre.email}
+                                </span>
                               </div>
                             </button>
-                            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-red-500/10 text-red-400 border border-red-500/20">Unregistered</span>
+                            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-red-500/10 text-red-400 border border-red-500/20">
+                              Unregistered
+                            </span>
                             <button
                               onClick={async () => {
                                 if (!email) return;
@@ -1805,7 +1859,9 @@ export default function ManageTeam({
                                   await sendSignupInvite(email);
                                   toast.success("Invite email sent.");
                                 } catch (err) {
-                                  toast.error(err.message || "Failed to send invite");
+                                  toast.error(
+                                    err.message || "Failed to send invite",
+                                  );
                                 } finally {
                                   setSendingInviteTo(null);
                                 }
@@ -1829,21 +1885,41 @@ export default function ManageTeam({
                         key = `tm-${m._id}-${idx}`;
                         const name = m.name || m.email || "—";
                         const photoUrl = m.photo || m.image_drive_link;
-                        const src = photoUrl ? photoPreviewUrl(photoUrl) : avatarPlaceholder(name);
-                        const tagLabel = (m.position && String(m.position).trim()) || item.department || "Team";
+                        const src = photoUrl
+                          ? photoPreviewUrl(photoUrl)
+                          : avatarPlaceholder(name);
+                        const tagLabel =
+                          (m.position && String(m.position).trim()) ||
+                          item.department ||
+                          "Team";
 
                         content = (
                           <button
                             type="button"
                             className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-all border border-transparent hover:border-gray-500/30 active:scale-[0.98]"
-                            onClick={() => setSelectedDetailItem({ type: "teamMember", data: m })}
+                            onClick={() =>
+                              setSelectedDetailItem({
+                                type: "teamMember",
+                                data: m,
+                              })
+                            }
                           >
-                            <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
+                            <img
+                              src={src}
+                              alt=""
+                              className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
+                            />
                             <div className="flex-1 min-w-0">
-                              <span className="block truncate font-medium text-richblack-25">{name}</span>
-                              <span className="block truncate text-xs text-gray-500">{m.email}</span>
+                              <span className="block truncate font-medium text-richblack-25">
+                                {name}
+                              </span>
+                              <span className="block truncate text-xs text-gray-500">
+                                {m.email}
+                              </span>
                             </div>
-                            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">{tagLabel}</span>
+                            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                              {tagLabel}
+                            </span>
                           </button>
                         );
                       }
@@ -1892,7 +1968,9 @@ export default function ManageTeam({
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between p-4 border-b border-gray-500/30 bg-[#1e1e2f]/95 shrink-0">
-                <h2 className="text-lg font-bold text-richblack-25">Whole society</h2>
+                <h2 className="text-lg font-bold text-richblack-25">
+                  Whole society
+                </h2>
                 <button
                   type="button"
                   onClick={() => {
@@ -1911,7 +1989,9 @@ export default function ManageTeam({
                     <Spinner className="size-4 text-gray-400" />
                   </div>
                 ) : societyList.length === 0 ? (
-                  <div className="py-12 text-center text-gray-500">No one in the list.</div>
+                  <div className="py-12 text-center text-gray-500">
+                    No one in the list.
+                  </div>
                 ) : (
                   <ul className="space-y-1">
                     {societyList.map((item, idx) => {
@@ -1921,20 +2001,42 @@ export default function ManageTeam({
                       if (item.type === "user") {
                         const u = item.data;
                         key = `user-${u._id}-${idx}`;
-                        const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "—";
-                        const src = u.image ? photoPreviewLargeAvatarUrl(u.image) : avatarPlaceholder(name);
-                        const position = u.additionalDetails?.position && String(u.additionalDetails.position).trim();
-                        const roleLabel = position || item.department || getAccountTypeLabel(u.accountType) || u.accountType || "Member";
+                        const name =
+                          [u.firstName, u.lastName].filter(Boolean).join(" ") ||
+                          u.email ||
+                          "—";
+                        const src = u.image
+                          ? photoPreviewLargeAvatarUrl(u.image)
+                          : avatarPlaceholder(name);
+                        const position =
+                          u.additionalDetails?.position &&
+                          String(u.additionalDetails.position).trim();
+                        const roleLabel =
+                          position ||
+                          item.department ||
+                          getAccountTypeLabel(u.accountType) ||
+                          u.accountType ||
+                          "Member";
                         content = (
                           <button
                             type="button"
                             className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-all border border-transparent hover:border-gray-500/30 active:scale-[0.98]"
-                            onClick={() => setSelectedDetailItem({ type: "user", data: u })}
+                            onClick={() =>
+                              setSelectedDetailItem({ type: "user", data: u })
+                            }
                           >
-                            <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
+                            <img
+                              src={src}
+                              alt=""
+                              className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
+                            />
                             <div className="flex-1 min-w-0">
-                              <span className="block truncate font-medium text-richblack-25">{name}</span>
-                              <span className="block truncate text-xs text-gray-500">{u.email}</span>
+                              <span className="block truncate font-medium text-richblack-25">
+                                {name}
+                              </span>
+                              <span className="block truncate text-xs text-gray-500">
+                                {u.email}
+                              </span>
                             </div>
                             <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                               {roleLabel}
@@ -1950,17 +2052,40 @@ export default function ManageTeam({
                         const name = pre.name || pre.email || "—";
                         const isSending = sendingInviteTo === email;
                         const imagePath = (pre.image || "").trim();
-                        const src = imagePath ? (imagePath.startsWith("http") ? imagePath : `${PREDEFINED_IMAGE_BASE}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`) : avatarPlaceholder(name);
+                        const src = imagePath
+                          ? imagePath.startsWith("http")
+                            ? imagePath
+                            : `${PREDEFINED_IMAGE_BASE}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`
+                          : avatarPlaceholder(name);
                         content = (
                           <div className="w-full flex items-center gap-3 p-3 rounded-xl border border-transparent hover:border-gray-500/30 hover:bg-gray-500/10 transition-all">
-                            <button type="button" className="flex-1 flex items-center gap-3 min-w-0 text-left active:scale-[0.98]" onClick={() => setSelectedDetailItem({ type: "predefinedOnly", data: pre })}>
-                              <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
+                            <button
+                              type="button"
+                              className="flex-1 flex items-center gap-3 min-w-0 text-left active:scale-[0.98]"
+                              onClick={() =>
+                                setSelectedDetailItem({
+                                  type: "predefinedOnly",
+                                  data: pre,
+                                })
+                              }
+                            >
+                              <img
+                                src={src}
+                                alt=""
+                                className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
+                              />
                               <div className="flex-1 min-w-0">
-                                <span className="block truncate font-medium text-richblack-25">{name}</span>
-                                <span className="block truncate text-xs text-gray-500">{pre.email}</span>
+                                <span className="block truncate font-medium text-richblack-25">
+                                  {name}
+                                </span>
+                                <span className="block truncate text-xs text-gray-500">
+                                  {pre.email}
+                                </span>
                               </div>
                             </button>
-                            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-red-500/10 text-red-400 border border-red-500/20">Unregistered</span>
+                            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-red-500/10 text-red-400 border border-red-500/20">
+                              Unregistered
+                            </span>
                             <button
                               onClick={async () => {
                                 if (!email) return;
@@ -1969,7 +2094,9 @@ export default function ManageTeam({
                                   await sendSignupInvite(email);
                                   toast.success("Invite email sent.");
                                 } catch (err) {
-                                  toast.error(err.message || "Failed to send invite");
+                                  toast.error(
+                                    err.message || "Failed to send invite",
+                                  );
                                 } finally {
                                   setSendingInviteTo(null);
                                 }
@@ -1993,18 +2120,36 @@ export default function ManageTeam({
                         key = `tm-${m._id}-${dept}-${idx}`;
                         const name = m.name || m.email || "—";
                         const photoUrl = m.photo || m.image_drive_link;
-                        const src = photoUrl ? photoPreviewLargeAvatarUrl(photoUrl) : avatarPlaceholder(name);
-                        const tagLabel = (m.position && String(m.position).trim()) || dept || "Team";
+                        const src = photoUrl
+                          ? photoPreviewLargeAvatarUrl(photoUrl)
+                          : avatarPlaceholder(name);
+                        const tagLabel =
+                          (m.position && String(m.position).trim()) ||
+                          dept ||
+                          "Team";
                         content = (
                           <button
                             type="button"
                             className="w-full flex items-center gap-3 p-3 rounded-xl text-left text-gray-200 hover:bg-gray-500/20 transition-all border border-transparent hover:border-gray-500/30 active:scale-[0.98]"
-                            onClick={() => setSelectedDetailItem({ type: "teamMember", data: m })}
+                            onClick={() =>
+                              setSelectedDetailItem({
+                                type: "teamMember",
+                                data: m,
+                              })
+                            }
                           >
-                            <img src={src} alt="" className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0" />
+                            <img
+                              src={src}
+                              alt=""
+                              className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
+                            />
                             <div className="flex-1 min-w-0">
-                              <span className="block truncate font-medium text-richblack-25">{name}</span>
-                              <span className="block truncate text-xs text-gray-500">{m.email}</span>
+                              <span className="block truncate font-medium text-richblack-25">
+                                {name}
+                              </span>
+                              <span className="block truncate text-xs text-gray-500">
+                                {m.email}
+                              </span>
                             </div>
                             <span className="shrink-0 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                               {tagLabel}
@@ -2046,7 +2191,9 @@ export default function ManageTeam({
           <UserDetailModal
             user={selectedDetailItem.data}
             onClose={() => setSelectedDetailItem(null)}
-            onViewLogs={(userId, userName) => setActivityLogUser({ id: userId, name: userName })}
+            onViewLogs={(userId, userName) =>
+              setActivityLogUser({ id: userId, name: userName })
+            }
           />,
           document.body,
         )}
