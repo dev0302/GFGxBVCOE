@@ -9,6 +9,7 @@ lerna-debug.log*
 .env
 
 node_modules
+server/.playwright-browsers
 dist
 dist-ssr
 *.local

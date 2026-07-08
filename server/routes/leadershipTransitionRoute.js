@@ -11,6 +11,7 @@ const {
 } = require("../controllers/leadershipTransitionController");
 const {
   getActiveDraft,
+  startDraftSession,
   finalizeDraft,
   approveDraft,
   revokeApproval,
@@ -34,6 +35,7 @@ router.post("/end-session", auth, canAccessLeadershipTransition, endSession);
 router.get("/history", auth, canAccessLeadershipTransition, getHistory);
 
 router.get("/draft/active", auth, canAccessLeadershipTransition, getActiveDraft);
+router.post("/draft/start", auth, canAccessLeadershipTransition, startDraftSession);
 router.post("/draft/finalize", auth, canAccessLeadershipTransition, finalizeDraft);
 router.post("/draft/approve", auth, canAccessLeadershipTransition, approveDraft);
 router.post("/draft/revoke-approval", auth, canAccessLeadershipTransition, revokeApproval);

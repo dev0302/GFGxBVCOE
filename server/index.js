@@ -1,4 +1,8 @@
 require("dotenv").config();
+const path = require("path");
+if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
+  process.env.PLAYWRIGHT_BROWSERS_PATH = path.join(__dirname, ".playwright-browsers");
+}
 const express = require("express");
 const http = require("http");
 const dbConnect = require("./config/database");

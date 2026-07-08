@@ -139,7 +139,7 @@ function ProfileDropDown({
 }) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { hasPendingChanges } = useSocketContext();
+  const { hasActiveLeadershipSession } = useSocketContext();
   const [open, setOpen] = useState(false);
   const [deptFlyoutOpen, setDeptFlyoutOpen] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -324,7 +324,7 @@ function ProfileDropDown({
               onError={() => setAvatarLoadedButton(true)}
               className={`${avatarSize} relative z-10 rounded-full object-cover border border-gray-600/50 opacity-100`}
             />
-            {hasPendingChanges && (
+            {hasActiveLeadershipSession && (
               <span className="absolute top-0 right-0 z-30 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500 border border-[#1e1e2f]"></span>
@@ -342,7 +342,7 @@ function ProfileDropDown({
               {user.firstName?.[0]}
               {user.lastName?.[0]}
             </div>
-            {hasPendingChanges && (
+            {hasActiveLeadershipSession && (
               <span className="absolute top-0 right-0 z-30 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500 border border-[#1e1e2f]"></span>
@@ -524,7 +524,7 @@ function ProfileDropDown({
                   Promotions & role management
                 </span>
               </span>
-              {hasPendingChanges && (
+              {hasActiveLeadershipSession && (
                 <span className="mr-1 flex h-2 w-2 shrink-0 relative">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>

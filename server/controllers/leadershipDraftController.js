@@ -5,6 +5,7 @@ const User = require("../models/User");
 const { buildPeopleList } = require("../controllers/leadershipTransitionController");
 const {
   getActiveDraftSession,
+  getOrCreateActiveDraft,
   addPromotionToDraft,
   addEndSessionToDraft,
   removeChangeFromDraft,
@@ -19,6 +20,11 @@ const {
 } = require("../services/leadershipDraftService");
 const { getUserApprovalInfo, resolveUserRoleLabel } = require("../utils/leadershipApproval");
 const { REPORTS_DIR, generateLeadershipReportPdf } = require("../utils/leadershipReportPdf");
+const {
+  emitDraftUpdated,
+  emitLeadershipPresence,
+} = require("../utils/leadershipDraftBus");
+const { getPresenceList } = require("../utils/leadershipPromotionsSocket");
 
 async function buildUserCollaboratorInfo(userId) {
   const user = await User.findById(userId).populate("additionalDetails").lean();
@@ -47,6 +53,40 @@ exports.getActiveDraft = async (req, res) => {
     });
   } catch (error) {
     console.error("getActiveDraft error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.startDraftSession = async (req, res) => {
+  try {
+    const existing = await getActiveDraftSession();
+    const session = await getOrCreateActiveDraft(req.user);
+    const info = await buildUserCollaboratorInfo(req.user.id);
+    if (info) {
+      upsertCollaborator(session, info);
+    }
+
+    for (const presenceUser of getPresenceList()) {
+      upsertCollaborator(session, presenceUser);
+    }
+
+    await session.save();
+
+    const presence = getPresenceList();
+    emitDraftUpdated(session);
+    emitLeadershipPresence(presence);
+
+    return res.status(200).json({
+      success: true,
+      message: existing
+        ? "Joined active leadership change session."
+        : "Leadership change session started.",
+      draft: serializeSessionForClient(session),
+      approvalStatus: serializeApprovalStatus(session.approvals),
+      collaborators: presence,
+    });
+  } catch (error) {
+    console.error("startDraftSession error:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };

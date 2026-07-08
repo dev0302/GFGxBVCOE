@@ -118,6 +118,7 @@ async function addPromotionToDraft(user, payload) {
     duplicate.newRole = preview.newRole;
     duplicate.newDepartment = preview.newDepartment;
     duplicate.previousDepartment = preview.previousDepartment;
+    duplicate.personImage = preview.personImage || duplicate.personImage;
     duplicate.addedBy = actor.id;
     duplicate.addedByName = actor.name;
     duplicate.addedAt = new Date();
@@ -406,7 +407,7 @@ async function applyDraftChanges(user, req) {
   const baseUrl = getFrontendBaseUrl(req);
   const emailResults = await sendQueuedEmails(emailEntries, baseUrl);
 
-  session.effectiveDate = new Date();
+  session.effectiveDate = session.createdAt || new Date();
   session.appliedAt = new Date();
   session.appliedBy = actor.id;
   session.appliedByName = actor.name;
