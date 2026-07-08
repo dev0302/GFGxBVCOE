@@ -164,11 +164,11 @@ function SessionStatCard({ label, value, hint, accent = "text-richblack-25", onC
       }`}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-light uppercase tracking-[0.14em] text-gray-500">{label}</p>
-        {Icon ? <Icon className="h-3.5 w-3.5 text-gray-600 group-hover:text-cyan-400/80" /> : null}
+        <p className="text-[8px] sm:text-[11px] font-light uppercase tracking-[0.14em] text-gray-400">{label}</p>
+        {Icon ? <Icon className="h-3.5 w-3.5 text-gray-500 group-hover:text-cyan-400/80" /> : null}
       </div>
-      <p className={`mt-2 text-3xl font-light tabular-nums ${accent}`}>{value}</p>
-      {hint ? <p className="mt-1 text-xs font-light text-gray-500">{hint}</p> : null}
+      <p className={`mt-2 text-2xl sm:text-3xl font-light tabular-nums ${accent}`}>{value}</p>
+      {hint ? <p className="mt-1 text-[9px] sm:text-[12px] font-light text-gray-400/80">{hint}</p> : null}
       {onClick ? (
         <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-normal text-cyan-400/80 group-hover:text-cyan-300">
           View <ArrowUpRight className="h-3 w-3" />
@@ -180,7 +180,7 @@ function SessionStatCard({ label, value, hint, accent = "text-richblack-25", onC
 
 function SessionIdleScreen({ onStart, starting, appliedCount, onViewApplied }) {
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center px-4 pt-10">
+    <div className="flex  flex-col items-center justify-center px-4 pt-10">
       <div className="relative w-full max-w-xl overflow-hidden rounded-[28px] border border-white/[0.08] bg-gradient-to-b from-[#252545]/90 to-[#181828]/95 py-8 px-4 sm:py-10 sm:px-10 shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
         <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-cyan-500/[0.07] blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 -left-10 h-40 w-40 rounded-full bg-violet-500/[0.06] blur-3xl" />
@@ -742,7 +742,7 @@ export default function Promotions() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
               </span>
-              <p className="text-xs font-normal uppercase tracking-[0.16em] text-emerald-300/90">
+              <p className="text-[10px] sm:text-[12px] font-normal uppercase tracking-[0.16em] text-emerald-300/90">
                 Leadership Change Session Active
               </p>
               <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 font-mono text-[11px] font-normal text-gray-400">
@@ -754,7 +754,7 @@ export default function Promotions() {
             </div>
           </div>
 
-          <div className="grid gap-3 p-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 p-4 sm:p-6 grid-cols-2 lg:grid-cols-4">
             <SessionStatCard
               label="Pending promotions"
               value={changeCounts.promotions + changeCounts.transfers}
