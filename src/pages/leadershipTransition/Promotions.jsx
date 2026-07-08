@@ -180,20 +180,20 @@ function SessionStatCard({ label, value, hint, accent = "text-richblack-25", onC
 
 function SessionIdleScreen({ onStart, starting, appliedCount, onViewApplied }) {
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center px-4 py-16">
-      <div className="relative w-full max-w-xl overflow-hidden rounded-[28px] border border-white/[0.08] bg-gradient-to-b from-[#252545]/90 to-[#181828]/95 p-10 shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+    <div className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center px-4 pt-10">
+      <div className="relative w-full max-w-xl overflow-hidden rounded-[28px] border border-white/[0.08] bg-gradient-to-b from-[#252545]/90 to-[#181828]/95 py-8 px-4 sm:py-10 sm:px-10 shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
         <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-cyan-500/[0.07] blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 -left-10 h-40 w-40 rounded-full bg-violet-500/[0.06] blur-3xl" />
 
         <div className="relative flex flex-col items-center text-center">
-          <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-500/20 bg-cyan-500/[0.08]">
-            <Zap className="h-6 w-6 text-cyan-300" strokeWidth={1.5} />
+          <div className="mb-6 flex h-10 w-10 sm:h-14 sm:w-14 items-center justify-center rounded-2xl border border-cyan-500/20 bg-cyan-500/[0.08]">
+            <Zap className="h-5 w-4 sm:h-5 sm:w-4 text-cyan-300" strokeWidth={1.5} />
           </div>
 
           <p className="text-[11px] font-light uppercase tracking-[0.2em] text-cyan-400/80">
             Leadership transition
           </p>
-          <h1 className="mt-3 text-3xl font-light tracking-tight text-richblack-25 sm:text-4xl">
+          <h1 className="mt-3 text-[22px] font-light tracking-tight text-richblack-25 sm:text-4xl ">
             No session initialized yet
           </h1>
           <p className="mt-4 max-w-md text-sm font-light leading-relaxed text-gray-400">
@@ -652,7 +652,7 @@ export default function Promotions() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+              className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-8 sm:p-4 backdrop-blur-sm"
               onClick={() => setViewAppliedOpen(false)}
             >
               <motion.div
@@ -665,11 +665,16 @@ export default function Promotions() {
                 <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-5">
                   <div>
                     <h2 className="text-lg font-normal text-richblack-25">Transitions completed</h2>
-                    <p className="mt-0.5 text-xs font-light text-gray-500">Applied leadership change sessions</p>
+                    <p className="mt-0.5 text-xs font-light text-gray-400/90">Applied leadership change sessions</p>
                   </div>
-                  <button type="button" onClick={() => setViewAppliedOpen(false)} className="text-gray-400 hover:text-gray-200">
-                    <X className="h-4 w-4" />
-                  </button>
+                  <button
+  type="button"
+  onClick={() => setViewAppliedOpen(false)}
+  className="group flex h-8 w-8 items-center justify-center rounded-full bg-red-400/40 text-gray-400 transition-all duration-200 hover:bg-red-500/80 hover:text-red-300"
+  aria-label="Close"
+>
+  <X className="h-4 w-4" />
+</button>
                 </div>
                 <div className="space-y-3 p-6">
                   {appliedSessions.length === 0 ? (
@@ -682,11 +687,11 @@ export default function Promotions() {
                       >
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
-                            <p className="font-mono text-sm font-normal text-cyan-300">{session.sessionId}</p>
-                            <p className="mt-1 text-xs font-light text-gray-500">
+                            <p className="font-mono text-sm font-normal text-cyan-400">{session.sessionId}</p>
+                            <p className="mt-1 text-xs font-light text-gray-400">
                               {session.changeCount} change{session.changeCount === 1 ? "" : "s"} · Applied by {session.appliedByName || "—"}
                             </p>
-                            <p className="mt-0.5 text-xs font-light text-gray-600">
+                            <p className="mt-0.5 text-xs font-light text-gray-500">
                               {session.appliedAt ? new Date(session.appliedAt).toLocaleString() : "—"}
                             </p>
                           </div>

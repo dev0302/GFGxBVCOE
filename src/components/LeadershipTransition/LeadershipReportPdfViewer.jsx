@@ -66,7 +66,7 @@ export function LeadershipReportPdfViewer({ sessionId, open, onClose }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[150] flex flex-col bg-black/70 p-3 backdrop-blur-sm sm:p-5"
+          className="fixed inset-0 z-[150] flex flex-col bg-black/70 py-12 px-6 backdrop-blur-sm sm:p-5"
           onClick={onClose}
         >
           <motion.div
@@ -104,13 +104,13 @@ export function LeadershipReportPdfViewer({ sessionId, open, onClose }) {
                   Download
                 </button>
                 <button
-                  type="button"
-                  onClick={onClose}
-                  className="rounded-lg p-1.5 text-gray-400 transition hover:bg-white/[0.06] hover:text-gray-200"
-                  aria-label="Close report viewer"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+  type="button"
+  onClick={onClose}
+  className="group flex h-8 w-8 items-center justify-center rounded-full bg-red-500/90 transition-all duration-200 hover:bg-red-600 hover:scale-105 active:scale-95 shadow-sm"
+  aria-label="Close report viewer"
+>
+  <X className="h-4 w-4 text-white transition-opacity group-hover:opacity-100" />
+</button>
               </div>
             </div>
 
