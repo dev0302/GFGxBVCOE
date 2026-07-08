@@ -78,11 +78,11 @@ export function LeadershipReportPdfViewer({ sessionId, open, onClose }) {
           >
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3 sm:px-5">
               <div className="flex min-w-0 items-center gap-2.5">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-500/10">
+                <div className="flex h-7 w-7 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-500/10">
                   <FileText className="h-4 w-4 text-emerald-300" />
                 </div>
                 <div className="min-w-0">
-                  <h2 className="truncate text-sm font-normal text-richblack-25 sm:text-base">
+                  <h2 className="truncate text-xs font-normal text-richblack-25 sm:text-base">
                     Leadership transition report
                   </h2>
                   <p className="truncate font-mono text-[11px] font-light text-gray-500">{sessionId}</p>
@@ -99,14 +99,14 @@ export function LeadershipReportPdfViewer({ sessionId, open, onClose }) {
                   {downloading ? (
                     <Spinner className="size-3.5 text-emerald-200" />
                   ) : (
-                    <Download className="h-3.5 w-3.5" />
+                    <Download className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" />
                   )}
                   Download
                 </button>
                 <button
   type="button"
   onClick={onClose}
-  className="group flex h-8 w-8 items-center justify-center rounded-full bg-red-500/90 transition-all duration-200 hover:bg-red-600 hover:scale-105 active:scale-95 shadow-sm"
+  className="group flex h-6 w-6 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-red-500/90 transition-all duration-200 hover:bg-red-600 hover:scale-105 active:scale-95 shadow-sm"
   aria-label="Close report viewer"
 >
   <X className="h-4 w-4 text-white transition-opacity group-hover:opacity-100" />
