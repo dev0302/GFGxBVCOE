@@ -4,7 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Clock, TrendingUp, UserPlus, UserMinus, FileText, CheckCircle } from "react-feather";
 import { Spinner } from "@/components/ui/spinner";
 import { SectionTitle } from "../../components/EventDashboard/SectionTitle";
-import { getAccountTypeLabel, getLeadershipHistory, formatLeadershipRoleLabel, getLeadershipAppliedSessions, downloadLeadershipReport } from "../../services/api";
+import { LeadershipReportPdfViewer } from "../../components/LeadershipTransition/LeadershipReportPdfViewer";
+import { getAccountTypeLabel, getLeadershipHistory, formatLeadershipRoleLabel, getLeadershipAppliedSessions } from "../../services/api";
 import { subscribeLeadershipUpdates } from "../../services/socket";
 import { cloudinaryTinyAvatarUrl } from "../../utils/cloudinary";
 
@@ -152,7 +153,7 @@ function RoleBadge({ value, muted = false }) {
   );
 }
 
-function HistoryEntry({ log, isLast }) {
+function HistoryEntry({ log, isLast, onOpenReport }) {
   const meta = ACTION_META[log.action] || {
     label: log.action,
     icon: Clock,
@@ -238,15 +239,11 @@ function HistoryEntry({ log, isLast }) {
                   {details.sessionId && (
                     <button
                       type="button"
-                      onClick={() =>
-                        downloadLeadershipReport(details.sessionId).catch((e) =>
-                          toast.error(e.message || "Download failed")
-                        )
-                      }
+                      onClick={() => onOpenReport(details.sessionId)}
                       className="inline-flex items-center gap-1.5 rounded-lg border border-violet-500/30 bg-violet-500/10 px-2.5 py-1 text-[11px] font-medium text-violet-200 hover:bg-violet-500/20"
                     >
                       <FileText className="h-3 w-3" />
-                      Download PDF
+                      Open PDF
                     </button>
                   )}
                 </div>
@@ -301,6 +298,7 @@ export default function History() {
   const [appliedSessions, setAppliedSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [reportViewerSessionId, setReportViewerSessionId] = useState(null);
 
   const loadHistory = useCallback(async () => {
     try {
@@ -468,15 +466,11 @@ export default function History() {
                   </div>
                   <button
                     type="button"
-                    onClick={() =>
-                      downloadLeadershipReport(session.sessionId).catch((e) =>
-                        toast.error(e.message || "Download failed")
-                      )
-                    }
+                    onClick={() => setReportViewerSessionId(session.sessionId)}
                     className="inline-flex items-center gap-2 self-start rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-2 text-sm font-medium text-violet-200 hover:bg-violet-500/20"
                   >
                     <FileText className="h-4 w-4" />
-                    Download PDF
+                    Open PDF
                   </button>
                 </div>
               ))}
@@ -526,6 +520,7 @@ export default function History() {
                           key={log._id}
                           log={log}
                           isLast={index === group.items.length - 1}
+                          onOpenReport={setReportViewerSessionId}
                         />
                       ))}
                     </ol>
@@ -536,6 +531,12 @@ export default function History() {
           )}
         </section>
       </div>
+
+      <LeadershipReportPdfViewer
+        sessionId={reportViewerSessionId}
+        open={Boolean(reportViewerSessionId)}
+        onClose={() => setReportViewerSessionId(null)}
+      />
     </div>
   );
 }
