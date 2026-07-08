@@ -619,11 +619,7 @@ export default function ManageTeam({
             INVITE_LINK_STORAGE_PREFIX + displayDepartment,
             JSON.stringify(res.data),
           );
-<<<<<<< HEAD
-        } catch (_) {}
-=======
         } catch (_) { }
->>>>>>> 7a59c5726cb7a4ebda4d88e60a4c0429cd3c54d0
         toast.success(`Invite link created. Valid for ${expiresIn}.`);
       }
     } catch (e) {
