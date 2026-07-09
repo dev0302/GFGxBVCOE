@@ -8,15 +8,12 @@ import { useAuth } from "../context/AuthContext";
 import Footer from "../components/common/Footer";
 import ImageGrid from "../components/ImageGrid";
 import UpcomingEventSection from "../components/UpcomingEventSection";
+import ProfileAvatarFlip from "../components/common/ProfileAvatarFlip";
 import Lenis from "lenis";
-import { useFeatureFlags } from "../context/FeatureFlags.jsx";
-
-
 gsap.registerPlugin(ScrollTrigger);
 
 function Home() {
   const { user } = useAuth();
-  const { leaderboardEnabled } = useFeatureFlags();
 
   useEffect(() => {
   const lenis = new Lenis({ lerp: 0.05, smoothWheel: true });
@@ -222,14 +219,6 @@ function Home() {
             >
               About Us
             </button>
-            {leaderboardEnabled && (
-              <button
-                onClick={() => navigate('/leaderboard')}
-                className="px-8 py-4 bg-white/10 border border-white/20 text-richblack-25 font-semibold rounded-full hover:bg-white/15 transition-all"
-              >
-                View Leaderboard
-              </button>
-            )}
           </div>
 
           {/* Stats */}
@@ -343,14 +332,17 @@ function Home() {
                 
                 {/* Content */}
                 <div className="relative z-10 text-center">
-                  <div className="w-24 h-24 mx-auto mb-6 rounded-full overflow-hidden border-4 border-green-400/50 shadow-lg group-hover:border-green-400 transition-colors duration-300">
-                    <img 
-                      src="/Toshika.webp" 
-                      alt="Toshika Goswami"
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </div>
+                  <ProfileAvatarFlip
+                    flipKey="toshika-goswami"
+                    src="/Toshika.webp"
+                    alt="Toshika Goswami"
+                    initials="TG"
+                    animateOnScroll
+                    imageLoading="lazy"
+                    className="h-24 w-24 mx-auto mb-6"
+                    borderClassName="border-4 border-green-400/50 shadow-lg group-hover:border-green-400 transition-colors duration-300"
+                    imageClassName="group-hover:scale-110 transition-transform duration-500"
+                  />
                   <h3 className="font-rounded text-2xl font-bold text-richblack-25 mb-2 group-hover:text-green-300 transition-colors duration-300">
                     Toshika Goswami
                   </h3>
@@ -391,14 +383,17 @@ function Home() {
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
                 <div className="relative z-10 text-center">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-3 border-blue-400/50 shadow-lg group-hover:border-blue-400 transition-colors duration-300">
-                    <img 
-                      src="/Kartik.webp" 
-                      loading="lazy"
-                      alt="Kartik Bhattacharya"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </div>
+                  <ProfileAvatarFlip
+                    flipKey="kartik-bhattacharya"
+                    src="/Kartik.webp"
+                    alt="Kartik Bhattacharya"
+                    initials="KB"
+                    animateOnScroll
+                    imageLoading="lazy"
+                    className="h-20 w-20 mx-auto mb-4"
+                    borderClassName="border-2 border-blue-400/50 shadow-lg group-hover:border-blue-400 transition-colors duration-300"
+                    imageClassName="group-hover:scale-110 transition-transform duration-500"
+                  />
                   <h3 className="font-rounded text-xl font-bold text-richblack-25 mb-1 group-hover:text-blue-300 transition-colors duration-300">
                     Kartik Bhattacharya
                   </h3>
@@ -450,14 +445,17 @@ function Home() {
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
                 <div className="relative z-10 text-center">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-3 border-purple-400/50 shadow-lg group-hover:border-purple-400 transition-colors duration-300">
-                    <img 
-                      src="/Archita.webp" 
-                      alt="Archita"
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </div>
+                  <ProfileAvatarFlip
+                    flipKey="archita"
+                    src="/Archita.webp"
+                    alt="Archita"
+                    initials="A"
+                    animateOnScroll
+                    imageLoading="lazy"
+                    className="h-20 w-20 mx-auto mb-4"
+                    borderClassName="border-2 border-purple-400/50 shadow-lg group-hover:border-purple-400 transition-colors duration-300"
+                    imageClassName="group-hover:scale-110 transition-transform duration-500"
+                  />
                   <h3 className="font-rounded text-xl font-bold text-richblack-25 mb-1 group-hover:text-purple-300 transition-colors duration-300">
                     Archita
                   </h3>

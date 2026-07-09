@@ -34,8 +34,6 @@ function Navbar() {
     "/about",
     "/team2",
     "/results",
-    "/quiz",
-    "/leaderboard",
     "/admin",
     "/dashboard",
     "/profile",
@@ -306,15 +304,6 @@ font-montserrat opacity-90">
               onClick={() => setIsMenuOpen(false)}
             >
               Contact
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/quiz"
-              className={mobileNavLinkClass}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Quiz
             </NavLink>
           </li>
           <li className="mt-2 flex flex-col  gap-3">

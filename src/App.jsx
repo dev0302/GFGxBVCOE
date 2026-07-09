@@ -16,7 +16,6 @@ import Navbar from "./components/common/Navbar"
 import DepartmentDashboardLayout from "./components/DepartmentDashboard/DepartmentDashboardLayout"
 import DepartmentMain from "./pages/dashboard/DepartmentMain"
 import DepartmentDepartmentsAllowed from "./pages/dashboard/DepartmentsAllowed"
-import { FeatureFlagsProvider } from "./context/FeatureFlags.jsx"
 import { AuthProvider } from "./context/AuthContext"
 import { SocketProvider } from "./context/SocketProvider"
 import { GlobalModalProvider } from "./context/GlobalModalProvider"
@@ -82,8 +81,7 @@ function App() {
     dropdownBasePaths.some((base) => location.pathname === base || location.pathname.startsWith(base + "/"));
 
   return (
-    <FeatureFlagsProvider>
-      <AuthProvider>
+    <AuthProvider>
       <SocketProvider>
       <GlobalModalProvider>
       <UploadTransferProvider>
@@ -175,7 +173,6 @@ function App() {
       </GlobalModalProvider>
       </SocketProvider>
       </AuthProvider>
-    </FeatureFlagsProvider>
   )
 }
 export default App
