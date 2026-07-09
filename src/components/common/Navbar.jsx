@@ -326,7 +326,7 @@ font-montserrat opacity-90">
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <button className="py-3 px-8 rounded-full border border-amber-400/50 text-amber-300 font-medium">
-                      Dashboard
+                      Signup Dashboard
                     </button>
                   </NavLink>
                 )}

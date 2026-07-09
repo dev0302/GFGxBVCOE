@@ -315,6 +315,7 @@ exports.login = async (req, res) => {
       "Content and Documentation",
       "Photography and Videography",
       "Sponsorship and Marketing",
+      "Treasurer",
     ];
 
     const dashboardAccess = new Set();
@@ -595,6 +596,7 @@ exports.me = async (req, res) => {
       "Content and Documentation",
       "Photography and Videography",
       "Sponsorship and Marketing",
+      "Treasurer",
     ];
 
     const dashboardAccess = new Set();
@@ -995,6 +997,7 @@ const TEAM_DEPARTMENTS = [
   "Content and Documentation",
   "Photography and Videography",
   "Sponsorship and Marketing",
+  "Treasurer",
 ];
 
 /**

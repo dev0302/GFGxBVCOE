@@ -13,6 +13,7 @@ const ALL_DEPARTMENTS = [
   "Content and Documentation",
   "Photography and Videography",
   "Sponsorship and Marketing",
+  "Treasurer",
 ];
 
 exports.getAllSignupConfigs = async (req, res) => {
