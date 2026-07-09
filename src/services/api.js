@@ -402,6 +402,7 @@ export const AUTH_DEPARTMENTS = [
   'Content and Documentation',
   'Photography and Videography',
   'Sponsorship and Marketing',
+  'Treasurer',
 ];
 
 /** Display label for account type (e.g. ADMIN → "Faculty Incharge") */

@@ -500,7 +500,7 @@ function ProfileDropDown({
                 <Layout className="h-4 w-4" />
               </span>
               <span className="flex-1">
-                <span className="block text-xs font-medium">Dashboard</span>
+                <span className="block text-xs font-medium">Signup Dashboard</span>
                 <span className="block text-[10px] text-gray-500">
                   Manage signup access
                 </span>
