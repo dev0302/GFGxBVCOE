@@ -7,6 +7,7 @@ import { driveLinkToImageUrl, avatarPlaceholder, photoPreviewUrl, photoProfileMo
 import { Search as SearchIcon, X, Mail, Activity } from "react-feather";
 import "./Search.css";
 import { Spinner } from "./ui/spinner";
+import ProfileAvatarFlip from "./common/ProfileAvatarFlip";
 
 
 
@@ -139,6 +140,18 @@ export function MemberDetailModal({ member, onClose }) {
 }
 
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
+
+function profileInitials(firstName, lastName, fallback = "") {
+  const fromNames = `${firstName?.[0] || ""}${lastName?.[0] || ""}`.trim();
+  if (fromNames) return fromNames.toUpperCase();
+  const fromFallback = (fallback || "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("");
+  return fromFallback.toUpperCase() || "?";
+}
 
 function ClickableProfilePhoto({ src, originalSrc, alt, className, onFallback }) {
   const isClickable = Boolean(originalSrc) && !originalSrc.includes("ui-avatars.com");
@@ -420,6 +433,7 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
   const rawImage = user.image || (pre.image ? resolvePredefinedImageUrl(pre.image) : null);
   const imgSrc = rawImage ? photoProfileModalUrl(rawImage) : avatarPlaceholder(fullName);
   const originalSrc = rawImage ? photoOriginalUrl(rawImage) : null;
+  const photoClickable = Boolean(originalSrc) && !originalSrc.includes("ui-avatars.com");
 
   return (
     <div
@@ -447,12 +461,20 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
         <div className="p-6 space-y-8 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }} data-lenis-prevent>
           {/* Header: photo + name */}
           <div className="flex flex-col items-center gap-3">
-            <ClickableProfilePhoto
+            <ProfileAvatarFlip
+              flipKey={user._id || fullName}
+              hasImage={Boolean(rawImage)}
               src={imgSrc}
-              originalSrc={originalSrc}
+              initials={profileInitials(user.firstName, user.lastName, fullName)}
+              className="h-28 w-28"
+              initialsClassName="text-3xl"
               alt={fullName}
-              className="h-28 w-28 rounded-full object-cover border-2 border-gray-500/50"
-              onFallback={() => avatarPlaceholder(fullName)}
+              clickable={photoClickable}
+              onClick={
+                photoClickable
+                  ? () => window.open(originalSrc, "_blank", "noopener,noreferrer")
+                  : undefined
+              }
             />
             <h3 className="text-xl font-bold text-richblack-25 text-center">{fullName}</h3>
             {(profile.branch || profile.year || user.accountType) && (

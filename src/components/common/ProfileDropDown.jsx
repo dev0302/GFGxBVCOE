@@ -488,6 +488,23 @@ function ProfileDropDown({
         </div>
 
         <div className="px-1 py-1.5">
+          <button
+            onClick={() => {
+              setOpen(false);
+              navigate("/profile");
+            }}
+            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
+          >
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+              <User className="h-4 w-4" />
+            </span>
+            <span className="flex-1">
+              <span className="block text-xs font-medium">My profile</span>
+              <span className="block text-[10px] text-gray-500">
+                Edit details & display picture
+              </span>
+            </span>
+          </button>
           {!tenureEnding && isSocietyRole(user.accountType) && (
             <button
               onClick={() => {
@@ -532,23 +549,6 @@ function ProfileDropDown({
               )}
             </button>
           )}
-          <button
-            onClick={() => {
-              setOpen(false);
-              navigate("/profile");
-            }}
-            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
-          >
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
-              <User className="h-4 w-4" />
-            </span>
-            <span className="flex-1">
-              <span className="block text-xs font-medium">My profile</span>
-              <span className="block text-[10px] text-gray-500">
-                Edit details & display picture
-              </span>
-            </span>
-          </button>
           {!tenureEnding && (
           <>
           <button

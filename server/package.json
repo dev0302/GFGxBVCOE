@@ -8,7 +8,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "postinstall": "playwright install chromium",
-    "setup:playwright": "playwright install chromium"
+    "setup:playwright": "playwright install chromium",
+    "clear:leadership-records": "node scripts/clearLeadershipTestRecords.js"
   },
   "keywords": [],
   "author": "",
