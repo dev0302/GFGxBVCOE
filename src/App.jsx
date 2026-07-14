@@ -12,6 +12,7 @@ import ForceDeletePermissions from "./pages/eventDashboard/ForceDeletePermission
 import ManageEvents from "./pages/eventDashboard/ManageEvents"
 import UpcomingEventPage from "./pages/eventDashboard/UpcomingEventPage"
 import GenerateQR from "./pages/eventDashboard/GenerateQR"
+import VectorVision from "./pages/eventDashboard/VectorVision"
 import Navbar from "./components/common/Navbar"
 import DepartmentDashboardLayout from "./components/DepartmentDashboard/DepartmentDashboardLayout"
 import DepartmentMain from "./pages/dashboard/DepartmentMain"
@@ -124,6 +125,7 @@ function App() {
                     <Route path="generate-link" element={<GenerateLink />} />
                     <Route path="departments" element={<EMDepartmentsAllowed />} />
                     <Route path="generate-qr" element={<GenerateQR />} />
+                    <Route path="vector-vision" element={<VectorVision />} />
                     <Route path="force-delete" element={<ForceDeletePermissions />} />
                     <Route path="manage" element={<ManageEvents />} />
                     <Route path="upcoming" element={<UpcomingEventPage />} />
