@@ -159,6 +159,20 @@ function getResourceTypeFromUrl(url) {
  * @param {object} [options] - Override resource_type if needed
  * @returns {Promise<{ result: string }|null>}
  */
+exports.uploadRawFromPath = async (filePath, folder, publicId = null) => {
+  try {
+    if (!filePath) throw new Error("No file path provided for upload.");
+    const options = {
+      folder,
+      resource_type: "raw",
+    };
+    if (publicId) options.public_id = publicId;
+    return await cloudinary.uploader.upload(filePath, options);
+  } catch (error) {
+    throw new Error(error.message || "Failed to upload file to Cloudinary.");
+  }
+};
+
 exports.deleteAssetByUrl = async (assetUrl, options = {}) => {
   try {
     const publicId = getPublicIdFromUrl(assetUrl);

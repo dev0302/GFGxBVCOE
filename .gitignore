@@ -9,6 +9,7 @@ lerna-debug.log*
 .env
 
 node_modules
+server/.playwright-browsers
 dist
 dist-ssr
 *.local
@@ -23,3 +24,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Generated leadership transition report PDFs (stored locally in dev)
+server/reports/leadership/*.pdf

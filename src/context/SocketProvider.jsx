@@ -13,11 +13,17 @@ import {
 
 const SocketContext = createContext(null);
 
+const ACTIVE_DRAFT_STATUSES = new Set(["DRAFT", "APPROVAL_PENDING", "READY_TO_APPLY"]);
+
+function isActiveLeadershipSession(draft) {
+  return Boolean(draft?.status && ACTIVE_DRAFT_STATUSES.has(draft.status));
+}
+
 export function SocketProvider({ children }) {
   const { user } = useAuth();
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [socketInstance, setSocketInstance] = useState(null);
-  const [hasPendingChanges, setHasPendingChanges] = useState(false);
+  const [hasActiveLeadershipSession, setHasActiveLeadershipSession] = useState(false);
 
   useEffect(() => {
     if (!user?._id) {
@@ -49,42 +55,30 @@ export function SocketProvider({ children }) {
 
   useEffect(() => {
     if (!user?._id || !userCanAccessLeadershipTransition(user)) {
-      setHasPendingChanges(false);
+      setHasActiveLeadershipSession(false);
       return;
     }
 
-    // Load initial status
     getLeadershipDraft()
       .then((res) => {
-        if (res.success && res.data) {
-          const count = res.data.pendingChanges?.length ?? 0;
-          setHasPendingChanges(count > 0);
-        } else {
-          setHasPendingChanges(false);
-        }
+        setHasActiveLeadershipSession(isActiveLeadershipSession(res.success ? res.data : null));
       })
       .catch((err) => {
-        console.error("Error fetching initial draft changes count:", err);
+        console.error("Error fetching initial leadership session:", err);
       });
 
-    // Realtime changes listener
     const unsub = subscribeLeadershipUpdates((payload) => {
       if (!payload) return;
       if (payload.type === "draft-updated" || payload.type === "draft-created") {
         getLeadershipDraft()
           .then((res) => {
-            if (res.success && res.data) {
-              const count = res.data.pendingChanges?.length ?? 0;
-              setHasPendingChanges(count > 0);
-            } else {
-              setHasPendingChanges(false);
-            }
+            setHasActiveLeadershipSession(isActiveLeadershipSession(res.success ? res.data : null));
           })
           .catch((err) => {
-            console.error("Error refetching draft changes on update:", err);
+            console.error("Error refetching leadership session on update:", err);
           });
       } else if (payload.type === "draft-discarded" || payload.type === "changes-applied") {
-        setHasPendingChanges(false);
+        setHasActiveLeadershipSession(false);
       }
     });
 
@@ -97,9 +91,9 @@ export function SocketProvider({ children }) {
       onlineUsers,
       joinDashboard,
       getSocket,
-      hasPendingChanges,
+      hasActiveLeadershipSession,
     }),
-    [socketInstance, onlineUsers, hasPendingChanges]
+    [socketInstance, onlineUsers, hasActiveLeadershipSession]
   );
 
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;

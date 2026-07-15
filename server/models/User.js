@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema(
         "Content and Documentation",
         "Photography and Videography",
         "Sponsorship and Marketing",
+        "Treasurer",
       ],
     },
     additionalDetails: { type: mongoose.Schema.Types.ObjectId, ref: "Profile" },

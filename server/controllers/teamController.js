@@ -19,6 +19,7 @@ const TEAM_DEPARTMENTS = [
   "Content and Documentation",
   "Photography and Videography",
   "Sponsorship and Marketing",
+  "Treasurer",
 ];
 
 const EXCEL_COLUMNS = [

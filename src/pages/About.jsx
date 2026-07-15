@@ -2,7 +2,6 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef, useEffect } from "react";
-import { useFeatureFlags } from "../context/FeatureFlags.jsx";
 import Lenis from "lenis";
 
 
@@ -10,7 +9,6 @@ import Lenis from "lenis";
 gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
-  const { leaderboardEnabled, setLeaderboardEnabled } = useFeatureFlags();
   const containerRef = useRef();
   const heroRef = useRef();
   const visionRef = useRef();
@@ -379,14 +377,6 @@ const About = () => {
 >
   Get Started Today
 </button>
-              <div className="mt-8">
-                <button
-                  onClick={() => setLeaderboardEnabled(!leaderboardEnabled)}
-                  className={`px-6 py-3 rounded-full border ${leaderboardEnabled ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300' : 'bg-white/5 border-white/10 text-richblack-25'} `}
-                >
-                  {leaderboardEnabled ? 'Turn Off Leaderboard Buttons' : 'Turn On Leaderboard Buttons'}
-                </button>
-              </div>
             </div>
           </div>
         </section>

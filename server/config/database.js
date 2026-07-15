@@ -13,7 +13,7 @@ const dbConnect = () => {
         .catch((err) => {
             console.log("Issue in DB Connection!!");
             console.log(err);
-            process.exit(1);
+            throw err;
         });
 };
 
