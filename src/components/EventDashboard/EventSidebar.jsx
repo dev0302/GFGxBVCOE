@@ -1,15 +1,34 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Upload, Link2, Users, List, Calendar, Shield, Grid } from "react-feather";
+import {
+  Upload,
+  Link2,
+  Users,
+  List,
+  Calendar,
+  Shield,
+  Grid,
+} from "react-feather";
 import { useAuth } from "../../context/AuthContext";
-import { canManageEventUploadConfig, canManageForceDeleteConfig } from "../../services/api";
+import {
+  canManageEventUploadConfig,
+  canManageForceDeleteConfig,
+} from "../../services/api";
 
 const sidebarLinks = [
   { name: "Upload new event", path: "/em-dashboard/upload", icon: Upload },
   { name: "Upcoming event", path: "/em-dashboard/upcoming", icon: Calendar },
-  { name: "Generate upload link", path: "/em-dashboard/generate-link", icon: Link2 },
+  {
+    name: "Generate upload link",
+    path: "/em-dashboard/generate-link",
+    icon: Link2,
+  },
   { name: "Generate QR", path: "/em-dashboard/generate-qr", icon: Grid },
-  { name: "Departments allowed", path: "/em-dashboard/departments", icon: Users, requireConfig: true },
-  { name: "Force delete permissions", path: "/em-dashboard/force-delete", icon: Shield, requireFacultyIncharge: true },
+  {
+    name: "Departments allowed",
+    path: "/em-dashboard/departments",
+    icon: Users,
+    requireConfig: true,
+  },
   { name: "Manage uploaded events", path: "/em-dashboard/manage", icon: List },
 ];
 
@@ -18,16 +37,29 @@ export default function EventSidebar() {
   const { user } = useAuth();
 
   const matchRoute = (path) => {
-    if (path === "/em-dashboard/upload") return location.pathname === path || location.pathname === "/em-dashboard";
-    return location.pathname === path || location.pathname.startsWith(path + "/");
+    if (path === "/em-dashboard/upload")
+      return (
+        location.pathname === path || location.pathname === "/em-dashboard"
+      );
+    return (
+      location.pathname === path || location.pathname.startsWith(path + "/")
+    );
   };
 
   return (
     <div className="flex h-[calc(100vh-5rem)] min-w-[60px] md:min-w-[220px] flex-col border-r border-gray-500/30 bg-[#1e1e2f]/95 py-6 transition-all duration-300">
       <div className="flex flex-col gap-0.5 px-2 md:px-4">
         {sidebarLinks.map((link) => {
-          if (link.requireConfig && !canManageEventUploadConfig(user?.accountType)) return null;
-          if (link.requireFacultyIncharge && !canManageForceDeleteConfig(user?.accountType)) return null;
+          if (
+            link.requireConfig &&
+            !canManageEventUploadConfig(user?.accountType)
+          )
+            return null;
+          if (
+            link.requireFacultyIncharge &&
+            !canManageForceDeleteConfig(user?.accountType)
+          )
+            return null;
           const Icon = link.icon;
           const isActive = matchRoute(link.path);
           return (
