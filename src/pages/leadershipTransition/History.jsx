@@ -96,8 +96,9 @@ function actorName(actor) {
   return name || actor.email || "Someone";
 }
 
-function subjectName(details = {}) {
-  return details.name || details.email || "Unknown user";
+function subjectName(details = {}, actor) {
+  if (details.name || details.email) return details.name || details.email;
+  return actorName(actor) || "Unknown user";
 }
 
 function initialsFromName(name) {
@@ -163,7 +164,7 @@ function HistoryEntry({ log, isLast }) {
   const Icon = meta.icon;
   const details = log.details || {};
   const actor = log.userId;
-  const subject = subjectName(details);
+  const subject = subjectName(details, actor);
 
   return (
     <motion.li

@@ -4,7 +4,8 @@ const path = require("path");
 const { chromium } = require("playwright");
 
 const REPORTS_DIR = path.join(__dirname, "..", "reports", "leadership");
-const ORG_NAME = process.env.ORG_NAME || "GeeksforGeeks Student Chapter – BVCOE";
+const ORG_NAME =
+  process.env.ORG_NAME || "GeeksforGeeks Student Chapter – BVCOE";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -17,6 +18,7 @@ function escapeHtml(value) {
 function formatDate(date) {
   if (!date) return "—";
   return new Date(date).toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
     dateStyle: "medium",
     timeStyle: "short",
   });
@@ -24,18 +26,19 @@ function formatDate(date) {
 
 function buildReportHtml(session) {
   const promotions = (session.pendingChanges || []).filter(
-    (c) => c.changeType === "promotion" || c.changeType === "role_change"
+    (c) => c.changeType === "promotion" || c.changeType === "role_change",
   );
   const transfers = (session.pendingChanges || []).filter(
-    (c) => c.changeType === "department_transfer"
+    (c) => c.changeType === "department_transfer",
   );
   const sessionEnds = (session.pendingChanges || []).filter(
-    (c) => c.changeType === "end_session"
+    (c) => c.changeType === "end_session",
   );
   const approvalStatus = session.approvals || [];
   const coreApprover = approvalStatus.find((a) => a.category === "core");
   const deptApprover = approvalStatus.find((a) => a.category === "department");
-  const effectiveDate = session.effectiveDate || session.appliedAt || new Date();
+  const effectiveDate =
+    session.effectiveDate || session.appliedAt || new Date();
 
   const promotionRows = promotions
     .map(
@@ -46,7 +49,7 @@ function buildReportHtml(session) {
         <td style="color: #1d1d1f; font-weight: 600;">${escapeHtml(p.newRole)}</td>
         <td style="color: #515154;">${escapeHtml(p.newDepartment || p.previousDepartment)}</td>
         <td style="color: #86868b;">${formatDate(effectiveDate)}</td>
-      </tr>`
+      </tr>`,
     )
     .join("");
 
@@ -58,7 +61,7 @@ function buildReportHtml(session) {
         <td style="color: #515154;">${escapeHtml(t.previousDepartment)}</td>
         <td style="color: #1d1d1f; font-weight: 600;">${escapeHtml(t.newDepartment)}</td>
         <td style="color: #515154;">${escapeHtml(t.newRole || t.previousRole)}</td>
-      </tr>`
+      </tr>`,
     )
     .join("");
 
@@ -71,7 +74,7 @@ function buildReportHtml(session) {
         <td style="color: #515154;">${escapeHtml(e.previousDepartment)}</td>
         <td style="color: #86868b;">${formatDate(effectiveDate)}</td>
         <td><span style="display: inline-block; background-color: #f5f5f7; border: 1px solid #d2d2d7; color: #1d1d1f; font-size: 7pt; font-weight: 600; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Terminated</span></td>
-      </tr>`
+      </tr>`,
     )
     .join("");
 
@@ -80,7 +83,10 @@ function buildReportHtml(session) {
     .join(", ");
 
   const approvalChain = approvalStatus
-    .map((a) => `<div style="margin-bottom: 4px; color: #1d1d1f;"><strong style="font-weight: 600;">${escapeHtml(a.name)}</strong> <span style="color: #86868b; font-size: 8.5pt;">(${escapeHtml(a.role)})</span> <span style="font-weight: 600; font-size: 8.5pt; color: #1d1d1f;">[Approved]</span> <span style="color: #86868b; font-size: 8pt; font-style: italic;">on ${formatDate(a.approvedAt)}</span></div>`)
+    .map(
+      (a) =>
+        `<div style="margin-bottom: 4px; color: #1d1d1f;"><strong style="font-weight: 600;">${escapeHtml(a.name)}</strong> <span style="color: #86868b; font-size: 8.5pt;">(${escapeHtml(a.role)})</span> <span style="font-weight: 600; font-size: 8.5pt; color: #1d1d1f;">[Approved]</span> <span style="color: #86868b; font-size: 8pt; font-style: italic;">on ${formatDate(a.approvedAt)}</span></div>`,
+    )
     .join("");
 
   return `<!DOCTYPE html>
@@ -404,31 +410,31 @@ function buildReportHtml(session) {
   <div class="section">
     <div class="section-title">Verification & Approvals</div>
     <div class="approval-grid">
-      <div class="approval-card ${deptApprover ? 'approved' : ''}">
+      <div class="approval-card ${deptApprover ? "approved" : ""}">
         <div>
-          <span class="badge ${deptApprover ? 'badge-approved' : 'badge-pending'}">${deptApprover ? 'Approved' : 'Pending'}</span>
-          <div class="approver-name">${deptApprover ? escapeHtml(deptApprover.name) : 'Department Authority'}</div>
-          <div class="approver-title">${deptApprover ? escapeHtml(deptApprover.role) : 'Department Lead / Head Review'}</div>
+          <span class="badge ${deptApprover ? "badge-approved" : "badge-pending"}">${deptApprover ? "Approved" : "Pending"}</span>
+          <div class="approver-name">${deptApprover ? escapeHtml(deptApprover.name) : "Department Authority"}</div>
+          <div class="approver-title">${deptApprover ? escapeHtml(deptApprover.role) : "Department Lead / Head Review"}</div>
         </div>
-        <div class="approver-date">${deptApprover ? formatDate(deptApprover.approvedAt) : 'Signature Pending'}</div>
+        <div class="approver-date">${deptApprover ? formatDate(deptApprover.approvedAt) : "Signature Pending"}</div>
       </div>
       
-      <div class="approval-card ${coreApprover ? 'approved' : ''}">
+      <div class="approval-card ${coreApprover ? "approved" : ""}">
         <div>
-          <span class="badge ${coreApprover ? 'badge-approved' : 'badge-pending'}">${coreApprover ? 'Approved' : 'Pending'}</span>
-          <div class="approver-name">${coreApprover ? escapeHtml(coreApprover.name) : 'Core Authority'}</div>
-          <div class="approver-title">${coreApprover ? escapeHtml(coreApprover.role) : 'Chairperson / Vice-Chairperson'}</div>
+          <span class="badge ${coreApprover ? "badge-approved" : "badge-pending"}">${coreApprover ? "Approved" : "Pending"}</span>
+          <div class="approver-name">${coreApprover ? escapeHtml(coreApprover.name) : "Core Authority"}</div>
+          <div class="approver-title">${coreApprover ? escapeHtml(coreApprover.role) : "Chairperson / Vice-Chairperson"}</div>
         </div>
-        <div class="approver-date">${coreApprover ? formatDate(coreApprover.approvedAt) : 'Signature Pending'}</div>
+        <div class="approver-date">${coreApprover ? formatDate(coreApprover.approvedAt) : "Signature Pending"}</div>
       </div>
 
-      <div class="approval-card ${session.appliedByName ? 'approved' : ''}">
+      <div class="approval-card ${session.appliedByName ? "approved" : ""}">
         <div>
-          <span class="badge ${session.appliedByName ? 'badge-approved' : 'badge-pending'}">${session.appliedByName ? 'Executed' : 'Pending'}</span>
-          <div class="approver-name">${session.appliedByName ? escapeHtml(session.appliedByName) : 'System Executor'}</div>
+          <span class="badge ${session.appliedByName ? "badge-approved" : "badge-pending"}">${session.appliedByName ? "Executed" : "Pending"}</span>
+          <div class="approver-name">${session.appliedByName ? escapeHtml(session.appliedByName) : "System Executor"}</div>
           <div class="approver-title">Faculty Incharge / Administrator</div>
         </div>
-        <div class="approver-date">${session.appliedByName && session.appliedAt ? formatDate(session.appliedAt) : 'Execution Pending'}</div>
+        <div class="approver-date">${session.appliedByName && session.appliedAt ? formatDate(session.appliedAt) : "Execution Pending"}</div>
       </div>
     </div>
   </div>
@@ -455,7 +461,10 @@ async function generateLeadershipReportPdf(session) {
 
   const filename = `${session.sessionId}-${hash}.pdf`;
   const filepath = path.join(REPORTS_DIR, filename);
-  const html = buildReportHtml({ ...session.toObject?.() || session, documentHash: hash });
+  const html = buildReportHtml({
+    ...(session.toObject?.() || session),
+    documentHash: hash,
+  });
 
   const browser = await chromium.launch({ headless: true });
   try {
