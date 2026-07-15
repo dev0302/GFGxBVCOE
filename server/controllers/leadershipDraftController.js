@@ -5,6 +5,7 @@ const User = require("../models/User");
 const { buildPeopleList } = require("../controllers/leadershipTransitionController");
 const {
   getActiveDraftSession,
+  getOrCreateActiveDraft,
   addPromotionToDraft,
   addEndSessionToDraft,
   removeChangeFromDraft,
@@ -18,7 +19,15 @@ const {
   upsertCollaborator,
 } = require("../services/leadershipDraftService");
 const { getUserApprovalInfo, resolveUserRoleLabel } = require("../utils/leadershipApproval");
-const { REPORTS_DIR, generateLeadershipReportPdf } = require("../utils/leadershipReportPdf");
+const {
+  generateLeadershipReportPdf,
+  resolveLocalReportPath,
+} = require("../utils/leadershipReportPdf");
+const {
+  emitDraftUpdated,
+  emitLeadershipPresence,
+} = require("../utils/leadershipDraftBus");
+const { getPresenceList } = require("../utils/leadershipPromotionsSocket");
 
 async function buildUserCollaboratorInfo(userId) {
   const user = await User.findById(userId).populate("additionalDetails").lean();
@@ -47,6 +56,40 @@ exports.getActiveDraft = async (req, res) => {
     });
   } catch (error) {
     console.error("getActiveDraft error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.startDraftSession = async (req, res) => {
+  try {
+    const existing = await getActiveDraftSession();
+    const session = await getOrCreateActiveDraft(req.user);
+    const info = await buildUserCollaboratorInfo(req.user.id);
+    if (info) {
+      upsertCollaborator(session, info);
+    }
+
+    for (const presenceUser of getPresenceList()) {
+      upsertCollaborator(session, presenceUser);
+    }
+
+    await session.save();
+
+    const presence = getPresenceList();
+    emitDraftUpdated(session);
+    emitLeadershipPresence(presence);
+
+    return res.status(200).json({
+      success: true,
+      message: existing
+        ? "Joined active leadership change session."
+        : "Leadership change session started.",
+      draft: serializeSessionForClient(session),
+      approvalStatus: serializeApprovalStatus(session.approvals),
+      collaborators: presence,
+    });
+  } catch (error) {
+    console.error("startDraftSession error:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -203,25 +246,62 @@ exports.applyDraft = async (req, res) => {
   }
 };
 
+function setReportPdfHeaders(res, sessionId) {
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="${sessionId}-report.pdf"`
+  );
+}
+
+async function streamReportFromUrl(url, res) {
+  const upstream = await fetch(url);
+  if (!upstream.ok) {
+    throw new Error(`Failed to fetch report (${upstream.status})`);
+  }
+  const buffer = Buffer.from(await upstream.arrayBuffer());
+  return res.send(buffer);
+}
+
 exports.downloadReport = async (req, res) => {
   try {
     const { sessionId } = req.params;
     const session = await LeadershipDraftSession.findOne({ sessionId, status: "APPLIED" });
-    if (!session?.reportPdfPath) {
+    if (!session?.reportPdfPath && !session?.reportPdfUrl) {
       return res.status(404).json({ success: false, message: "Report not found." });
     }
 
-    const filepath = path.resolve(session.reportPdfPath);
-    if (!filepath.startsWith(path.resolve(REPORTS_DIR)) || !fs.existsSync(filepath)) {
-      return res.status(404).json({ success: false, message: "Report file missing." });
+    setReportPdfHeaders(res, session.sessionId);
+
+    const localPath = resolveLocalReportPath(session.reportPdfPath);
+    if (localPath && fs.existsSync(localPath)) {
+      return res.sendFile(localPath);
     }
 
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${session.sessionId}-report.pdf"`
-    );
-    return res.sendFile(filepath);
+    if (session.reportPdfUrl) {
+      try {
+        return await streamReportFromUrl(session.reportPdfUrl, res);
+      } catch (error) {
+        console.error("Leadership report Cloudinary fetch failed:", error.message);
+      }
+    }
+
+    const { filename, documentHash, reportPdfUrl } = await generateLeadershipReportPdf(session);
+    session.reportPdfPath = filename;
+    session.documentHash = documentHash;
+    if (reportPdfUrl) session.reportPdfUrl = reportPdfUrl;
+    await session.save();
+
+    const regeneratedPath = resolveLocalReportPath(filename);
+    if (regeneratedPath && fs.existsSync(regeneratedPath)) {
+      return res.sendFile(regeneratedPath);
+    }
+
+    if (reportPdfUrl) {
+      return await streamReportFromUrl(reportPdfUrl, res);
+    }
+
+    return res.status(404).json({ success: false, message: "Report file missing." });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

@@ -32,6 +32,10 @@ function emitCollaboratorLeft(collaborators) {
   emitToDraftRoom("collaborator-left", { collaborators });
 }
 
+function emitLeadershipPresence(collaborators) {
+  emitToDraftRoom("leadership-presence", { collaborators });
+}
+
 function emitApprovalAdded(session) {
   emitToDraftRoom("approval-added", { session: serializeSessionForClient(session) });
   emitToDraftRoom("draft-updated", { session: serializeSessionForClient(session) });
@@ -71,6 +75,7 @@ function serializeSessionForClient(session) {
       targetPositionId: c.targetPositionId || "",
       personName: c.personName || "",
       personEmail: c.personEmail || "",
+      personImage: c.personImage || "",
       previousRole: c.previousRole || "",
       newRole: c.newRole || "",
       newDepartment: c.newDepartment || "",
@@ -99,6 +104,7 @@ module.exports = {
   emitDraftUpdated,
   emitCollaboratorJoined,
   emitCollaboratorLeft,
+  emitLeadershipPresence,
   emitApprovalAdded,
   emitApprovalRemoved,
   emitDraftDiscarded,

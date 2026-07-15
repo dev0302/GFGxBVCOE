@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { getUpcomingEvents } from "../services/api";
-import { MapPin, Clock, Users, ExternalLink, Calendar, ChevronDown, ChevronUp, Award } from "react-feather";
+import { MapPin, Clock, Users, ExternalLink, Calendar, ChevronDown, ChevronUp } from "react-feather";
 import { motion, AnimatePresence } from "framer-motion";
 import CornerFrameScrambleText from "./ui/corner-frame-scramble-text";
 import { Accordion } from "./ui/accordion";
@@ -255,20 +255,6 @@ export default function UpcomingEventSection({ variant = "events" }) {
 
               {/* Action Bar */}
               <div className="flex flex-wrap gap-3 pt-8 border-t border-white/5">
-                {(event.title?.toLowerCase().includes("jam the web") || event.description?.toLowerCase().includes("leaderboard")) && (
-                  <motion.button
-                    whileHover={{ y: -3 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      const link = event.title?.toLowerCase().includes("jam the web") ? "/jam-the-web" : "/leaderboard";
-                      window.location.href = link;
-                    }}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-bold transition-all ${theme.btn}`}
-                  >
-                    <Award size={14} />
-                    Leaderboard
-                  </motion.button>
-                )}
                 {links.map((link, i) => (
                   <motion.a
                     whileHover={{ y: -3 }}

@@ -34,8 +34,6 @@ function Navbar() {
     "/about",
     "/team2",
     "/results",
-    "/quiz",
-    "/leaderboard",
     "/admin",
     "/dashboard",
     "/profile",
@@ -308,15 +306,6 @@ font-montserrat opacity-90">
               Contact
             </NavLink>
           </li>
-          <li>
-            <NavLink
-              to="/quiz"
-              className={mobileNavLinkClass}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Quiz
-            </NavLink>
-          </li>
           <li className="mt-2 flex flex-col  gap-3">
             {user ? (
               <>
@@ -326,7 +315,7 @@ font-montserrat opacity-90">
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <button className="py-3 px-8 rounded-full border border-amber-400/50 text-amber-300 font-medium">
-                      Dashboard
+                      Signup Dashboard
                     </button>
                   </NavLink>
                 )}

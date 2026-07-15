@@ -80,7 +80,7 @@ const AdminSignupConfig = () => {
     <div className="min-h-screen darkthemebg pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-richblack-25 mb-2">Dashboard</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-richblack-25 mb-2">Signup Dashboard</h1>
           <p className="text-gray-400 text-sm">
             Manage allowed emails for all departments. Add or remove emails below; only listed emails can sign up for that department.
           </p>

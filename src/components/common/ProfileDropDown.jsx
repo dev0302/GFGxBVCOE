@@ -139,7 +139,7 @@ function ProfileDropDown({
 }) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { hasPendingChanges } = useSocketContext();
+  const { hasActiveLeadershipSession } = useSocketContext();
   const [open, setOpen] = useState(false);
   const [deptFlyoutOpen, setDeptFlyoutOpen] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -324,7 +324,7 @@ function ProfileDropDown({
               onError={() => setAvatarLoadedButton(true)}
               className={`${avatarSize} relative z-10 rounded-full object-cover border border-gray-600/50 opacity-100`}
             />
-            {hasPendingChanges && (
+            {hasActiveLeadershipSession && (
               <span className="absolute top-0 right-0 z-30 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500 border border-[#1e1e2f]"></span>
@@ -342,7 +342,7 @@ function ProfileDropDown({
               {user.firstName?.[0]}
               {user.lastName?.[0]}
             </div>
-            {hasPendingChanges && (
+            {hasActiveLeadershipSession && (
               <span className="absolute top-0 right-0 z-30 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500 border border-[#1e1e2f]"></span>
@@ -488,6 +488,23 @@ function ProfileDropDown({
         </div>
 
         <div className="px-1 py-1.5">
+          <button
+            onClick={() => {
+              setOpen(false);
+              navigate("/profile");
+            }}
+            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
+          >
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+              <User className="h-4 w-4" />
+            </span>
+            <span className="flex-1">
+              <span className="block text-xs font-medium">My profile</span>
+              <span className="block text-[10px] text-gray-500">
+                Edit details & display picture
+              </span>
+            </span>
+          </button>
           {!tenureEnding && isSocietyRole(user.accountType) && (
             <button
               onClick={() => {
@@ -500,7 +517,7 @@ function ProfileDropDown({
                 <Layout className="h-4 w-4" />
               </span>
               <span className="flex-1">
-                <span className="block text-xs font-medium">Dashboard</span>
+                <span className="block text-xs font-medium">Signup Dashboard</span>
                 <span className="block text-[10px] text-gray-500">
                   Manage signup access
                 </span>
@@ -524,7 +541,7 @@ function ProfileDropDown({
                   Promotions & role management
                 </span>
               </span>
-              {hasPendingChanges && (
+              {hasActiveLeadershipSession && (
                 <span className="mr-1 flex h-2 w-2 shrink-0 relative">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
@@ -532,23 +549,6 @@ function ProfileDropDown({
               )}
             </button>
           )}
-          <button
-            onClick={() => {
-              setOpen(false);
-              navigate("/profile");
-            }}
-            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
-          >
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
-              <User className="h-4 w-4" />
-            </span>
-            <span className="flex-1">
-              <span className="block text-xs font-medium">My profile</span>
-              <span className="block text-[10px] text-gray-500">
-                Edit details & display picture
-              </span>
-            </span>
-          </button>
           {!tenureEnding && (
           <>
           <button

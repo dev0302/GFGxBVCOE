@@ -402,6 +402,7 @@ export const AUTH_DEPARTMENTS = [
   'Content and Documentation',
   'Photography and Videography',
   'Sponsorship and Marketing',
+  'Treasurer',
 ];
 
 /** Display label for account type (e.g. ADMIN → "Faculty Incharge") */
@@ -982,6 +983,15 @@ export async function getLeadershipDraft() {
   return data;
 }
 
+export async function startLeadershipDraftSession() {
+  const res = await authFetch("/api/v1/leadership-transition/draft/start", {
+    method: "POST",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to start session");
+  return data;
+}
+
 export async function finalizeLeadershipDraft() {
   const res = await authFetch("/api/v1/leadership-transition/draft/finalize", {
     method: "POST",
@@ -1049,13 +1059,17 @@ export function getLeadershipReportDownloadUrl(sessionId) {
   return `${base}/api/v1/leadership-transition/draft/report/${sessionId}`;
 }
 
-export async function downloadLeadershipReport(sessionId) {
-  const res = await authFetch(`/api/v1/leadership-transition/draft/report/${sessionId}`);
+export async function fetchLeadershipReportBlob(sessionId, options = {}) {
+  const res = await authFetch(`/api/v1/leadership-transition/draft/report/${sessionId}`, options);
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.message || "Failed to download report");
+    throw new Error(data.message || "Failed to load report");
   }
-  const blob = await res.blob();
+  return res.blob();
+}
+
+export async function downloadLeadershipReport(sessionId) {
+  const blob = await fetchLeadershipReportBlob(sessionId);
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

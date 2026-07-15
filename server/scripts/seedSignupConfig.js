@@ -12,6 +12,7 @@ const DEPARTMENTS = [
   "Content and Documentation",
   "Photography and Videography",
   "Sponsorship and Marketing",
+  "Treasurer",
 ];
 
 async function seed() {

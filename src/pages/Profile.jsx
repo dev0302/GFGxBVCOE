@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Trash2, X } from "react-feather";
 import { motion } from "framer-motion";
 import { cloudinaryProfileAvatarUrl } from "../utils/cloudinary";
-
+import ProfileAvatarFlip from "../components/common/ProfileAvatarFlip";
 
 const Profile = () => {
   const { user, setUser, logout } = useAuth();
@@ -240,6 +240,12 @@ const Profile = () => {
     "w-full px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-richblack-25 placeholder-gray-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none";
   const labelClass = "block text-sm font-medium text-gray-300 mb-1.5";
 
+  const avatarDisplaySrc = avatarPreview
+    ? avatarPreview.includes("cloudinary.com")
+      ? cloudinaryProfileAvatarUrl(avatarPreview)
+      : avatarPreview
+    : "";
+
   return (
     <div className="min-h-screen darkthemebg pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-2xl">
@@ -256,24 +262,12 @@ const Profile = () => {
         >
             {/* Avatar */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-              <div className="shrink-0">
-                {avatarPreview ? (
-                  <img
-                    src={
-                      avatarPreview.includes("cloudinary.com")
-                        ? cloudinaryProfileAvatarUrl(avatarPreview)
-                        : avatarPreview
-                    }
-                    alt=""
-                    className="h-20 w-20 rounded-full object-cover border-2 border-gray-500/50"
-                  />
-                ) : (
-                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-cyan-600/80 text-2xl font-semibold text-richblack-25">
-                    {user.firstName?.[0]}
-                    {user.lastName?.[0]}
-                  </div>
-                )}
-              </div>
+              <ProfileAvatarFlip
+                flipKey={avatarDisplaySrc || "initials"}
+                hasImage={Boolean(avatarPreview)}
+                src={avatarDisplaySrc}
+                initials={`${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`}
+              />
               <div className="space-y-3 min-w-0">
                 <p className="text-sm font-medium text-richblack-25">
                   {user.firstName} {user.lastName}

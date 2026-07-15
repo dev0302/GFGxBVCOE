@@ -2,6 +2,7 @@ const User = require("../models/User");
 const {
   emitCollaboratorJoined,
   emitCollaboratorLeft,
+  emitDraftUpdated,
 } = require("./leadershipDraftBus");
 const {
   getActiveDraftSession,
@@ -54,6 +55,7 @@ async function handleJoinLeadershipPromotions(socket, io) {
   if (session && session.status === "DRAFT") {
     upsertCollaborator(session, presenceUser);
     await session.save();
+    emitDraftUpdated(session);
   }
 
   emitPresenceToRoom(io);

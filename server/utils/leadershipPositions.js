@@ -7,6 +7,7 @@ const TEAM_DEPARTMENTS = [
   "Content and Documentation",
   "Photography and Videography",
   "Sponsorship and Marketing",
+  "Treasurer",
 ];
 
 const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];

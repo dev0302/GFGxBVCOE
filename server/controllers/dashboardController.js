@@ -12,6 +12,7 @@ const DASHBOARD_KEYS = [
   "Content and Documentation",
   "Photography and Videography",
   "Sponsorship and Marketing",
+  "Treasurer",
 ];
 
 function computeCoreRoles(dashboardKey) {

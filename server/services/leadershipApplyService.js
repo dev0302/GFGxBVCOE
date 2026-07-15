@@ -362,6 +362,7 @@ async function buildPromotionPreview({ personType, personId, sourceDepartment, t
     targetPositionId,
     personName: details.name || details.email,
     personEmail: details.email,
+    personImage: details.image || "",
     previousRole: previousRoleLabel,
     newRole: position.positionTitle,
     newDepartment: position.accountType,
@@ -396,6 +397,7 @@ async function buildEndSessionPreview({ personType, personId, sourceDepartment }
     sourceDepartment: sourceDepartment || "",
     personName: details.name || details.email,
     personEmail: details.email,
+    personImage: details.image || "",
     previousRole: roleLabel,
     previousDepartment: details.currentAccountType || oldSignupDepts.join(", "),
   };
@@ -609,9 +611,18 @@ async function applyEndSessionChange(change, actorUserId) {
   };
 }
 
+async function resolveChangePersonImage(change) {
+  if (change?.personImage) return change.personImage;
+  const rawData = await loadPersonRaw(change.personType, change.personId, change.sourceDepartment);
+  if (!rawData) return "";
+  const details = extractPersonDetails(change.personType, rawData, change.sourceDepartment);
+  return details?.image || "";
+}
+
 module.exports = {
   buildPromotionPreview,
   buildEndSessionPreview,
   applyPromotionChange,
   applyEndSessionChange,
+  resolveChangePersonImage,
 };

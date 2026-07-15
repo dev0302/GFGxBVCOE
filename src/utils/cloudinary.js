@@ -139,3 +139,22 @@ export function cloudinaryProfileAvatarUrl(url) {
 
   return url.replace("/upload/", AVATAR_TRANSFORM);
 }
+
+/**
+ * Strip Cloudinary delivery transforms and return the stored original asset URL.
+ */
+export function cloudinaryOriginalUrl(url) {
+  if (!url || typeof url !== "string") return url;
+  if (!url.includes("cloudinary.com")) return url;
+  if (url.includes("/video/upload/")) return url;
+
+  const versioned = url.match(/^(.+\/image\/upload\/)([\s\S]*?)(\/v\d+\/.+)$/);
+  if (versioned) {
+    return `${versioned[1]}${versioned[3]}`;
+  }
+  const vOnly = url.match(/^(.+\/image\/upload\/)(v\d+\/.+)$/);
+  if (vOnly) {
+    return `${vOnly[1]}${vOnly[2]}`;
+  }
+  return url.replace(/\/upload\/[^/]+\//, "/upload/");
+}
