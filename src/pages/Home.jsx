@@ -1,50 +1,132 @@
-import GFGBentoGrid from "../components/GFGBentoGrid";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useRef, useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useEffect, useRef } from "react";
 import Footer from "../components/common/Footer";
+import CloudinaryIntroAnimation from "../components/CloudinaryIntroAnimation";
 import ImageGrid from "../components/ImageGrid";
 import UpcomingEventSection from "../components/UpcomingEventSection";
 import ProfileAvatarFlip from "../components/common/ProfileAvatarFlip";
 import Lenis from "lenis";
+import {
+  ArrowUpRight,
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  Check,
+  Code2,
+  Handshake,
+  Image as ImageIcon,
+  Instagram,
+  Linkedin,
+  Lightbulb,
+  MessageCircle,
+  Mic,
+  Settings,
+  Sparkles,
+  Trophy,
+  Users,
+  UsersRound,
+} from "lucide-react";
 gsap.registerPlugin(ScrollTrigger);
 
 function Home() {
-  const { user } = useAuth();
-
-  useEffect(() => {
-  const lenis = new Lenis({ lerp: 0.05, smoothWheel: true });
-
-  lenis.on("scroll", ScrollTrigger.update);
-
-  function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-  }
-  requestAnimationFrame(raf);
-
-  ScrollTrigger.refresh();
-
-  return () => {
-    lenis.destroy();
-  };
-}, []);
-
-  
   const navigate = useNavigate();
   const titleRef = useRef();
   const descRef = useRef();
   const btnRef = useRef();
+  const aboutSectionRef = useRef();
+  const exploreSectionRef = useRef();
   const teamTitleRef = useRef();
   const teamCardsRef = useRef();
 
-  // State for the counters
-  const [memberCount, setMemberCount] = useState(0);
-  const [eventCount, setEventCount] = useState(0);
-  const [workshopCount, setWorkshopCount] = useState(0);
+  useEffect(() => {
+    const lenis = new Lenis({
+      lerp: 0.08,
+      smoothWheel: true,
+    });
+    let rafId;
+
+    const updateScrollTrigger = () => ScrollTrigger.update();
+    lenis.on("scroll", updateScrollTrigger);
+
+    const raf = (time) => {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    };
+
+    rafId = requestAnimationFrame(raf);
+    ScrollTrigger.refresh();
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      lenis.off("scroll", updateScrollTrigger);
+      lenis.destroy();
+    };
+  }, []);
+
+  const stats = [
+    { value: "100+", label: "Active Members", icon: UsersRound },
+    { value: "10+", label: "Events Held", icon: CalendarDays },
+    { value: "10+", label: "Workshops Conducted", icon: Code2 },
+    { value: "5+", label: "Projects Completed", icon: Trophy, highlight: true },
+  ];
+
+  const exploreCards = [
+    {
+      eyebrow: "Upcoming",
+      title: "Events",
+      description: "Workshops, competitions, and exciting sessions.",
+      cta: "Explore Events",
+      icon: CalendarDays,
+      to: "/events",
+      tone: "from-emerald-400/20 via-emerald-500/10 to-teal-500/5",
+      iconTone: "bg-emerald-400/15 text-emerald-300",
+      textTone: "text-emerald-300",
+    },
+    {
+      eyebrow: "Our Amazing",
+      title: "Team",
+      description: "Meet the passionate minds driving our community.",
+      cta: "Meet The Team",
+      icon: Users,
+      to: "/team",
+      tone: "from-violet-400/20 via-violet-500/10 to-fuchsia-500/5",
+      iconTone: "bg-violet-400/15 text-violet-300",
+      textTone: "text-violet-300",
+    },
+    {
+      eyebrow: "Moments &",
+      title: "Gallery",
+      description: "Snapshots of creativity, collaboration and fun.",
+      cta: "View Gallery",
+      icon: ImageIcon,
+      to: "/gallery",
+      tone: "from-amber-300/20 via-amber-500/10 to-orange-500/5",
+      iconTone: "bg-amber-300/15 text-amber-200",
+      textTone: "text-amber-200",
+    },
+    {
+      eyebrow: "Get In",
+      title: "Touch",
+      description: "Have questions or ideas? We'd love to hear from you.",
+      cta: "Contact Us",
+      icon: Handshake,
+      to: "/contact",
+      tone: "from-blue-400/20 via-blue-500/10 to-cyan-500/5",
+      iconTone: "bg-blue-400/15 text-blue-300",
+      textTone: "text-blue-300",
+    },
+  ];
+
+  const journeyPhotos = [
+    { src: "/FreshersMeet1.webp", label: "Group Discussions", icon: Users, color: "bg-emerald-400/90" },
+    { src: "/FreshersMeet3.webp", label: "Interactive Sessions", icon: MessageCircle, color: "bg-violet-400/90" },
+    { src: "/FreshersMeet4.webp", label: "Team Activities", icon: Settings, color: "bg-amber-400/90" },
+    { src: "/FreshersMeet5.webp", label: "Expert Talks", icon: Mic, color: "bg-blue-400/90" },
+    { src: "/FreshersMeet8.webp", label: "Selected Candidates", icon: Check, color: "bg-emerald-400/90" },
+  ];
 
   // GSAP animations
   useGSAP(() => {
@@ -70,20 +152,21 @@ function Home() {
       delay: 0.6,
     });
 
-    // Number counting animation
-    const counters = { members: 0, events: 0, workshops: 0 };
-    gsap.to(counters, {
-      duration: 4,
-      ease: "power2.out",
-      delay: 0.8,
-      members: 100,
-      events: 10,
-      workshops: 10,
-      onUpdate: () => {
-        setMemberCount(Math.ceil(counters.members));
-        setEventCount(Math.ceil(counters.events));
-        setWorkshopCount(Math.ceil(counters.workshops));
-      },
+    [aboutSectionRef.current, exploreSectionRef.current].forEach((section) => {
+      if (!section) return;
+
+      gsap.from(section.querySelectorAll(".reveal-up"), {
+        y: 44,
+        opacity: 0,
+        duration: 0.75,
+        ease: "power2.out",
+        stagger: 0.08,
+        scrollTrigger: {
+          trigger: section,
+          start: "top 76%",
+          toggleActions: "play none none reverse",
+        },
+      });
     });
 
     // Team section animations
@@ -114,148 +197,109 @@ function Home() {
   }, []);
 
   return (
-    <div className="relative overflow-x-hidden ">
-      {/* Hero Section with Background */}
-      <div className="relative min-h-screen">
-        {/* Background */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url('/landingpage_img2.jpg')`,
-            filter: "blur(1px)", // stronger blur if you like
-          }}
-        >
-          {/* Dark overlay for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/30 to-black/50"></div>
-          {/* Subtle pattern overlay */}
-          <div className="absolute inset-0 opacity-5">
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: `radial-gradient(circle at 25% 25%, #10b981 1px, transparent 1px)`,
-                backgroundSize: "60px 60px",
-              }}
-            />
-          </div>
-        </div>
+    <div className="relative overflow-x-hidden bg-[#020808] text-white">
+      <section className="relative min-h-screen overflow-hidden border-b border-emerald-400/10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_18%,rgba(34,197,94,0.18),transparent_28%),radial-gradient(circle_at_18%_20%,rgba(16,185,129,0.08),transparent_30%),linear-gradient(180deg,#020607_0%,#031111_54%,#02100d_100%)]" />
+        <div className="absolute inset-0 opacity-35 [background-image:radial-gradient(circle,rgba(190,255,214,0.55)_1px,transparent_1px)] [background-size:42px_42px]" />
+        <div className="absolute left-1/2 top-24 h-72 w-72 -translate-x-1/2 rounded-full border border-emerald-300/10 md:left-[72%] md:top-24 md:h-[28rem] md:w-[28rem]" />
+        <div className="absolute left-[58%] top-20 hidden h-96 w-96 rounded-full border border-dashed border-emerald-200/10 md:block" />
 
-        {/* Hero Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 pt-20 pb-20 text-center">
-          {/* Title */}
-          <h1
-            ref={titleRef}
-            className="text-3xl md:text-5xl font-bold text-richblack-25 mb-8 tracking-tight pt-8 leading-tight md:leading-tight pb-1"
-            style={{
-              background: "linear-gradient(135deg, #22c55e, #10b981, #059669)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Empowering Students for
-            <br />
-            a Brighter Future
-          </h1>
-
-          {/* Description */}
-          <p
-            ref={descRef}
-            id="home-desc"
-            className="text-lg md:text-xl text-green-100 max-w-3xl leading-relaxed font-light font-nunito"
-          >
-            Join GFG BVCOE - learn, teach, and collaborate through workshops, events, project showcases and mentorship.
-          </p>
-
-          
-
-          {/* CTAs */}
-          <div
-            ref={btnRef}
-            className="flex flex-col sm:flex-row gap-6 mt-12 font-nunito items-center"
-          >
-            <NavLink to="/results">
-              <button
-                id="btn-join"
-                className=" px-3 py-3 bg-gradient-to-r 
-             from-green-500/50 via-emerald-400/50 to-teal-500/50
-             text-richblack-25 font-bold rounded-full transition-all duration-500 ease-in-out
-             transform hover:-translate-y-2 hover:scale-105
-             shadow-[0_0_20px_rgba(16,185,129,0.6)]
-            
-             border-2 border-white/20
-             overflow-hidden group"
+        <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col px-6 pb-12 pt-28 lg:px-8">
+          <div className="grid flex-1 items-center gap-12 lg:grid-cols-[1fr_0.9fr]">
+            <div className="max-w-2xl text-left">
+              <h1
+                ref={titleRef}
+                className="font-nunito text-5xl font-extrabold leading-tight tracking-normal text-white md:text-7xl"
               >
-                {/* Shining sweep overlay */}
-                {/* <span
-                  className="absolute top-0 left-0 w-1/3 h-full bg-white/30 blur-md transform -skew-x-12 animate-shine hover:shadow-[0_0_35px_rgba(16,185,129,0.8)]"
-                ></span> */}
-
-                {/* Text + icon */}
-                <span className="relative  flex items-center justify-center">
-                  <span className="ml-3 font-nunito text-center">2025 Execoms Result out</span>
-                  <svg
-                    className="w-5 h-5 group-hover:translate-x-[2px] transition-transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    {/* <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M14 5l7 7m0 0l-7 7m7-7H3"
-                    ></path> */}
-                  </svg>
+                Empowering Students
+                <br />
+                to Build{" "}
+                <span className="text-green-400 drop-shadow-[0_0_18px_rgba(74,222,128,0.45)]">
+                  the Future
                 </span>
-              </button>
-            </NavLink>
+              </h1>
 
+              <p
+                ref={descRef}
+                id="home-desc"
+                className="mt-6 max-w-md font-nunito text-base leading-8 text-slate-300 md:text-lg"
+              >
+                Join GFG BVCOE - learn, teach, and collaborate through workshops,
+                events, project showcases and mentorship.
+              </p>
 
-            <button
-              id="btn-about"
-              onClick={() => navigate("/about")}
-              className="px-8 py-3 bg-transparent text-green-100 font-semibold rounded-full text-lg border-2 border-green-300/40 backdrop-blur-sm transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:bg-green-400/20 hover:border-green-300"
-            >
-              About Us
-            </button>
+              <div ref={btnRef} className="mt-8 flex flex-wrap items-center gap-4 font-nunito">
+                <NavLink to="/signup">
+                  <button
+                    id="btn-join"
+                    className="group inline-flex items-center gap-3 rounded-full bg-green-500 px-7 py-3 text-sm font-bold text-white shadow-[0_0_30px_rgba(34,197,94,0.36)] transition hover:-translate-y-1 hover:bg-green-400"
+                  >
+                    Join Our Community
+                    <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </button>
+                </NavLink>
+
+                <button
+                  id="btn-about"
+                  onClick={() => navigate("/about")}
+                  className="group inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.03] px-7 py-3 text-sm font-semibold text-slate-200 backdrop-blur transition hover:-translate-y-1 hover:border-green-300/40 hover:bg-green-300/10"
+                >
+                  Learn More
+                  <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </button>
+              </div>
+
+              <div className="mt-8 flex items-center gap-5 text-sm text-slate-400">
+                <span>Follow us on</span>
+                <a className="text-slate-300 transition hover:text-green-300" href="https://discord.com" aria-label="Discord">
+                  <MessageCircle className="h-5 w-5" />
+                </a>
+                <a className="text-slate-300 transition hover:text-green-300" href="https://instagram.com" aria-label="Instagram">
+                  <Instagram className="h-5 w-5" />
+                </a>
+                <a className="text-slate-300 transition hover:text-green-300" href="https://linkedin.com" aria-label="LinkedIn">
+                  <Linkedin className="h-5 w-5" />
+                </a>
+              </div>
+            </div>
+
+            <div className="relative mx-auto h-[360px] w-full max-w-xl lg:h-[500px]">
+              <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-500/20 blur-3xl" />
+              <div className="absolute left-1/2 top-[58%] h-20 w-80 -translate-x-1/2 rounded-full border border-green-300/35 bg-green-400/10 shadow-[0_0_70px_rgba(34,197,94,0.35)]" />
+              <div className="absolute left-1/2 top-[64%] h-14 w-[26rem] -translate-x-1/2 rounded-full border border-green-200/10" />
+              <div className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 font-audiowide text-[8rem] font-black leading-none text-green-500 drop-shadow-[0_0_34px_rgba(34,197,94,0.8)] md:text-[12rem]">
+                gG
+              </div>
+              <div className="absolute left-[18%] top-[18%] rounded-full border border-green-300/15 bg-white/[0.04] p-4 text-green-200 shadow-[0_0_25px_rgba(34,197,94,0.16)] backdrop-blur">
+                <UsersRound className="h-6 w-6" />
+              </div>
+              <div className="absolute right-[18%] top-[10%] rounded-full border border-green-300/15 bg-white/[0.04] p-4 text-green-200 shadow-[0_0_25px_rgba(34,197,94,0.16)] backdrop-blur">
+                <Code2 className="h-6 w-6" />
+              </div>
+              <div className="absolute right-[4%] top-[38%] rounded-full border border-green-300/15 bg-white/[0.04] p-4 text-green-200 shadow-[0_0_25px_rgba(34,197,94,0.16)] backdrop-blur">
+                <CalendarDays className="h-6 w-6" />
+              </div>
+            </div>
           </div>
 
-          {/* Stats */}
           <div
             id="stats-grid"
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 font-nunito"
+            className="grid overflow-hidden rounded-3xl border border-white/10 bg-white/[0.045] font-nunito shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:grid-cols-2 lg:grid-cols-4"
           >
-            <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
-              <div
-                id="count-members"
-                className="text-3xl font-bold text-green-300 mb-2"
-              >
-                {memberCount}+
+            {stats.map(({ value, label, icon: Icon, highlight }) => (
+              <div key={label} className="flex items-center gap-5 border-white/10 px-8 py-7 lg:border-r last:border-r-0">
+                <div className={`rounded-full p-4 ${highlight ? "bg-yellow-400/15 text-yellow-300 shadow-[0_0_28px_rgba(250,204,21,0.22)]" : "bg-green-400/10 text-green-300 shadow-[0_0_28px_rgba(34,197,94,0.2)]"}`}>
+                  <Icon className="h-7 w-7" />
+                </div>
+                <div>
+                  <div className="text-3xl font-extrabold text-green-300">{value}</div>
+                  <div className="mt-1 max-w-28 text-sm leading-5 text-slate-300">{label}</div>
+                </div>
               </div>
-              <div className="text-green-100">Active Members</div>
-            </div>
-            <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
-              <div
-                id="count-events"
-                className="text-3xl font-bold text-emerald-300 mb-2"
-              >
-                {eventCount}+
-              </div>
-              <div className="text-green-100">Events Held</div>
-            </div>
-            <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
-              <div
-                id="count-workshops"
-                className="text-3xl font-bold text-green-300 mb-2"
-              >
-                {workshopCount}+
-              </div>
-              <div className="text-green-100">Workshops Conducted</div>
-            </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
 
       <UpcomingEventSection variant="home" />
 
@@ -265,26 +309,177 @@ function Home() {
       </div>
 
       {/* About Section */}
-      <section className="py-20 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 text-richblack-25 text-center">
-        <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 font-audiowide">
-            Who We{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
-              Are
-            </span>
-          </h2>
-          <p className="text-lg md:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed font-light font-nunito mb-12 ">
-            GFG BVCOE is a community of tech enthusiasts dedicated to fostering
-            a culture of learning, innovation, and collaboration. We organize
-            workshops, hackathons, and speaker sessions to help students grow
-            their skills and connect with like-minded peers.
-          </p>
-          <button
-            onClick={() => navigate("/about")}
-            className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-richblack-25 font-semibold rounded-full text-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/40"
-          >
-            Learn More About Us
-          </button>
+      <section ref={aboutSectionRef} className="relative overflow-hidden bg-[#020808] py-20 text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_30%,rgba(34,197,94,0.14),transparent_28%),linear-gradient(180deg,#020808_0%,#03100e_100%)]" />
+        <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(circle,rgba(190,255,214,0.45)_1px,transparent_1px)] [background-size:48px_48px]" />
+
+        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
+          <div className="reveal-up text-left">
+            <p className="mb-4 font-nunito text-xs font-bold uppercase tracking-[0.2em] text-green-400">
+              About Us
+            </p>
+            <h2 className="mb-5 font-nunito text-4xl font-extrabold tracking-normal md:text-5xl">
+              Who We Are
+            </h2>
+            <p className="max-w-lg font-nunito text-base leading-8 text-slate-300 md:text-lg">
+              GFG BVCOE is a community of tech enthusiasts dedicated to fostering
+              a culture of learning, innovation, and collaboration. We organize
+              workshops, hackathons, and speaker sessions to help students grow
+              their skills and connect with like-minded peers.
+            </p>
+            <button
+              onClick={() => navigate("/about")}
+              className="group mt-8 inline-flex items-center gap-3 rounded-full bg-green-500 px-7 py-3 font-nunito text-sm font-bold text-white shadow-[0_0_28px_rgba(34,197,94,0.32)] transition hover:-translate-y-1 hover:bg-green-400"
+            >
+              Learn More About Us
+              <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </button>
+          </div>
+
+          <div className="reveal-up relative min-h-[360px] overflow-hidden rounded-[2rem] border border-white/5 bg-transparent">
+            <div className="absolute left-[22%] bottom-8 h-36 w-24 rounded-t-full bg-green-950/80 shadow-[0_0_28px_rgba(34,197,94,0.18)]" />
+            <div className="absolute left-[27%] bottom-24 h-12 w-12 rounded-full bg-emerald-800" />
+            <div className="absolute left-[18%] bottom-0 h-28 w-40 rounded-[50%] bg-black/40" />
+
+            <div className="absolute left-[48%] top-10 h-56 w-72 -translate-x-1/2 rounded-xl border border-green-300/20 bg-[#071816]/90 p-5 shadow-[0_0_45px_rgba(34,197,94,0.2)]">
+              <div className="mb-5 flex gap-2">
+                <span className="h-2 w-2 rounded-full bg-green-400/70" />
+                <span className="h-2 w-2 rounded-full bg-green-400/30" />
+                <span className="h-2 w-2 rounded-full bg-green-400/20" />
+              </div>
+              {[72, 48, 82, 62, 76, 54].map((width, index) => (
+                <div key={width + index} className="mb-4 flex items-center gap-3">
+                  <span className="h-1.5 w-8 rounded-full bg-green-400/20" />
+                  <span className="h-1.5 rounded-full bg-green-300/40" style={{ width: `${width}%` }} />
+                </div>
+              ))}
+              <div className="absolute right-5 top-16 rounded-xl bg-green-500/20 p-4 text-green-200">
+                <Code2 className="h-8 w-8" />
+              </div>
+            </div>
+
+            <div className="absolute right-[12%] bottom-4 h-32 w-24 rounded-t-full bg-green-950/80" />
+            <div className="absolute right-[14%] bottom-32 h-11 w-11 rounded-full bg-emerald-800" />
+            <div className="absolute right-[8%] bottom-0 h-24 w-36 rounded-[50%] bg-black/40" />
+
+            <div className="absolute left-[7%] top-12 rounded-full border border-green-300/15 bg-white/[0.04] p-4 text-green-200 backdrop-blur">
+              <UsersRound className="h-7 w-7" />
+            </div>
+            <div className="absolute right-[8%] top-8 rounded-full border border-green-300/15 bg-white/[0.04] p-4 text-green-200 backdrop-blur">
+              <Lightbulb className="h-7 w-7" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section ref={exploreSectionRef} className="relative overflow-hidden bg-[#020808] px-4 py-16 text-white sm:px-6 lg:px-8">
+        <div className="absolute inset-x-0 top-0 mx-auto h-px max-w-6xl bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_8%_72%,rgba(16,185,129,0.18),transparent_22%),radial-gradient(circle_at_84%_28%,rgba(59,130,246,0.14),transparent_24%),linear-gradient(180deg,#020808_0%,#030913_48%,#020808_100%)]" />
+
+        <div className="relative z-10 mx-auto max-w-[1480px] rounded-[1.75rem] border border-white/[0.06] bg-[#030912]/80 px-5 py-10 shadow-[0_28px_100px_rgba(0,0,0,0.5)] sm:px-8 lg:px-10">
+          <div className="reveal-up mx-auto flex w-fit items-center gap-2 rounded-full border border-emerald-300/10 bg-emerald-300/[0.06] px-5 py-2 font-nunito text-sm font-semibold text-emerald-200 shadow-[0_0_34px_rgba(16,185,129,0.12)]">
+            <Sparkles className="h-4 w-4 fill-emerald-200 text-emerald-200" />
+            Explore More
+          </div>
+
+          <div className="reveal-up mx-auto mt-6 max-w-3xl text-center font-nunito">
+            <h2 className="text-4xl font-extrabold tracking-normal text-white md:text-6xl">
+              Explore. Connect. <span className="text-green-400">Grow.</span>
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
+              Discover our journey through impactful events, amazing people,
+              and unforgettable moments.
+            </p>
+          </div>
+
+          <div className="reveal-up mx-auto mt-9 grid max-w-7xl gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {exploreCards.map(({ eyebrow, title, description, cta, icon: Icon, to, tone, iconTone, textTone }) => (
+              <button
+                key={title}
+                onClick={() => navigate(to)}
+                className={`group min-h-[260px] rounded-[1.35rem] border border-white/10 bg-gradient-to-br ${tone} p-6 text-left font-nunito shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_18px_50px_rgba(0,0,0,0.26)] transition duration-300 hover:-translate-y-1 hover:border-white/20`}
+              >
+                <div className="flex h-full flex-col justify-between">
+                  <div>
+                    <div className={`mb-7 flex h-[70px] w-[70px] items-center justify-center rounded-full ${iconTone} shadow-[0_0_26px_rgba(255,255,255,0.08)]`}>
+                      <Icon className="h-8 w-8" />
+                    </div>
+                    <div className="flex flex-wrap items-end gap-x-3">
+                      <p className={`text-base font-bold ${textTone}`}>{eyebrow}</p>
+                      <h3 className="text-3xl font-extrabold leading-none text-white">{title}</h3>
+                    </div>
+                    <p className="mt-7 max-w-[14rem] text-base leading-7 text-slate-300">{description}</p>
+                  </div>
+                  <div className="mt-8 flex items-center justify-between">
+                    <span className={`text-base font-bold ${textTone}`}>{cta}</span>
+                    <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-white transition group-hover:translate-x-1 group-hover:border-white/20">
+                      <ArrowRight className="h-5 w-5" />
+                    </span>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="reveal-up mt-10 overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#030913]/70 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:p-8 lg:p-10">
+            <div className="grid gap-8 lg:grid-cols-[minmax(220px,0.32fr)_minmax(0,0.68fr)] lg:items-center">
+              <div className="font-nunito">
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-300">Our Journey</p>
+                <h3 className="mt-4 inline-block origin-left -rotate-1 text-3xl font-extrabold tracking-normal text-white md:text-4xl">
+                  Freshers Recruitment <span className="text-green-400">2024</span>
+                </h3>
+                <p className="mt-5 max-w-md text-base leading-8 text-slate-300">
+                  A glimpse of the energy, enthusiasm and talent from last year's recruitment drive.
+                </p>
+                <button
+                  type="button"
+                  aria-label="Previous journey image"
+                  className="mt-10 hidden h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/[0.035] text-emerald-300 transition hover:border-emerald-300/30 hover:bg-emerald-300/10 lg:flex"
+                >
+                  <ArrowLeft className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div className="relative min-w-0 overflow-hidden">
+                <div className="flex max-w-full gap-2 overflow-x-auto pb-3 [scrollbar-width:none] sm:gap-3 lg:overflow-hidden [&::-webkit-scrollbar]:hidden">
+                  {journeyPhotos.map(({ src, label, icon: Icon, color }) => (
+                    <div key={label} className="group relative h-[200px] min-w-[145px] flex-1 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_18px_46px_rgba(0,0,0,0.34)] sm:min-w-[165px] md:h-[220px] lg:min-w-0 xl:h-[230px]">
+                      <img
+                        src={src}
+                        alt={label}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                      <div className="absolute inset-x-2 bottom-2 flex items-center gap-2 rounded-full border border-white/10 bg-black/45 px-2 py-2 font-nunito text-xs font-bold text-white backdrop-blur-md sm:inset-x-3 sm:bottom-3 sm:gap-3 sm:px-3 sm:text-sm">
+                        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${color} text-white`}>
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <span className="truncate">{label}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  aria-label="Next journey image"
+                  className="absolute -right-3 top-1/2 hidden h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-emerald-300 shadow-[0_16px_44px_rgba(0,0,0,0.3)] backdrop-blur transition hover:border-emerald-300/30 hover:bg-emerald-300/10 lg:flex"
+                >
+                  <ArrowRight className="h-6 w-6" />
+                </button>
+
+                <div className="mt-5 flex justify-center gap-3">
+                  {[0, 1, 2, 3, 4, 5].map((dot) => (
+                    <span
+                      key={dot}
+                      className={`h-3 w-3 rounded-full ${dot === 0 ? "bg-green-400 shadow-[0_0_16px_rgba(74,222,128,0.5)]" : "bg-slate-600/50"}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -523,6 +718,8 @@ function Home() {
 
       {/* Image Grid */}
       <ImageGrid />
+
+      <CloudinaryIntroAnimation />
 
       {/* Footer */}
       <Footer />

@@ -1,25 +1,19 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../images/gfgLogo.png";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { useRef, useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { Spinner } from "../ui/spinner";
 import { SaxHome2Linear } from "@meysam213/iconsax-react";
 import { SaxInfoCircleLinear } from "@meysam213/iconsax-react";
 import { SaxProfile2UserLinear } from "@meysam213/iconsax-react";
 import { SaxCalendarTickTwotone } from "@meysam213/iconsax-react";
 import { SaxUserTwotone } from "@meysam213/iconsax-react";
 import { SaxGalleryLinear } from "@meysam213/iconsax-react";
+import { Settings } from "react-feather";
 import ProfileDropDown from "./ProfileDropDown";
 import Search from "../Search";
 import { isSocietyRole } from "../../services/api";
 
 function Navbar() {
-  const navMain = useRef();
-  const navList = useRef();
-  const joinBtn = useRef();
-  const logoRef = useRef();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { user, loading: authLoading, logout } = useAuth();
@@ -41,6 +35,7 @@ function Navbar() {
     "/manage-society",
     "/em-dashboard",
     "/leadership-transition",
+    "/settings",
     "/jam-the-web",
     "/login",
     "/signup",
@@ -56,10 +51,10 @@ function Navbar() {
     location.pathname.startsWith("/join-team/");
 
   const navLinkClass = ({ isActive }) =>
-    `flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-300 relative overflow-hidden ${
+    `flex items-center justify-center px-4 py-2 rounded-full font-medium transition-all duration-300 relative overflow-hidden border ${
       isActive
-        ? "text-richblack-25 bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30"
-        : "text-gray-200 hover:text-richblack-25 hover:bg-green-700/50 backdrop-blur-sm"
+        ? "border-green-300/35 bg-green-500/20 text-green-100 shadow-[0_0_24px_rgba(34,197,94,0.28)]"
+        : "border-transparent text-slate-300 hover:border-green-300/25 hover:bg-green-300/10 hover:text-green-100 hover:shadow-[0_0_18px_rgba(34,197,94,0.16)] backdrop-blur-sm"
     }`;
 
   const mobileNavLinkClass = ({ isActive }) =>
@@ -70,38 +65,36 @@ function Navbar() {
   return (
     <>
       <div
-        ref={navMain}
-        className="NAVBAR_CONTAINER fixed top-0 left-0 right-0 z-50 w-full px-6 py-3 backdrop-blur-xl shadow-2xl"
+        className="NAVBAR_CONTAINER fixed top-0 left-0 right-0 z-50 w-full px-6 py-3 backdrop-blur-md"
       >
          {/* Dark Navbar Background */}
   <div
     className={`absolute inset-0 transition-opacity duration-700 ease-in-out pointer-events-none
-    bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border-b border-gray-500/40
+    bg-[#020808]/88 border-b border-green-300/10 shadow-[0_8px_26px_rgba(0,0,0,0.34)]
     ${isDarkNavbar ? "opacity-100" : "opacity-0"}`}
   />
 
   {/* Light Navbar Background */}
   <div
     className={`absolute inset-0 transition-opacity duration-700 ease-in-out pointer-events-none
-    bg-gradient-to-r from-green-900/95 via-green-800/95 to-emerald-800/95 border-b border-green-400/30
+    bg-[#020808]/82 border-b border-green-300/10 shadow-[0_8px_24px_rgba(0,0,0,0.28)]
     ${isDarkNavbar ? "opacity-0" : "opacity-100"}`}
   />
          {/* Navbar Content */}
   <div className="relative z-10 w-full flex items-center justify-between">
 
-    <div ref={logoRef} className="flex items-center gap-3 min-w-0">
+    <div className="flex items-center gap-3 min-w-0">
       <NavLink to="/" className="block">
         <img
           src={logo}
           alt="GFG Logo"
-          className="w-8 h-8 rounded-full border-2 border-green-400 shadow-lg cursor-pointer hover:scale-110 transition-transform duration-300 drop-shadow-[0_0_6px_rgba(34,197,94,0.5)]  opacity-90"
+          className="w-9 h-9 rounded-full border border-green-300/45 bg-green-400/10 shadow-[0_0_22px_rgba(34,197,94,0.26)] cursor-pointer hover:scale-110 hover:border-green-300 transition-all duration-300 opacity-95"
         />
       </NavLink>
 
       <p className="font-bold text-xl bg-clip-text text-transparent 
-bg-gradient-to-r from-green-200 via-emerald-300 to-green-400 
-drop-shadow-[0_0_6px_rgba(34,197,94,0.5)]
-font-montserrat opacity-90">
+bg-gradient-to-r from-white via-green-100 to-green-400 
+font-montserrat opacity-95">
   GFGxBVCOE
 </p>
     </div>
@@ -114,7 +107,7 @@ font-montserrat opacity-90">
               className="shrink-0l"
             />
           )}
-          <ul ref={navList} className="flex gap-6 text-sm">
+          <ul className="flex gap-6 text-sm">
             <li>
               <NavLink to="/" className={navLinkClass}>
                 <SaxHome2Linear className="mr-2" />
@@ -153,7 +146,7 @@ font-montserrat opacity-90">
             </li>
           </ul>
         </nav>
-        <div ref={joinBtn} className="hidden sm:flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2">
           {authLoading ? (
             <div className="flex h-9 w-9 items-center justify-center">
               <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-600/80 to-gray-500/60 border border-white/20 flex items-center justify-center animate-pulse">
@@ -161,16 +154,36 @@ font-montserrat opacity-90">
               </div>
             </div>
           ) : user ? (
-            <ProfileDropDown onLogout={logout} isDarkNavbar={isDarkNavbar} />
+            <div
+              className={`flex items-center gap-2 rounded-full border px-2 py-1 shadow-sm transition-all duration-150 ${
+                isDarkNavbar
+                  ? "border-green-300/20 bg-green-300/5 text-green-100"
+                  : "border-green-300/20 bg-green-300/5 text-green-100"
+              }`}
+            >
+              <NavLink
+                to="/settings"
+                aria-label="Open settings"
+                title="Settings"
+                className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150 ${
+                  isDarkNavbar
+                    ? "hover:bg-green-300/12 hover:text-green-300"
+                    : "hover:bg-green-300/12 hover:text-green-300"
+                }`}
+              >
+                <Settings className="h-[18px] w-[18px]" />
+              </NavLink>
+              <ProfileDropDown onLogout={logout} isDarkNavbar={isDarkNavbar} embedded />
+            </div>
           ) : (
             <>
               <NavLink to="/login">
-                <button className="py-2 px-4 rounded-full border border-green-400/50 text-green-200 hover:bg-green-700/50 font-medium transition text-sm">
+                <button className="py-2 px-4 rounded-full border border-green-300/30 bg-white/[0.03] text-green-100 hover:bg-green-300/10 hover:border-green-300/55 font-medium transition text-sm">
                   Login
                 </button>
               </NavLink>
               <NavLink to="/signup">
-                <button className="py-2 px-5 bg-gradient-to-r from-green-500 to-emerald-500 text-richblack-25 font-semibold rounded-full hover:from-green-400 hover:to-emerald-400 transition-all duration-300 shadow-xl hover:shadow-green-500/40 text-sm">
+                <button className="py-2 px-5 bg-green-500 text-white font-semibold rounded-full hover:bg-green-400 transition-all duration-300 shadow-[0_0_24px_rgba(34,197,94,0.32)] hover:shadow-[0_0_32px_rgba(34,197,94,0.44)] text-sm">
                   Sign up
                 </button>
               </NavLink>
@@ -186,19 +199,43 @@ font-montserrat opacity-90">
               </div>
             </div>
           ) : user ? (
-            <ProfileDropDown
-              onLogout={logout}
-              isDarkNavbar={isDarkNavbar}
-              avatarOnly
-              showChevron
-              onBeforeToggle={() => {
-                if (isMenuOpen) setIsMenuOpen(false);
-              }}
-            />
+            <div
+              className={`flex items-center gap-2 rounded-full border px-2 py-1 shadow-sm transition-all duration-150 ${
+                isDarkNavbar
+                  ? "border-green-300/20 bg-green-300/5 text-green-100"
+                  : "border-green-300/20 bg-green-300/5 text-green-100"
+              }`}
+            >
+              <NavLink
+                to="/settings"
+                aria-label="Open settings"
+                title="Settings"
+                onClick={() => {
+                  if (isMenuOpen) setIsMenuOpen(false);
+                }}
+                className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150 ${
+                  isDarkNavbar
+                    ? "hover:bg-green-300/12 hover:text-green-300"
+                    : "hover:bg-green-300/12 hover:text-green-300"
+                }`}
+              >
+                <Settings className="h-[18px] w-[18px]" />
+              </NavLink>
+              <ProfileDropDown
+                onLogout={logout}
+                isDarkNavbar={isDarkNavbar}
+                avatarOnly
+                showChevron
+                embedded
+                onBeforeToggle={() => {
+                  if (isMenuOpen) setIsMenuOpen(false);
+                }}
+              />
+            </div>
           ) : null}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-green-100 focus:outline-none"
+            className="rounded-full border border-green-300/20 bg-green-300/5 p-2 text-green-100 transition hover:border-green-300/45 hover:bg-green-300/10 focus:outline-none"
           >
             {isMenuOpen ? (
               <svg
@@ -246,9 +283,9 @@ font-montserrat opacity-90">
         className={`fixed inset-0 z-40 transform
     ${isMenuOpen ? "translate-x-40" : "translate-x-full"}
     transition-transform duration-300 ease-in-out sm:hidden
-    bg-gradient-to-br from-[#1e1e2f]/60 to-[#2c2c3e]/60
-    backdrop-blur-xl
-    border border-white/10
+    bg-[#020808]/96
+    backdrop-blur-sm
+    border-l border-green-300/10 shadow-[0_0_26px_rgba(0,0,0,0.38)]
   `}
       >
         <ul className="flex flex-col ml-8 mt-8 justify-center h-full gap-8">
@@ -323,7 +360,7 @@ font-montserrat opacity-90">
                   to="/profile"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <button className="py-3 px-8 rounded-full border border-cyan-400/50 text-cyan-300 font-medium">
+                  <button className="py-3 px-8 rounded-full border border-green-300/35 bg-green-300/5 text-green-200 font-medium">
                     Profile
                   </button>
                 </NavLink>
@@ -333,7 +370,7 @@ font-montserrat opacity-90">
                     setIsMenuOpen(false);
                     navigate("/");
                   }}
-                  className="w-fit inline-flex py-3 px-8 rounded-full border border-cyan-400/50 text-green-300 font-medium"
+                  className="w-fit inline-flex py-3 px-8 rounded-full border border-green-300/35 bg-green-300/5 text-green-200 font-medium"
                 >
                   Logout
                 </button>
@@ -345,16 +382,16 @@ font-montserrat opacity-90">
                   onClick={() => setIsMenuOpen(false)}
                   className="w-full max-w-[120px] text-center"
                 >
-                  <button className="py-3 px-8 w-full rounded-full border border-green-400/50 text-green-300 font-medium">
+                  <button className="py-3 px-8 w-full rounded-full border border-green-300/35 bg-green-300/5 text-green-200 font-medium">
                     Login
                   </button>
                 </NavLink>
                 <NavLink
                   to="/signup"
                   onClick={() => setIsMenuOpen(false)}
-                  className="glowing-btn-wrapper blue rounded-full inline-block"
+                  className="rounded-full inline-block"
                 >
-                  <button className="py-3 px-8 bg-gradient-to-r from-green-500 to-emerald-500 text-richblack-25 font-semibold rounded-full text-lg">
+                  <button className="py-3 px-8 bg-green-500 text-white font-semibold rounded-full text-lg shadow-[0_0_24px_rgba(34,197,94,0.32)]">
                     Sign up
                   </button>
                 </NavLink>
@@ -368,4 +405,3 @@ font-montserrat opacity-90">
 }
 
 export default Navbar;
-

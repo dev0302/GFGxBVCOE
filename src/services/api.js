@@ -375,6 +375,27 @@ export function canManageForceDeleteConfig(accountType) {
   return accountType === 'ADMIN' || accountType === 'Chairperson' || accountType === 'Vice-Chairperson';
 }
 
+export async function fetchCloudinaryStorageUsage() {
+  const res = await authFetch('/api/v1/settings/cloudinary-storage');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load Cloudinary storage usage');
+  return data;
+}
+
+export async function fetchDatabaseAnalytics() {
+  const res = await authFetch('/api/v1/settings/database');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load database analytics');
+  return data;
+}
+
+export async function fetchEmailServiceAnalytics({ refresh = false } = {}) {
+  const res = await authFetch(`/api/v1/settings/email-service${refresh ? '?refresh=1' : ''}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load email service analytics');
+  return data;
+}
+
 const authFetch = (url, options = {}) => {
   const token = getAuthToken();
   const headers = {

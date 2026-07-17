@@ -135,6 +135,7 @@ function ProfileDropDown({
   avatarOnly = false,
   alignLeft = false,
   showChevron = false,
+  embedded = false,
   onBeforeToggle,
 }) {
   const navigate = useNavigate();
@@ -245,6 +246,8 @@ function ProfileDropDown({
   const borderCls = isDarkNavbar
     ? "border-gray-500/50 hover:border-cyan-500/60"
     : "border-green-400/50 hover:border-green-400";
+  const embeddedButtonCls =
+    "border-transparent shadow-none hover:border-transparent";
   const menuBg =
     "bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] border border-gray-500/40";
   const textCls = isDarkNavbar ? "text-gray-200" : "text-green-100";
@@ -308,7 +311,7 @@ function ProfileDropDown({
         onClick={handleToggle}
         className={`flex items-center rounded-full border shadow-sm transition-all duration-150 ${
           avatarOnly && !showChevron ? "p-0.5" : "gap-1.5 p-0.5"
-        } ${borderCls} ${textCls}`}
+        } ${embedded ? embeddedButtonCls : borderCls} ${textCls}`}
         aria-label="Open profile menu"
       >
         {user.image ? (
@@ -883,4 +886,3 @@ function ProfileDropDown({
 }
 
 export default ProfileDropDown;
-

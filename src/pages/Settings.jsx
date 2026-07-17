@@ -1,0 +1,972 @@
+import { useEffect, useMemo, useState } from "react";
+import {
+  Bell,
+  ChevronRight,
+  Cloud,
+  CreditCard,
+  Database,
+  HardDrive,
+  Link,
+  Lock,
+  Mail,
+  Info,
+  Server,
+  RefreshCw,
+  RotateCcw,
+  Settings as Sliders,
+  Shield,
+  Users,
+  User,
+} from "react-feather";
+import {
+  fetchCloudinaryStorageUsage,
+  fetchDatabaseAnalytics,
+  fetchEmailServiceAnalytics,
+} from "../services/api";
+
+const societyItems = [
+  { id: "overview", label: "Overview", icon: Users },
+  { id: "cloudinary-storage", label: "Cloudinary Storage", icon: Cloud },
+  { id: "database", label: "MongoDB", icon: Database },
+  { id: "redis-storage", label: "Redis Storage", icon: HardDrive },
+  { id: "email-service", label: "Email Service", icon: Mail },
+];
+
+const personalItems = [
+  { id: "profile", label: "Profile", icon: User },
+  { id: "notifications", label: "Notifications", icon: Bell },
+];
+
+const otherItems = [
+  { id: "team-roles", label: "Team Roles", icon: Users },
+  { id: "manage-members", label: "Manage Members", icon: Users },
+  { id: "billing-usage", label: "Billing & Usage", icon: CreditCard },
+  { id: "backup-restore", label: "Backup & Restore", icon: Cloud },
+];
+
+const allItems = [...societyItems, ...personalItems, ...otherItems];
+const CLOUDINARY_ESTIMATED_FREE_PLAN_GB = 25;
+const CLOUDINARY_ESTIMATED_FREE_PLAN_BYTES =
+  CLOUDINARY_ESTIMATED_FREE_PLAN_GB * 1024 ** 3;
+
+const metricCards = [
+  {
+    id: "cloudinary-storage",
+    title: "Cloudinary Storage",
+    value: "12.45 GB",
+    caption: "Used of 25 GB",
+    percent: 49,
+    icon: Cloud,
+    color: "text-sky-400",
+    bg: "bg-sky-500/10",
+    bar: "bg-sky-400",
+  },
+  {
+    id: "redis-storage",
+    title: "Redis Memory",
+    value: "128 MB",
+    caption: "Used of 512 MB",
+    percent: 25,
+    icon: HardDrive,
+    color: "text-red-400",
+    bg: "bg-red-500/10",
+    bar: "bg-red-400",
+  },
+  {
+    id: "database",
+    title: "Database Storage",
+    value: "2.18 GB",
+    caption: "Used of 10 GB",
+    percent: 21,
+    icon: Database,
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10",
+    bar: "bg-emerald-400",
+  },
+  {
+    id: "manage-members",
+    title: "Active Members",
+    value: "248",
+    caption: "Total Members",
+    percent: null,
+    icon: Users,
+    color: "text-violet-400",
+    bg: "bg-violet-500/10",
+    action: "View Members",
+  },
+];
+
+const societyCards = [
+  {
+    id: "cloudinary-storage",
+    title: "Cloudinary Storage",
+    desc: "Manage media files, folders, upload presets and storage usage.",
+    icon: Cloud,
+    color: "text-sky-400",
+    bg: "bg-sky-500/10",
+  },
+  {
+    id: "redis-storage",
+    title: "Redis Storage",
+    desc: "View cache statistics, memory usage, TTL and manage keys.",
+    icon: HardDrive,
+    color: "text-red-400",
+    bg: "bg-red-500/10",
+  },
+  {
+    id: "database",
+    title: "Database",
+    desc: "Monitor database performance, collections, and storage details.",
+    icon: Database,
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10",
+  },
+  {
+    id: "email-service",
+    title: "Email Service",
+    desc: "Configure email templates, SMTP settings and sending limits.",
+    icon: Mail,
+    color: "text-amber-400",
+    bg: "bg-amber-500/10",
+  },
+  {
+    id: "api-integrations",
+    title: "API & Integrations",
+    desc: "Manage third-party APIs, webhooks and integrations.",
+    icon: Link,
+    color: "text-violet-400",
+    bg: "bg-violet-500/10",
+  },
+  {
+    id: "logs-activity",
+    title: "Logs & Activity",
+    desc: "View system logs, user activities and audit trails.",
+    icon: RotateCcw,
+    color: "text-teal-400",
+    bg: "bg-teal-500/10",
+  },
+];
+
+const personalCards = [
+  {
+    id: "profile",
+    title: "Profile",
+    desc: "Update your profile information and avatar.",
+    icon: User,
+    color: "text-sky-300",
+    bg: "bg-sky-500/10",
+  },
+  {
+    id: "notifications",
+    title: "Notifications",
+    desc: "Manage email and activity notifications.",
+    icon: Bell,
+    color: "text-orange-300",
+    bg: "bg-orange-500/10",
+  },
+];
+
+const otherCards = [
+  {
+    id: "team-roles",
+    title: "Team Roles",
+    desc: "Manage roles and permissions.",
+    icon: Users,
+    color: "text-orange-300",
+    bg: "bg-orange-500/10",
+  },
+  {
+    id: "manage-members",
+    title: "Manage Members",
+    desc: "Add, remove or update members.",
+    icon: Users,
+    color: "text-violet-300",
+    bg: "bg-violet-500/10",
+  },
+  {
+    id: "billing-usage",
+    title: "Billing & Usage",
+    desc: "View plans, usage and billing details.",
+    icon: CreditCard,
+    color: "text-emerald-300",
+    bg: "bg-emerald-500/10",
+  },
+  {
+    id: "backup-restore",
+    title: "Backup & Restore",
+    desc: "Backup or restore your data.",
+    icon: Cloud,
+    color: "text-sky-300",
+    bg: "bg-sky-500/10",
+  },
+];
+
+function SidebarGroup({ title, tone, items, activeTab, onSelect }) {
+  return (
+    <div className="space-y-2 border-b border-white/10 pb-5 last:border-b-0 last:pb-0">
+      <p className={`px-1 text-xs font-bold uppercase tracking-wide ${tone}`}>
+        {title}
+      </p>
+      <div className="space-y-1">
+        {items.map((item) => {
+          const Icon = item.icon;
+          const active = item.id === activeTab;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onSelect(item.id)}
+              className={`relative flex w-full items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5 text-left text-sm font-semibold transition-all duration-200 ${
+                active
+                  ? "bg-emerald-400/18 text-emerald-100 shadow-inner shadow-emerald-950/30"
+                  : "text-gray-300 hover:bg-white/[0.07] hover:text-richblack-25"
+              }`}
+            >
+              <span
+                className={`absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)] transition-all duration-200 ${
+                  active ? "opacity-100 scale-y-100" : "opacity-0 scale-y-50"
+                }`}
+              />
+              <Icon
+                className={`h-4 w-4 shrink-0 transition-colors duration-200 ${
+                  active ? "text-emerald-300" : ""
+                }`}
+              />
+              <span className="truncate">{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function MetricCard({ item, onSelect }) {
+  const Icon = item.icon;
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/[0.035] p-4 shadow-lg shadow-black/10">
+      <div className="flex items-start gap-3">
+        <span className={`flex h-10 w-10 items-center justify-center rounded-lg ${item.bg} ${item.color}`}>
+          <Icon className="h-5 w-5" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-richblack-25">{item.title}</p>
+          <p className="mt-5 text-2xl font-bold text-richblack-25">
+            {item.value}
+          </p>
+          <p className="mt-1 text-sm text-gray-400">{item.caption}</p>
+        </div>
+      </div>
+      {item.percent == null ? (
+        <button
+          type="button"
+          onClick={() => onSelect?.(item.id)}
+          className="mt-5 flex w-full items-center justify-end gap-1 text-sm font-bold text-violet-300 transition hover:text-violet-200"
+        >
+          {item.action}
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      ) : (
+        <div className="mt-5 flex items-center gap-4">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+            <div
+              className={`h-full rounded-full ${item.bar}`}
+              style={{ width: `${item.percent}%` }}
+            />
+          </div>
+          <span className="w-9 text-right text-xs text-gray-300">
+            {item.percent}%
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SettingsCard({ item, compact = false, onSelect }) {
+  const Icon = item.icon;
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect?.(item.id)}
+      className="flex w-full items-center gap-4 rounded-lg border border-white/10 bg-white/[0.035] p-4 text-left transition hover:border-white/20 hover:bg-white/[0.06]"
+    >
+      <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${item.bg} ${item.color}`}>
+        <Icon className="h-5 w-5" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-bold text-richblack-25">
+          {item.title}
+        </span>
+        <span className={`mt-1 block text-gray-400 ${compact ? "text-xs" : "text-sm"}`}>
+          {item.desc}
+        </span>
+      </span>
+      <ChevronRight className="h-5 w-5 shrink-0 text-gray-300" />
+    </button>
+  );
+}
+
+function Panel({ title, subtitle, children }) {
+  return (
+    <section className="rounded-lg border border-white/10 bg-white/[0.035] p-5 shadow-xl shadow-black/10">
+      {(title || subtitle) && (
+        <div className="mb-5">
+          {title && <h2 className="text-lg font-bold text-richblack-25">{title}</h2>}
+          {subtitle && <p className="mt-1 text-sm text-gray-400">{subtitle}</p>}
+        </div>
+      )}
+      {children}
+    </section>
+  );
+}
+
+function OverviewContent({ onSelect }) {
+  return (
+    <div className="space-y-4">
+      <Panel title="Society Overview" subtitle="Quick summary of your society's system and services.">
+        <div className="mb-8 flex justify-end sm:-mt-14">
+          <button className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-white/[0.06]">
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </button>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {metricCards.map((item) => (
+            <MetricCard key={item.title} item={item} onSelect={onSelect} />
+          ))}
+        </div>
+      </Panel>
+
+      <Panel title="Society Settings" subtitle="Configure and manage your society preferences.">
+        <div className="grid gap-3 lg:grid-cols-2">
+          {societyCards.map((item) => (
+            <SettingsCard key={item.title} item={item} onSelect={onSelect} />
+          ))}
+        </div>
+      </Panel>
+
+      <Panel title="Personal Settings" subtitle="Manage your account, security and preferences.">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {personalCards.map((item) => (
+            <SettingsCard key={item.title} item={item} compact onSelect={onSelect} />
+          ))}
+        </div>
+      </Panel>
+
+      <Panel title="Others">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {otherCards.map((item) => (
+            <SettingsCard key={item.title} item={item} compact onSelect={onSelect} />
+          ))}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function PlaceholderContent({ activeTab }) {
+  const activeItem = allItems.find((item) => item.id === activeTab);
+  const Icon = activeItem?.icon || Lock;
+
+  return (
+    <Panel title={activeItem?.label || "Settings"} subtitle="This settings area is ready for the next implementation step.">
+      <div className="flex min-h-[360px] flex-col items-center justify-center rounded-lg border border-dashed border-white/15 bg-white/[0.025] px-6 text-center">
+        <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300">
+          <Icon className="h-7 w-7" />
+        </span>
+        <h3 className="mt-5 text-xl font-bold text-richblack-25">
+          {activeItem?.label}
+        </h3>
+        <p className="mt-2 max-w-md text-sm leading-6 text-gray-400">
+          The tab is connected in the sidebar. Add the actual controls here when
+          you share the next requirements.
+        </p>
+      </div>
+    </Panel>
+  );
+}
+
+function formatStorageFromBytes(bytes) {
+  if (bytes == null) return "Not reported";
+  const numeric = Number(bytes || 0);
+  if (numeric < 1024 ** 3) {
+    return `${(numeric / 1024 ** 2).toFixed(2)} MB`;
+  }
+  return `${(numeric / 1024 ** 3).toFixed(2)} GB`;
+}
+
+function formatStorage(value) {
+  if (value == null) return "Not reported";
+  return `${Number(value || 0).toFixed(2)} GB`;
+}
+
+function formatNumber(value) {
+  return Number(value || 0).toLocaleString("en-IN");
+}
+
+function AnalyticsCard({ label, value, icon: Icon, tone = "text-emerald-300", subtext }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/[0.035] p-4 shadow-lg shadow-black/10">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-gray-400">{label}</p>
+          <p className="mt-2 text-2xl font-bold text-richblack-25">{value}</p>
+          {subtext && <p className="mt-1 text-xs text-gray-500">{subtext}</p>}
+        </div>
+        {Icon && (
+          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] ${tone}`}>
+            <Icon className="h-5 w-5" />
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="h-28 animate-pulse rounded-lg border border-white/10 bg-white/[0.04]" />
+        ))}
+      </div>
+      <div className="h-72 animate-pulse rounded-lg border border-white/10 bg-white/[0.04]" />
+    </div>
+  );
+}
+
+function AnalyticsHeader({ title, subtitle, updatedAt, loading, onRefresh, connected }) {
+  return (
+    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 className="text-lg font-bold text-richblack-25">{title}</h2>
+        {subtitle && <p className="mt-1 text-sm text-gray-400">{subtitle}</p>}
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+          {connected != null && (
+            <span className={connected ? "text-emerald-300" : "text-red-300"}>
+              {connected ? "Connected" : "Unavailable"}
+            </span>
+          )}
+          <span>
+            {updatedAt ? `Last refreshed ${new Date(updatedAt).toLocaleString("en-IN")}` : "Not refreshed yet"}
+          </span>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={onRefresh}
+        disabled={loading}
+        className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+        Refresh
+      </button>
+    </div>
+  );
+}
+
+function CloudinaryStorageContent() {
+  const [usage, setUsage] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const loadUsage = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const data = await fetchCloudinaryStorageUsage();
+      setUsage(data);
+    } catch (err) {
+      setError(err?.message || "Failed to load Cloudinary storage usage");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadUsage();
+  }, []);
+
+  const storage = usage?.storage || {};
+  const folders = usage?.folders || [];
+  const usedBytes = Number(storage.usedBytes || 0);
+  const estimatedRemainingBytes = Math.max(
+    CLOUDINARY_ESTIMATED_FREE_PLAN_BYTES - usedBytes,
+    0,
+  );
+  const estimatedPercentUsed = Math.min(
+    Math.round((usedBytes / CLOUDINARY_ESTIMATED_FREE_PLAN_BYTES) * 100),
+    100,
+  );
+
+  return (
+    <div className="space-y-4">
+      <Panel
+        title="Cloudinary Storage"
+        subtitle="Actual Cloudinary storage usage and folder breakdown."
+      >
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="text-sm text-gray-400">
+            {usage?.updatedAt
+              ? `Last updated ${new Date(usage.updatedAt).toLocaleString("en-IN")}`
+              : "Live usage from Cloudinary"}
+          </div>
+          <button
+            type="button"
+            onClick={loadUsage}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
+        </div>
+
+        {loading && (
+          <div className="rounded-lg border border-white/10 bg-white/[0.03] p-8 text-center text-sm text-gray-400">
+            Loading Cloudinary usage...
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="rounded-lg border border-red-400/20 bg-red-500/10 p-5 text-sm text-red-200">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && usage && (
+          <div className="space-y-5">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
+                <p className="text-sm font-semibold text-gray-400">Used</p>
+                <p className="mt-2 text-3xl font-bold text-richblack-25">
+                  {formatStorageFromBytes(storage.usedBytes)}
+                </p>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-400">
+                  <span>Roughly Remaining</span>
+                  <span
+                    className="group relative inline-flex"
+                    tabIndex={0}
+                    aria-label="Remaining storage estimate information"
+                  >
+                    <Info className="h-4 w-4 text-emerald-300/80" />
+                    <span className="pointer-events-none absolute left-1/2 top-6 z-20 hidden w-72 -translate-x-1/2 rounded-lg border border-white/10 bg-[#171827] px-3 py-2 text-xs font-normal leading-5 text-gray-200 shadow-xl group-hover:block group-focus:block">
+                      Estimated based on Cloudinary's credit system. Actual
+                      available storage may vary because credits are shared
+                      across storage, bandwidth, and transformations.
+                    </span>
+                  </span>
+                </div>
+                <p className="mt-2 text-3xl font-bold text-emerald-200">
+                  ~{formatStorageFromBytes(estimatedRemainingBytes)}
+                </p>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
+                <p className="text-sm font-semibold text-gray-400">Estimated Max</p>
+                <p className="mt-2 text-3xl font-bold text-richblack-25">
+                  {CLOUDINARY_ESTIMATED_FREE_PLAN_GB.toFixed(2)} GB
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="font-semibold text-gray-300">
+                  Estimated free-plan storage used
+                </span>
+                <span className="text-gray-400">{estimatedPercentUsed}%</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.45)] transition-all duration-300"
+                  style={{ width: `${estimatedPercentUsed}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-4">
+              {[
+                ["Total Assets", usage.assets?.total],
+                ["Images", usage.assets?.image],
+                ["Videos", usage.assets?.video],
+                ["Raw Files", usage.assets?.raw],
+              ].map(([label, value]) => (
+                <div key={label} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-gray-500">
+                    {label}
+                  </p>
+                  <p className="mt-2 text-2xl font-bold text-richblack-25">
+                    {value ?? 0}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </Panel>
+
+      {!loading && !error && usage && (
+        <Panel title="Storage By Folder" subtitle="Grouped by the top-level Cloudinary folder.">
+          {usage.partial && (
+            <div className="mb-4 rounded-lg border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+              Showing a large-account sample from Cloudinary. Some assets may be outside this breakdown.
+            </div>
+          )}
+
+          {folders.length ? (
+            <div className="overflow-x-auto rounded-lg border border-white/10">
+              <div className="min-w-[640px]">
+                <div className="grid grid-cols-[minmax(0,1fr)_110px_100px_90px] gap-3 border-b border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-bold uppercase tracking-wide text-gray-400">
+                  <span>Folder</span>
+                  <span className="text-right">Used</span>
+                  <span className="text-right">Assets</span>
+                  <span className="text-right">Share</span>
+                </div>
+                <div className="divide-y divide-white/10">
+                  {folders.map((folder) => (
+                    <div
+                      key={folder.folder}
+                      className="grid grid-cols-[minmax(0,1fr)_110px_100px_90px] items-center gap-3 px-4 py-3 text-sm"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-richblack-25">
+                          {folder.folder}
+                        </p>
+                        <p className="mt-1 text-xs text-gray-500">
+                          {folder.image} images - {folder.video} videos - {folder.raw} raw
+                        </p>
+                      </div>
+                      <span className="text-right font-semibold text-gray-200">
+                        {formatStorage(folder.gb)}
+                      </span>
+                      <span className="text-right text-gray-300">{folder.assets}</span>
+                      <span className="text-right text-emerald-300">
+                        {folder.percentOfUsed}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-white/15 bg-white/[0.025] p-8 text-center text-sm text-gray-400">
+              No Cloudinary assets found.
+            </div>
+          )}
+        </Panel>
+      )}
+    </div>
+  );
+}
+
+function DatabaseAnalyticsContent() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const load = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      setData(await fetchDatabaseAnalytics());
+    } catch (err) {
+      setError(err?.message || "Failed to load database analytics");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const summary = data?.summary || {};
+  const collections = data?.collections || [];
+
+  return (
+    <div className="space-y-4">
+      <Panel>
+        <AnalyticsHeader
+          title="MongoDB Analytics"
+          subtitle="Read-only database storage, documents, collections and index usage."
+          updatedAt={data?.updatedAt}
+          loading={loading}
+          onRefresh={load}
+          connected={!error}
+        />
+        {loading && <LoadingSkeleton />}
+        {!loading && error && (
+          <div className="rounded-lg border border-red-400/20 bg-red-500/10 p-5 text-sm text-red-200">
+            {error}
+          </div>
+        )}
+        {!loading && !error && data && (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <AnalyticsCard label="Database Storage Used" value={`${summary.storageMb ?? 0} MB`} icon={Database} tone="text-emerald-300" />
+            <AnalyticsCard label="Total Documents" value={formatNumber(summary.totalDocuments)} icon={Users} tone="text-sky-300" />
+            <AnalyticsCard label="Total Collections" value={formatNumber(summary.totalCollections)} icon={Server} tone="text-violet-300" />
+            <AnalyticsCard label="Total Index Size" value={`${summary.indexMb ?? 0} MB`} icon={HardDrive} tone="text-amber-300" />
+          </div>
+        )}
+      </Panel>
+
+      {!loading && !error && data && (
+        <>
+          <Panel title="Collection Analytics" subtitle="Important MongoDB collections by document volume.">
+            <div className="space-y-3">
+              {collections.map((collection) => (
+                <div key={collection.name} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="font-bold text-richblack-25">{collection.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {formatNumber(collection.documents)} documents · {collection.storageMb} MB storage · {collection.indexMb} MB indexes
+                      </p>
+                    </div>
+                    <span className="text-sm font-semibold text-emerald-300">
+                      {collection.percentOfDocuments}%
+                    </span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                    <div
+                      className="h-full rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.35)]"
+                      style={{ width: `${Math.min(collection.percentOfDocuments, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Panel>
+
+          <Panel title="Database Distribution" subtitle="Collections containing the most documents.">
+            <div className="flex h-72 items-end gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-4">
+              {collections.slice(0, 8).map((collection) => (
+                <div key={collection.name} className="flex min-w-0 flex-1 flex-col items-center gap-2">
+                  <div className="flex h-48 w-full items-end rounded-md bg-white/[0.04]">
+                    <div
+                      className="w-full rounded-md bg-gradient-to-t from-emerald-500 to-cyan-300 shadow-[0_0_14px_rgba(52,211,153,0.22)]"
+                      style={{ height: `${Math.max(collection.percentOfDocuments, 4)}%` }}
+                      title={`${collection.name}: ${formatNumber(collection.documents)} documents`}
+                    />
+                  </div>
+                  <p className="w-full truncate text-center text-xs text-gray-400" title={collection.name}>
+                    {collection.name}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Panel>
+        </>
+      )}
+    </div>
+  );
+}
+
+function EmailServiceAnalyticsContent() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const load = async ({ refresh = false } = {}) => {
+    try {
+      setLoading(true);
+      setError("");
+      setData(await fetchEmailServiceAnalytics({ refresh }));
+    } catch (err) {
+      setError(err?.message || "Failed to load email service analytics");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const summary = data?.summary || {};
+  const performance = data?.performance || {};
+  const dailyLimit = summary.dailyLimit || 0;
+  const sent = summary.sentToday || 0;
+  const remaining = summary.remaining;
+  const usagePercent = dailyLimit > 0 ? Math.min(Math.round((sent / dailyLimit) * 100), 100) : 0;
+
+  return (
+    <div className="space-y-4">
+      <Panel>
+        <AnalyticsHeader
+          title="Email Service"
+          subtitle="Brevo transactional email usage and delivery health."
+          updatedAt={data?.updatedAt}
+          loading={loading}
+          onRefresh={() => load({ refresh: true })}
+          connected={data?.connected && !error}
+        />
+        {loading && <LoadingSkeleton />}
+        {!loading && error && (
+          <div className="rounded-lg border border-red-400/20 bg-red-500/10 p-5 text-sm text-red-200">
+            {error}
+          </div>
+        )}
+        {!loading && !error && data && (
+          <div className="space-y-5">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <AnalyticsCard label="Emails Sent Today" value={formatNumber(sent)} icon={Mail} tone="text-sky-300" />
+              <AnalyticsCard
+                label="Daily Limit / Remaining"
+                value={dailyLimit ? `${formatNumber(dailyLimit)} / ${formatNumber(remaining ?? 0)}` : "Not reported"}
+                icon={CreditCard}
+                tone="text-emerald-300"
+                subtext={dailyLimit ? "limit / remaining" : "Set BREVO_DAILY_EMAIL_LIMIT for fallback"}
+              />
+              <AnalyticsCard label="Emails Delivered" value={formatNumber(summary.delivered)} icon={Shield} tone="text-violet-300" />
+              <AnalyticsCard label="Failed / Bounced" value={formatNumber(summary.failed)} icon={RotateCcw} tone="text-red-300" />
+            </div>
+
+            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="font-semibold text-gray-300">Email Usage</span>
+                <span className="text-gray-400">
+                  {dailyLimit ? `${formatNumber(sent)} / ${formatNumber(dailyLimit)} emails sent today` : `${formatNumber(sent)} emails sent today`}
+                </span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.45)]"
+                  style={{ width: `${usagePercent}%` }}
+                />
+              </div>
+              {remaining != null && (
+                <p className="mt-2 text-sm text-emerald-300">
+                  {formatNumber(remaining)} emails remaining
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </Panel>
+
+      {!loading && !error && data && (
+        <>
+          <Panel title="Email Performance" subtitle="Available Brevo SMTP metrics for today.">
+            <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+              {[
+                ["Delivery rate", `${performance.deliveryRate || 0}%`],
+                ["Open rate", `${performance.openRate || 0}%`],
+                ["Click rate", `${performance.clickRate || 0}%`],
+                ["Bounce rate", `${performance.bounceRate || 0}%`],
+                ["Unsubscribes", formatNumber(performance.unsubscribed)],
+                ["Spam complaints", formatNumber(performance.spamReports)],
+              ].map(([label, value]) => (
+                <div key={label} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-gray-500">{label}</p>
+                  <p className="mt-2 text-2xl font-bold text-richblack-25">{value}</p>
+                </div>
+              ))}
+            </div>
+          </Panel>
+
+          <Panel title="Recent Email Activity" subtitle="Safe Brevo event metadata only. Recipient addresses and content are hidden.">
+            {data.recentActivity?.length ? (
+              <div className="divide-y divide-white/10 overflow-hidden rounded-lg border border-white/10">
+                {data.recentActivity.map((event, index) => (
+                  <div key={`${event.sentAt}-${index}`} className="grid gap-2 px-4 py-3 text-sm md:grid-cols-[minmax(0,1fr)_140px_190px]">
+                    <span className="truncate font-semibold text-richblack-25">{event.subject}</span>
+                    <span className="capitalize text-emerald-300">{event.status}</span>
+                    <span className="text-gray-400">
+                      {event.sentAt ? new Date(event.sentAt).toLocaleString("en-IN") : "Time unavailable"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-lg border border-dashed border-white/15 bg-white/[0.025] p-8 text-center text-sm text-gray-400">
+                No recent safe email activity available from Brevo.
+              </div>
+            )}
+            {(data.reportUnavailable || data.eventsUnavailable) && (
+              <p className="mt-3 text-xs text-amber-200">
+                Some Brevo analytics were unavailable: {data.reportUnavailable || data.eventsUnavailable}
+              </p>
+            )}
+          </Panel>
+        </>
+      )}
+    </div>
+  );
+}
+
+function Settings() {
+  const [activeTab, setActiveTab] = useState("overview");
+  const activeLabel = useMemo(
+    () => allItems.find((item) => item.id === activeTab)?.label || "Overview",
+    [activeTab],
+  );
+
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-[#181829] via-[#1d1e31] to-[#151a2a] px-4 pb-10 pt-28 text-richblack-25 sm:px-6 lg:h-screen lg:w-full lg:overflow-hidden lg:pb-6 lg:px-10">
+      <div className="mx-auto flex h-full max-w-[1740px] flex-col lg:min-h-0">
+        <header className="mb-6 shrink-0">
+          <h1 className="text-3xl font-bold tracking-normal text-richblack-25">
+            Settings
+          </h1>
+          <p className="mt-2 text-sm text-gray-400">
+            Manage society settings, storage, personal preferences and more.
+          </p>
+        </header>
+
+        <div className="grid w-full gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[280px_minmax(0,1fr)]">
+          <aside className="h-fit rounded-lg border border-white/10 bg-white/[0.035] p-5 shadow-xl shadow-black/10 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:scrollbar-thin lg:scrollbar-track-transparent lg:scrollbar-thumb-emerald-400/20 hover:lg:scrollbar-thumb-emerald-400/35">
+            <div className="space-y-6">
+              <SidebarGroup
+                title="Society Settings"
+                tone="text-emerald-300"
+                items={societyItems}
+                activeTab={activeTab}
+                onSelect={setActiveTab}
+              />
+              <SidebarGroup
+                title="Personal Settings"
+                tone="text-violet-300"
+                items={personalItems}
+                activeTab={activeTab}
+                onSelect={setActiveTab}
+              />
+              <SidebarGroup
+                title="Others"
+                tone="text-amber-300"
+                items={otherItems}
+                activeTab={activeTab}
+                onSelect={setActiveTab}
+              />
+            </div>
+          </aside>
+
+          <section
+            className="min-w-0 lg:flex lg:h-full lg:min-h-0 lg:w-full lg:flex-col lg:overflow-hidden"
+            aria-label={`${activeLabel} settings`}
+          >
+            <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-2 lg:scrollbar-thin lg:scrollbar-track-transparent lg:scrollbar-thumb-emerald-400/20 hover:lg:scrollbar-thumb-emerald-400/35">
+              {activeTab === "overview" ? (
+                <OverviewContent onSelect={setActiveTab} />
+              ) : activeTab === "cloudinary-storage" ? (
+                <CloudinaryStorageContent />
+              ) : activeTab === "database" ? (
+                <DatabaseAnalyticsContent />
+              ) : activeTab === "email-service" ? (
+                <EmailServiceAnalyticsContent />
+              ) : (
+                <PlaceholderContent activeTab={activeTab} />
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export default Settings;

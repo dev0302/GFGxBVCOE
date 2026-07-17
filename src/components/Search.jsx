@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { getSearchPeople, getAccountTypeLabel, sendSignupInvite, getActivityLogs, isSocietyRole } from "../services/api";
-import { driveLinkToImageUrl, avatarPlaceholder, photoPreviewUrl, photoProfileModalUrl, photoOriginalUrl, resolvePredefinedImageUrl } from "../utils/teamMemberUtils";
+import { driveLinkToImageUrl, avatarPlaceholder, photoPreviewUrl, photoPreviewLargeAvatarUrl, photoProfileModalUrl, photoOriginalUrl, resolvePredefinedImageUrl } from "../utils/teamMemberUtils";
 import { Search as SearchIcon, X, Mail, Activity } from "react-feather";
 import "./Search.css";
 import { Spinner } from "./ui/spinner";
@@ -35,9 +35,10 @@ const TEAM_LABELS = {
 export function MemberDetailModal({ member, onClose }) {
   if (!member) return null;
   const rawPhoto = member.photo || member.image_drive_link;
-  const photoUrl = rawPhoto
-    ? photoPreviewUrl(rawPhoto)
+  const previewSrc = rawPhoto
+    ? photoPreviewLargeAvatarUrl(rawPhoto)
     : avatarPlaceholder(member.name);
+  const highResSrc = rawPhoto ? photoProfileModalUrl(rawPhoto) : null;
   const originalPhotoUrl = rawPhoto ? photoOriginalUrl(rawPhoto) : null;
 
   return (
@@ -66,7 +67,8 @@ export function MemberDetailModal({ member, onClose }) {
         <div className="p-6 space-y-6 flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }} data-lenis-prevent>
           <div className="flex flex-col items-center gap-3">
             <ClickableProfilePhoto
-              src={photoUrl}
+              src={previewSrc}
+              highResSrc={highResSrc && highResSrc !== previewSrc ? highResSrc : undefined}
               originalSrc={originalPhotoUrl}
               alt={member.name || "Member"}
               className="h-24 w-24 rounded-full object-cover border-2 border-gray-500/50"
@@ -153,7 +155,23 @@ function profileInitials(firstName, lastName, fallback = "") {
   return fromFallback.toUpperCase() || "?";
 }
 
-function ClickableProfilePhoto({ src, originalSrc, alt, className, onFallback }) {
+function ClickableProfilePhoto({ src, highResSrc, originalSrc, alt, className, onFallback }) {
+  const [highResLoaded, setHighResLoaded] = useState(false);
+  const highResImgRef = useRef(null);
+  const useProgressive = Boolean(highResSrc && highResSrc !== src);
+
+  useLayoutEffect(() => {
+    setHighResLoaded(false);
+  }, [src, highResSrc, useProgressive]);
+
+  useLayoutEffect(() => {
+    if (!useProgressive) return;
+    const img = highResImgRef.current;
+    if (img?.complete && img.naturalWidth > 0) {
+      setHighResLoaded(true);
+    }
+  }, [src, highResSrc, useProgressive]);
+
   const isClickable = Boolean(originalSrc) && !originalSrc.includes("ui-avatars.com");
 
   const handleClick = () => {
@@ -162,16 +180,60 @@ function ClickableProfilePhoto({ src, originalSrc, alt, className, onFallback })
     }
   };
 
+  const interactiveClass = isClickable ? " cursor-pointer hover:opacity-90 transition-opacity" : "";
+
+  const handleImageError = (e) => {
+    e.target.onerror = null;
+    e.target.src = onFallback?.() || avatarPlaceholder(alt);
+  };
+
+  if (useProgressive) {
+    return (
+      <div
+        className={`relative overflow-hidden${interactiveClass} ${className}`}
+        onClick={isClickable ? handleClick : undefined}
+        role={isClickable ? "button" : undefined}
+        tabIndex={isClickable ? 0 : undefined}
+        aria-label={isClickable ? `Open ${alt} photo in new tab` : undefined}
+        onKeyDown={
+          isClickable
+            ? (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleClick();
+                }
+              }
+            : undefined
+        }
+      >
+        <img
+          src={src}
+          alt={alt}
+          className="absolute inset-0 h-full w-full object-cover"
+          onError={handleImageError}
+        />
+        <img
+          ref={highResImgRef}
+          src={highResSrc}
+          alt=""
+          aria-hidden
+          loading="eager"
+          onLoad={() => setHighResLoaded(true)}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ease-out ${
+            highResLoaded ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      </div>
+    );
+  }
+
   return (
     <img
       src={src}
       alt={alt}
-      className={`${className}${isClickable ? " cursor-pointer hover:opacity-90 transition-opacity" : ""}`}
+      className={`${className}${interactiveClass}`}
       onClick={isClickable ? handleClick : undefined}
-      onError={(e) => {
-        e.target.onerror = null;
-        e.target.src = onFallback?.() || avatarPlaceholder(alt);
-      }}
+      onError={handleImageError}
       role={isClickable ? "button" : undefined}
       tabIndex={isClickable ? 0 : undefined}
       aria-label={isClickable ? `Open ${alt} photo in new tab` : undefined}
@@ -431,7 +493,8 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
   const pre = user.predefinedProfile || {};
   const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email || "—";
   const rawImage = user.image || (pre.image ? resolvePredefinedImageUrl(pre.image) : null);
-  const imgSrc = rawImage ? photoProfileModalUrl(rawImage) : avatarPlaceholder(fullName);
+  const previewSrc = rawImage ? photoPreviewLargeAvatarUrl(rawImage) : avatarPlaceholder(fullName);
+  const highResSrc = rawImage ? photoProfileModalUrl(rawImage) : null;
   const originalSrc = rawImage ? photoOriginalUrl(rawImage) : null;
   const photoClickable = Boolean(originalSrc) && !originalSrc.includes("ui-avatars.com");
 
@@ -464,7 +527,8 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
             <ProfileAvatarFlip
               flipKey={user._id || fullName}
               hasImage={Boolean(rawImage)}
-              src={imgSrc}
+              src={previewSrc}
+              highResSrc={highResSrc && highResSrc !== previewSrc ? highResSrc : undefined}
               initials={profileInitials(user.firstName, user.lastName, fullName)}
               className="h-28 w-28"
               initialsClassName="text-3xl"

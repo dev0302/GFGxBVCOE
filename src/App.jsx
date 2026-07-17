@@ -38,6 +38,7 @@ import QuizResult from "./pages/QuizResult";
 import JamTheWeb from "./pages/JamTheWeb";
 import ManageTeam from "./pages/ManageTeam";
 import ManageSociety from "./pages/ManageSociety";
+import Settings from "./pages/Settings";
 import JoinTeamByLink from "./pages/JoinTeamByLink";
 import AuthAwareLayout from "./components/AuthAwareLayout";
 import { AnimatePresence, motion } from "framer-motion";
@@ -55,6 +56,7 @@ function App() {
     "/profile",
     "/manage-team",
     "/manage-society",
+    "/settings",
     "/jam-the-web",
   ];
 
@@ -224,6 +226,7 @@ function App() {
                       element={<Navigate to="/dashboard" replace />}
                     />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/settings" element={<Settings />} />
                     <Route path="/manage-team" element={<ManageTeam />} />
                     <Route path="/manage-society" element={<ManageSociety />} />
                     <Route
