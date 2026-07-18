@@ -116,7 +116,7 @@ export default function OrbitCarousel() {
           radiusX: 160,
           radiusY: 165,
           profileSize: 42,
-          cardWidth: "w-36",
+          cardWidth: "w-46",
           avatarSize: "w-12 h-12",
           avatarMargin: "-mt-8",
           fontSize: { name: "text-sm", position: "text-xs" },
@@ -128,7 +128,7 @@ export default function OrbitCarousel() {
           radiusX: 190,
           radiusY: 110,
           profileSize: 50,
-          cardWidth: "w-40",
+          cardWidth: "w-50",
           avatarSize: "w-14 h-14",
           avatarMargin: "-mt-9",
           fontSize: { name: "text-base", position: "text-xs" },
@@ -140,7 +140,7 @@ export default function OrbitCarousel() {
           radiusX: 280,
           radiusY: 130,
           profileSize: 62,
-          cardWidth: "w-44",
+          cardWidth: "w-54",
           avatarSize: "w-16 h-16",
           avatarMargin: "-mt-10",
           fontSize: { name: "text-base", position: "text-sm" },
@@ -152,7 +152,7 @@ export default function OrbitCarousel() {
           radiusX: 380,
           radiusY: 200,
           profileSize: 76,
-          cardWidth: "w-52",
+          cardWidth: "w-62",
           avatarSize: "w-20 h-20",
           avatarMargin: "-mt-12",
           fontSize: { name: "text-lg", position: "text-sm" },
@@ -248,7 +248,7 @@ export default function OrbitCarousel() {
               stiffness: 300,
               damping: 25,
             }}
-            className={`z-10 backdrop-blur-sm shadow-xl shadow-black/40 rounded-xl p-2 sm:p-3 md:p-4 ${cardWidth} text-center border border-white/10`}
+            className={`z-10 backdrop-blur-sm rounded-xl p-2 sm:p-3 md:p-4 ${cardWidth} text-center border border-white/10`}
             style={{ backgroundColor: "#1e1e3f" }}
           >
             <motion.img

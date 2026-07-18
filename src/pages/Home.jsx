@@ -501,7 +501,7 @@ const journeyPhotos = [
         <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
           
           {/* Left Content */}
-          <div className="reveal-up text-left">
+          <div className="reveal-up text-center sm:text-left">
             <p className="mb-4 font-nunito text-xs font-bold uppercase tracking-[0.2em] text-green-400">
               About Us
             </p>

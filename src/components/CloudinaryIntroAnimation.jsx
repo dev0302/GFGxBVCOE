@@ -9,7 +9,7 @@ const TOTAL_IMAGES = 20;
 // This now drives BOTH the progress math and the pinned section height,
 // so they can never fall out of sync.
 const SCROLL_DISTANCE = 3200;
-const CLOUDINARY_TRANSFORM = "w_256,h_256,c_fill,f_auto,q_auto";
+const CLOUDINARY_TRANSFORM = "w_128,h_128,c_fill,f_auto,q_auto";
 
 const RAW_IMAGES = [
   "https://res.cloudinary.com/duwmby01d/image/upload/v1783760137/gfg-avatars/mskhuvj43hnoycxe0mtn.jpg",
