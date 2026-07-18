@@ -278,7 +278,7 @@ const journeyPhotos = [
                   ref={titleRef}
                   className="
                     font-nunito
-                    text-[2.7rem] font-extrabold
+                    text-3xl font-extrabold
                     leading-[1.12] tracking-normal
                     text-white
 
