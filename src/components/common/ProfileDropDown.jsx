@@ -15,7 +15,6 @@ import { subscribeOnlineUsers } from "../../services/presenceSocket";
 import { cloudinaryLargeAvatarUrl, cloudinaryTinyAvatarUrl } from "../../utils/cloudinary";
 import {
   Calendar,
-  ChevronDown,
   Clock,
   Grid,
   Layout,
@@ -25,6 +24,7 @@ import {
   Users,
 } from "react-feather";
 import { useSocketContext } from "../../context/SocketProvider";
+import { AiOutlineCaretDown } from "react-icons/ai"
 
 function formatLastSeenLabel(iso) {
   if (!iso) return "No visit logged yet";
@@ -251,7 +251,7 @@ function ProfileDropDown({
   const menuBg =
     "bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] border border-gray-500/40";
   const textCls = isDarkNavbar ? "text-gray-200" : "text-green-100";
-  const avatarSize = avatarOnly ? "h-9 w-9" : "h-8 w-8";
+  const avatarSize = avatarOnly ? "h-8 w-8" : "h-7 w-7";
   const dropdownPosition = alignLeft
     ? "left-0 mt-2 w-64 origin-top-left"
     : "right-[-45px] sm:right-0 mt-2 w-64 origin-top-right";
@@ -357,7 +357,7 @@ function ProfileDropDown({
           </div>
         )}
         {(!avatarOnly || showChevron) && (
-          <ChevronDown
+          <AiOutlineCaretDown
             className={`h-3.5 w-3.5 transition-transform duration-150 shrink-0 ${
               open ? "rotate-180" : ""
             }`}
@@ -610,7 +610,7 @@ function ProfileDropDown({
                       Browse {deptDashboardKeys.length} dashboards
                     </span>
                   </span>
-                  <ChevronDown
+                  <AiOutlineCaretDown
                     className={`h-3.5 w-3.5 shrink-0 transition-transform duration-150 ${deptFlyoutOpen ? "rotate-90" : "rotate-90 opacity-70"}`}
                   />
                 </button>
