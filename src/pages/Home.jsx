@@ -120,13 +120,38 @@ function Home() {
     },
   ];
 
-  const journeyPhotos = [
-    { src: "/FreshersMeet1.webp", label: "Group Discussions", icon: Users, color: "bg-emerald-400/90" },
-    { src: "/FreshersMeet3.webp", label: "Interactive Sessions", icon: MessageCircle, color: "bg-violet-400/90" },
-    { src: "/FreshersMeet4.webp", label: "Team Activities", icon: Settings, color: "bg-amber-400/90" },
-    { src: "/FreshersMeet5.webp", label: "Expert Talks", icon: Mic, color: "bg-blue-400/90" },
-    { src: "/FreshersMeet8.webp", label: "Selected Candidates", icon: Check, color: "bg-emerald-400/90" },
-  ];
+const journeyPhotos = [
+  {
+    src: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,q_auto,f_auto/v1784357366/FreshersMeet5_z9qdup.webp",
+    label: "Group Discussions",
+    icon: Users,
+    color: "bg-emerald-400/90",
+  },
+  {
+    src: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,q_auto,f_auto/v1784357366/FreshersMeet3_haw3o6.webp",
+    label: "Interactive Sessions",
+    icon: MessageCircle,
+    color: "bg-violet-400/90",
+  },
+  {
+    src: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,q_auto,f_auto/v1784357366/FreshersMeet6_rc45g4.webp",
+    label: "Team Activities",
+    icon: Settings,
+    color: "bg-amber-400/90",
+  },
+  {
+    src: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,q_auto,f_auto/v1784357366/FreshersMeet_eryceo.webp",
+    label: "Expert Talks",
+    icon: Mic,
+    color: "bg-blue-400/90",
+  },
+  {
+    src: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,q_auto,f_auto/v1784357366/FreshersMeet4_qlm7yu.webp",
+    label: "Selected Candidates",
+    icon: Check,
+    color: "bg-emerald-400/90",
+  },
+];
 
   // GSAP animations
   useGSAP(() => {
@@ -204,12 +229,12 @@ function Home() {
         <div className="absolute left-1/2 top-24 h-72 w-72 -translate-x-1/2 rounded-full border border-emerald-300/10 md:left-[72%] md:top-24 md:h-[28rem] md:w-[28rem]" />
         <div className="absolute left-[58%] top-20 hidden h-96 w-96 rounded-full border border-dashed border-emerald-200/10 md:block" />
 
-        <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col px-6 pb-12 pt-28 lg:px-8">
+        <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col px-6 pb-12 pt-24 lg:px-8">
           <div className="grid flex-1 items-center gap-12 lg:grid-cols-[1fr_0.9fr]">
-            <div className="max-w-2xl text-left">
+            <div className="max-w-2xl text-left mt-[-8rem]">
               <h1
                 ref={titleRef}
-                className="font-nunito text-5xl font-extrabold leading-tight tracking-normal text-white md:text-7xl"
+                className="font-nunito text-5xl font-extrabold leading-tight tracking-normal text-white md:text-5xl"
               >
                 Empowering Students
                 <br />
@@ -249,18 +274,7 @@ function Home() {
                 </button>
               </div>
 
-              <div className="mt-8 flex items-center gap-5 text-sm text-slate-400">
-                <span>Follow us on</span>
-                <a className="text-slate-300 transition hover:text-green-300" href="https://discord.com" aria-label="Discord">
-                  <MessageCircle className="h-5 w-5" />
-                </a>
-                <a className="text-slate-300 transition hover:text-green-300" href="https://instagram.com" aria-label="Instagram">
-                  <Instagram className="h-5 w-5" />
-                </a>
-                <a className="text-slate-300 transition hover:text-green-300" href="https://linkedin.com" aria-label="LinkedIn">
-                  <Linkedin className="h-5 w-5" />
-                </a>
-              </div>
+              
             </div>
 
             <div className="relative mx-auto h-[360px] w-full max-w-xl lg:h-[500px]">
@@ -282,22 +296,47 @@ function Home() {
             </div>
           </div>
 
-          <div
-            id="stats-grid"
-            className="grid overflow-hidden rounded-3xl border border-white/10 bg-white/[0.045] font-nunito shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:grid-cols-2 lg:grid-cols-4"
-          >
-            {stats.map(({ value, label, icon: Icon, highlight }) => (
-              <div key={label} className="flex items-center gap-5 border-white/10 px-8 py-7 lg:border-r last:border-r-0">
-                <div className={`rounded-full p-4 ${highlight ? "bg-yellow-400/15 text-yellow-300 shadow-[0_0_28px_rgba(250,204,21,0.22)]" : "bg-green-400/10 text-green-300 shadow-[0_0_28px_rgba(34,197,94,0.2)]"}`}>
-                  <Icon className="h-7 w-7" />
+                   <div
+  id="stats-grid"
+  className="
+    -mt-16
+    grid overflow-hidden rounded-3xl
+    border border-green-400/10
+    bg-green-950/30
+    font-nunito
+    shadow-lg
+    ring-1 ring-inset ring-green-400/5
+    sm:grid-cols-2 lg:grid-cols-4
+  "
+>
+                  {stats.map(({ value, label, icon: Icon, highlight }) => (
+                    <div
+                      key={label}
+                      className="flex items-center gap-5 border-green-400/10 px-6 py-5 lg:border-r last:border-r-0"
+                    >
+                      <div
+                        className={`rounded-full p-4 ${
+                          highlight
+                            ? "bg-yellow-400/10 text-yellow-300"
+                            : "bg-green-400/10 text-green-300"
+                        }`}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </div>
+
+                      <div>
+                        <div className="text-[22px] font-extrabold text-green-300">
+                          {value}
+                        </div>
+
+                        <div className="mt-1 text-sm leading-5 text-slate-300">
+                          {label}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <div className="text-3xl font-extrabold text-green-300">{value}</div>
-                  <div className="mt-1 max-w-28 text-sm leading-5 text-slate-300">{label}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+          
         </div>
       </section>
 
@@ -372,6 +411,9 @@ function Home() {
         </div>
       </section>
 
+
+      {/* ----------------------- */}
+
       <section ref={exploreSectionRef} className="relative overflow-hidden bg-[#020808] px-4 py-16 text-white sm:px-6 lg:px-8">
         <div className="absolute inset-x-0 top-0 mx-auto h-px max-w-6xl bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_8%_72%,rgba(16,185,129,0.18),transparent_22%),radial-gradient(circle_at_84%_28%,rgba(59,130,246,0.14),transparent_24%),linear-gradient(180deg,#020808_0%,#030913_48%,#020808_100%)]" />
@@ -393,93 +435,138 @@ function Home() {
           </div>
 
           <div className="reveal-up mx-auto mt-9 grid max-w-7xl gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {exploreCards.map(({ eyebrow, title, description, cta, icon: Icon, to, tone, iconTone, textTone }) => (
-              <button
-                key={title}
-                onClick={() => navigate(to)}
-                className={`group min-h-[260px] rounded-[1.35rem] border border-white/10 bg-gradient-to-br ${tone} p-6 text-left font-nunito shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_18px_50px_rgba(0,0,0,0.26)] transition duration-300 hover:-translate-y-1 hover:border-white/20`}
-              >
-                <div className="flex h-full flex-col justify-between">
-                  <div>
-                    <div className={`mb-7 flex h-[70px] w-[70px] items-center justify-center rounded-full ${iconTone} shadow-[0_0_26px_rgba(255,255,255,0.08)]`}>
-                      <Icon className="h-8 w-8" />
+            {exploreCards.map(
+              ({
+                eyebrow,
+                title,
+                description,
+                cta,
+                icon: Icon,
+                to,
+                tone,
+                iconTone,
+                textTone,
+              }) => (
+                <button
+                  key={title}
+                  onClick={() => navigate(to)}
+                  className={`group min-h-[260px] rounded-2xl border border-white/10 bg-gradient-to-br ${tone} p-6 text-left font-nunito transition-transform duration-200 hover:-translate-y-1`}
+                >
+                  <div className="flex h-full flex-col justify-between">
+                    <div>
+                      <div
+                        className={`mb-7 flex h-[70px] w-[70px] items-center justify-center rounded-full ${iconTone}`}
+                      >
+                        <Icon className="h-8 w-8" />
+                      </div>
+
+                      <div className="flex flex-wrap items-end gap-x-3">
+                        <p className={`text-base font-bold ${textTone}`}>
+                          {eyebrow}
+                        </p>
+
+                        <h3 className="text-3xl font-extrabold leading-none text-white">
+                          {title}
+                        </h3>
+                      </div>
+
+                      <p className="mt-7 max-w-[14rem] text-base leading-7 text-slate-300">
+                        {description}
+                      </p>
                     </div>
-                    <div className="flex flex-wrap items-end gap-x-3">
-                      <p className={`text-base font-bold ${textTone}`}>{eyebrow}</p>
-                      <h3 className="text-3xl font-extrabold leading-none text-white">{title}</h3>
+
+                    <div className="mt-8 flex items-center justify-between">
+                      <span className={`text-base font-bold ${textTone}`}>
+                        {cta}
+                      </span>
+
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition-transform duration-200 group-hover:translate-x-1">
+                        <ArrowRight className="h-5 w-5" />
+                      </span>
                     </div>
-                    <p className="mt-7 max-w-[14rem] text-base leading-7 text-slate-300">{description}</p>
                   </div>
-                  <div className="mt-8 flex items-center justify-between">
-                    <span className={`text-base font-bold ${textTone}`}>{cta}</span>
-                    <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-white transition group-hover:translate-x-1 group-hover:border-white/20">
-                      <ArrowRight className="h-5 w-5" />
-                    </span>
-                  </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              )
+            )}
           </div>
 
-          <div className="reveal-up mt-10 overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#030913]/70 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:p-8 lg:p-10">
-            <div className="grid gap-8 lg:grid-cols-[minmax(220px,0.32fr)_minmax(0,0.68fr)] lg:items-center">
-              <div className="font-nunito">
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-300">Our Journey</p>
-                <h3 className="mt-4 inline-block origin-left -rotate-1 text-3xl font-extrabold tracking-normal text-white md:text-4xl">
-                  Freshers Recruitment <span className="text-green-400">2024</span>
-                </h3>
-                <p className="mt-5 max-w-md text-base leading-8 text-slate-300">
-                  A glimpse of the energy, enthusiasm and talent from last year's recruitment drive.
-                </p>
-                <button
-                  type="button"
-                  aria-label="Previous journey image"
-                  className="mt-10 hidden h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/[0.035] text-emerald-300 transition hover:border-emerald-300/30 hover:bg-emerald-300/10 lg:flex"
-                >
-                  <ArrowLeft className="h-6 w-6" />
-                </button>
-              </div>
+          <div className="reveal-up mt-10 overflow-hidden rounded-2xl border border-white/10 bg-[#030913]/90 p-5 sm:p-8 lg:p-10">
+  <div className="grid gap-8 lg:grid-cols-[minmax(220px,0.32fr)_minmax(0,0.68fr)] lg:items-center">
+    <div className="font-nunito">
+      <p className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-300">
+        Our Journey
+      </p>
 
-              <div className="relative min-w-0 overflow-hidden">
-                <div className="flex max-w-full gap-2 overflow-x-auto pb-3 [scrollbar-width:none] sm:gap-3 lg:overflow-hidden [&::-webkit-scrollbar]:hidden">
-                  {journeyPhotos.map(({ src, label, icon: Icon, color }) => (
-                    <div key={label} className="group relative h-[200px] min-w-[145px] flex-1 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] shadow-[0_18px_46px_rgba(0,0,0,0.34)] sm:min-w-[165px] md:h-[220px] lg:min-w-0 xl:h-[230px]">
-                      <img
-                        src={src}
-                        alt={label}
-                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-                      <div className="absolute inset-x-2 bottom-2 flex items-center gap-2 rounded-full border border-white/10 bg-black/45 px-2 py-2 font-nunito text-xs font-bold text-white backdrop-blur-md sm:inset-x-3 sm:bottom-3 sm:gap-3 sm:px-3 sm:text-sm">
-                        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${color} text-white`}>
-                          <Icon className="h-4 w-4" />
-                        </span>
-                        <span className="truncate">{label}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+      <h3 className="mt-4 inline-block origin-left -rotate-1 text-3xl font-extrabold text-white md:text-4xl">
+        Freshers Recruitment{" "}
+        <span className="text-green-400">2024</span>
+      </h3>
 
-                <button
-                  type="button"
-                  aria-label="Next journey image"
-                  className="absolute -right-3 top-1/2 hidden h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-emerald-300 shadow-[0_16px_44px_rgba(0,0,0,0.3)] backdrop-blur transition hover:border-emerald-300/30 hover:bg-emerald-300/10 lg:flex"
-                >
-                  <ArrowRight className="h-6 w-6" />
-                </button>
+      <p className="mt-5 max-w-md text-base leading-8 text-slate-300">
+        A glimpse of the energy, enthusiasm and talent from last year's
+        recruitment drive.
+      </p>
 
-                <div className="mt-5 flex justify-center gap-3">
-                  {[0, 1, 2, 3, 4, 5].map((dot) => (
-                    <span
-                      key={dot}
-                      className={`h-3 w-3 rounded-full ${dot === 0 ? "bg-green-400 shadow-[0_0_16px_rgba(74,222,128,0.5)]" : "bg-slate-600/50"}`}
-                    />
-                  ))}
-                </div>
-              </div>
+      <button
+        type="button"
+        aria-label="Previous journey image"
+        className="mt-10 hidden h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/5 text-emerald-300 transition-colors hover:border-emerald-300/30 hover:bg-emerald-300/10 lg:flex"
+      >
+        <ArrowLeft className="h-6 w-6" />
+      </button>
+    </div>
+
+    <div className="relative min-w-0 overflow-hidden">
+      <div className="flex max-w-full gap-2 overflow-x-auto pb-3 [scrollbar-width:none] sm:gap-3 lg:overflow-hidden [&::-webkit-scrollbar]:hidden">
+        {journeyPhotos.map(({ src, label, icon: Icon, color }) => (
+          <div
+            key={label}
+            className="group relative h-[200px] min-w-[145px] flex-1 overflow-hidden rounded-2xl border border-white/10 bg-white/5 sm:min-w-[165px] md:h-[220px] lg:min-w-0 xl:h-[230px]"
+          >
+            <img
+              src={src}
+              alt={label}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+
+            <div className="absolute inset-x-2 bottom-2 flex items-center gap-2 rounded-full border border-white/10 bg-black/70 px-2 py-2 font-nunito text-xs font-bold text-white sm:inset-x-3 sm:bottom-3 sm:gap-3 sm:px-3 sm:text-sm">
+              <span
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${color} text-white`}
+              >
+                <Icon className="h-4 w-4" />
+              </span>
+
+              <span className="truncate">{label}</span>
             </div>
           </div>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        aria-label="Next journey image"
+        className="absolute -right-3 top-1/2 hidden h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-[#07130f] text-emerald-300 transition-colors hover:border-emerald-300/30 hover:bg-emerald-300/10 lg:flex"
+      >
+        <ArrowRight className="h-6 w-6" />
+      </button>
+
+      <div className="mt-5 flex justify-center gap-3">
+        {[0, 1, 2, 3, 4, 5].map((dot) => (
+          <span
+            key={dot}
+            className={`h-3 w-3 rounded-full ${
+              dot === 0 ? "bg-green-400" : "bg-slate-600/50"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
+
         </div>
       </section>
 

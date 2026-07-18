@@ -18,6 +18,7 @@ import {
   Users,
   User,
 } from "react-feather";
+import { FiSettings } from "react-icons/fi";
 import {
   fetchCloudinaryStorageUsage,
   fetchDatabaseAnalytics,
@@ -203,11 +204,13 @@ const otherCards = [
 
 function SidebarGroup({ title, tone, items, activeTab, onSelect }) {
   return (
-    <div className="space-y-2 border-b border-white/10 pb-5 last:border-b-0 last:pb-0">
-      <p className={`px-1 text-xs font-bold uppercase tracking-wide ${tone}`}>
+    <div className="w-full border-b border-white/10 pb-3 last:border-b-0 last:pb-0 lg:pb-5">
+      <p
+        className={`hidden px-1 pb-2 text-xs font-bold uppercase tracking-wide lg:block ${tone}`}
+      >
         {title}
       </p>
-      <div className="space-y-1">
+      <div className="flex flex-col items-center gap-1.5 lg:items-stretch lg:gap-1">
         {items.map((item) => {
           const Icon = item.icon;
           const active = item.id === activeTab;
@@ -215,24 +218,26 @@ function SidebarGroup({ title, tone, items, activeTab, onSelect }) {
             <button
               key={item.id}
               type="button"
+              title={item.label}
+              aria-label={item.label}
               onClick={() => onSelect(item.id)}
-              className={`relative flex w-full items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5 text-left text-sm font-semibold transition-all duration-200 ${
+              className={`relative flex items-center justify-center gap-3 overflow-hidden rounded-lg p-2.5 text-sm font-semibold transition-all duration-200 lg:w-full lg:justify-start lg:px-3 lg:py-2.5 ${
                 active
                   ? "bg-emerald-400/18 text-emerald-100 shadow-inner shadow-emerald-950/30"
                   : "text-gray-300 hover:bg-white/[0.07] hover:text-richblack-25"
               }`}
             >
               <span
-                className={`absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)] transition-all duration-200 ${
+                className={`absolute left-0 top-1/2 hidden h-7 w-1 -translate-y-1/2 rounded-r-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.55)] transition-all duration-200 lg:block ${
                   active ? "opacity-100 scale-y-100" : "opacity-0 scale-y-50"
                 }`}
               />
               <Icon
-                className={`h-4 w-4 shrink-0 transition-colors duration-200 ${
+                className={`h-5 w-5 shrink-0 transition-colors duration-200 lg:h-4 lg:w-4 ${
                   active ? "text-emerald-300" : ""
                 }`}
               />
-              <span className="truncate">{item.label}</span>
+              <span className="hidden truncate lg:inline">{item.label}</span>
             </button>
           );
         })}
@@ -244,37 +249,37 @@ function SidebarGroup({ title, tone, items, activeTab, onSelect }) {
 function MetricCard({ item, onSelect }) {
   const Icon = item.icon;
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.035] p-4 shadow-lg shadow-black/10">
-      <div className="flex items-start gap-3">
-        <span className={`flex h-10 w-10 items-center justify-center rounded-lg ${item.bg} ${item.color}`}>
-          <Icon className="h-5 w-5" />
+    <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-lg shadow-black/10 sm:p-4">
+      <div className="flex items-start gap-2.5 sm:gap-3">
+        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10 ${item.bg} ${item.color}`}>
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
         </span>
         <div className="min-w-0">
-          <p className="text-sm font-bold text-richblack-25">{item.title}</p>
-          <p className="mt-5 text-2xl font-bold text-richblack-25">
+          <p className="text-xs font-bold text-richblack-25 sm:text-sm">{item.title}</p>
+          <p className="mt-3 text-lg font-bold text-richblack-25 sm:mt-5 sm:text-2xl">
             {item.value}
           </p>
-          <p className="mt-1 text-sm text-gray-400">{item.caption}</p>
+          <p className="mt-1 text-xs text-gray-400 sm:text-sm">{item.caption}</p>
         </div>
       </div>
       {item.percent == null ? (
         <button
           type="button"
           onClick={() => onSelect?.(item.id)}
-          className="mt-5 flex w-full items-center justify-end gap-1 text-sm font-bold text-violet-300 transition hover:text-violet-200"
+          className="mt-4 flex w-full items-center justify-end gap-1 text-xs font-bold text-violet-300 transition hover:text-violet-200 sm:mt-5 sm:text-sm"
         >
           {item.action}
           <ChevronRight className="h-4 w-4" />
         </button>
       ) : (
-        <div className="mt-5 flex items-center gap-4">
+        <div className="mt-4 flex items-center gap-3 sm:mt-5 sm:gap-4">
           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
             <div
               className={`h-full rounded-full ${item.bar}`}
               style={{ width: `${item.percent}%` }}
             />
           </div>
-          <span className="w-9 text-right text-xs text-gray-300">
+          <span className="w-8 text-right text-[11px] text-gray-300 sm:w-9 sm:text-xs">
             {item.percent}%
           </span>
         </div>
@@ -289,31 +294,31 @@ function SettingsCard({ item, compact = false, onSelect }) {
     <button
       type="button"
       onClick={() => onSelect?.(item.id)}
-      className="flex w-full items-center gap-4 rounded-lg border border-white/10 bg-white/[0.035] p-4 text-left transition hover:border-white/20 hover:bg-white/[0.06]"
+      className="flex w-full items-center gap-3 rounded-lg border border-white/10 bg-white/[0.035] p-2.5 text-left transition hover:border-white/20 hover:bg-white/[0.06] sm:gap-4 sm:p-4"
     >
-      <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${item.bg} ${item.color}`}>
-        <Icon className="h-5 w-5" />
+      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-11 sm:w-11 ${item.bg} ${item.color}`}>
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-bold text-richblack-25">
+        <span className="block text-xs font-bold text-richblack-25 sm:text-sm">
           {item.title}
         </span>
-        <span className={`mt-1 block text-gray-400 ${compact ? "text-xs" : "text-sm"}`}>
+        <span className={`mt-1 block text-gray-400 ${compact ? "text-[11px]" : "text-[11px] sm:text-sm"}`}>
           {item.desc}
         </span>
       </span>
-      <ChevronRight className="h-5 w-5 shrink-0 text-gray-300" />
+      <ChevronRight className="h-4 w-4 shrink-0 text-gray-300 sm:h-5 sm:w-5" />
     </button>
   );
 }
 
 function Panel({ title, subtitle, children }) {
   return (
-    <section className="rounded-lg border border-white/10 bg-white/[0.035] p-5 shadow-xl shadow-black/10">
+    <section className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-xl shadow-black/10 sm:p-5">
       {(title || subtitle) && (
-        <div className="mb-5">
-          {title && <h2 className="text-lg font-bold text-richblack-25">{title}</h2>}
-          {subtitle && <p className="mt-1 text-sm text-gray-400">{subtitle}</p>}
+        <div className="mb-3 sm:mb-5">
+          {title && <h2 className="text-sm font-bold text-richblack-25 sm:text-lg">{title}</h2>}
+          {subtitle && <p className="mt-1 text-[11px] text-gray-400 sm:text-sm">{subtitle}</p>}
         </div>
       )}
       {children}
@@ -323,15 +328,15 @@ function Panel({ title, subtitle, children }) {
 
 function OverviewContent({ onSelect }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <Panel title="Society Overview" subtitle="Quick summary of your society's system and services.">
-        <div className="mb-8 flex justify-end sm:-mt-14">
-          <button className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-white/[0.06]">
+        <div className="mb-4 flex justify-end sm:mb-8 sm:-mt-14">
+          <button className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 text-xs font-semibold text-gray-200 transition hover:bg-white/[0.06] sm:px-4 sm:py-2 sm:text-sm">
             <RefreshCw className="h-4 w-4" />
             Refresh
           </button>
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
           {metricCards.map((item) => (
             <MetricCard key={item.title} item={item} onSelect={onSelect} />
           ))}
@@ -339,7 +344,7 @@ function OverviewContent({ onSelect }) {
       </Panel>
 
       <Panel title="Society Settings" subtitle="Configure and manage your society preferences.">
-        <div className="grid gap-3 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
           {societyCards.map((item) => (
             <SettingsCard key={item.title} item={item} onSelect={onSelect} />
           ))}
@@ -347,7 +352,7 @@ function OverviewContent({ onSelect }) {
       </Panel>
 
       <Panel title="Personal Settings" subtitle="Manage your account, security and preferences.">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
           {personalCards.map((item) => (
             <SettingsCard key={item.title} item={item} compact onSelect={onSelect} />
           ))}
@@ -355,7 +360,7 @@ function OverviewContent({ onSelect }) {
       </Panel>
 
       <Panel title="Others">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
           {otherCards.map((item) => (
             <SettingsCard key={item.title} item={item} compact onSelect={onSelect} />
           ))}
@@ -371,14 +376,14 @@ function PlaceholderContent({ activeTab }) {
 
   return (
     <Panel title={activeItem?.label || "Settings"} subtitle="This settings area is ready for the next implementation step.">
-      <div className="flex min-h-[360px] flex-col items-center justify-center rounded-lg border border-dashed border-white/15 bg-white/[0.025] px-6 text-center">
-        <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300">
-          <Icon className="h-7 w-7" />
+      <div className="flex min-h-[220px] flex-col items-center justify-center rounded-lg border border-dashed border-white/15 bg-white/[0.025] px-4 text-center sm:min-h-[360px] sm:px-6">
+        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300 sm:h-14 sm:w-14">
+          <Icon className="h-5 w-5 sm:h-7 sm:w-7" />
         </span>
-        <h3 className="mt-5 text-xl font-bold text-richblack-25">
+        <h3 className="mt-3 text-base font-bold text-richblack-25 sm:mt-5 sm:text-xl">
           {activeItem?.label}
         </h3>
-        <p className="mt-2 max-w-md text-sm leading-6 text-gray-400">
+        <p className="mt-2 max-w-md text-xs leading-6 text-gray-400 sm:text-sm">
           The tab is connected in the sidebar. Add the actual controls here when
           you share the next requirements.
         </p>
@@ -407,16 +412,16 @@ function formatNumber(value) {
 
 function AnalyticsCard({ label, value, icon: Icon, tone = "text-emerald-300", subtext }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.035] p-4 shadow-lg shadow-black/10">
-      <div className="flex items-start justify-between gap-3">
+    <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-lg shadow-black/10 sm:p-4">
+      <div className="flex items-start justify-between gap-2.5 sm:gap-3">
         <div>
-          <p className="text-sm font-semibold text-gray-400">{label}</p>
-          <p className="mt-2 text-2xl font-bold text-richblack-25">{value}</p>
-          {subtext && <p className="mt-1 text-xs text-gray-500">{subtext}</p>}
+          <p className="text-[11px] font-semibold text-gray-400 sm:text-sm">{label}</p>
+          <p className="mt-2 text-lg font-bold text-richblack-25 sm:text-2xl">{value}</p>
+          {subtext && <p className="mt-1 text-[10px] text-gray-500 sm:text-xs">{subtext}</p>}
         </div>
         {Icon && (
-          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] ${tone}`}>
-            <Icon className="h-5 w-5" />
+          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] sm:h-10 sm:w-10 ${tone}`}>
+            <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
           </span>
         )}
       </div>
@@ -426,24 +431,24 @@ function AnalyticsCard({ label, value, icon: Icon, tone = "text-emerald-300", su
 
 function LoadingSkeleton() {
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-4">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="h-28 animate-pulse rounded-lg border border-white/10 bg-white/[0.04]" />
+          <div key={index} className="h-24 animate-pulse rounded-lg border border-white/10 bg-white/[0.04] sm:h-28" />
         ))}
       </div>
-      <div className="h-72 animate-pulse rounded-lg border border-white/10 bg-white/[0.04]" />
+      <div className="h-52 animate-pulse rounded-lg border border-white/10 bg-white/[0.04] sm:h-72" />
     </div>
   );
 }
 
 function AnalyticsHeader({ title, subtitle, updatedAt, loading, onRefresh, connected }) {
   return (
-    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5 sm:mb-5 sm:gap-3">
       <div>
-        <h2 className="text-lg font-bold text-richblack-25">{title}</h2>
-        {subtitle && <p className="mt-1 text-sm text-gray-400">{subtitle}</p>}
-        <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+        <h2 className="text-sm font-bold text-richblack-25 sm:text-lg">{title}</h2>
+        {subtitle && <p className="mt-1 text-[11px] text-gray-400 sm:text-sm">{subtitle}</p>}
+        <div className="mt-2 flex flex-wrap items-center gap-2.5 text-[11px] text-gray-500 sm:gap-3 sm:text-xs">
           {connected != null && (
             <span className={connected ? "text-emerald-300" : "text-red-300"}>
               {connected ? "Connected" : "Unavailable"}
@@ -458,7 +463,7 @@ function AnalyticsHeader({ title, subtitle, updatedAt, loading, onRefresh, conne
         type="button"
         onClick={onRefresh}
         disabled={loading}
-        className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 text-xs font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:py-2 sm:text-sm"
       >
         <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
         Refresh
@@ -502,13 +507,13 @@ function CloudinaryStorageContent() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <Panel
         title="Cloudinary Storage"
         subtitle="Actual Cloudinary storage usage and folder breakdown."
       >
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <div className="text-sm text-gray-400">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5 sm:mb-5 sm:gap-3">
+          <div className="text-[11px] text-gray-400 sm:text-sm">
             {usage?.updatedAt
               ? `Last updated ${new Date(usage.updatedAt).toLocaleString("en-IN")}`
               : "Live usage from Cloudinary"}
@@ -517,7 +522,7 @@ function CloudinaryStorageContent() {
             type="button"
             onClick={loadUsage}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 text-xs font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:py-2 sm:text-sm"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             Refresh
@@ -525,28 +530,28 @@ function CloudinaryStorageContent() {
         </div>
 
         {loading && (
-          <div className="rounded-lg border border-white/10 bg-white/[0.03] p-8 text-center text-sm text-gray-400">
+          <div className="rounded-lg border border-white/10 bg-white/[0.03] p-6 text-center text-xs text-gray-400 sm:p-8 sm:text-sm">
             Loading Cloudinary usage...
           </div>
         )}
 
         {!loading && error && (
-          <div className="rounded-lg border border-red-400/20 bg-red-500/10 p-5 text-sm text-red-200">
+          <div className="rounded-lg border border-red-400/20 bg-red-500/10 p-4 text-xs text-red-200 sm:p-5 sm:text-sm">
             {error}
           </div>
         )}
 
         {!loading && !error && usage && (
-          <div className="space-y-5">
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
-                <p className="text-sm font-semibold text-gray-400">Used</p>
-                <p className="mt-2 text-3xl font-bold text-richblack-25">
+          <div className="space-y-4 sm:space-y-5">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+              <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 sm:p-4">
+                <p className="text-xs font-semibold text-gray-400 sm:text-sm">Used</p>
+                <p className="mt-2 text-xl font-bold text-richblack-25 sm:text-3xl">
                   {formatStorageFromBytes(storage.usedBytes)}
                 </p>
               </div>
-              <div className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-gray-400">
+              <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 sm:p-4">
+                <div className="flex items-center gap-2 text-xs font-semibold text-gray-400 sm:text-sm">
                   <span>Roughly Remaining</span>
                   <span
                     className="group relative inline-flex"
@@ -554,27 +559,27 @@ function CloudinaryStorageContent() {
                     aria-label="Remaining storage estimate information"
                   >
                     <Info className="h-4 w-4 text-emerald-300/80" />
-                    <span className="pointer-events-none absolute left-1/2 top-6 z-20 hidden w-72 -translate-x-1/2 rounded-lg border border-white/10 bg-[#171827] px-3 py-2 text-xs font-normal leading-5 text-gray-200 shadow-xl group-hover:block group-focus:block">
+                    <span className="pointer-events-none absolute left-1/2 top-6 z-20 hidden w-56 -translate-x-1/2 rounded-lg border border-white/10 bg-[#171827] px-3 py-2 text-[11px] font-normal leading-5 text-gray-200 shadow-xl group-hover:block group-focus:block sm:w-72 sm:text-xs">
                       Estimated based on Cloudinary's credit system. Actual
                       available storage may vary because credits are shared
                       across storage, bandwidth, and transformations.
                     </span>
                   </span>
                 </div>
-                <p className="mt-2 text-3xl font-bold text-emerald-200">
+                <p className="mt-2 text-xl font-bold text-emerald-200 sm:text-3xl">
                   ~{formatStorageFromBytes(estimatedRemainingBytes)}
                 </p>
               </div>
-              <div className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
-                <p className="text-sm font-semibold text-gray-400">Estimated Max</p>
-                <p className="mt-2 text-3xl font-bold text-richblack-25">
+              <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 sm:p-4">
+                <p className="text-xs font-semibold text-gray-400 sm:text-sm">Estimated Max</p>
+                <p className="mt-2 text-xl font-bold text-richblack-25 sm:text-3xl">
                   {CLOUDINARY_ESTIMATED_FREE_PLAN_GB.toFixed(2)} GB
                 </p>
               </div>
             </div>
 
             <div>
-              <div className="mb-2 flex items-center justify-between text-sm">
+              <div className="mb-2 flex items-center justify-between text-xs sm:text-sm">
                 <span className="font-semibold text-gray-300">
                   Estimated free-plan storage used
                 </span>
@@ -588,18 +593,18 @@ function CloudinaryStorageContent() {
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-4">
               {[
                 ["Total Assets", usage.assets?.total],
                 ["Images", usage.assets?.image],
                 ["Videos", usage.assets?.video],
                 ["Raw Files", usage.assets?.raw],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-xs font-bold uppercase tracking-wide text-gray-500">
+                <div key={label} className="rounded-lg border border-white/10 bg-white/[0.03] p-2.5 sm:p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500 sm:text-xs">
                     {label}
                   </p>
-                  <p className="mt-2 text-2xl font-bold text-richblack-25">
+                  <p className="mt-2 text-lg font-bold text-richblack-25 sm:text-2xl">
                     {value ?? 0}
                   </p>
                 </div>
@@ -612,48 +617,74 @@ function CloudinaryStorageContent() {
       {!loading && !error && usage && (
         <Panel title="Storage By Folder" subtitle="Grouped by the top-level Cloudinary folder.">
           {usage.partial && (
-            <div className="mb-4 rounded-lg border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+            <div className="mb-4 rounded-lg border border-amber-400/20 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-100 sm:px-4 sm:py-3 sm:text-sm">
               Showing a large-account sample from Cloudinary. Some assets may be outside this breakdown.
             </div>
           )}
 
           {folders.length ? (
-            <div className="overflow-x-auto rounded-lg border border-white/10">
-              <div className="min-w-[640px]">
-                <div className="grid grid-cols-[minmax(0,1fr)_110px_100px_90px] gap-3 border-b border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-bold uppercase tracking-wide text-gray-400">
-                  <span>Folder</span>
-                  <span className="text-right">Used</span>
-                  <span className="text-right">Assets</span>
-                  <span className="text-right">Share</span>
+            <div className="space-y-2 sm:hidden">
+              {folders.map((folder) => (
+                <div key={folder.folder} className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="min-w-0 truncate text-xs font-semibold text-richblack-25">
+                      {folder.folder}
+                    </p>
+                    <span className="shrink-0 text-xs text-emerald-300">
+                      {folder.percentOfUsed}%
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[10px] text-gray-500">
+                    {folder.image} images · {folder.video} videos · {folder.raw} raw
+                  </p>
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-gray-300">
+                    <span>{formatStorage(folder.gb)}</span>
+                    <span>{folder.assets} assets</span>
+                  </div>
                 </div>
-                <div className="divide-y divide-white/10">
-                  {folders.map((folder) => (
-                    <div
-                      key={folder.folder}
-                      className="grid grid-cols-[minmax(0,1fr)_110px_100px_90px] items-center gap-3 px-4 py-3 text-sm"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold text-richblack-25">
-                          {folder.folder}
-                        </p>
-                        <p className="mt-1 text-xs text-gray-500">
-                          {folder.image} images - {folder.video} videos - {folder.raw} raw
-                        </p>
-                      </div>
-                      <span className="text-right font-semibold text-gray-200">
-                        {formatStorage(folder.gb)}
-                      </span>
-                      <span className="text-right text-gray-300">{folder.assets}</span>
-                      <span className="text-right text-emerald-300">
-                        {folder.percentOfUsed}%
-                      </span>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-white/15 bg-white/[0.025] p-6 text-center text-xs text-gray-400 sm:hidden">
+              No Cloudinary assets found.
+            </div>
+          )}
+
+          {folders.length ? (
+            <div className="hidden rounded-lg border border-white/10 sm:block">
+              <div className="grid grid-cols-[minmax(0,1fr)_110px_100px_90px] gap-3 border-b border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-bold uppercase tracking-wide text-gray-400">
+                <span>Folder</span>
+                <span className="text-right">Used</span>
+                <span className="text-right">Assets</span>
+                <span className="text-right">Share</span>
+              </div>
+              <div className="divide-y divide-white/10">
+                {folders.map((folder) => (
+                  <div
+                    key={folder.folder}
+                    className="grid grid-cols-[minmax(0,1fr)_110px_100px_90px] items-center gap-3 px-4 py-3 text-sm"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-richblack-25">
+                        {folder.folder}
+                      </p>
+                      <p className="mt-1 text-xs text-gray-500">
+                        {folder.image} images - {folder.video} videos - {folder.raw} raw
+                      </p>
                     </div>
-                  ))}
-                </div>
+                    <span className="text-right font-semibold text-gray-200">
+                      {formatStorage(folder.gb)}
+                    </span>
+                    <span className="text-right text-gray-300">{folder.assets}</span>
+                    <span className="text-right text-emerald-300">
+                      {folder.percentOfUsed}%
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           ) : (
-            <div className="rounded-lg border border-dashed border-white/15 bg-white/[0.025] p-8 text-center text-sm text-gray-400">
+            <div className="hidden rounded-lg border border-dashed border-white/15 bg-white/[0.025] p-8 text-center text-sm text-gray-400 sm:block">
               No Cloudinary assets found.
             </div>
           )}
@@ -688,7 +719,7 @@ function DatabaseAnalyticsContent() {
   const collections = data?.collections || [];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <Panel>
         <AnalyticsHeader
           title="MongoDB Analytics"
@@ -700,12 +731,12 @@ function DatabaseAnalyticsContent() {
         />
         {loading && <LoadingSkeleton />}
         {!loading && error && (
-          <div className="rounded-lg border border-red-400/20 bg-red-500/10 p-5 text-sm text-red-200">
+          <div className="rounded-lg border border-red-400/20 bg-red-500/10 p-4 text-xs text-red-200 sm:p-5 sm:text-sm">
             {error}
           </div>
         )}
         {!loading && !error && data && (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
             <AnalyticsCard label="Database Storage Used" value={`${summary.storageMb ?? 0} MB`} icon={Database} tone="text-emerald-300" />
             <AnalyticsCard label="Total Documents" value={formatNumber(summary.totalDocuments)} icon={Users} tone="text-sky-300" />
             <AnalyticsCard label="Total Collections" value={formatNumber(summary.totalCollections)} icon={Server} tone="text-violet-300" />
@@ -717,17 +748,17 @@ function DatabaseAnalyticsContent() {
       {!loading && !error && data && (
         <>
           <Panel title="Collection Analytics" subtitle="Important MongoDB collections by document volume.">
-            <div className="space-y-3">
+            <div className="space-y-2.5 sm:space-y-3">
               {collections.map((collection) => (
-                <div key={collection.name} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                  <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <div key={collection.name} className="rounded-lg border border-white/10 bg-white/[0.03] p-3 sm:p-4">
+                  <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2.5 sm:mb-3 sm:gap-3">
                     <div>
-                      <p className="font-bold text-richblack-25">{collection.name}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-sm font-bold text-richblack-25">{collection.name}</p>
+                      <p className="text-[11px] text-gray-500 sm:text-xs">
                         {formatNumber(collection.documents)} documents · {collection.storageMb} MB storage · {collection.indexMb} MB indexes
                       </p>
                     </div>
-                    <span className="text-sm font-semibold text-emerald-300">
+                    <span className="text-xs font-semibold text-emerald-300 sm:text-sm">
                       {collection.percentOfDocuments}%
                     </span>
                   </div>
@@ -743,17 +774,17 @@ function DatabaseAnalyticsContent() {
           </Panel>
 
           <Panel title="Database Distribution" subtitle="Collections containing the most documents.">
-            <div className="flex h-72 items-end gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-4">
+            <div className="grid grid-cols-4 gap-2 rounded-lg border border-white/10 bg-white/[0.025] p-3 sm:flex sm:h-72 sm:items-end sm:gap-3 sm:p-4">
               {collections.slice(0, 8).map((collection) => (
-                <div key={collection.name} className="flex min-w-0 flex-1 flex-col items-center gap-2">
-                  <div className="flex h-48 w-full items-end rounded-md bg-white/[0.04]">
+                <div key={collection.name} className="flex flex-col items-center gap-1.5 sm:min-w-0 sm:flex-1 sm:gap-2">
+                  <div className="flex h-20 w-full items-end rounded-md bg-white/[0.04] sm:h-48">
                     <div
                       className="w-full rounded-md bg-gradient-to-t from-emerald-500 to-cyan-300 shadow-[0_0_14px_rgba(52,211,153,0.22)]"
                       style={{ height: `${Math.max(collection.percentOfDocuments, 4)}%` }}
                       title={`${collection.name}: ${formatNumber(collection.documents)} documents`}
                     />
                   </div>
-                  <p className="w-full truncate text-center text-xs text-gray-400" title={collection.name}>
+                  <p className="w-full truncate text-center text-[9px] text-gray-400 sm:text-xs" title={collection.name}>
                     {collection.name}
                   </p>
                 </div>
@@ -795,7 +826,7 @@ function EmailServiceAnalyticsContent() {
   const usagePercent = dailyLimit > 0 ? Math.min(Math.round((sent / dailyLimit) * 100), 100) : 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <Panel>
         <AnalyticsHeader
           title="Email Service"
@@ -807,13 +838,13 @@ function EmailServiceAnalyticsContent() {
         />
         {loading && <LoadingSkeleton />}
         {!loading && error && (
-          <div className="rounded-lg border border-red-400/20 bg-red-500/10 p-5 text-sm text-red-200">
+          <div className="rounded-lg border border-red-400/20 bg-red-500/10 p-4 text-xs text-red-200 sm:p-5 sm:text-sm">
             {error}
           </div>
         )}
         {!loading && !error && data && (
-          <div className="space-y-5">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="space-y-4 sm:space-y-5">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
               <AnalyticsCard label="Emails Sent Today" value={formatNumber(sent)} icon={Mail} tone="text-sky-300" />
               <AnalyticsCard
                 label="Daily Limit / Remaining"
@@ -826,8 +857,8 @@ function EmailServiceAnalyticsContent() {
               <AnalyticsCard label="Failed / Bounced" value={formatNumber(summary.failed)} icon={RotateCcw} tone="text-red-300" />
             </div>
 
-            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-              <div className="mb-2 flex items-center justify-between text-sm">
+            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3 sm:p-4">
+              <div className="mb-2 flex items-center justify-between text-xs sm:text-sm">
                 <span className="font-semibold text-gray-300">Email Usage</span>
                 <span className="text-gray-400">
                   {dailyLimit ? `${formatNumber(sent)} / ${formatNumber(dailyLimit)} emails sent today` : `${formatNumber(sent)} emails sent today`}
@@ -840,7 +871,7 @@ function EmailServiceAnalyticsContent() {
                 />
               </div>
               {remaining != null && (
-                <p className="mt-2 text-sm text-emerald-300">
+                <p className="mt-2 text-xs text-emerald-300 sm:text-sm">
                   {formatNumber(remaining)} emails remaining
                 </p>
               )}
@@ -852,7 +883,7 @@ function EmailServiceAnalyticsContent() {
       {!loading && !error && data && (
         <>
           <Panel title="Email Performance" subtitle="Available Brevo SMTP metrics for today.">
-            <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
               {[
                 ["Delivery rate", `${performance.deliveryRate || 0}%`],
                 ["Open rate", `${performance.openRate || 0}%`],
@@ -861,9 +892,9 @@ function EmailServiceAnalyticsContent() {
                 ["Unsubscribes", formatNumber(performance.unsubscribed)],
                 ["Spam complaints", formatNumber(performance.spamReports)],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-xs font-bold uppercase tracking-wide text-gray-500">{label}</p>
-                  <p className="mt-2 text-2xl font-bold text-richblack-25">{value}</p>
+                <div key={label} className="rounded-lg border border-white/10 bg-white/[0.03] p-2.5 sm:p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500 sm:text-xs">{label}</p>
+                  <p className="mt-2 text-lg font-bold text-richblack-25 sm:text-2xl">{value}</p>
                 </div>
               ))}
             </div>
@@ -873,7 +904,7 @@ function EmailServiceAnalyticsContent() {
             {data.recentActivity?.length ? (
               <div className="divide-y divide-white/10 overflow-hidden rounded-lg border border-white/10">
                 {data.recentActivity.map((event, index) => (
-                  <div key={`${event.sentAt}-${index}`} className="grid gap-2 px-4 py-3 text-sm md:grid-cols-[minmax(0,1fr)_140px_190px]">
+                  <div key={`${event.sentAt}-${index}`} className="grid gap-1 px-3 py-2.5 text-xs sm:gap-2 sm:px-4 sm:py-3 sm:text-sm md:grid-cols-[minmax(0,1fr)_140px_190px]">
                     <span className="truncate font-semibold text-richblack-25">{event.subject}</span>
                     <span className="capitalize text-emerald-300">{event.status}</span>
                     <span className="text-gray-400">
@@ -883,12 +914,12 @@ function EmailServiceAnalyticsContent() {
                 ))}
               </div>
             ) : (
-              <div className="rounded-lg border border-dashed border-white/15 bg-white/[0.025] p-8 text-center text-sm text-gray-400">
+              <div className="rounded-lg border border-dashed border-white/15 bg-white/[0.025] p-6 text-center text-xs text-gray-400 sm:p-8 sm:text-sm">
                 No recent safe email activity available from Brevo.
               </div>
             )}
             {(data.reportUnavailable || data.eventsUnavailable) && (
-              <p className="mt-3 text-xs text-amber-200">
+              <p className="mt-3 text-[11px] text-amber-200 sm:text-xs">
                 Some Brevo analytics were unavailable: {data.reportUnavailable || data.eventsUnavailable}
               </p>
             )}
@@ -907,20 +938,21 @@ function Settings() {
   );
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#181829] via-[#1d1e31] to-[#151a2a] px-4 pb-10 pt-28 text-richblack-25 sm:px-6 lg:h-screen lg:w-full lg:overflow-hidden lg:pb-6 lg:px-10">
-      <div className="mx-auto flex h-full max-w-[1740px] flex-col lg:min-h-0">
-        <header className="mb-6 shrink-0">
-          <h1 className="text-3xl font-bold tracking-normal text-richblack-25">
+    <main className="h-screen w-full overflow-hidden bg-gradient-to-br from-[#181829] via-[#1d1e31] to-[#151a2a] px-2 pt-20 text-richblack-25 sm:px-4 sm:pt-20 lg:px-10 lg:pt-24">
+      <div className="mx-auto flex h-full min-h-0 max-w-[1740px] flex-col">
+        {/* <header className="mb-4 flex shrink-0 items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-richblack-700">
+            <FiSettings className="text-base text-yellow-50" />
+          </div>
+
+          <h1 className="font-nunito text-[26px] font-bold tracking-normal text-richblack-25">
             Settings
           </h1>
-          <p className="mt-2 text-sm text-gray-400">
-            Manage society settings, storage, personal preferences and more.
-          </p>
-        </header>
+        </header> */}
 
-        <div className="grid w-full gap-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="h-fit rounded-lg border border-white/10 bg-white/[0.035] p-5 shadow-xl shadow-black/10 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:scrollbar-thin lg:scrollbar-track-transparent lg:scrollbar-thumb-emerald-400/20 hover:lg:scrollbar-thumb-emerald-400/35">
-            <div className="space-y-6">
+        <div className="grid min-h-0 w-full flex-1 grid-cols-[56px_minmax(0,1fr)] gap-2 sm:grid-cols-[64px_minmax(0,1fr)] sm:gap-3 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
+          <aside className="h-full min-h-0 overflow-y-auto rounded-lg border border-white/10 bg-white/[0.035] p-1.5 shadow-xl shadow-black/10 sm:p-2 lg:p-5 lg:scrollbar-thin lg:scrollbar-track-transparent lg:scrollbar-thumb-emerald-400/20 hover:lg:scrollbar-thumb-emerald-400/35">
+            <div className="flex flex-col gap-2 lg:gap-6">
               <SidebarGroup
                 title="Society Settings"
                 tone="text-emerald-300"
@@ -946,10 +978,10 @@ function Settings() {
           </aside>
 
           <section
-            className="min-w-0 lg:flex lg:h-full lg:min-h-0 lg:w-full lg:flex-col lg:overflow-hidden"
+            className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden"
             aria-label={`${activeLabel} settings`}
           >
-            <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-2 lg:scrollbar-thin lg:scrollbar-track-transparent lg:scrollbar-thumb-emerald-400/20 hover:lg:scrollbar-thumb-emerald-400/35">
+            <div className="min-h-0 flex-1 overflow-y-auto pr-1 sm:pr-2 lg:scrollbar-thin lg:scrollbar-track-transparent lg:scrollbar-thumb-emerald-400/20 hover:lg:scrollbar-thumb-emerald-400/35">
               {activeTab === "overview" ? (
                 <OverviewContent onSelect={setActiveTab} />
               ) : activeTab === "cloudinary-storage" ? (
