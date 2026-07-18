@@ -231,255 +231,260 @@ const journeyPhotos = [
             lg:min-h-screen
           "
         >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_18%,rgba(34,197,94,0.18),transparent_28%),radial-gradient(circle_at_18%_20%,rgba(16,185,129,0.08),transparent_30%),linear-gradient(180deg,#020607_0%,#031111_54%,#02100d_100%)]" />
-        <div className="absolute inset-0 opacity-35 [background-image:radial-gradient(circle,rgba(190,255,214,0.55)_1px,transparent_1px)] [background-size:42px_42px]" />
-        <div className="absolute left-1/2 top-24 h-72 w-72 -translate-x-1/2 rounded-full border border-emerald-300/10 md:left-[72%] md:top-24 md:h-[28rem] md:w-[28rem]" />
-        <div className="absolute left-[58%] top-20 hidden h-96 w-96 rounded-full border border-dashed border-emerald-200/10 md:block" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_18%,rgba(34,197,94,0.18),transparent_28%),radial-gradient(circle_at_18%_20%,rgba(16,185,129,0.08),transparent_30%),linear-gradient(180deg,#020607_0%,#031111_54%,#02100d_100%)]" />
+          <div className="absolute inset-0 opacity-35 [background-image:radial-gradient(circle,rgba(190,255,214,0.55)_1px,transparent_1px)] [background-size:42px_42px]" />
+          <div className="absolute left-1/2 top-24 h-72 w-72 -translate-x-1/2 rounded-full border border-emerald-300/10 md:left-[72%] md:top-24 md:h-[28rem] md:w-[28rem]" />
+          <div className="absolute left-[58%] top-20 hidden h-96 w-96 rounded-full border border-dashed border-emerald-200/10 md:block" />
 
-       <div
-        className="
-          relative z-10 mx-auto
-          flex max-w-7xl flex-col
-          px-5 pb-8 pt-32
-
-          sm:px-6 sm:pt-28
-
-          lg:min-h-screen
-          lg:px-8 lg:pb-12 lg:pt-24
-        "
-      >
-  {/* HERO */}
-  <div
-    className="
-      relative grid
-      pb-10
-
-      lg:flex-1
-      lg:items-center
-      lg:gap-12
-      lg:grid-cols-[1fr_0.9fr]
-      lg:pb-0
-    "
-  >
-    {/* TEXT */}
-    <div
-      className="
-        relative z-10
-        max-w-2xl text-left
-
-        lg:-mt-32
-      "
-    >
-      <h1
-        ref={titleRef}
-        className="
-          font-nunito
-          text-4xl font-extrabold
-          leading-tight tracking-normal
-          text-white
-
-          md:text-5xl
-        "
-      >
-        Empowering Students
-        <br />
-        to Build{" "}
-        <span className="text-green-400 drop-shadow-[0_0_18px_rgba(74,222,128,0.45)]">
-          the Future
-        </span>
-      </h1>
-
-      <p
-        ref={descRef}
-        id="home-desc"
-        className="
-          mt-5 max-w-md
-          font-nunito
-          text-sm leading-6
-          text-slate-300
-
-          sm:mt-6 sm:leading-8
-          md:text-lg
-        "
-      >
-        Join GFG BVCOE - learn, teach, and collaborate through workshops,
-        events, project showcases and mentorship.
-      </p>
-
-      <div
-        ref={btnRef}
-        className="
-          mt-7 flex flex-wrap
-          items-center gap-3
-          font-nunito
-
-          sm:mt-8 sm:gap-4
-        "
-      >
-        <NavLink to="/signup">
-          <button
-            id="btn-join"
+          <div
             className="
-              group inline-flex items-center gap-2
-              rounded-full
-              bg-green-600/80
-              px-5 py-2.5
-              text-xs font-bold text-white
-              transition
-              hover:-translate-y-1
-              hover:bg-green-400
+              relative z-10 mx-auto
+              flex min-h-[100svh] max-w-7xl flex-col
+              px-5 pb-14 pt-20
 
-              sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
+              sm:min-h-0 sm:px-6 sm:pb-8 sm:pt-28
+
+              lg:min-h-screen
+              lg:px-8 lg:pb-12 lg:pt-24
             "
           >
-            Our Events
+            {/* HERO */}
+            <div
+              className="
+                relative grid
+                min-h-[68svh]
+                content-center
+                pb-16
 
-            <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </button>
-        </NavLink>
+                sm:min-h-0 sm:content-normal sm:pb-10
 
-        <button
-          id="btn-about"
-          onClick={() => navigate("/about")}
-          className="
-            group inline-flex items-center gap-2
-            rounded-full
-            border border-white/10
-            bg-white/[0.03]
-            px-5 py-2.5
-            text-xs font-semibold text-slate-200
-            backdrop-blur
-            transition
-            hover:-translate-y-1
-            hover:border-green-300/40
-            hover:bg-green-300/10
+                lg:flex-1
+                lg:items-center
+                lg:gap-12
+                lg:grid-cols-[1fr_0.9fr]
+                lg:pb-0
+              "
+            >
+              {/* TEXT */}
+              <div
+                className="
+                  relative z-10
+                  max-w-2xl text-left
 
-            sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
-          "
-        >
-          About us
+                  lg:-mt-32
+                "
+              >
+                <h1
+                  ref={titleRef}
+                  className="
+                    font-nunito
+                    text-[2.7rem] font-extrabold
+                    leading-[1.12] tracking-normal
+                    text-white
 
-          <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-        </button>
-      </div>
-    </div>
+                    sm:text-4xl sm:leading-tight
+                    md:text-5xl
+                  "
+                >
+                  Empowering Students
+                  <br />
+                  to Build{" "}
+                  <span className="text-green-400 drop-shadow-[0_0_18px_rgba(74,222,128,0.45)]">
+                    the Future
+                  </span>
+                </h1>
 
-    {/* LOGO BACKGROUND ON MOBILE */}
-    <div
-      className="
-        pointer-events-none
-        absolute inset-0 -z-10
-        h-full w-full
-        opacity-30 blur-[4px]
+                <p
+                  ref={descRef}
+                  id="home-desc"
+                  className="
+                    mt-8 max-w-md
+                    font-nunito
+                    text-base leading-7
+                    text-slate-300
 
-        lg:pointer-events-auto
-        lg:relative
-        lg:inset-auto
-        lg:z-auto
-        lg:mx-auto
-        lg:h-[500px]
-        lg:max-w-xl
-        lg:opacity-100
-        lg:blur-none
-      "
-    >
-      <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-500/20 blur-3xl" />
+                    sm:mt-6 sm:text-sm sm:leading-8
+                    md:text-lg
+                  "
+                >
+                  Join GFG BVCOE - learn, teach, and collaborate through workshops,
+                  events, project showcases and mentorship.
+                </p>
 
-      <div className="absolute left-1/2 top-[58%] h-20 w-80 -translate-x-1/2 rounded-full border border-green-300/35 bg-green-400/10 shadow-[0_0_70px_rgba(34,197,94,0.35)]" />
+                <div
+                  ref={btnRef}
+                  className="
+                    mt-10 flex flex-wrap
+                    items-center gap-4
+                    font-nunito
 
-      <div className="absolute left-1/2 top-[64%] h-14 w-[26rem] -translate-x-1/2 rounded-full border border-green-200/10" />
+                    sm:mt-8 sm:gap-4
+                  "
+                >
+                  <NavLink to="/events">
+                    <button
+                      id="btn-join"
+                      className="
+                        group inline-flex items-center gap-3
+                        rounded-full
+                        bg-green-600/80
+                        px-6 py-3.5
+                        text-sm font-bold text-white
+                        transition
+                        hover:-translate-y-1
+                        hover:bg-green-400
 
-      <div
-        className="
-          absolute left-1/2 top-[42%]
-          -translate-x-1/2 -translate-y-1/2
-          font-audiowide
-          text-[7rem] font-black leading-none
-          text-green-500
-          drop-shadow-[0_0_34px_rgba(34,197,94,0.8)]
+                        sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
+                      "
+                    >
+                      Our Events
 
-          md:text-[12rem]
-        "
-      >
-        gG
-      </div>
+                      <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </button>
+                  </NavLink>
 
-      <div className="absolute left-[8%] top-[10%] rounded-full border border-green-300/15 bg-white/[0.04] p-3 text-green-200 backdrop-blur sm:left-[18%] sm:top-[18%] sm:p-4">
-        <UsersRound className="h-5 w-5 sm:h-6 sm:w-6" />
-      </div>
+                  <button
+                    id="btn-about"
+                    onClick={() => navigate("/about")}
+                    className="
+                      group inline-flex items-center gap-3
+                      rounded-full
+                      border border-white/10
+                      bg-white/[0.03]
+                      px-6 py-3.5
+                      text-sm font-semibold text-slate-200
+                      backdrop-blur
+                      transition
+                      hover:-translate-y-1
+                      hover:border-green-300/40
+                      hover:bg-green-300/10
 
-      <div className="absolute right-[8%] top-[5%] rounded-full border border-green-300/15 bg-white/[0.04] p-3 text-green-200 backdrop-blur sm:right-[18%] sm:top-[10%] sm:p-4">
-        <Code2 className="h-5 w-5 sm:h-6 sm:w-6" />
-      </div>
+                      sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
+                    "
+                  >
+                    About us
 
-      <div className="absolute right-[2%] top-[45%] rounded-full border border-green-300/15 bg-white/[0.04] p-3 text-green-200 backdrop-blur sm:right-[4%] sm:top-[38%] sm:p-4">
-        <CalendarDays className="h-5 w-5 sm:h-6 sm:w-6" />
-      </div>
-    </div>
-  </div>
+                    <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </button>
+                </div>
+              </div>
 
-  {/* STATS — NORMAL FLOW ON MOBILE */}
-  <div
-    id="stats-grid"
-    className="
-      relative z-20
-      mt-4
-      grid grid-cols-3
-      overflow-hidden rounded-2xl
-      border border-green-400/10
-      bg-green-950/30
-      font-nunito
-      shadow-lg
-      ring-1 ring-inset ring-green-400/5
+              {/* LOGO BACKGROUND ON MOBILE */}
+              <div
+                className="
+                  pointer-events-none
+                  absolute inset-0 -z-10
+                  h-full w-full
+                  opacity-30 blur-[4px]
 
-      sm:mt-6 sm:rounded-3xl
+                  lg:pointer-events-auto
+                  lg:relative
+                  lg:inset-auto
+                  lg:z-auto
+                  lg:mx-auto
+                  lg:h-[500px]
+                  lg:max-w-xl
+                  lg:opacity-100
+                  lg:blur-none
+                "
+              >
+                <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-500/20 blur-3xl" />
 
-      lg:-mt-16
-    "
-  >
-    {stats.map(({ value, label, icon: Icon, highlight }) => (
-      <div
-        key={label}
-        className="
-          flex min-w-0
-          flex-col items-center justify-center
-          gap-2
-          border-r border-green-400/10
-          px-1 py-3
-          text-center
-          last:border-r-0
+                <div className="absolute left-1/2 top-[58%] h-20 w-80 -translate-x-1/2 rounded-full border border-green-300/35 bg-green-400/10 shadow-[0_0_70px_rgba(34,197,94,0.35)]" />
 
-          sm:flex-row
-          sm:justify-center
-          sm:gap-5
-          sm:px-6 sm:py-5
-          sm:text-left
-        "
-      >
-        <div
-          className={`rounded-full p-2 sm:p-4 ${
-            highlight
-              ? "bg-yellow-400/10 text-yellow-300"
-              : "bg-green-400/10 text-green-300"
-          }`}
-        >
-          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-        </div>
+                <div className="absolute left-1/2 top-[64%] h-14 w-[26rem] -translate-x-1/2 rounded-full border border-green-200/10" />
 
-        <div className="min-w-0">
-          <div className="text-sm font-extrabold text-green-300 sm:text-[22px]">
-            {value}
+                <div
+                  className="
+                    absolute left-1/2 top-[42%]
+                    -translate-x-1/2 -translate-y-1/2
+                    font-audiowide
+                    text-[7rem] font-black leading-none
+                    text-green-500
+                    drop-shadow-[0_0_34px_rgba(34,197,94,0.8)]
+
+                    md:text-[12rem]
+                  "
+                >
+                  gG
+                </div>
+
+                <div className="absolute left-[8%] top-[10%] rounded-full border border-green-300/15 bg-white/[0.04] p-3 text-green-200 backdrop-blur sm:left-[18%] sm:top-[18%] sm:p-4">
+                  <UsersRound className="h-5 w-5 sm:h-6 sm:w-6" />
+                </div>
+
+                <div className="absolute right-[8%] top-[5%] rounded-full border border-green-300/15 bg-white/[0.04] p-3 text-green-200 backdrop-blur sm:right-[18%] sm:top-[10%] sm:p-4">
+                  <Code2 className="h-5 w-5 sm:h-6 sm:w-6" />
+                </div>
+
+                <div className="absolute right-[2%] top-[45%] rounded-full border border-green-300/15 bg-white/[0.04] p-3 text-green-200 backdrop-blur sm:right-[4%] sm:top-[38%] sm:p-4">
+                  <CalendarDays className="h-5 w-5 sm:h-6 sm:w-6" />
+                </div>
+              </div>
+            </div>
+
+            {/* STATS */}
+            <div
+              id="stats-grid"
+              className="
+                relative z-20
+                mt-[-16px]
+                grid grid-cols-3
+                overflow-hidden rounded-3xl
+                border border-green-400/10
+                bg-green-950/30
+                font-nunito
+                shadow-lg
+                ring-1 ring-inset ring-green-400/5
+
+                sm:mt-6 sm:rounded-3xl
+
+                lg:-mt-16
+              "
+            >
+              {stats.map(({ value, label, icon: Icon, highlight }) => (
+                <div
+                  key={label}
+                  className="
+                    flex min-w-0
+                    flex-col items-center justify-center
+                    gap-4
+                    border-r border-green-400/10
+                    px-2 py-6
+                    text-center
+                    last:border-r-0
+
+                    sm:flex-row
+                    sm:justify-center
+                    sm:gap-5
+                    sm:px-6 sm:py-5
+                    sm:text-left
+                  "
+                >
+                  <div
+                    className={`rounded-full p-3 sm:p-4 ${
+                      highlight
+                        ? "bg-yellow-400/10 text-yellow-300"
+                        : "bg-green-400/10 text-green-300"
+                    }`}
+                  >
+                    <Icon className="h-5 w-5 sm:h-5 sm:w-5" />
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="text-lg font-extrabold text-green-300 sm:text-[22px]">
+                      {value}
+                    </div>
+
+                    <div className="mt-1.5 text-[10px] leading-relaxed text-slate-300 sm:mt-1 sm:text-sm sm:leading-5">
+                      {label}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-
-          <div className="mt-0.5 text-[9px] leading-tight text-slate-300 sm:mt-1 sm:text-sm sm:leading-5">
-            {label}
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-</div>
-      </section>
+        </section>
 
       <UpcomingEventSection variant="home" />
 
@@ -501,14 +506,14 @@ const journeyPhotos = [
               About Us
             </p>
 
-            <h2 className="mb-5 font-nunito text-4xl font-extrabold tracking-normal md:text-5xl">
+            <h2 className="mb-5 font-audiowide text-4xl font-extrabold tracking-normal md:text-5xl text-richblack-25">
               Who We{" "}
               <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
                 Are
               </span>
             </h2>
 
-            <p className="max-w-lg font-nunito text-base leading-8 text-slate-300 md:text-lg">
+            <p className="max-w-lg font-nunito text-base leading-8 text-richblack-25 md:text-lg">
               GFG BVCOE is a community of tech enthusiasts dedicated to fostering a
               culture of learning, innovation, and collaboration. We organize
               workshops, hackathons, and speaker sessions to help students grow their
@@ -517,7 +522,7 @@ const journeyPhotos = [
 
             <button
               onClick={() => navigate("/about")}
-              className="group mt-8 inline-flex items-center gap-3 rounded-full bg-green-500 px-7 py-3 font-nunito text-sm font-bold text-white shadow-[0_0_28px_rgba(34,197,94,0.32)] transition hover:-translate-y-1 hover:bg-green-400"
+              className="group mt-8 inline-flex items-center gap-3 rounded-full bg-green-600 px-7 py-3 font-nunito text-sm font-bold text-richblack-25   transition hover:-translate-y-1 hover:bg-green-400"
             >
               Learn More About Us
               <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -623,12 +628,12 @@ const journeyPhotos = [
         Our Journey
       </p>
 
-      <h3 className="mt-4 inline-block origin-left -rotate-1 text-3xl font-extrabold text-white md:text-4xl">
+      <h3 className="mt-4 inline-block origin-left -rotate-1 text-xl font-extrabold text-white md:text-4xl">
         Freshers Recruitment{" "}
         <span className="text-green-400">2024</span>
       </h3>
 
-      <p className="mt-5 max-w-md text-base leading-8 text-slate-300">
+      <p className=" mt-3 sm:mt-5 max-w-md text-base  text-richblack-25">
         A glimpse of the energy, enthusiasm and talent from last year's
         recruitment drive.
       </p>
