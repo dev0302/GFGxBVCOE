@@ -232,8 +232,9 @@ export default function OrbitCarousel() {
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
+      <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(circle,rgba(190,255,214,0.5)_1px,transparent_1px)] [background-size:46px_46px]" />
       <div
-        className="relative flex items-center justify-center"
+        className="relative z-10 flex items-center justify-center"
         style={{ width: containerWidth, height: containerHeight }}
       >
         {/* Active Person Card */}
@@ -248,8 +249,8 @@ export default function OrbitCarousel() {
               stiffness: 300,
               damping: 25,
             }}
-            className={`z-10 backdrop-blur-sm rounded-xl p-2 sm:p-3 md:p-4 ${cardWidth} text-center border border-white/10`}
-            style={{ backgroundColor: "#1e1e3f" }}
+            className={`z-10 rounded-xl p-2 sm:p-3 md:p-4 ${cardWidth} text-center border border-white/25 backdrop-blur-xl shadow-[0_20px_55px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.22)]`}
+            style={{ backgroundColor: "rgba(30, 30, 63, 0.42)" }}
           >
             <motion.img
               initial={{ opacity: 0, scale: 0.8 }}
@@ -281,20 +282,20 @@ export default function OrbitCarousel() {
             >
               <button
                 onClick={prev}
-                className="p-1 sm:p-1.5 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+                className="p-1 sm:p-1.5 rounded-full border border-white/20 bg-white/10 hover:bg-white/15 transition-colors backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
               >
                 <ChevronLeft size={14} className="text-gray-300 sm:w-4 sm:h-4" />
               </button>
               <button
                 onClick={handleViewAll}
-                className="flex items-center gap-1 px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                className="flex items-center gap-1 px-3 sm:px-4 py-0.5 sm:py-1 text-xs sm:text-sm rounded-full bg-indigo-600/65 text-white hover:bg-indigo-600/80 transition-colors border border-white/20 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
               >
                 <Users size={13} />
                 View All
               </button>
               <button
                 onClick={next}
-                className="p-1 sm:p-1.5 rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+                className="p-1 sm:p-1.5 rounded-full border border-white/20 bg-white/10 hover:bg-white/15 transition-colors backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
               >
                 <ChevronRight size={14} className="text-gray-300 sm:w-4 sm:h-4" />
               </button>
@@ -346,7 +347,7 @@ export default function OrbitCarousel() {
       </div>
 
       {/* Progress Indicator */}
-      <div className="flex justify-center mt-4 sm:mt-6 space-x-1.5 sm:space-x-2">
+      <div className="relative z-10 flex justify-center mt-4 sm:mt-6 space-x-1.5 sm:space-x-2">
         {people.map((_, index) => (
           <motion.button
             key={index}
