@@ -8,6 +8,7 @@ import CloudinaryIntroAnimation from "../components/CloudinaryIntroAnimation";
 import ImageGrid from "../components/ImageGrid";
 import UpcomingEventSection from "../components/UpcomingEventSection";
 import ProfileAvatarFlip from "../components/common/ProfileAvatarFlip";
+
 import Lenis from "lenis";
 import {
   ArrowUpRight,
@@ -29,6 +30,7 @@ import {
   Users,
   UsersRound,
 } from "lucide-react";
+import OrbitCarousel from "@/components/OrbitCarousel";
 gsap.registerPlugin(ScrollTrigger);
 
 function Home() {
@@ -487,24 +489,32 @@ const journeyPhotos = [
       </div>
 
       {/* About Section */}
-      <section ref={aboutSectionRef} className="relative overflow-hidden bg-[#020808] py-20 text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_30%,rgba(34,197,94,0.14),transparent_28%),linear-gradient(180deg,#020808_0%,#03100e_100%)]" />
-        <div className="absolute inset-0 opacity-25 [background-image:radial-gradient(circle,rgba(190,255,214,0.45)_1px,transparent_1px)] [background-size:48px_48px]" />
-
+      <section
+        ref={aboutSectionRef}
+        className="relative overflow-hidden bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 py-20 text-white"
+      >
         <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
+          
+          {/* Left Content */}
           <div className="reveal-up text-left">
             <p className="mb-4 font-nunito text-xs font-bold uppercase tracking-[0.2em] text-green-400">
               About Us
             </p>
+
             <h2 className="mb-5 font-nunito text-4xl font-extrabold tracking-normal md:text-5xl">
-              Who We Are
+              Who We{" "}
+              <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                Are
+              </span>
             </h2>
+
             <p className="max-w-lg font-nunito text-base leading-8 text-slate-300 md:text-lg">
-              GFG BVCOE is a community of tech enthusiasts dedicated to fostering
-              a culture of learning, innovation, and collaboration. We organize
-              workshops, hackathons, and speaker sessions to help students grow
-              their skills and connect with like-minded peers.
+              GFG BVCOE is a community of tech enthusiasts dedicated to fostering a
+              culture of learning, innovation, and collaboration. We organize
+              workshops, hackathons, and speaker sessions to help students grow their
+              skills and connect with like-minded peers.
             </p>
+
             <button
               onClick={() => navigate("/about")}
               className="group mt-8 inline-flex items-center gap-3 rounded-full bg-green-500 px-7 py-3 font-nunito text-sm font-bold text-white shadow-[0_0_28px_rgba(34,197,94,0.32)] transition hover:-translate-y-1 hover:bg-green-400"
@@ -514,130 +524,99 @@ const journeyPhotos = [
             </button>
           </div>
 
-          <div className="reveal-up relative min-h-[360px] overflow-hidden rounded-[2rem] border border-white/5 bg-transparent">
-            <div className="absolute left-[22%] bottom-8 h-36 w-24 rounded-t-full bg-green-950/80 shadow-[0_0_28px_rgba(34,197,94,0.18)]" />
-            <div className="absolute left-[27%] bottom-24 h-12 w-12 rounded-full bg-emerald-800" />
-            <div className="absolute left-[18%] bottom-0 h-28 w-40 rounded-[50%] bg-black/40" />
-
-            <div className="absolute left-[48%] top-10 h-56 w-72 -translate-x-1/2 rounded-xl border border-green-300/20 bg-[#071816]/90 p-5 shadow-[0_0_45px_rgba(34,197,94,0.2)]">
-              <div className="mb-5 flex gap-2">
-                <span className="h-2 w-2 rounded-full bg-green-400/70" />
-                <span className="h-2 w-2 rounded-full bg-green-400/30" />
-                <span className="h-2 w-2 rounded-full bg-green-400/20" />
-              </div>
-              {[72, 48, 82, 62, 76, 54].map((width, index) => (
-                <div key={width + index} className="mb-4 flex items-center gap-3">
-                  <span className="h-1.5 w-8 rounded-full bg-green-400/20" />
-                  <span className="h-1.5 rounded-full bg-green-300/40" style={{ width: `${width}%` }} />
-                </div>
-              ))}
-              <div className="absolute right-5 top-16 rounded-xl bg-green-500/20 p-4 text-green-200">
-                <Code2 className="h-8 w-8" />
-              </div>
-            </div>
-
-            <div className="absolute right-[12%] bottom-4 h-32 w-24 rounded-t-full bg-green-950/80" />
-            <div className="absolute right-[14%] bottom-32 h-11 w-11 rounded-full bg-emerald-800" />
-            <div className="absolute right-[8%] bottom-0 h-24 w-36 rounded-[50%] bg-black/40" />
-
-            <div className="absolute left-[7%] top-12 rounded-full border border-green-300/15 bg-white/[0.04] p-4 text-green-200 backdrop-blur">
-              <UsersRound className="h-7 w-7" />
-            </div>
-            <div className="absolute right-[8%] top-8 rounded-full border border-green-300/15 bg-white/[0.04] p-4 text-green-200 backdrop-blur">
-              <Lightbulb className="h-7 w-7" />
-            </div>
-          </div>
+          {/* Right Illustration - Desktop Only */}
+          <div className="reveal-up relative hidden h-[360px] overflow-hidden rounded-[2rem] border border-green-200/10 bg-green-950/10 lg:block"> {/* Left Person */} <div className="absolute bottom-8 left-[22%] h-36 w-24 rounded-t-full bg-emerald-400/35 shadow-[0_0_32px_rgba(74,222,128,0.28)]" /> <div className="absolute bottom-24 left-[27%] h-12 w-12 rounded-full bg-emerald-300/70 shadow-[0_0_20px_rgba(110,231,183,0.25)]" /> <div className="absolute bottom-0 left-[18%] h-28 w-40 rounded-[50%] bg-emerald-950/20" /> {/* Center Code Window */} <div className="absolute left-[48%] top-10 h-56 w-72 -translate-x-1/2 rounded-xl border border-green-200/30 bg-emerald-950/50 p-5 shadow-[0_0_50px_rgba(74,222,128,0.25)] backdrop-blur-sm"> <div className="mb-5 flex gap-2"> <span className="h-2 w-2 rounded-full bg-green-300/90" /> <span className="h-2 w-2 rounded-full bg-green-300/60" /> <span className="h-2 w-2 rounded-full bg-green-300/40" /> </div> {[72, 48, 82, 62, 76, 54].map((width, index) => ( <div key={width + index} className="mb-4 flex items-center gap-3" > <span className="h-1.5 w-8 rounded-full bg-green-300/30" /> <span className="h-1.5 rounded-full bg-green-200/60" style={{ width: `${width}%` }} /> </div> ))} <div className="absolute right-5 top-16 rounded-xl bg-green-300/20 p-4 text-green-100 shadow-[0_0_20px_rgba(134,239,172,0.15)]"> <Code2 className="h-8 w-8" /> </div> </div> {/* Right Person */} <div className="absolute bottom-4 right-[12%] h-32 w-24 rounded-t-full bg-emerald-400/35 shadow-[0_0_32px_rgba(74,222,128,0.2)]" /> <div className="absolute bottom-32 right-[14%] h-11 w-11 rounded-full bg-emerald-300/70 shadow-[0_0_20px_rgba(110,231,183,0.25)]" /> <div className="absolute bottom-0 right-[8%] h-24 w-36 rounded-[50%] bg-emerald-950/20" /> {/* Users Icon */} <div className="absolute left-[7%] top-12 rounded-full border border-green-200/25 bg-green-300/10 p-4 text-green-100 shadow-[0_0_24px_rgba(74,222,128,0.15)] backdrop-blur"> <UsersRound className="h-7 w-7" /> </div> {/* Lightbulb Icon */} <div className="absolute right-[8%] top-8 rounded-full border border-green-200/25 bg-green-300/10 p-4 text-green-100 shadow-[0_0_24px_rgba(74,222,128,0.15)] backdrop-blur"> <Lightbulb className="h-7 w-7" /> </div> </div>
         </div>
       </section>
 
 
       {/* ----------------------- */}
 
-      <section ref={exploreSectionRef} className="relative overflow-hidden bg-[#020808] px-4 py-16 text-white sm:px-6 lg:px-8">
+      <section
+        ref={exploreSectionRef}
+        className="relative overflow-hidden bg-[#161629] px-4 py-10 text-white sm:px-6 lg:px-8"
+      >
         <div className="absolute inset-x-0 top-0 mx-auto h-px max-w-6xl bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_8%_72%,rgba(16,185,129,0.18),transparent_22%),radial-gradient(circle_at_84%_28%,rgba(59,130,246,0.14),transparent_24%),linear-gradient(180deg,#020808_0%,#030913_48%,#020808_100%)]" />
 
-        <div className="relative z-10 mx-auto max-w-[1480px] rounded-[1.75rem] border border-white/[0.06] bg-[#030912]/80 px-5 py-10 shadow-[0_28px_100px_rgba(0,0,0,0.5)] sm:px-8 lg:px-10">
-          <div className="reveal-up mx-auto flex w-fit items-center gap-2 rounded-full border border-emerald-300/10 bg-emerald-300/[0.06] px-5 py-2 font-nunito text-sm font-semibold text-emerald-200 shadow-[0_0_34px_rgba(16,185,129,0.12)]">
-            <Sparkles className="h-4 w-4 fill-emerald-200 text-emerald-200" />
-            Explore More
-          </div>
+        <div className="absolute inset-0 bg-[#161629]" />
+
+        <div className="relative z-10 mx-auto max-w-[1480px] rounded-[1.75rem] border border-white/[0.06] bg-[#161629] px-5 py-2 sm:px-8 sm:py-8 lg:px-10">
 
           <div className="reveal-up mx-auto mt-6 max-w-3xl text-center font-nunito">
-            <h2 className="text-4xl font-extrabold tracking-normal text-white md:text-6xl">
+            <h2 className="text-2xl font-extrabold tracking-normal text-white md:text-4xl">
               Explore. Connect. <span className="text-green-400">Grow.</span>
             </h2>
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-300 md:text-lg">
+            <p className="mx-auto mt-2 sm:mt-5 max-w-4xl text-sm leading-6 sm:leading-8 text-slate-300 md:text-lg">
               Discover our journey through impactful events, amazing people,
               and unforgettable moments.
             </p>
           </div>
 
-          <div className="reveal-up mx-auto mt-5 grid max-w-7xl grid-cols-4 gap-2 sm:mt-7 sm:gap-4">
-  {exploreCards.map(
-    ({
-      eyebrow,
-      title,
-      description,
-      cta,
-      icon: Icon,
-      to,
-      tone,
-      iconTone,
-      textTone,
-    }) => (
-      <button
-        key={title}
-        onClick={() => navigate(to)}
-        className={`group min-w-0 rounded-xl border border-white/10 bg-gradient-to-br ${tone} p-2 text-left font-nunito transition-transform duration-200 hover:-translate-y-1 sm:min-h-[220px] sm:rounded-2xl sm:p-5`}
-      >
-        <div className="flex h-full flex-col justify-between">
-          <div>
-            {/* Icon */}
-            <div
-              className={`mb-2 flex h-8 w-8 items-center justify-center rounded-full sm:mb-4 sm:h-14 sm:w-14 ${iconTone}`}
-            >
-              <Icon className="h-4 w-4 sm:h-6 sm:w-6" />
-            </div>
+          <div className="reveal-up mx-auto mt-8 grid max-w-7xl grid-cols-4 gap-2 sm:mt-7 sm:gap-4">
+            {exploreCards.map(
+              ({
+                eyebrow,
+                title,
+                description,
+                cta,
+                icon: Icon,
+                to,
+                tone,
+                iconTone,
+                textTone,
+              }) => (
+                <button
+                  key={title}
+                  onClick={() => navigate(to)}
+                  className={`group min-w-0 rounded-xl border border-white/10 bg-gradient-to-br ${tone} p-2 text-left font-nunito transition-transform duration-200 hover:-translate-y-1 sm:min-h-[220px] sm:rounded-2xl sm:p-5`}
+                >
+                  <div className="flex h-full flex-col justify-between">
+                    <div>
+                      {/* Icon */}
+                      <div
+                        className={`mb-2 flex h-8 w-8 items-center justify-center rounded-full sm:mb-4 sm:h-14 sm:w-14 ${iconTone}`}
+                      >
+                        <Icon className="h-4 w-4 sm:h-6 sm:w-6" />
+                      </div>
 
-            {/* Eyebrow + Title */}
-            <div className="flex flex-col gap-0.5 sm:flex-row sm:flex-wrap sm:items-end sm:gap-x-2">
-              <p
-                className={`truncate text-[8px] font-bold leading-tight sm:text-sm ${textTone}`}
-              >
-                {eyebrow}
-              </p>
+                      {/* Eyebrow + Title */}
+                      <div className="flex flex-col gap-0.5 sm:flex-row sm:flex-wrap sm:items-end sm:gap-x-2">
+                        <p
+                          className={`truncate text-[8px] font-bold leading-tight sm:text-sm ${textTone}`}
+                        >
+                          {eyebrow}
+                        </p>
 
-              <h3 className="break-words text-[11px] font-extrabold leading-tight text-white sm:text-2xl sm:leading-none">
-                {title}
-              </h3>
-            </div>
+                        <h3 className="break-words text-[11px] font-extrabold leading-tight text-white sm:text-2xl sm:leading-none">
+                          {title}
+                        </h3>
+                      </div>
 
-            {/* Description */}
-            <p className="mt-2 line-clamp-3 text-[8px] leading-3 text-slate-300 sm:mt-4 sm:max-w-[14rem] sm:text-sm sm:leading-6">
-              {description}
-            </p>
+                      {/* Description */}
+                      <p className="mt-2 hidden sm:block line-clamp-3 text-[8px] leading-3 text-slate-300 sm:mt-4 sm:max-w-[14rem] sm:text-sm sm:leading-6">
+                        {description}
+                      </p>
+                    </div>
+
+                    {/* CTA */}
+                    <div className="mt-3 flex items-center justify-between gap-1 sm:mt-5">
+                      <span
+                        className={`hidden sm:block truncate text-[8px] font-bold sm:text-sm ${textTone}`}
+                      >
+                        {cta}
+                      </span>
+
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition-transform duration-200 group-hover:translate-x-1 sm:h-9 sm:w-9">
+                        <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              )
+            )}
           </div>
 
-          {/* CTA */}
-          <div className="mt-3 flex items-center justify-between gap-1 sm:mt-5">
-            <span
-              className={`truncate text-[8px] font-bold sm:text-sm ${textTone}`}
-            >
-              {cta}
-            </span>
-
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition-transform duration-200 group-hover:translate-x-1 sm:h-9 sm:w-9">
-              <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
-            </span>
-          </div>
-        </div>
-      </button>
-    )
-  )}
-</div>
-
-          <div className="reveal-up mt-10 overflow-hidden rounded-2xl border border-white/10 bg-[#030913]/90 p-5 sm:p-8 lg:p-10">
+          <div className="reveal-up mt-10 overflow-hidden rounded-2xl border border-white/10 bg-[#161629] p-5 sm:p-8 lg:p-10">
   <div className="grid gap-8 lg:grid-cols-[minmax(220px,0.32fr)_minmax(0,0.68fr)] lg:items-center">
     <div className="font-nunito">
       <p className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-300">
@@ -718,7 +697,7 @@ const journeyPhotos = [
       </section>
 
       {/* Team Section */}
-      <section className="py-20 bg-[#161629] text-richblack-25 relative overflow-hidden border-b-2 border-gray-600 border-opacity-40">
+      <section className="py-20 bg-[#071426] text-richblack-25 relative overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0 opacity-5">
           <div
@@ -752,184 +731,7 @@ const journeyPhotos = [
           </div>
 
           {/* Team Preview Grid */}
-          <div ref={teamCardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 max-w-6xl mx-auto">
-            {/* Chair Person - Featured */}
-            <div className="lg:col-span-1 md:col-span-2 group font-nunito">
-              <div className="relative bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-3xl p-8 border border-green-400/30 hover:border-green-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/20 backdrop-blur-sm">
-                {/* Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                
-                {/* Content */}
-                <div className="relative z-10 text-center">
-                  <ProfileAvatarFlip
-                    flipKey="toshika-goswami"
-                    src="/Toshika.webp"
-                    alt="Toshika Goswami"
-                    initials="TG"
-                    animateOnScroll
-                    imageLoading="lazy"
-                    className="h-24 w-24 mx-auto mb-6"
-                    borderClassName="border-4 border-green-400/50 shadow-lg group-hover:border-green-400 transition-colors duration-300"
-                    imageClassName="group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <h3 className="font-rounded text-2xl font-bold text-richblack-25 mb-2 group-hover:text-green-300 transition-colors duration-300">
-                    Toshika Goswami
-                  </h3>
-                  <p className="text-green-300 text-lg font-semibold mb-2">Chair Person</p>
-                  <p className="text-gray-300 text-sm mb-4">CSE • 4th Year</p>
-                  
-                  {/* Social Links */}
-                  <div className="flex justify-center gap-3">
-                    <a 
-                      href="mailto:toshikagoswami4@gmail.com"
-                      className="w-10 h-10 bg-green-500/80 rounded-full flex items-center justify-center hover:bg-green-400 hover:scale-110 transition-all duration-300"
-                      title="Email"
-                    >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                      </svg>
-                    </a>
-                    <a 
-                      href="https://www.linkedin.com/in/toshika-goswami-39791022a"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 bg-blue-600/80 rounded-full flex items-center justify-center hover:bg-blue-500 hover:scale-110 transition-all duration-300"
-                      title="LinkedIn"
-                    >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.328v15.344C1 18.4 1.595 19 2.328 19h15.34c.734 0 1.332-.6 1.332-1.328V2.328C19 1.581 18.402 1 17.668 1z" />
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Vice Chair Person */}
-            <div className="group font-nunito">
-              <div className="relative bg-gradient-to-br from-blue-600/20 to-cyan-600/20 rounded-3xl p-6 border border-blue-400/30 hover:border-blue-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 backdrop-blur-sm">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                
-                <div className="relative z-10 text-center">
-                  <ProfileAvatarFlip
-                    flipKey="kartik-bhattacharya"
-                    src="/Kartik.webp"
-                    alt="Kartik Bhattacharya"
-                    initials="KB"
-                    animateOnScroll
-                    imageLoading="lazy"
-                    className="h-20 w-20 mx-auto mb-4"
-                    borderClassName="border-2 border-blue-400/50 shadow-lg group-hover:border-blue-400 transition-colors duration-300"
-                    imageClassName="group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <h3 className="font-rounded text-xl font-bold text-richblack-25 mb-1 group-hover:text-blue-300 transition-colors duration-300">
-                    Kartik Bhattacharya
-                  </h3>
-                  <p className="text-blue-300 font-semibold mb-1">Vice-Chairperson</p>
-                  <p className="text-gray-300 text-sm mb-3">CSE • 3rd Year</p>
-                  
-                  <div className="flex justify-center gap-2">
-                    <a 
-                      href="mailto:kartikbhattacharya10@gmail.com"
-                      className="w-8 h-8 bg-blue-500/80 rounded-full flex items-center justify-center hover:bg-blue-400 hover:scale-110 transition-all duration-300"
-                      title="Email"
-                    >
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                      </svg>
-                    </a>
-                    <a 
-                      href="https://linkedin.com/in/kafiltafish21"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 bg-blue-600/80 rounded-full flex items-center justify-center hover:bg-blue-500 hover:scale-110 transition-all duration-300"
-                      title="LinkedIn"
-                    >
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.328v15.344C1 18.4 1.595 19 2.328 19h15.34c.734 0 1.332-.6 1.332-1.328V2.328C19 1.581 18.402 1 17.668 1z" />
-                      </svg>
-                    </a>
-                    <a 
-                      href="https://www.instagram.com/_kafiltafish_21_/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 bg-pink-600/80 rounded-full flex items-center justify-center hover:bg-pink-500 hover:scale-110 transition-all duration-300"
-                      title="Instagram"
-                    >
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 2C6.686 2 6.343 2.014 5.514 2.072 4.69 2.13 4.188 2.333 3.77 2.551a2.5 2.5 0 0 0-.919.919C2.333 4.188 2.13 4.69 2.072 5.514 2.014 6.343 2 6.686 2 10s.014 3.657.072 4.486c.058.824.261 1.326.479 1.744a2.5 2.5 0 0 0 .919.919c.418.218.92.421 1.744.479.829.058 1.168.072 4.486.072s3.657-.014 4.486-.072c.824-.058 1.326-.261 1.744-.479a2.5 2.5 0 0 0 .919-.919c.218-.418.421-.92.479-1.744.058-.829.072-1.168.072-4.486s-.014-3.657-.072-4.486c-.058-.824-.261-1.326-.479-1.744a2.5 2.5 0 0 0-.919-.919c-.418-.218-.92-.421-1.744-.479C13.657 2.014 13.314 2 10 2zm0 1.5c3.136 0 3.389.007 4.61.045.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.919.11.281.24.705.275 1.485.038 1.22.045 1.475.045 4.61s-.007 3.389-.045 4.61c-.035.78-.166 1.204-.275 1.486a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.919.598-.28.11-.704.24-1.485.275-1.22.038-1.475.045-4.61.045s-3.389-.007-4.61-.045c-.78-.035-1.203-.166-1.485-.275a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.704-.275-1.485-.038-1.22-.045-1.475-.045-4.61s.007-3.389.045-4.61c.035-.78.166-1.203.275-1.485.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.281-.11.704-.24 1.485-.275C6.611 3.507 6.864 3.5 10 3.5z" clipRule="evenodd"/>
-                        <path d="M10 5.838a4.162 4.162 0 1 0 0 8.324 4.162 4.162 0 0 0 0-8.324zM10 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm4.208-7.208a.972.972 0 1 1-1.944 0 .972.972 0 0 1 1.944 0z"/>
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Design Lead */}
-            <div className="group font-nunito">
-              <div className="relative bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-3xl p-6 border border-purple-400/30 hover:border-purple-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20 backdrop-blur-sm">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                
-                <div className="relative z-10 text-center">
-                  <ProfileAvatarFlip
-                    flipKey="archita"
-                    src="/Archita.webp"
-                    alt="Archita"
-                    initials="A"
-                    animateOnScroll
-                    imageLoading="lazy"
-                    className="h-20 w-20 mx-auto mb-4"
-                    borderClassName="border-2 border-purple-400/50 shadow-lg group-hover:border-purple-400 transition-colors duration-300"
-                    imageClassName="group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <h3 className="font-rounded text-xl font-bold text-richblack-25 mb-1 group-hover:text-purple-300 transition-colors duration-300">
-                    Archita
-                  </h3>
-                  <p className="text-purple-300 font-semibold mb-1">Design & Creative Lead</p>
-                  <p className="text-gray-300 text-sm mb-3">IT • 3rd Year</p>
-                  
-                  <div className="flex justify-center gap-2">
-                    <a 
-                      href="mailto:archita770@gmail.com"
-                      className="w-8 h-8 bg-purple-500/80 rounded-full flex items-center justify-center hover:bg-purple-400 hover:scale-110 transition-all duration-300"
-                      title="Email"
-                    >
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                      </svg>
-                    </a>
-                    <a 
-                      href="https://www.linkedin.com/in/archita-337521376"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 bg-blue-600/80 rounded-full flex items-center justify-center hover:bg-blue-500 hover:scale-110 transition-all duration-300"
-                      title="LinkedIn"
-                    >
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.328v15.344C1 18.4 1.595 19 2.328 19h15.34c.734 0 1.332-.6 1.332-1.328V2.328C19 1.581 18.402 1 17.668 1z" />
-                      </svg>
-                    </a>
-                    <a 
-                      href="https://www.instagram.com/archiitta.r?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 bg-pink-600/80 rounded-full flex items-center justify-center hover:bg-pink-500 hover:scale-110 transition-all duration-300"
-                      title="Instagram"
-                    >
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 2C6.686 2 6.343 2.014 5.514 2.072 4.69 2.13 4.188 2.333 3.77 2.551a2.5 2.5 0 0 0-.919.919C2.333 4.188 2.13 4.69 2.072 5.514 2.014 6.343 2 6.686 2 10s.014 3.657.072 4.486c.058.824.261 1.326.479 1.744a2.5 2.5 0 0 0 .919.919c.418.218.92.421 1.744.479.829.058 1.168.072 4.486.072s3.657-.014 4.486-.072c.824-.058 1.326-.261 1.744-.479a2.5 2.5 0 0 0 .919-.919c.218-.418.421-.92.479-1.744.058-.829.072-1.168.072-4.486s-.014-3.657-.072-4.486c-.058-.824-.261-1.326-.479-1.744a2.5 2.5 0 0 0-.919-.919c-.418-.218-.92-.421-1.744-.479C13.657 2.014 13.314 2 10 2zm0 1.5c3.136 0 3.389.007 4.61.045.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.919.11.281.24.705.275 1.485.038 1.22.045 1.475.045 4.61s-.007 3.389-.045 4.61c-.035.78-.166 1.204-.275 1.486a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.919.598-.28.11-.704.24-1.485.275-1.22.038-1.475.045-4.61.045s-3.389-.007-4.61-.045c-.78-.035-1.203-.166-1.485-.275a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.704-.275-1.485-.038-1.22-.045-1.475-.045-4.61s.007-3.389.045-4.61c.035-.78.166-1.203.275-1.485.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.281-.11.704-.24 1.485-.275C6.611 3.507 6.864 3.5 10 3.5z" clipRule="evenodd"/>
-                        <path d="M10 5.838a4.162 4.162 0 1 0 0 8.324 4.162 4.162 0 0 0 0-8.324zM10 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm4.208-7.208a.972.972 0 1 1-1.944 0 .972.972 0 0 1 1.944 0z"/>
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+         
 
           {/* Call to Action */}
           <div className="text-center">
@@ -950,10 +752,14 @@ const journeyPhotos = [
         </div>
       </section>
 
+       <CloudinaryIntroAnimation />
+
+      <OrbitCarousel></OrbitCarousel>
+
       {/* Image Grid */}
       <ImageGrid />
 
-      <CloudinaryIntroAnimation />
+     
 
       {/* Footer */}
       <Footer />

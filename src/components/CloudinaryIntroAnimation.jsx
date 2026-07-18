@@ -4,6 +4,7 @@ import { motion, useTransform, useSpring, useMotionValue } from "framer-motion";
 const IMG_WIDTH = 60;
 const IMG_HEIGHT = 85;
 const TOTAL_IMAGES = 20;
+
 // Single source of truth for how much scroll the animation needs.
 // This now drives BOTH the progress math and the pinned section height,
 // so they can never fall out of sync.
@@ -138,6 +139,18 @@ const scrollRotate = useTransform(
   const contentOpacity = useTransform(smoothMorph, [0.8, 1], [0, 1]);
   const contentY = useTransform(smoothMorph, [0.8, 1], [20, 0]);
 
+  const backgroundColor = useTransform(
+  virtualScroll,
+  [-PRE_PIN_DISTANCE, -100, 80],
+  ["#071426", "#071426", "#161629"]
+);
+
+const greenGlowOpacity = useTransform(
+  virtualScroll,
+  [-100, 80],
+  [0, 1]
+);
+
   useEffect(() => {
     if (!containerRef.current) return undefined;
 
@@ -266,12 +279,13 @@ const pinClassName =
 }}
       className="relative overflow-visible border-t border-emerald-300/10 bg-[#020808]"
     >
-      <div
+      <motion.div
   ref={containerRef}
   style={{
     top: pinState === "after" ? `${PIN_DISTANCE}px` : "0px",
+    backgroundColor,
   }}
-  className={`${pinClassName} h-screen min-h-[620px] w-full overflow-hidden bg-[radial-gradient(circle_at_50%_15%,rgba(34,197,94,0.20),transparent_30%),radial-gradient(circle_at_18%_78%,rgba(16,185,129,0.12),transparent_25%),linear-gradient(180deg,#020808_0%,#03140f_55%,#020808_100%)]`}
+  className={`${pinClassName} h-screen pb-40 min-h-[620px] w-full overflow-hidden`}
 >
         <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(circle,rgba(190,255,214,0.5)_1px,transparent_1px)] [background-size:46px_46px]" />
         <div className="flex h-full w-full flex-col items-center justify-center">
@@ -279,21 +293,51 @@ const pinClassName =
             <motion.h2
               initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
               animate={
-                introPhase === "circle" && morphValue < 0.5
-                  ? { opacity: 1 - morphValue * 2, y: 0, filter: "blur(0px)" }
-                  : { opacity: 0, filter: "blur(10px)" }
+                introPhase === "circle"
+                  ? {
+                      opacity:
+                        morphValue < 0.2
+                          ? 0
+                          : morphValue < 0.3
+                            ? (morphValue - 0.2) * 10
+                            : morphValue < 0.5
+                              ? 1 - ((morphValue - 0.3) / 0.2)
+                              : 0,
+                      y: 0,
+                      filter: morphValue < 0.5 ? "blur(0px)" : "blur(10px)",
+                    }
+                  : {
+                      opacity: 0,
+                      y: 20,
+                      filter: "blur(10px)",
+                    }
               }
               transition={{ duration: 1 }}
-              className="text-2xl font-semibold tracking-tight text-white md:text-4xl"
+              className="text-2xl font-montserrat font-semibold tracking-tight text-richblack-200/60 md:text-4xl"
             >
-              Moments that build community.
+              Meet the Minds Behind the Community.
             </motion.h2>
             <motion.p
               initial={{ opacity: 0 }}
               animate={
-                introPhase === "circle" && morphValue < 0.5
-                  ? { opacity: 0.5 - morphValue }
-                  : { opacity: 0 }
+                introPhase === "circle"
+                  ? {
+                      opacity:
+                        morphValue < 0.2
+                          ? 0
+                          : morphValue < 0.3
+                            ? (morphValue - 0.2) * 10
+                            : morphValue < 0.5
+                              ? 1 - ((morphValue - 0.3) / 0.2)
+                              : 0,
+                      y: 0,
+                      filter: morphValue < 0.5 ? "blur(0px)" : "blur(10px)",
+                    }
+                  : {
+                      opacity: 0,
+                      y: 20,
+                      filter: "blur(10px)",
+                    }
               }
               transition={{ duration: 1, delay: 0.2 }}
               className="mt-4 text-xs font-bold tracking-[0.2em] text-emerald-300"
@@ -306,11 +350,11 @@ const pinClassName =
             style={{ opacity: contentOpacity, y: contentY }}
             className="pointer-events-none absolute top-[10%] z-10 flex flex-col items-center justify-center px-4 text-center"
           >
-            <h2 className="mb-4 text-3xl font-semibold tracking-tight text-white md:text-5xl">
-              Explore Our Events
+            <h2 className="mb-4 mt-10 text-3xl font-montserrat font-semibold tracking-tight text-richblack-200 md:text-4xl">
+              Meet the Minds Behind the Community
             </h2>
-            <p className="max-w-lg text-sm leading-relaxed text-slate-300 md:text-base">
-              A moving wall of highlights from the GFG BVCOE event archive.
+            <p className="max-w-xl text-sm leading-relaxed text-richblack-200 md:text-base">
+              The people who turn ideas into action. Meet our Society Heads, Core Team, and dedicated members who collaborate, create, and work together to make every initiative, event, and experience possible.
             </p>
           </motion.div>
 
@@ -337,23 +381,42 @@ const pinClassName =
                   rotation: circleAngle + 90,
                 };
 
-                const baseRadius = Math.min(containerSize.width, containerSize.height * 1.5);
-                const arcRadius = baseRadius * (isMobile ? 1.4 : 1.1);
-                const arcApexY = containerSize.height * (isMobile ? 0.35 : 0.25);
-                const arcCenterY = arcApexY + arcRadius;
-                const spreadAngle = isMobile ? 100 : 130;
-                const startAngle = -90 - spreadAngle / 2;
-                const step = spreadAngle / (TOTAL_IMAGES - 1);
-                const scrollProgress = Math.min(Math.max(rotateValue / 360, 0), 1);
-                const boundedRotation = -scrollProgress * spreadAngle * 0.8;
-                const currentArcAngle = startAngle + index * step + boundedRotation;
-                const arcRad = (currentArcAngle * Math.PI) / 180;
-                const arcPos = {
-                  x: Math.cos(arcRad) * arcRadius + parallaxValue,
-                  y: Math.sin(arcRad) * arcRadius + arcCenterY,
-                  rotation: currentArcAngle + 90,
-                  scale: isMobile ? 1.4 : 1.8,
-                };
+                const scrollProgress = Math.min(
+  Math.max(rotateValue / 360, 0),
+  1
+);
+
+// Move the entire flow from right to left
+const movingIndex =
+  index - scrollProgress * (TOTAL_IMAGES * 0.7);
+
+const spacing = isMobile ? 90 : 130;
+
+const x =
+  movingIndex * spacing -
+  (TOTAL_IMAGES * spacing) / 2 +
+  containerSize.width / 2;
+
+// Create a curved path instead of a horizontal line
+const normalizedX =
+  (x - containerSize.width / 2) /
+  (containerSize.width * 0.7);
+
+const curveAmount = isMobile ? 120 : 260;
+
+const arcPos = {
+  x: x - containerSize.width / 2 + parallaxValue,
+
+  // Images curve downward when entering/leaving
+  y:
+    containerSize.height * 0.25 +
+    Math.pow(normalizedX, 2) * curveAmount,
+
+  // Slight rotation following the curve
+  rotation: normalizedX * 25,
+
+  scale: isMobile ? 1.4 : 1.8,
+};
 
                 target = {
                   x: lerp(circlePos.x, arcPos.x, morphValue),
@@ -368,7 +431,7 @@ const pinClassName =
             })}
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
