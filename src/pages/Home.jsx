@@ -70,7 +70,6 @@ function Home() {
     { value: "100+", label: "Active Members", icon: UsersRound },
     { value: "10+", label: "Events Held", icon: CalendarDays },
     { value: "10+", label: "Workshops Conducted", icon: Code2 },
-    { value: "5+", label: "Projects Completed", icon: Trophy, highlight: true },
   ];
 
   const exploreCards = [
@@ -229,12 +228,12 @@ const journeyPhotos = [
         <div className="absolute left-1/2 top-24 h-72 w-72 -translate-x-1/2 rounded-full border border-emerald-300/10 md:left-[72%] md:top-24 md:h-[28rem] md:w-[28rem]" />
         <div className="absolute left-[58%] top-20 hidden h-96 w-96 rounded-full border border-dashed border-emerald-200/10 md:block" />
 
-        <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col px-6 pb-12 pt-24 lg:px-8">
-          <div className="grid flex-1 items-center gap-12 lg:grid-cols-[1fr_0.9fr]">
-            <div className="max-w-2xl text-left mt-[-8rem]">
+        <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col px-6 pb-12 sm:pt-24 pt-48 lg:px-8">
+          <div className="relative grid flex-1 items-center gap-12 pb-2 sm:pb-16 lg:grid-cols-[1fr_0.9fr] lg:pb-0">
+            <div className="relative z-10 max-w-2xl text-left mt-[-8rem]">
               <h1
                 ref={titleRef}
-                className="font-nunito text-5xl font-extrabold leading-tight tracking-normal text-white md:text-5xl"
+                className="font-nunito text-3xl font-extrabold leading-tight tracking-normal text-white md:text-5xl"
               >
                 Empowering Students
                 <br />
@@ -247,7 +246,7 @@ const journeyPhotos = [
               <p
                 ref={descRef}
                 id="home-desc"
-                className="mt-6 max-w-md font-nunito text-base leading-8 text-slate-300 md:text-lg"
+                className="mt-6 max-w-md font-nunito text-sm leading-6 sm:leading-8 text-slate-300 md:text-lg"
               >
                 Join GFG BVCOE - learn, teach, and collaborate through workshops,
                 events, project showcases and mentorship.
@@ -257,9 +256,9 @@ const journeyPhotos = [
                 <NavLink to="/signup">
                   <button
                     id="btn-join"
-                    className="group inline-flex items-center gap-3 rounded-full bg-green-500 px-7 py-3 text-sm font-bold text-white shadow-[0_0_30px_rgba(34,197,94,0.36)] transition hover:-translate-y-1 hover:bg-green-400"
+                    className="group inline-flex items-center gap-3 rounded-full bg-green-600/80 px-7 py-3 text-sm font-bold text-white transition hover:-translate-y-1 hover:bg-green-400"
                   >
-                    Join Our Community
+                    Our Events
                     <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                   </button>
                 </NavLink>
@@ -269,7 +268,7 @@ const journeyPhotos = [
                   onClick={() => navigate("/about")}
                   className="group inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.03] px-7 py-3 text-sm font-semibold text-slate-200 backdrop-blur transition hover:-translate-y-1 hover:border-green-300/40 hover:bg-green-300/10"
                 >
-                  Learn More
+                  About us
                   <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </button>
               </div>
@@ -277,65 +276,97 @@ const journeyPhotos = [
               
             </div>
 
-            <div className="relative mx-auto h-[360px] w-full max-w-xl lg:h-[500px]">
+            {/* gradient logo div */}
+            <div
+              className="
+                pointer-events-none absolute inset-0 -z-10
+                mx-auto h-full w-full
+                opacity-40 blur-[3px]
+
+                lg:pointer-events-auto
+                lg:relative lg:inset-auto lg:z-auto
+                lg:h-[500px] lg:max-w-xl
+                lg:opacity-100 lg:blur-none
+              "
+            >
               <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-500/20 blur-3xl" />
+
               <div className="absolute left-1/2 top-[58%] h-20 w-80 -translate-x-1/2 rounded-full border border-green-300/35 bg-green-400/10 shadow-[0_0_70px_rgba(34,197,94,0.35)]" />
+
               <div className="absolute left-1/2 top-[64%] h-14 w-[26rem] -translate-x-1/2 rounded-full border border-green-200/10" />
+
               <div className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 font-audiowide text-[8rem] font-black leading-none text-green-500 drop-shadow-[0_0_34px_rgba(34,197,94,0.8)] md:text-[12rem]">
                 gG
               </div>
+
               <div className="absolute left-[18%] top-[18%] rounded-full border border-green-300/15 bg-white/[0.04] p-4 text-green-200 shadow-[0_0_25px_rgba(34,197,94,0.16)] backdrop-blur">
                 <UsersRound className="h-6 w-6" />
               </div>
+
               <div className="absolute right-[18%] top-[10%] rounded-full border border-green-300/15 bg-white/[0.04] p-4 text-green-200 shadow-[0_0_25px_rgba(34,197,94,0.16)] backdrop-blur">
                 <Code2 className="h-6 w-6" />
               </div>
+
               <div className="absolute right-[4%] top-[38%] rounded-full border border-green-300/15 bg-white/[0.04] p-4 text-green-200 shadow-[0_0_25px_rgba(34,197,94,0.16)] backdrop-blur">
                 <CalendarDays className="h-6 w-6" />
               </div>
             </div>
+
+
+
           </div>
 
-                   <div
+                 <div
   id="stats-grid"
   className="
-    -mt-16
-    grid overflow-hidden rounded-3xl
+  mt-8
+    relative -translate-y-10
+    grid grid-cols-3 overflow-hidden rounded-2xl
     border border-green-400/10
     bg-green-950/30
     font-nunito
     shadow-lg
     ring-1 ring-inset ring-green-400/5
-    sm:grid-cols-2 lg:grid-cols-4
+
+    sm:rounded-3xl
+    lg:-mt-16
   "
 >
-                  {stats.map(({ value, label, icon: Icon, highlight }) => (
-                    <div
-                      key={label}
-                      className="flex items-center gap-5 border-green-400/10 px-6 py-5 lg:border-r last:border-r-0"
-                    >
-                      <div
-                        className={`rounded-full p-4 ${
-                          highlight
-                            ? "bg-yellow-400/10 text-yellow-300"
-                            : "bg-green-400/10 text-green-300"
-                        }`}
-                      >
-                        <Icon className="h-5 w-5" />
-                      </div>
+  {stats.map(({ value, label, icon: Icon, highlight }) => (
+    <div
+      key={label}
+      className="
+        flex min-w-0 flex-col items-center justify-center
+        gap-2 border-r border-green-400/10
+        px-1 py-3 text-center
+        last:border-r-0
 
-                      <div>
-                        <div className="text-[22px] font-extrabold text-green-300">
-                          {value}
-                        </div>
+        sm:flex-row sm:justify-center sm:gap-5
+        sm:px-6 sm:py-5 sm:text-left
+      "
+    >
+      <div
+        className={`rounded-full p-2 sm:p-4 ${
+          highlight
+            ? "bg-yellow-400/10 text-yellow-300"
+            : "bg-green-400/10 text-green-300"
+        }`}
+      >
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+      </div>
 
-                        <div className="mt-1 text-sm leading-5 text-slate-300">
-                          {label}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+      <div className="min-w-0">
+        <div className="text-sm font-extrabold text-green-300 sm:text-[22px]">
+          {value}
+        </div>
+
+        <div className="mt-0.5 text-[9px] leading-tight text-slate-300 sm:mt-1 sm:text-sm sm:leading-5">
+          {label}
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
           
         </div>
       </section>
@@ -434,61 +465,69 @@ const journeyPhotos = [
             </p>
           </div>
 
-          <div className="reveal-up mx-auto mt-9 grid max-w-7xl gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {exploreCards.map(
-              ({
-                eyebrow,
-                title,
-                description,
-                cta,
-                icon: Icon,
-                to,
-                tone,
-                iconTone,
-                textTone,
-              }) => (
-                <button
-                  key={title}
-                  onClick={() => navigate(to)}
-                  className={`group min-h-[260px] rounded-2xl border border-white/10 bg-gradient-to-br ${tone} p-6 text-left font-nunito transition-transform duration-200 hover:-translate-y-1`}
-                >
-                  <div className="flex h-full flex-col justify-between">
-                    <div>
-                      <div
-                        className={`mb-7 flex h-[70px] w-[70px] items-center justify-center rounded-full ${iconTone}`}
-                      >
-                        <Icon className="h-8 w-8" />
-                      </div>
+          <div className="reveal-up mx-auto mt-5 grid max-w-7xl grid-cols-4 gap-2 sm:mt-7 sm:gap-4">
+  {exploreCards.map(
+    ({
+      eyebrow,
+      title,
+      description,
+      cta,
+      icon: Icon,
+      to,
+      tone,
+      iconTone,
+      textTone,
+    }) => (
+      <button
+        key={title}
+        onClick={() => navigate(to)}
+        className={`group min-w-0 rounded-xl border border-white/10 bg-gradient-to-br ${tone} p-2 text-left font-nunito transition-transform duration-200 hover:-translate-y-1 sm:min-h-[220px] sm:rounded-2xl sm:p-5`}
+      >
+        <div className="flex h-full flex-col justify-between">
+          <div>
+            {/* Icon */}
+            <div
+              className={`mb-2 flex h-8 w-8 items-center justify-center rounded-full sm:mb-4 sm:h-14 sm:w-14 ${iconTone}`}
+            >
+              <Icon className="h-4 w-4 sm:h-6 sm:w-6" />
+            </div>
 
-                      <div className="flex flex-wrap items-end gap-x-3">
-                        <p className={`text-base font-bold ${textTone}`}>
-                          {eyebrow}
-                        </p>
+            {/* Eyebrow + Title */}
+            <div className="flex flex-col gap-0.5 sm:flex-row sm:flex-wrap sm:items-end sm:gap-x-2">
+              <p
+                className={`truncate text-[8px] font-bold leading-tight sm:text-sm ${textTone}`}
+              >
+                {eyebrow}
+              </p>
 
-                        <h3 className="text-3xl font-extrabold leading-none text-white">
-                          {title}
-                        </h3>
-                      </div>
+              <h3 className="break-words text-[11px] font-extrabold leading-tight text-white sm:text-2xl sm:leading-none">
+                {title}
+              </h3>
+            </div>
 
-                      <p className="mt-7 max-w-[14rem] text-base leading-7 text-slate-300">
-                        {description}
-                      </p>
-                    </div>
-
-                    <div className="mt-8 flex items-center justify-between">
-                      <span className={`text-base font-bold ${textTone}`}>
-                        {cta}
-                      </span>
-
-                      <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition-transform duration-200 group-hover:translate-x-1">
-                        <ArrowRight className="h-5 w-5" />
-                      </span>
-                    </div>
-                  </div>
-                </button>
-              )
-            )}
+            {/* Description */}
+            <p className="mt-2 line-clamp-3 text-[8px] leading-3 text-slate-300 sm:mt-4 sm:max-w-[14rem] sm:text-sm sm:leading-6">
+              {description}
+            </p>
           </div>
+
+          {/* CTA */}
+          <div className="mt-3 flex items-center justify-between gap-1 sm:mt-5">
+            <span
+              className={`truncate text-[8px] font-bold sm:text-sm ${textTone}`}
+            >
+              {cta}
+            </span>
+
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition-transform duration-200 group-hover:translate-x-1 sm:h-9 sm:w-9">
+              <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
+            </span>
+          </div>
+        </div>
+      </button>
+    )
+  )}
+</div>
 
           <div className="reveal-up mt-10 overflow-hidden rounded-2xl border border-white/10 bg-[#030913]/90 p-5 sm:p-8 lg:p-10">
   <div className="grid gap-8 lg:grid-cols-[minmax(220px,0.32fr)_minmax(0,0.68fr)] lg:items-center">
