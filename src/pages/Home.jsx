@@ -31,6 +31,7 @@ import {
   UsersRound,
 } from "lucide-react";
 import OrbitCarousel from "@/components/OrbitCarousel";
+import { ImagesScrollingAnimation } from "@/components/ImagesScrollingAnimation";
 gsap.registerPlugin(ScrollTrigger);
 
 function Home() {
@@ -700,6 +701,13 @@ const journeyPhotos = [
 
         </div>
       </section>
+
+
+
+        <ImagesScrollingAnimation></ImagesScrollingAnimation>
+
+
+
 
       {/* Team Section */}
       <section className="py-20 bg-[#071426] text-richblack-25 relative overflow-hidden">
