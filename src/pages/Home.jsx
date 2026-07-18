@@ -240,7 +240,7 @@ const journeyPhotos = [
             className="
               relative z-10 mx-auto
               flex min-h-[100svh] max-w-7xl flex-col
-              px-5 pb-14 pt-36
+              px-5 pb-14 pt-20
 
               sm:min-h-0 sm:px-6 sm:pb-8 sm:pt-28
 
@@ -280,7 +280,7 @@ const journeyPhotos = [
                     font-nunito
                     text-[2.7rem] font-extrabold
                     leading-[1.12] tracking-normal
-                    text-white
+                    text-richblack-25
 
                     sm:text-4xl sm:leading-tight
                     md:text-5xl
@@ -428,7 +428,7 @@ const journeyPhotos = [
               id="stats-grid"
               className="
                 relative z-20
-                mt-8
+                mt-[-40px]
                 grid grid-cols-3
                 overflow-hidden rounded-3xl
                 border border-green-400/10
