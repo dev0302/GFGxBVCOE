@@ -6,7 +6,7 @@
   line-height: 1.5;
   font-weight: 400;
 
-  background: linear-gradient(135deg, #064e3b, #065f46, #047857);
+  background: #020808;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,9 +21,7 @@
 html,
 body,
 #root {
-  background-color: #0f172a;
-  /* same as your dark gradient */
-
+  background-color: #020808;
 }
 
 html {
