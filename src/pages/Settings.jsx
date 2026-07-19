@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Navigate } from "react-router-dom";
 import {
   Bell,
   ChevronRight,
@@ -22,8 +23,11 @@ import { FiSettings } from "react-icons/fi";
 import {
   fetchCloudinaryStorageUsage,
   fetchDatabaseAnalytics,
+  fetchBroadcastEmailAudience,
   fetchEmailServiceAnalytics,
+  sendBroadcastEmail,
 } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 const societyItems = [
   { id: "overview", label: "Overview", icon: Users },
@@ -39,6 +43,7 @@ const personalItems = [
 ];
 
 const otherItems = [
+  { id: "send-email", label: "Send Email To All", icon: Mail },
   { id: "team-roles", label: "Team Roles", icon: Users },
   { id: "manage-members", label: "Manage Members", icon: Users },
   { id: "billing-usage", label: "Billing & Usage", icon: CreditCard },
@@ -167,6 +172,14 @@ const personalCards = [
 ];
 
 const otherCards = [
+  {
+    id: "send-email",
+    title: "Send Email To All",
+    desc: "Broadcast an announcement to every registered user.",
+    icon: Mail,
+    color: "text-cyan-300",
+    bg: "bg-cyan-500/10",
+  },
   {
     id: "team-roles",
     title: "Team Roles",
@@ -1045,12 +1058,221 @@ function EmailServiceAnalyticsContent() {
   );
 }
 
+function SendEmailToAllContent() {
+  const [audience, setAudience] = useState(null);
+  const [loadingAudience, setLoadingAudience] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [form, setForm] = useState({
+    title: "",
+    subject: "",
+    description: "",
+    linkUrl: "",
+    linkLabel: "Open link",
+  });
+
+  const loadAudience = async () => {
+    try {
+      setLoadingAudience(true);
+      setError("");
+      setAudience(await fetchBroadcastEmailAudience());
+    } catch (err) {
+      setError(err?.message || "Failed to load recipient count");
+    } finally {
+      setLoadingAudience(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAudience();
+  }, []);
+
+  const updateField = (field) => (event) => {
+    setForm((prev) => ({ ...prev, [field]: event.target.value }));
+    setSuccess("");
+    setError("");
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const confirmed = window.confirm(
+      `Send this email to ${audience?.count ?? 0} registered users?`,
+    );
+    if (!confirmed) return;
+
+    try {
+      setSending(true);
+      setError("");
+      setSuccess("");
+      const result = await sendBroadcastEmail(form);
+      setSuccess(result.message || "Email broadcast sent.");
+      setAudience((prev) => ({ ...(prev || {}), count: result.total ?? prev?.count ?? 0 }));
+    } catch (err) {
+      setError(err?.message || "Failed to send broadcast email");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const recipientCount = audience?.count ?? 0;
+  const canSend =
+    recipientCount > 0 &&
+    form.title.trim() &&
+    form.subject.trim() &&
+    form.description.trim() &&
+    !sending;
+  const inputClass =
+    "w-full rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm text-richblack-25 outline-none transition placeholder:text-gray-500 focus:border-cyan-300/50 focus:bg-white/[0.055]";
+  const labelClass = "mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400";
+
+  return (
+    <div className="space-y-3 sm:space-y-4">
+      <Panel
+        title="Send Email To All"
+        subtitle="Send one announcement to every registered user in the platform database."
+      >
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <AnalyticsCard
+            label="Recipients"
+            value={loadingAudience ? "Checking..." : formatNumber(recipientCount)}
+            icon={Users}
+            tone="text-cyan-300"
+            subtext="Registered users with email"
+          />
+          <AnalyticsCard
+            label="Delivery"
+            value="Brevo"
+            icon={Mail}
+            tone="text-emerald-300"
+            subtext="Uses existing site email sender"
+          />
+          <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-lg shadow-black/10 sm:p-4">
+            <p className="text-[11px] font-semibold text-gray-400 sm:text-sm">Audience Refresh</p>
+            <button
+              type="button"
+              onClick={loadAudience}
+              disabled={loadingAudience || sending}
+              className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCw className={`h-4 w-4 ${loadingAudience ? "animate-spin" : ""}`} />
+              Refresh Count
+            </button>
+          </div>
+        </div>
+
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-400/20 bg-red-500/10 p-3 text-xs text-red-200 sm:text-sm">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="mb-4 rounded-lg border border-emerald-400/20 bg-emerald-500/10 p-3 text-xs text-emerald-100 sm:text-sm">
+            {success}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label className={labelClass}>Email Title</label>
+              <input
+                value={form.title}
+                onChange={updateField("title")}
+                className={inputClass}
+                maxLength={120}
+                placeholder="Announcement title shown inside the email"
+                required
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Subject</label>
+              <input
+                value={form.subject}
+                onChange={updateField("subject")}
+                className={inputClass}
+                maxLength={160}
+                placeholder="Inbox subject line"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Description</label>
+            <textarea
+              value={form.description}
+              onChange={updateField("description")}
+              className={`${inputClass} min-h-40 resize-y leading-6`}
+              maxLength={5000}
+              placeholder="Write the email body..."
+              required
+            />
+            <p className="mt-1 text-right text-[11px] text-gray-500">
+              {form.description.length}/5000
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+            <div>
+              <label className={labelClass}>Link URL (Optional)</label>
+              <input
+                value={form.linkUrl}
+                onChange={updateField("linkUrl")}
+                className={inputClass}
+                placeholder="https://www.gfg-bvcoe.com/events"
+                type="url"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Link Button Text</label>
+              <input
+                value={form.linkLabel}
+                onChange={updateField("linkLabel")}
+                className={inputClass}
+                placeholder="Open link"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+            <p className="text-xs leading-5 text-gray-400 sm:text-sm">
+              This email will be sent to{" "}
+              <span className="font-bold text-cyan-300">{formatNumber(recipientCount)}</span>{" "}
+              registered users.
+            </p>
+            <button
+              type="submit"
+              disabled={!canSend}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-cyan-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Mail className="h-4 w-4" />
+              {sending ? "Sending..." : "Send Email"}
+            </button>
+          </div>
+        </form>
+      </Panel>
+    </div>
+  );
+}
+
 function Settings() {
+  const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const activeLabel = useMemo(
     () => allItems.find((item) => item.id === activeTab)?.label || "Overview",
     [activeTab],
   );
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#1e1e2f]">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-emerald-500/30 border-t-emerald-400" />
+      </div>
+    );
+  }
+
+  if (!user) return <Navigate to="/login" replace />;
 
   return (
     <main className="h-screen w-full overflow-hidden bg-gradient-to-br from-[#181829] via-[#1d1e31] to-[#151a2a] px-2 pt-20 text-richblack-25 sm:px-4 sm:pt-20 lg:px-10 lg:pt-24">
@@ -1105,6 +1327,8 @@ function Settings() {
                 <DatabaseAnalyticsContent />
               ) : activeTab === "email-service" ? (
                 <EmailServiceAnalyticsContent />
+              ) : activeTab === "send-email" ? (
+                <SendEmailToAllContent />
               ) : (
                 <PlaceholderContent activeTab={activeTab} />
               )}

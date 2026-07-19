@@ -117,6 +117,42 @@ exports.passwordChangedTemplate = () => {
   return wrapCard(inner);
 };
 
+/**
+ * Broadcast email sent from Settings to registered platform users.
+ * data: { title, description, linkUrl, linkLabel, senderName }
+ */
+exports.broadcastEmailTemplate = (data = {}) => {
+  const {
+    title,
+    description,
+    linkUrl,
+    linkLabel = "Open link",
+    senderName = "GFG BVCOE Team",
+  } = data;
+  const safeDescription = escapeHtml(description).replace(/\r?\n/g, "<br/>");
+  const safeLink = linkUrl && String(linkUrl).trim() ? escapeHtml(linkUrl) : "";
+
+  const inner = `
+    <h1 style="${BASE_STYLES.title}">${escapeHtml(title)}</h1>
+    <div style="${BASE_STYLES.box}; text-align: left;">
+      <p style="${BASE_STYLES.body} margin: 0; white-space: normal;">
+        ${safeDescription}
+      </p>
+    </div>
+    ${
+      safeLink
+        ? `<div style="margin: 24px 0;">
+            <a href="${safeLink}" style="${BASE_STYLES.button}">${escapeHtml(linkLabel)}</a>
+          </div>`
+        : ""
+    }
+    <p style="${BASE_STYLES.footer}">
+      Sent by ${escapeHtml(senderName)} through GFGxBVCOE.
+    </p>
+  `;
+  return wrapCard(inner);
+};
+
 function roleTransitionBlock(previousRole, newRole) {
   return `
     <div style="${BASE_STYLES.box} margin: 24px 0; text-align: center;">
