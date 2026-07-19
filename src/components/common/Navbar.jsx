@@ -51,7 +51,7 @@ function Navbar() {
     location.pathname.startsWith("/join-team/");
 
   const navLinkClass = ({ isActive }) =>
-    `flex items-center justify-center px-4 py-2 rounded-full font-medium transition-all duration-300 relative overflow-hidden border ${
+    `flex items-center justify-center px-3.5 py-1.5 rounded-full font-medium transition-all duration-300 relative overflow-hidden border ${
       isActive
         ? "border-green-300/35 bg-green-500/20 text-green-100 shadow-[0_0_24px_rgba(34,197,94,0.28)]"
         : "border-transparent text-slate-300 hover:border-green-300/25 hover:bg-green-300/10 hover:text-green-100 hover:shadow-[0_0_18px_rgba(34,197,94,0.16)] backdrop-blur-sm"
@@ -66,7 +66,7 @@ function Navbar() {
     <>
       <div
   className="NAVBAR_CONTAINER fixed top-0 left-0 right-0 z-50
-    h-16 sm:h-20
+    h-16 sm:h-[4.5rem]
     flex items-center justify-center
     backdrop-blur-md"
 >
@@ -100,7 +100,7 @@ function Navbar() {
           alt="GFG Logo"
           className="
             w-8 h-8
-            sm:w-9 sm:h-9
+            sm:w-8 sm:h-8
             rounded-full
             border border-green-300/45
             bg-green-400/10
@@ -117,7 +117,7 @@ function Navbar() {
       <p
         className="
           font-bold
-          text-base sm:text-xl
+          text-base sm:text-lg
           bg-clip-text text-transparent
           bg-gradient-to-r from-white via-green-100 to-green-400
           font-montserrat
@@ -137,40 +137,40 @@ function Navbar() {
               className="shrink-0l"
             />
           )}
-          <ul className="flex gap-6 text-sm">
+          <ul className="flex gap-4 text-[13px]">
             <li>
               <NavLink to="/" className={navLinkClass}>
-                <SaxHome2Linear className="mr-2" />
+                <SaxHome2Linear className="mr-1.5 h-4 w-4" />
                 <span>Home</span>
               </NavLink>
             </li>
             <li>
               <NavLink to="/about" className={navLinkClass}>
-                <SaxInfoCircleLinear className="mr-2" />
+                <SaxInfoCircleLinear className="mr-1.5 h-4 w-4" />
                 <span>About</span>
               </NavLink>
             </li>
             <li>
               <NavLink to="/team" className={navLinkClass}>
-                <SaxProfile2UserLinear className="mr-2" />
+                <SaxProfile2UserLinear className="mr-1.5 h-4 w-4" />
                 Team
               </NavLink>
             </li>
             <li>
               <NavLink to="/events" className={navLinkClass}>
-                <SaxCalendarTickTwotone className="mr-2" />
+                <SaxCalendarTickTwotone className="mr-1.5 h-4 w-4" />
                 Events
               </NavLink>
             </li>
             <li>
               <NavLink to="/gallery" className={navLinkClass}>
-                <SaxGalleryLinear className="mr-2" />
+                <SaxGalleryLinear className="mr-1.5 h-4 w-4" />
                 Gallery
               </NavLink>
             </li>
             <li>
               <NavLink to="/contact" className={navLinkClass}>
-                <SaxUserTwotone className="mr-2" />
+                <SaxUserTwotone className="mr-1.5 h-4 w-4" />
                 Contact
               </NavLink>
             </li>
@@ -208,12 +208,12 @@ function Navbar() {
           ) : (
             <>
               <NavLink to="/login">
-                <button className="py-2 px-4 rounded-full border border-green-300/30 bg-white/[0.03] text-green-100 hover:bg-green-300/10 hover:border-green-300/55 font-medium transition text-sm">
+                <button className="py-1.5 px-3.5 rounded-full border border-green-300/30 bg-white/[0.03] text-green-100 hover:bg-green-300/10 hover:border-green-300/55 font-medium transition text-[13px]">
                   Login
                 </button>
               </NavLink>
               <NavLink to="/signup">
-                <button className="py-2 px-5 bg-green-500 text-white font-semibold rounded-full hover:bg-green-400 transition-all duration-300 shadow-[0_0_24px_rgba(34,197,94,0.32)] hover:shadow-[0_0_32px_rgba(34,197,94,0.44)] text-sm">
+                <button className="py-1.5 px-4 bg-green-500 text-white font-semibold rounded-full hover:bg-green-400 transition-all duration-300 shadow-[0_0_24px_rgba(34,197,94,0.32)] hover:shadow-[0_0_32px_rgba(34,197,94,0.44)] text-[13px]">
                   Sign up
                 </button>
               </NavLink>
