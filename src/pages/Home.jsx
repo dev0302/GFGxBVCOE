@@ -369,7 +369,7 @@ const journeyPhotos = [
                         text-sm font-bold text-richblack-25
                         transition
                         hover:-translate-y-1
-                        hover:bg-green-400
+                        hover:bg-green-600
 
                         sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
                       "
@@ -557,13 +557,16 @@ const journeyPhotos = [
       {/* About Section */}
       <section
         ref={aboutSectionRef}
-        className="relative overflow-hidden bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 py-20 text-white"
+        className="relative overflow-hidden bg-gradient-to-br from-[#020808] via-[#10101f] to-[#07140f] py-20 text-white"
       >
+        <div className="absolute inset-x-0 top-0 mx-auto h-px max-w-6xl bg-gradient-to-r from-transparent via-green-300/20 to-transparent" />
+        <div className="absolute -left-24 top-16 h-72 w-72 rounded-full bg-green-500/10 blur-3xl" />
+        <div className="absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-emerald-400/10 blur-3xl" />
         <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
           
           {/* Left Content */}
           <div className="reveal-up text-center sm:text-left">
-            <p className="mb-4 font-nunito text-xs font-bold uppercase tracking-[0.2em] text-green-400">
+            <p className="mb-4 font-nunito text-xs font-bold uppercase tracking-[0.2em] text-green-300">
               About Us
             </p>
 
@@ -574,7 +577,7 @@ const journeyPhotos = [
               </span>
             </h2>
 
-            <p className="max-w-lg font-nunito text-base leading-8 text-richblack-25 md:text-lg">
+            <p className="max-w-lg font-nunito text-base leading-8 text-slate-300 md:text-lg">
               GFG BVCOE is a community of tech enthusiasts dedicated to fostering a
               culture of learning, innovation, and collaboration. We organize
               workshops, hackathons, and speaker sessions to help students grow their
@@ -583,7 +586,13 @@ const journeyPhotos = [
 
             <button
               onClick={() => navigate("/about")}
-              className="group mt-8 inline-flex items-center gap-3 rounded-full bg-green-600 px-7 py-3 font-nunito text-sm font-bold text-richblack-25   transition hover:-translate-y-1 hover:bg-green-400"
+              className="group mt-8 inline-flex items-center gap-3 rounded-full  transition hover:-translate-y-1 
+              group 
+                        bg-green-600/80
+                        px-6 py-3.5
+                        text-sm font-bold text-richblack-25
+                        hover:bg-green-600
+                        sm:gap-3 sm:px-7 sm:py-3 sm:text-sm"
             >
               Learn More About Us
               <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -591,7 +600,7 @@ const journeyPhotos = [
           </div>
 
           {/* Right Illustration - Desktop Only */}
-          <div className="reveal-up relative hidden h-[360px] overflow-hidden rounded-[2rem] border border-green-200/10 bg-green-950/10 lg:block"> {/* Left Person */} <div className="absolute bottom-8 left-[22%] h-36 w-24 rounded-t-full bg-emerald-400/35 shadow-[0_0_32px_rgba(74,222,128,0.28)]" /> <div className="absolute bottom-24 left-[27%] h-12 w-12 rounded-full bg-emerald-300/70 shadow-[0_0_20px_rgba(110,231,183,0.25)]" /> <div className="absolute bottom-0 left-[18%] h-28 w-40 rounded-[50%] bg-emerald-950/20" /> {/* Center Code Window */} <div className="absolute left-[48%] top-10 h-56 w-72 -translate-x-1/2 rounded-xl border border-green-200/30 bg-emerald-950/50 p-5 shadow-[0_0_50px_rgba(74,222,128,0.25)] backdrop-blur-sm"> <div className="mb-5 flex gap-2"> <span className="h-2 w-2 rounded-full bg-green-300/90" /> <span className="h-2 w-2 rounded-full bg-green-300/60" /> <span className="h-2 w-2 rounded-full bg-green-300/40" /> </div> {[72, 48, 82, 62, 76, 54].map((width, index) => ( <div key={width + index} className="mb-4 flex items-center gap-3" > <span className="h-1.5 w-8 rounded-full bg-green-300/30" /> <span className="h-1.5 rounded-full bg-green-200/60" style={{ width: `${width}%` }} /> </div> ))} <div className="absolute right-5 top-16 rounded-xl bg-green-300/20 p-4 text-green-100 shadow-[0_0_20px_rgba(134,239,172,0.15)]"> <Code2 className="h-8 w-8" /> </div> </div> {/* Right Person */} <div className="absolute bottom-4 right-[12%] h-32 w-24 rounded-t-full bg-emerald-400/35 shadow-[0_0_32px_rgba(74,222,128,0.2)]" /> <div className="absolute bottom-32 right-[14%] h-11 w-11 rounded-full bg-emerald-300/70 shadow-[0_0_20px_rgba(110,231,183,0.25)]" /> <div className="absolute bottom-0 right-[8%] h-24 w-36 rounded-[50%] bg-emerald-950/20" /> {/* Users Icon */} <div className="absolute left-[7%] top-12 rounded-full border border-green-200/25 bg-green-300/10 p-4 text-green-100 shadow-[0_0_24px_rgba(74,222,128,0.15)] backdrop-blur"> <UsersRound className="h-7 w-7" /> </div> {/* Lightbulb Icon */} <div className="absolute right-[8%] top-8 rounded-full border border-green-200/25 bg-green-300/10 p-4 text-green-100 shadow-[0_0_24px_rgba(74,222,128,0.15)] backdrop-blur"> <Lightbulb className="h-7 w-7" /> </div> </div>
+          <div className="reveal-up relative hidden h-[360px] overflow-hidden rounded-[2rem] border border-white/10 bg-[#0b1512]/70 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur lg:block"> {/* Left Person */} <div className="absolute bottom-8 left-[22%] h-36 w-24 rounded-t-full bg-emerald-400/30 shadow-[0_0_32px_rgba(74,222,128,0.22)]" /> <div className="absolute bottom-24 left-[27%] h-12 w-12 rounded-full bg-emerald-300/60 shadow-[0_0_20px_rgba(110,231,183,0.2)]" /> <div className="absolute bottom-0 left-[18%] h-28 w-40 rounded-[50%] bg-black/30" /> {/* Center Code Window */} <div className="absolute left-[48%] top-10 h-56 w-72 -translate-x-1/2 rounded-xl border border-green-200/20 bg-[#07100d]/80 p-5 shadow-[0_0_50px_rgba(74,222,128,0.18)] backdrop-blur-sm"> <div className="mb-5 flex gap-2"> <span className="h-2 w-2 rounded-full bg-green-300/90" /> <span className="h-2 w-2 rounded-full bg-green-300/60" /> <span className="h-2 w-2 rounded-full bg-green-300/40" /> </div> {[72, 48, 82, 62, 76, 54].map((width, index) => ( <div key={width + index} className="mb-4 flex items-center gap-3" > <span className="h-1.5 w-8 rounded-full bg-green-300/25" /> <span className="h-1.5 rounded-full bg-green-200/50" style={{ width: `${width}%` }} /> </div> ))} <div className="absolute right-5 top-16 rounded-xl bg-green-300/15 p-4 text-green-100 shadow-[0_0_20px_rgba(134,239,172,0.12)]"> <Code2 className="h-8 w-8" /> </div> </div> {/* Right Person */} <div className="absolute bottom-4 right-[12%] h-32 w-24 rounded-t-full bg-emerald-400/30 shadow-[0_0_32px_rgba(74,222,128,0.16)]" /> <div className="absolute bottom-32 right-[14%] h-11 w-11 rounded-full bg-emerald-300/60 shadow-[0_0_20px_rgba(110,231,183,0.2)]" /> <div className="absolute bottom-0 right-[8%] h-24 w-36 rounded-[50%] bg-black/30" /> {/* Users Icon */} <div className="absolute left-[7%] top-12 rounded-full border border-green-200/20 bg-green-300/10 p-4 text-green-100 shadow-[0_0_24px_rgba(74,222,128,0.12)] backdrop-blur"> <UsersRound className="h-7 w-7" /> </div> {/* Lightbulb Icon */} <div className="absolute right-[8%] top-8 rounded-full border border-green-200/20 bg-green-300/10 p-4 text-green-100 shadow-[0_0_24px_rgba(74,222,128,0.12)] backdrop-blur"> <Lightbulb className="h-7 w-7" /> </div> </div>
         </div>
       </section>
 
