@@ -7,72 +7,82 @@ import { ChevronLeft, ChevronRight, Users } from "lucide-react";
 const people = [
   {
     id: 1,
-    name: "Aarav Sharma",
-    position: "Chairperson",
-    avatar: "https://placehold.co/200x200/1e1e3f/ffffff?text=AS",
+    name: "Person 1 Name",
+    position: "Position",
+    avatar:
+      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1773412911/gfg-avatars/tnze2ztp4lwn0bhcvpfy.webp",
   },
   {
     id: 2,
-    name: "Priya Mehta",
-    position: "Vice Chairperson",
-    avatar: "https://placehold.co/200x200/1e1e3f/ffffff?text=PM",
+    name: "Person 2 Name",
+    position: "Position",
+    avatar:
+      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1772024447/gfg-avatars/es0qdtjstittj8k5qiaq.webp",
   },
   {
     id: 3,
-    name: "Rohan Verma",
-    position: "General Secretary",
-    avatar: "https://placehold.co/200x200/1e1e3f/ffffff?text=RV",
+    name: "Person 3 Name",
+    position: "Position",
+    avatar:
+      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1771864701/gfg-avatars/c8mbazffvobzqhvl501w.webp",
   },
   {
     id: 4,
-    name: "Ananya Gupta",
-    position: "Treasurer",
-    avatar: "https://placehold.co/200x200/1e1e3f/ffffff?text=AG",
+    name: "Person 4 Name",
+    position: "Position",
+    avatar:
+      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1772028823/gfg-avatars/qdszguldh9qnpudf4b1u.webp",
   },
   {
     id: 5,
-    name: "Karan Malhotra",
-    position: "Technical Head",
-    avatar: "https://placehold.co/200x200/1e1e3f/ffffff?text=KM",
+    name: "Person 5 Name",
+    position: "Position",
+    avatar:
+      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1771695434/gfg-avatars/bdkprijuuchnkqggmar5.webp",
   },
   {
     id: 6,
-    name: "Ishita Rao",
-    position: "Design Head",
-    avatar: "https://placehold.co/200x200/1e1e3f/ffffff?text=IR",
+    name: "Person 6 Name",
+    position: "Position",
+    avatar:
+      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1771267811/gfg-avatars/a9qwbpg6xpb9d7eiaeva.webp",
   },
   {
     id: 7,
-    name: "Dev Kapoor",
-    position: "Events Head",
-    avatar: "https://placehold.co/200x200/1e1e3f/ffffff?text=DK",
+    name: "Person 7 Name",
+    position: "Position",
+    avatar:
+      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1771308086/gfg-avatars/xzavxgsvwsqxppl4lh6m.webp",
   },
   {
     id: 8,
-    name: "Sara Khan",
-    position: "PR Head",
-    avatar: "https://placehold.co/200x200/1e1e3f/ffffff?text=SK",
+    name: "Person 8 Name",
+    position: "Position",
+    avatar:
+      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1771254332/gfg-avatars/g5s7eagxeabljn1n285w.jpg",
   },
   {
     id: 9,
-    name: "Yash Trivedi",
-    position: "Content Head",
-    avatar: "https://placehold.co/200x200/1e1e3f/ffffff?text=YT",
+    name: "Person 9 Name",
+    position: "Position",
+    avatar:
+      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1771254113/gfg-avatars/n8ddryjhxpkc1hgjo4ro.webp",
   },
   {
     id: 10,
-    name: "Neha Joshi",
-    position: "Marketing Head",
-    avatar: "https://placehold.co/200x200/1e1e3f/ffffff?text=NJ",
+    name: "Person 10 Name",
+    position: "Position",
+    avatar:
+      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1771253483/gfg-avatars/u0y8pxtqzxwdulfjuydr.webp",
   },
   {
     id: 11,
-    name: "Arjun Bansal",
-    position: "Operations Head",
-    avatar: "https://placehold.co/200x200/1e1e3f/ffffff?text=AB",
+    name: "Person 11 Name",
+    position: "Position",
+    avatar:
+      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1781892760/gfg-avatars/esqurvehtciqhjnny4xn.jpg",
   },
 ];
-
 // --- Utility for fallback images ---
 const safeImage = (e) => {
   const target = e.target;
@@ -347,7 +357,7 @@ export default function OrbitCarousel() {
       </div>
 
       {/* Progress Indicator */}
-      <div className="relative z-10 flex justify-center mt-4 sm:mt-6 space-x-1.5 sm:space-x-2">
+      <div className="relative z-10 flex justify-center mt-8 sm:mt-32 space-x-1.5 sm:space-x-2">
         {people.map((_, index) => (
           <motion.button
             key={index}

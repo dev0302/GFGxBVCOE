@@ -149,7 +149,9 @@ function ProfileDropDown({
   const [lastSeenLoading, setLastSeenLoading] = useState(false);
   const [lastSeenError, setLastSeenError] = useState(null);
   const [lastSeenPlacement, setLastSeenPlacement] = useState(null);
+  const [menuPosition, setMenuPosition] = useState(null);
   const ref = useRef(null);
+  const triggerRef = useRef(null);
   const dropdownPanelRef = useRef(null);
   const [avatarLoadedButton, setAvatarLoadedButton] = useState(!user?.image);
   const [avatarLoadedMenu, setAvatarLoadedMenu] = useState(!user?.image);
@@ -162,7 +164,12 @@ function ProfileDropDown({
   useEffect(() => {
     const onClick = (e) => {
       if (e.target?.closest?.("[data-last-seen-modal]")) return;
-      if (!ref.current?.contains(e.target)) setOpen(false);
+      const clickedTrigger = ref.current?.contains(e.target);
+      const clickedDropdown = dropdownPanelRef.current?.contains(e.target);
+
+      if (!clickedTrigger && !clickedDropdown) {
+        setOpen(false);
+      }
     };
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
@@ -203,6 +210,42 @@ function ProfileDropDown({
 
   useEffect(() => {
     if (!open) setLastSeenOpen(false);
+  }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setMenuPosition(null);
+      return undefined;
+    }
+
+    const updatePosition = () => {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const isMobileViewport = window.innerWidth < 640;
+      const width = Math.min(256, window.innerWidth - 24);
+
+      setMenuPosition({
+        top: rect.bottom + 8,
+        left: isMobileViewport
+          ? Math.max(8, window.innerWidth - width - 8)
+          : Math.max(
+              12,
+              Math.min(rect.right - width, window.innerWidth - width - 12)
+            ),
+        width,
+      });
+    };
+
+    updatePosition();
+
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
   }, [open]);
 
   useLayoutEffect(() => {
@@ -248,16 +291,8 @@ function ProfileDropDown({
     : "border-green-400/50 hover:border-green-400";
   const embeddedButtonCls =
     "border-transparent shadow-none hover:border-transparent";
-  const menuBg =
-    "bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] border border-gray-500/40";
   const textCls = isDarkNavbar ? "text-gray-200" : "text-green-100";
   const avatarSize = avatarOnly ? "h-8 w-8" : "h-7 w-7";
-  const dropdownPosition = alignLeft
-    ? "left-0 mt-2 w-64 origin-top-left"
-    : "right-[-45px] sm:right-0 mt-2 w-64 origin-top-right";
-  const dropdownWidth = avatarOnly
-    ? "max-w-[min(16rem,calc(100vw-1.5rem))] w-64"
-    : "w-64";
 
   const handleToggle = () => {
     if (typeof onBeforeToggle === "function") {
@@ -308,6 +343,7 @@ function ProfileDropDown({
   return (
     <div className="relative" ref={ref}>
       <button
+        ref={triggerRef}
         onClick={handleToggle}
         className={`flex items-center rounded-full border shadow-sm transition-all duration-150 ${
           avatarOnly && !showChevron ? "p-0.5" : "gap-1.5 p-0.5"
@@ -365,14 +401,32 @@ function ProfileDropDown({
         )}
       </button>
 
-      <div
-        ref={dropdownPanelRef}
-        className={`absolute ${dropdownPosition} ${dropdownWidth} rounded-2xl ${menuBg} shadow-xl backdrop-blur-sm transition-all duration-150 ease-out z-[60] ${
-          open
-            ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
-            : "pointer-events-none -translate-y-1 scale-95 opacity-0"
-        }`}
-      >
+      {typeof document !== "undefined" &&
+        menuPosition &&
+        createPortal(
+          <div
+            ref={dropdownPanelRef}
+            style={{
+              top: menuPosition.top,
+              left: menuPosition.left,
+              width: menuPosition.width,
+            }}
+            className={`fixed z-[200]
+              rounded-2xl
+              overflow-visible
+              bg-[#020808]/30
+              sm:bg-[#020808]/20
+              backdrop-blur-lg
+              border border-green-300/10
+              shadow-[0_12px_40px_rgba(0,0,0,0.45)]
+              transition-all duration-150
+              ${
+                open
+                  ? "pointer-events-auto opacity-100"
+                  : "pointer-events-none opacity-0"
+              }`}
+          >
+
         <div className="border-b border-gray-500/30 px-4 py-3.5">
           <div className="flex items-center gap-3">
             {user.image ? (
@@ -591,7 +645,6 @@ function ProfileDropDown({
                 // onMouseLeave={() => setDeptFlyoutOpen(false)}
                 onMouseEnter={() =>  setDeptFlyoutOpen(true)}
                 onMouseLeave={() =>  setDeptFlyoutOpen(false)}
-                onClick={() => isMobile && setDeptFlyoutOpen(prev => !prev)}
                 tabIndex={0}
               >
                 <button
@@ -700,7 +753,7 @@ function ProfileDropDown({
           )}
         </div>
 
-        <div className="rounded-b-2xl border-t border-gray-500/30 bg-gray-900/50 px-3 py-2.5">
+        <div className="rounded-b-2xl border-t border-white/10 bg-transparent px-3 py-2.5">
           <button
             onClick={async () => {
               setOpen(false);
@@ -713,7 +766,9 @@ function ProfileDropDown({
             <span>Logout</span>
           </button>
         </div>
-      </div>
+          </div>,
+          document.body
+        )}
 
       {typeof document !== "undefined" &&
         createPortal(
