@@ -302,6 +302,32 @@ function Navbar() {
     </div>
   )}
 
+  {/* AUTH BUTTONS */}
+  {!authLoading && !user && (
+    <div className="flex items-center gap-1 shrink-0">
+      <NavLink
+        to="/login"
+        onClick={() => {
+          if (isMenuOpen) setIsMenuOpen(false);
+        }}
+      >
+        <button className="rounded-full border border-green-300/30 bg-white/[0.03] px-3 py-1.5 text-[11px] font-semibold text-green-100 transition hover:bg-green-300/10">
+          Login
+        </button>
+      </NavLink>
+      <NavLink
+        to="/signup"
+        onClick={() => {
+          if (isMenuOpen) setIsMenuOpen(false);
+        }}
+      >
+        <button className="rounded-full bg-green-500 px-3 py-1.5 text-[11px] font-semibold text-white shadow-[0_0_16px_rgba(34,197,94,0.26)] transition hover:bg-green-400">
+          Sign up
+        </button>
+      </NavLink>
+    </div>
+  )}
+
   {/* MENU BUTTON */}
   <button
     onClick={() => setIsMenuOpen(!isMenuOpen)}
