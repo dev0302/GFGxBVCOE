@@ -1,68 +1,50 @@
-import { lazy, Suspense } from "react";
 import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Events from "./pages/Events";
+import UploadEventByLink from "./pages/UploadEventByLink";
+import EventDashboardLayout from "./components/EventDashboard/EventDashboardLayout";
+import UploadNewEvent from "./pages/eventDashboard/UploadNewEvent";
+import GenerateLink from "./pages/eventDashboard/GenerateLink";
+import EMDepartmentsAllowed from "./pages/eventDashboard/DepartmentsAllowed";
+import ManageEvents from "./pages/eventDashboard/ManageEvents";
+import UpcomingEventPage from "./pages/eventDashboard/UpcomingEventPage";
+import GenerateQR from "./pages/eventDashboard/GenerateQR";
 import Navbar from "./components/common/Navbar";
+import DepartmentDashboardLayout from "./components/DepartmentDashboard/DepartmentDashboardLayout";
+import DepartmentDepartmentsAllowed from "./pages/dashboard/DepartmentsAllowed";
 import { AuthProvider } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketProvider";
 import { GlobalModalProvider } from "./context/GlobalModalProvider";
 import { UploadTransferProvider } from "./context/UploadTransferContext";
+import NotFound from "./components/NotFound";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import AdminSignupConfig from "./pages/AdminSignupConfig";
+import Profile from "./pages/Profile";
+import Contact from "./pages/Contact";
+import Gallery from "./pages/Gallery";
+import Team2 from "./pages/Team2";
+import GFGBentoGrid from "./components/GFGBentoGrid";
+import ResultPage from "./pages/ResultPage";
+import Quiz from "./pages/Quiz";
+import Leaderboard from "./pages/Leaderboard";
+import QuizResult from "./pages/QuizResult";
+import JamTheWeb from "./pages/JamTheWeb";
+import ManageTeam from "./pages/ManageTeam";
+import ManageSociety from "./pages/ManageSociety";
+import Settings from "./pages/Settings";
+import JoinTeamByLink from "./pages/JoinTeamByLink";
 import { AnimatePresence, motion } from "framer-motion";
 import IncomingUploadModal from "./components/IncomingUploadModal";
 import AirdropAnimationLayer from "./components/AirdropAnimationLayer";
-
-const Home = lazy(() => import("./pages/Home"));
-const About = lazy(() => import("./pages/About"));
-const Events = lazy(() => import("./pages/Events"));
-const UploadEventByLink = lazy(() => import("./pages/UploadEventByLink"));
-const EventDashboardLayout = lazy(() =>
-  import("./components/EventDashboard/EventDashboardLayout")
-);
-const UploadNewEvent = lazy(() => import("./pages/eventDashboard/UploadNewEvent"));
-const GenerateLink = lazy(() => import("./pages/eventDashboard/GenerateLink"));
-const EMDepartmentsAllowed = lazy(() =>
-  import("./pages/eventDashboard/DepartmentsAllowed")
-);
-const ManageEvents = lazy(() => import("./pages/eventDashboard/ManageEvents"));
-const UpcomingEventPage = lazy(() =>
-  import("./pages/eventDashboard/UpcomingEventPage")
-);
-const GenerateQR = lazy(() => import("./pages/eventDashboard/GenerateQR"));
-const DepartmentDashboardLayout = lazy(() =>
-  import("./components/DepartmentDashboard/DepartmentDashboardLayout")
-);
-const DepartmentDepartmentsAllowed = lazy(() =>
-  import("./pages/dashboard/DepartmentsAllowed")
-);
-const NotFound = lazy(() => import("./components/NotFound"));
-const Login = lazy(() => import("./pages/Login"));
-const Signup = lazy(() => import("./pages/Signup"));
-const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const AdminSignupConfig = lazy(() => import("./pages/AdminSignupConfig"));
-const Profile = lazy(() => import("./pages/Profile"));
-const Contact = lazy(() => import("./pages/Contact"));
-const Gallery = lazy(() => import("./pages/Gallery"));
-const Team2 = lazy(() => import("./pages/Team2"));
-const GFGBentoGrid = lazy(() => import("./components/GFGBentoGrid"));
-const ResultPage = lazy(() => import("./pages/ResultPage"));
-const Quiz = lazy(() => import("./pages/Quiz"));
-const Leaderboard = lazy(() => import("./pages/Leaderboard"));
-const QuizResult = lazy(() => import("./pages/QuizResult"));
-const JamTheWeb = lazy(() => import("./pages/JamTheWeb"));
-const ManageTeam = lazy(() => import("./pages/ManageTeam"));
-const ManageSociety = lazy(() => import("./pages/ManageSociety"));
-const Settings = lazy(() => import("./pages/Settings"));
-const JoinTeamByLink = lazy(() => import("./pages/JoinTeamByLink"));
-const LeadershipTransitionLayout = lazy(() =>
-  import("./components/LeadershipTransition/LeadershipTransitionLayout")
-);
-const Promotions = lazy(() => import("./pages/leadershipTransition/Promotions"));
-const LeadershipPersonsAllowed = lazy(() =>
-  import("./pages/leadershipTransition/PersonsAllowed")
-);
-const LeadershipHistory = lazy(() =>
-  import("./pages/leadershipTransition/History")
-);
+import LeadershipTransitionLayout from "./components/LeadershipTransition/LeadershipTransitionLayout";
+import Promotions from "./pages/leadershipTransition/Promotions";
+import LeadershipPersonsAllowed from "./pages/leadershipTransition/PersonsAllowed";
+import LeadershipHistory from "./pages/leadershipTransition/History";
 
 function App() {
   const location = useLocation();
@@ -148,8 +130,7 @@ function App() {
                   }
                   className="flex-1 flex flex-col"
                 >
-                  <Suspense fallback={null}>
-                    <Routes location={location}>
+                  <Routes location={location}>
                       <Route path="/" element={<Home />} />
                       <Route path="/about" element={<About />} />
                       <Route path="/team" element={<Team2 />} />
@@ -263,8 +244,7 @@ function App() {
                       <Route path="/leaderboard" element={<Leaderboard />} />
                       <Route path="/quiz/result" element={<QuizResult />} />
                       <Route path="/jam-the-web" element={<JamTheWeb />} />
-                    </Routes>
-                  </Suspense>
+                  </Routes>
                 </motion.main>
               </AnimatePresence>
             </div>
