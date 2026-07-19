@@ -154,117 +154,123 @@ function App() {
                   }
                   className="flex-1 flex flex-col"
                 >
-                  <Routes location={location}>
-                    <Route path="/" element={<Home />} />
-                    {/* <Route element={<AuthAwareLayout />}> */}
-                    <Route path="/about" element={<About />} />
-                    <Route path="/team" element={<Team2 />} />
-                    <Route path="/events" element={<Events />} />
-                    {/* Backward-compatible redirects (older URL: /uploadevent) */}
-                    <Route
-                      path="/uploadevent/link/:token"
-                      element={<UploadEventByLink />}
-                    />
-                    <Route
-                      path="/uploadevent"
-                      element={<Navigate to="/em-dashboard" replace />}
-                    />
-                    <Route path="/em-dashboard">
+                  <Suspense fallback={routeFallback}>
+                    <Routes location={location}>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/team" element={<Team2 />} />
+                      <Route path="/events" element={<Events />} />
+                      {/* Backward-compatible redirects (older URL: /uploadevent) */}
                       <Route
-                        path="link/:token"
+                        path="/uploadevent/link/:token"
                         element={<UploadEventByLink />}
                       />
-                      <Route element={<EventDashboardLayout />}>
+                      <Route
+                        path="/uploadevent"
+                        element={<Navigate to="/em-dashboard" replace />}
+                      />
+                      <Route path="/em-dashboard">
                         <Route
-                          index
-                          element={
-                            <Navigate to="/em-dashboard/upload" replace />
-                          }
+                          path="link/:token"
+                          element={<UploadEventByLink />}
                         />
-                        <Route path="upload" element={<UploadNewEvent />} />
-                        <Route
-                          path="generate-link"
-                          element={<GenerateLink />}
-                        />
-                        <Route
-                          path="departments"
-                          element={<EMDepartmentsAllowed />}
-                        />
-                        <Route path="generate-qr" element={<GenerateQR />} />
-                        <Route path="manage" element={<ManageEvents />} />
-                        <Route
-                          path="upcoming"
-                          element={<UpcomingEventPage />}
-                        />
+                        <Route element={<EventDashboardLayout />}>
+                          <Route
+                            index
+                            element={
+                              <Navigate to="/em-dashboard/upload" replace />
+                            }
+                          />
+                          <Route path="upload" element={<UploadNewEvent />} />
+                          <Route
+                            path="generate-link"
+                            element={<GenerateLink />}
+                          />
+                          <Route
+                            path="departments"
+                            element={<EMDepartmentsAllowed />}
+                          />
+                          <Route path="generate-qr" element={<GenerateQR />} />
+                          <Route path="manage" element={<ManageEvents />} />
+                          <Route
+                            path="upcoming"
+                            element={<UpcomingEventPage />}
+                          />
+                        </Route>
                       </Route>
-                    </Route>
-                    <Route path="/dashboard/:departmentKey">
-                      <Route element={<DepartmentDashboardLayout />}>
-                        {/* Clicking `/dashboard/:departmentKey` should land on the first sidebar tab. */}
-                        <Route
-                          index
-                          element={<Navigate to="departments" replace />}
-                        />
-                        <Route
-                          path="departments"
-                          element={<DepartmentDepartmentsAllowed />}
-                        />
-                        <Route path="generate-qr" element={<GenerateQR />} />
+                      <Route path="/dashboard/:departmentKey">
+                        <Route element={<DepartmentDashboardLayout />}>
+                          {/* Clicking `/dashboard/:departmentKey` should land on the first sidebar tab. */}
+                          <Route
+                            index
+                            element={<Navigate to="departments" replace />}
+                          />
+                          <Route
+                            path="departments"
+                            element={<DepartmentDepartmentsAllowed />}
+                          />
+                          <Route path="generate-qr" element={<GenerateQR />} />
+                        </Route>
                       </Route>
-                    </Route>
-                    <Route path="/login" element={<Login />} />
-                    <Route
-                      path="/forgot-password"
-                      element={<ForgotPassword />}
-                    />
-                    <Route
-                      path="/reset-password/:token"
-                      element={<ResetPassword />}
-                    />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/dashboard" element={<AdminSignupConfig />} />
-                    <Route path="/leadership-transition">
-                      <Route element={<LeadershipTransitionLayout />}>
-                        <Route
-                          index
-                          element={
-                            <Navigate
-                              to="/leadership-transition/promotions"
-                              replace
-                            />
-                          }
-                        />
-                        <Route path="promotions" element={<Promotions />} />
-                        <Route path="history" element={<LeadershipHistory />} />
-                        <Route
-                          path="persons-allowed"
-                          element={<LeadershipPersonsAllowed />}
-                        />
+                      <Route path="/login" element={<Login />} />
+                      <Route
+                        path="/forgot-password"
+                        element={<ForgotPassword />}
+                      />
+                      <Route
+                        path="/reset-password/:token"
+                        element={<ResetPassword />}
+                      />
+                      <Route path="/signup" element={<Signup />} />
+                      <Route path="/dashboard" element={<AdminSignupConfig />} />
+                      <Route path="/leadership-transition">
+                        <Route element={<LeadershipTransitionLayout />}>
+                          <Route
+                            index
+                            element={
+                              <Navigate
+                                to="/leadership-transition/promotions"
+                                replace
+                              />
+                            }
+                          />
+                          <Route path="promotions" element={<Promotions />} />
+                          <Route
+                            path="history"
+                            element={<LeadershipHistory />}
+                          />
+                          <Route
+                            path="persons-allowed"
+                            element={<LeadershipPersonsAllowed />}
+                          />
+                        </Route>
                       </Route>
-                    </Route>
-                    <Route
-                      path="/admin"
-                      element={<Navigate to="/dashboard" replace />}
-                    />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/manage-team" element={<ManageTeam />} />
-                    <Route path="/manage-society" element={<ManageSociety />} />
-                    <Route
-                      path="/join-team/:token"
-                      element={<JoinTeamByLink />}
-                    />
-                    <Route path="/notfound" element={<NotFound></NotFound>} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/gallery" element={<Gallery />} />
-                    <Route path="/bentogrid" element={<GFGBentoGrid />} />
-                    <Route path="/results" element={<ResultPage />} />
-                    <Route path="/quiz" element={<Quiz />} />
-                    <Route path="/leaderboard" element={<Leaderboard />} />
-                    <Route path="/quiz/result" element={<QuizResult />} />
-                    <Route path="/jam-the-web" element={<JamTheWeb />} />
-                    {/* </Route> */}
-                  </Routes>
+                      <Route
+                        path="/admin"
+                        element={<Navigate to="/dashboard" replace />}
+                      />
+                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/settings" element={<Settings />} />
+                      <Route path="/manage-team" element={<ManageTeam />} />
+                      <Route
+                        path="/manage-society"
+                        element={<ManageSociety />}
+                      />
+                      <Route
+                        path="/join-team/:token"
+                        element={<JoinTeamByLink />}
+                      />
+                      <Route path="/notfound" element={<NotFound />} />
+                      <Route path="/contact" element={<Contact />} />
+                      <Route path="/gallery" element={<Gallery />} />
+                      <Route path="/bentogrid" element={<GFGBentoGrid />} />
+                      <Route path="/results" element={<ResultPage />} />
+                      <Route path="/quiz" element={<Quiz />} />
+                      <Route path="/leaderboard" element={<Leaderboard />} />
+                      <Route path="/quiz/result" element={<QuizResult />} />
+                      <Route path="/jam-the-web" element={<JamTheWeb />} />
+                    </Routes>
+                  </Suspense>
                 </motion.main>
               </AnimatePresence>
             </div>
