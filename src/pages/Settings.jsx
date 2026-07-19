@@ -54,9 +54,9 @@ const metricCards = [
   {
     id: "cloudinary-storage",
     title: "Cloudinary Storage",
-    value: "12.45 GB",
-    caption: "Used of 25 GB",
-    percent: 49,
+    value: "Not connected yet",
+    caption: "Storage usage",
+    percent: null,
     icon: Cloud,
     color: "text-sky-400",
     bg: "bg-sky-500/10",
@@ -65,9 +65,9 @@ const metricCards = [
   {
     id: "redis-storage",
     title: "Redis Memory",
-    value: "128 MB",
-    caption: "Used of 512 MB",
-    percent: 25,
+    value: "Not connected yet",
+    caption: "No Redis analytics connected",
+    percent: null,
     icon: HardDrive,
     color: "text-red-400",
     bg: "bg-red-500/10",
@@ -76,24 +76,23 @@ const metricCards = [
   {
     id: "database",
     title: "Database Storage",
-    value: "2.18 GB",
-    caption: "Used of 10 GB",
-    percent: 21,
+    value: "Not connected yet",
+    caption: "MongoDB usage",
+    percent: null,
     icon: Database,
     color: "text-emerald-400",
     bg: "bg-emerald-500/10",
     bar: "bg-emerald-400",
   },
   {
-    id: "manage-members",
-    title: "Active Members",
-    value: "248",
-    caption: "Total Members",
+    id: "email-service",
+    title: "Email Service",
+    value: "Not connected yet",
+    caption: "Delivery service status",
     percent: null,
-    icon: Users,
-    color: "text-violet-400",
-    bg: "bg-violet-500/10",
-    action: "View Members",
+    icon: Mail,
+    color: "text-amber-400",
+    bg: "bg-amber-500/10",
   },
 ];
 
@@ -262,7 +261,7 @@ function MetricCard({ item, onSelect }) {
           <p className="mt-1 text-xs text-gray-400 sm:text-sm">{item.caption}</p>
         </div>
       </div>
-      {item.percent == null ? (
+      {item.percent == null && item.action ? (
         <button
           type="button"
           onClick={() => onSelect?.(item.id)}
@@ -271,7 +270,7 @@ function MetricCard({ item, onSelect }) {
           {item.action}
           <ChevronRight className="h-4 w-4" />
         </button>
-      ) : (
+      ) : item.percent != null ? (
         <div className="mt-4 flex items-center gap-3 sm:mt-5 sm:gap-4">
           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
             <div
@@ -283,7 +282,7 @@ function MetricCard({ item, onSelect }) {
             {item.percent}%
           </span>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -327,17 +326,133 @@ function Panel({ title, subtitle, children }) {
 }
 
 function OverviewContent({ onSelect }) {
+  const [overviewData, setOverviewData] = useState({
+    cloudinary: null,
+    database: null,
+    email: null,
+  });
+  const [overviewErrors, setOverviewErrors] = useState({});
+  const [overviewLoading, setOverviewLoading] = useState(true);
+
+  const loadOverview = async () => {
+    setOverviewLoading(true);
+    const results = await Promise.allSettled([
+      fetchCloudinaryStorageUsage(),
+      fetchDatabaseAnalytics(),
+      fetchEmailServiceAnalytics(),
+    ]);
+
+    setOverviewData({
+      cloudinary: results[0].status === "fulfilled" ? results[0].value : null,
+      database: results[1].status === "fulfilled" ? results[1].value : null,
+      email: results[2].status === "fulfilled" ? results[2].value : null,
+    });
+    setOverviewErrors({
+      cloudinary: results[0].status === "rejected",
+      database: results[1].status === "rejected",
+      email: results[2].status === "rejected",
+    });
+    setOverviewLoading(false);
+  };
+
+  useEffect(() => {
+    loadOverview();
+  }, []);
+
+  const liveMetricCards = useMemo(() => {
+    const cloudinaryUsedBytes = overviewData.cloudinary?.storage?.usedBytes;
+    const cloudinaryPercent =
+      cloudinaryUsedBytes != null
+        ? Math.min(
+            Math.round(
+              (Number(cloudinaryUsedBytes || 0) /
+                CLOUDINARY_ESTIMATED_FREE_PLAN_BYTES) *
+                100,
+            ),
+            100,
+          )
+        : null;
+    const databaseStorageMb = overviewData.database?.summary?.storageMb;
+    const emailConnected = overviewData.email?.connected === true;
+
+    return metricCards.map((card) => {
+      if (overviewLoading) {
+        return {
+          ...card,
+          value: "Checking...",
+          caption: "Loading live details",
+          percent: null,
+        };
+      }
+
+      if (card.id === "cloudinary-storage") {
+        return {
+          ...card,
+          value:
+            cloudinaryUsedBytes != null && !overviewErrors.cloudinary
+              ? formatStorageFromBytes(cloudinaryUsedBytes)
+              : "Not connected yet",
+          caption:
+            cloudinaryUsedBytes != null && !overviewErrors.cloudinary
+              ? `Used of estimated ${CLOUDINARY_ESTIMATED_FREE_PLAN_GB} GB`
+              : "Cloudinary analytics unavailable",
+          percent:
+            cloudinaryUsedBytes != null && !overviewErrors.cloudinary
+              ? cloudinaryPercent
+              : null,
+        };
+      }
+
+      if (card.id === "database") {
+        return {
+          ...card,
+          value:
+            databaseStorageMb != null && !overviewErrors.database
+              ? `${databaseStorageMb} MB`
+              : "Not connected yet",
+          caption:
+            databaseStorageMb != null && !overviewErrors.database
+              ? `${formatNumber(overviewData.database?.summary?.totalCollections)} collections`
+              : "MongoDB analytics unavailable",
+        };
+      }
+
+      if (card.id === "email-service") {
+        return {
+          ...card,
+          value:
+            overviewData.email && !overviewErrors.email
+              ? emailConnected
+                ? "Connected"
+                : "Not connected yet"
+              : "Not connected yet",
+          caption:
+            overviewData.email && !overviewErrors.email
+              ? `${formatNumber(overviewData.email?.summary?.sentToday)} emails sent today`
+              : "Email analytics unavailable",
+        };
+      }
+
+      return card;
+    });
+  }, [overviewData, overviewErrors, overviewLoading]);
+
   return (
     <div className="space-y-3 sm:space-y-4">
       <Panel title="Society Overview" subtitle="Quick summary of your society's system and services.">
         <div className="mb-4 flex justify-end sm:mb-8 sm:-mt-14">
-          <button className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 text-xs font-semibold text-gray-200 transition hover:bg-white/[0.06] sm:px-4 sm:py-2 sm:text-sm">
-            <RefreshCw className="h-4 w-4" />
+          <button
+            type="button"
+            onClick={loadOverview}
+            disabled={overviewLoading}
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 text-xs font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:py-2 sm:text-sm"
+          >
+            <RefreshCw className={`h-4 w-4 ${overviewLoading ? "animate-spin" : ""}`} />
             Refresh
           </button>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
-          {metricCards.map((item) => (
+          {liveMetricCards.map((item) => (
             <MetricCard key={item.title} item={item} onSelect={onSelect} />
           ))}
         </div>
