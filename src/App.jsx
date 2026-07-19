@@ -64,12 +64,6 @@ const LeadershipHistory = lazy(() =>
   import("./pages/leadershipTransition/History")
 );
 
-const routeFallback = (
-  <div className="flex min-h-[50vh] items-center justify-center bg-[#020808] text-sm text-green-100/70">
-    Loading...
-  </div>
-);
-
 function App() {
   const location = useLocation();
   const dropdownBasePaths = [
@@ -154,7 +148,7 @@ function App() {
                   }
                   className="flex-1 flex flex-col"
                 >
-                  <Suspense fallback={routeFallback}>
+                  <Suspense fallback={null}>
                     <Routes location={location}>
                       <Route path="/" element={<Home />} />
                       <Route path="/about" element={<About />} />
