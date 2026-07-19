@@ -1,11 +1,28 @@
 const { cloudinary } = require("../config/cloudinary");
 const mongoose = require("mongoose");
+const User = require("../models/User");
+const mailSender = require("../utils/mailSender");
+const { broadcastEmailTemplate } = require("../mail/templates");
 
 const RESOURCE_TYPES = ["image", "video", "raw"];
 const MAX_RESULTS_PER_PAGE = 500;
 const MAX_PAGES_PER_TYPE = 20;
 const CACHE_TTL_MS = 60 * 1000;
 const cache = new Map();
+
+function normalizeText(value) {
+  return String(value || "").trim();
+}
+
+function isValidHttpUrl(value) {
+  if (!value) return true;
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
 
 function bytesToGb(bytes) {
   return Number((Number(bytes || 0) / 1024 ** 3).toFixed(2));
@@ -391,6 +408,117 @@ exports.getBrevoEmailAnalytics = async (req, res) => {
       connected: false,
       message: error?.message || "Failed to load Brevo email analytics.",
       updatedAt: new Date().toISOString(),
+    });
+  }
+};
+
+exports.getBroadcastEmailAudience = async (_req, res) => {
+  try {
+    const count = await User.countDocuments({
+      email: { $exists: true, $ne: "" },
+    });
+
+    res.json({
+      success: true,
+      count,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Broadcast audience count error:", error);
+    res.status(500).json({
+      success: false,
+      message: error?.message || "Failed to load email audience count.",
+    });
+  }
+};
+
+exports.sendBroadcastEmail = async (req, res) => {
+  try {
+    const title = normalizeText(req.body?.title);
+    const subject = normalizeText(req.body?.subject);
+    const description = normalizeText(req.body?.description);
+    const linkUrl = normalizeText(req.body?.linkUrl);
+    const linkLabel = normalizeText(req.body?.linkLabel) || "Open link";
+
+    if (!title || !subject || !description) {
+      return res.status(400).json({
+        success: false,
+        message: "Title, subject and description are required.",
+      });
+    }
+
+    if (title.length > 120 || subject.length > 160) {
+      return res.status(400).json({
+        success: false,
+        message: "Title or subject is too long.",
+      });
+    }
+
+    if (description.length > 5000) {
+      return res.status(400).json({
+        success: false,
+        message: "Description must be 5000 characters or fewer.",
+      });
+    }
+
+    if (!isValidHttpUrl(linkUrl)) {
+      return res.status(400).json({
+        success: false,
+        message: "Link must start with http:// or https://.",
+      });
+    }
+
+    const users = await User.find({ email: { $exists: true, $ne: "" } })
+      .select("firstName lastName email")
+      .lean();
+
+    if (!users.length) {
+      return res.status(400).json({
+        success: false,
+        message: "No registered users with email addresses were found.",
+      });
+    }
+
+    const senderName = [req.user?.firstName, req.user?.lastName].filter(Boolean).join(" ") || "GFG BVCOE Team";
+    const html = broadcastEmailTemplate({
+      title,
+      description,
+      linkUrl,
+      linkLabel,
+      senderName,
+    });
+
+    const results = await Promise.allSettled(
+      users.map((user) => mailSender(user.email, subject, html))
+    );
+    const failedEmails = [];
+    let sent = 0;
+
+    results.forEach((result, index) => {
+      if (result.status === "fulfilled" && result.value) {
+        sent += 1;
+        return;
+      }
+      failedEmails.push(users[index].email);
+    });
+
+    res.json({
+      success: sent > 0,
+      message:
+        sent > 0
+          ? `Email sent to ${sent} of ${users.length} registered users.`
+          : "Email could not be sent to any registered users.",
+      total: users.length,
+      sent,
+      failed: failedEmails.length,
+      failedEmails: failedEmails.slice(0, 10),
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Broadcast email error:", error);
+    res.status(500).json({
+      success: false,
+      message: error?.message || "Failed to send broadcast email.",
     });
   }
 };

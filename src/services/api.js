@@ -396,6 +396,23 @@ export async function fetchEmailServiceAnalytics({ refresh = false } = {}) {
   return data;
 }
 
+export async function fetchBroadcastEmailAudience() {
+  const res = await authFetch('/api/v1/settings/broadcast-email/audience');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load email audience');
+  return data;
+}
+
+export async function sendBroadcastEmail(payload) {
+  const res = await authFetch('/api/v1/settings/broadcast-email/send', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to send email');
+  return data;
+}
+
 const authFetch = (url, options = {}) => {
   const token = getAuthToken();
   const headers = {

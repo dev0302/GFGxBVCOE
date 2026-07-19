@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import confetti from "canvas-confetti";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -43,6 +44,41 @@ function Home() {
   const exploreSectionRef = useRef();
   const teamTitleRef = useRef();
   const teamCardsRef = useRef();
+
+  const triggerResultConfetti = () => {
+    const end = Date.now() + 3 * 1000;
+    const colors = ["#a786ff", "#fd8bbc", "#eca184", "#f8deb1"];
+
+    const frame = () => {
+      if (Date.now() > end) return;
+
+      confetti({
+        particleCount: 2,
+        angle: 60,
+        spread: 55,
+        startVelocity: 60,
+        origin: { x: 0, y: 0.5 },
+        colors,
+      });
+      confetti({
+        particleCount: 2,
+        angle: 120,
+        spread: 55,
+        startVelocity: 60,
+        origin: { x: 1, y: 0.5 },
+        colors,
+      });
+
+      requestAnimationFrame(frame);
+    };
+
+    frame();
+  };
+
+  const handleRecruitmentResultClick = () => {
+    triggerResultConfetti();
+    window.setTimeout(() => navigate("/results"), 650);
+  };
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -330,7 +366,7 @@ const journeyPhotos = [
                         rounded-full
                         bg-green-600/80
                         px-6 py-3.5
-                        text-sm font-bold text-white
+                        text-sm font-bold text-richblack-25
                         transition
                         hover:-translate-y-1
                         hover:bg-green-400
@@ -353,19 +389,42 @@ const journeyPhotos = [
                       border border-white/10
                       bg-white/[0.03]
                       px-6 py-3.5
-                      text-sm font-semibold text-slate-200
+                      text-sm font-semibold text-richblack-25
                       backdrop-blur
                       transition
                       hover:-translate-y-1
                       hover:border-green-300/40
                       hover:bg-green-300/10
-
                       sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
                     "
                   >
                     About us
 
                     <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </button>
+
+                  <button
+                    id="btn-recruitment-result"
+                    type="button"
+                    onClick={handleRecruitmentResultClick}
+                    className="
+                      group inline-flex items-center gap-3
+                      rounded-full
+                      border border-white/10
+                      bg-white/[0.03]
+                      px-6 py-3.5
+                      text-xs font-semibold text-richblack-25
+                      backdrop-blur
+                      transition
+                      hover:-translate-y-1
+                      hover:border-green-300/40
+                      hover:bg-green-300/10
+                      sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
+                    "
+                  >
+                    2025 Recruitment Result
+
+                    <Trophy className="h-4 w-4 transition group-hover:rotate-6 group-hover:scale-110" />
                   </button>
                 </div>
               </div>
@@ -399,15 +458,16 @@ const journeyPhotos = [
                   className="
                     absolute left-1/2 top-[42%]
                     -translate-x-1/2 -translate-y-1/2
+                    flex items-center
                     font-audiowide
                     text-[7rem] font-black leading-none
                     text-green-500
                     drop-shadow-[0_0_34px_rgba(34,197,94,0.8)]
-
                     md:text-[12rem]
                   "
                 >
-                  gG
+                  <span className="inline-block scale-x-[-1]">G</span>
+                  <span>G</span>
                 </div>
 
                 <div className="absolute left-[8%] top-[10%] rounded-full border border-green-300/15 bg-white/[0.04] p-3 text-green-200 backdrop-blur sm:left-[18%] sm:top-[18%] sm:p-4">
