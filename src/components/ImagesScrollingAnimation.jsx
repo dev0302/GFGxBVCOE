@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion"
 import ReactLenis from "lenis/react"
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
 import { DiaTextReveal } from "@/components/ui/dia-text-reveal"
 
 const projects = [
@@ -88,6 +88,202 @@ const StickyCard_001 = ({
   )
 }
 
+const ConfettiBackground = () => {
+  const canvasRef = useRef(null)
+  const animationRef = useRef(null)
+  const confettiRef = useRef([])
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return undefined
+
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return undefined
+
+    const resizeCanvas = () => {
+      const parent = canvas.parentElement
+      const width = parent?.clientWidth || window.innerWidth
+      const height = parent?.clientHeight || window.innerHeight
+
+      canvas.width = width
+      canvas.height = height
+    }
+
+    const whiteColors = [
+      "rgba(255, 255, 255, 0.65)",
+      "rgba(248, 250, 252, 0.55)",
+      "rgba(241, 245, 249, 0.6)",
+      "rgba(226, 232, 240, 0.5)",
+      "rgba(134, 239, 172, 0.45)",
+    ]
+
+    const getSpeedProfile = () => {
+      const isMobile = canvas.width < 640
+
+      return {
+        horizontal: isMobile ? 0.65 : 1.2,
+        fallMin: isMobile ? 0.45 : 1.1,
+        fallRange: isMobile ? 0.85 : 1.7,
+        depthMin: isMobile ? 0.35 : 0.75,
+        depthRange: isMobile ? 0.55 : 1.1,
+        acceleration: isMobile ? 0.0015 : 0.004,
+        depthAcceleration: isMobile ? 1.0005 : 1.0012,
+        fade: isMobile ? 0.02 : 0.035,
+      }
+    }
+
+    const initConfetti = () => {
+      confettiRef.current = []
+      const speed = getSpeedProfile()
+
+      for (let i = 0; i < 320; i += 1) {
+        confettiRef.current.push({
+          x: -canvas.width * 0.2 + Math.random() * canvas.width * 1.4,
+          y: -canvas.height * 0.06 + Math.random() * canvas.height * 1.12,
+          z: Math.random() * 900 + 450,
+          velocityX: (Math.random() - 0.5) * speed.horizontal,
+          velocityY: Math.random() * speed.fallRange + speed.fallMin,
+          velocityZ: -(Math.random() * speed.depthRange + speed.depthMin),
+          rotation: Math.random() * Math.PI * 2,
+          rotationSpeed: (Math.random() - 0.5) * 0.04,
+          baseSize: Math.random() * 12 + 6,
+          opacity: 1,
+          shape: ["rectangle", "circle", "star", "diamond"][Math.floor(Math.random() * 4)],
+          color: whiteColors[Math.floor(Math.random() * whiteColors.length)],
+          floatPhase: Math.random() * Math.PI * 2,
+          swayAmplitude: Math.random() * 0.5 + 0.2,
+          bobAmplitude: Math.random() * 0.3 + 0.1,
+          isFading: false,
+        })
+      }
+    }
+
+    const drawConfetti = (piece) => {
+      const perspective = 800
+      const scale = perspective / (perspective + piece.z)
+      const projectedX = piece.x + (piece.x - canvas.width / 2) * (1 - scale)
+      const projectedY = piece.y + (piece.y - canvas.height / 2) * (1 - scale)
+
+      if (scale <= 0.01 || scale > 2) return
+
+      const size = piece.baseSize * scale
+      const opacity = Math.min(piece.opacity * scale * 1.5, 1)
+
+      ctx.save()
+      ctx.translate(projectedX, projectedY)
+      ctx.rotate(piece.rotation)
+      ctx.globalAlpha = opacity
+      ctx.shadowColor = `rgba(0, 0, 0, ${Math.min(scale * 0.3, 0.2)})`
+      ctx.shadowBlur = scale * 4
+      ctx.shadowOffsetX = scale * 3
+      ctx.shadowOffsetY = scale * 3
+      ctx.fillStyle = piece.color
+
+      if (piece.shape === "rectangle") {
+        const width = size * 1.5
+        const height = size * 0.8
+        ctx.fillRect(-width / 2, -height / 2, width, height)
+      } else if (piece.shape === "circle") {
+        ctx.beginPath()
+        ctx.arc(0, 0, size * 0.6, 0, Math.PI * 2)
+        ctx.fill()
+      } else if (piece.shape === "star") {
+        ctx.beginPath()
+        const starSize = size * 0.7
+        for (let i = 0; i < 6; i += 1) {
+          const angle = (i * Math.PI) / 3
+          const x = Math.cos(angle) * starSize
+          const y = Math.sin(angle) * starSize
+          if (i === 0) ctx.moveTo(x, y)
+          else ctx.lineTo(x, y)
+
+          const innerAngle = ((i + 0.5) * Math.PI) / 3
+          ctx.lineTo(Math.cos(innerAngle) * starSize * 0.5, Math.sin(innerAngle) * starSize * 0.5)
+        }
+        ctx.closePath()
+        ctx.fill()
+      } else {
+        const diamondSize = size * 0.8
+        ctx.beginPath()
+        ctx.moveTo(0, -diamondSize)
+        ctx.lineTo(diamondSize * 0.6, 0)
+        ctx.lineTo(0, diamondSize)
+        ctx.lineTo(-diamondSize * 0.6, 0)
+        ctx.closePath()
+        ctx.fill()
+      }
+
+      ctx.restore()
+    }
+
+    const resetPiece = (piece) => {
+      const speed = getSpeedProfile()
+
+      piece.x = -canvas.width * 0.2 + Math.random() * canvas.width * 1.4
+      piece.y = Math.random() < 0.65
+        ? -Math.random() * canvas.height * 0.08
+        : Math.random() * canvas.height
+      piece.z = Math.random() * 900 + 450
+      piece.velocityX = (Math.random() - 0.5) * speed.horizontal
+      piece.velocityY = Math.random() * speed.fallRange + speed.fallMin
+      piece.velocityZ = -(Math.random() * speed.depthRange + speed.depthMin)
+      piece.floatPhase = Math.random() * Math.PI * 2
+      piece.opacity = 1
+      piece.isFading = false
+    }
+
+    const updateConfetti = () => {
+      const speed = getSpeedProfile()
+
+      confettiRef.current.forEach((piece) => {
+        piece.floatPhase += 0.02
+        piece.x += piece.velocityX + Math.sin(piece.floatPhase) * piece.swayAmplitude * 0.3
+        piece.y += piece.velocityY + Math.cos(piece.floatPhase * 0.7) * piece.bobAmplitude * 0.2
+        piece.z += piece.velocityZ
+        piece.rotation += piece.rotationSpeed
+
+        const turbulence = Math.max(0, 1 - piece.z / 1500) * 0.08
+        piece.velocityX += (Math.random() - 0.5) * turbulence * 0.5
+        piece.velocityY += (Math.random() - 0.5) * turbulence * 0.5
+        piece.velocityX += (Math.random() - 0.5) * 0.005
+        piece.velocityY += (Math.random() - 0.5) * 0.005
+        piece.velocityX *= 0.999
+        piece.velocityY *= 0.999
+        piece.velocityY += speed.acceleration
+        piece.velocityZ *= speed.depthAcceleration
+
+        if (!piece.isFading && (piece.z <= 140 || piece.x < -150 || piece.x > canvas.width + 150 || piece.y > canvas.height + 180)) {
+          piece.isFading = true
+        }
+
+        if (piece.isFading) piece.opacity -= speed.fade
+        if (piece.opacity <= 0) resetPiece(piece)
+      })
+    }
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      updateConfetti()
+      confettiRef.current.forEach(drawConfetti)
+      animationRef.current = requestAnimationFrame(animate)
+    }
+
+    resizeCanvas()
+    initConfetti()
+    animate()
+    window.addEventListener("resize", resizeCanvas)
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas)
+      if (animationRef.current) cancelAnimationFrame(animationRef.current)
+    }
+  }, [])
+
+  return (
+    <canvas ref={canvasRef} className="absolute inset-0 z-0 h-full w-full pointer-events-none" />
+  )
+}
+
 const ImagesScrollingAnimation = () => {
   const container = useRef(null)
 
@@ -98,7 +294,16 @@ const ImagesScrollingAnimation = () => {
 
   return (
     <ReactLenis root>
-      <section className="w-full bg-[#020d0e]">
+      <section
+  className="
+    relative w-full overflow-hidden
+    bg-[#000814]
+    before:absolute before:inset-0
+    before:bg-[radial-gradient(circle_at_20%_20%,rgba(34,197,94,0.10),transparent_35%),radial-gradient(circle_at_80%_70%,rgba(34,197,94,0.07),transparent_30%)]
+    before:pointer-events-none
+  "
+>
+        <ConfettiBackground />
 
         {/* Heading */}
         <div className="relative z-20 mt-20 flex w-full justify-center px-4 text-center">
