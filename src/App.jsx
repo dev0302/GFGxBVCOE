@@ -49,6 +49,8 @@ import LeadershipTransitionLayout from "./components/LeadershipTransition/Leader
 import Promotions from "./pages/leadershipTransition/Promotions"
 import LeadershipPersonsAllowed from "./pages/leadershipTransition/PersonsAllowed"
 import LeadershipHistory from "./pages/leadershipTransition/History"
+import MemberEnrollment from "./pages/MemberEnrollment"
+import VectorVisionAdmin from "./pages/VectorVisionAdmin"
 
 function App() {
   const location = useLocation()
@@ -62,12 +64,14 @@ function App() {
 
   const isDashboardLike =
     location.pathname.startsWith("/em-dashboard") ||
+    location.pathname.startsWith("/vectorvision-admin") ||
     location.pathname.startsWith("/dashboard/") ||
     location.pathname.startsWith("/leadership-transition");
 
   // Keep this stable for tab switches so layouts (sidebars) don't remount.
   const dashboardLikeMotionKey = (() => {
     if (location.pathname.startsWith("/em-dashboard")) return "/em-dashboard";
+    if (location.pathname.startsWith("/vectorvision-admin")) return "/vectorvision-admin";
     if (location.pathname.startsWith("/leadership-transition")) return "/leadership-transition";
     if (location.pathname.startsWith("/dashboard/")) {
       const parts = location.pathname.split("/");
@@ -114,6 +118,10 @@ function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/team" element={<Team2 />} />
                 <Route path="/events" element={<Events />} />
+                <Route path="/member-enrollment" element={<MemberEnrollment />} />
+                <Route path="/vectorvision-admin" element={<EventDashboardLayout />}>
+                  <Route index element={<VectorVisionAdmin />} />
+                </Route>
                 {/* Backward-compatible redirects (older URL: /uploadevent) */}
                 <Route path="/uploadevent/link/:token" element={<UploadEventByLink />} />
                 <Route path="/uploadevent" element={<Navigate to="/em-dashboard" replace />} />

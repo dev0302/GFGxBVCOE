@@ -41,6 +41,7 @@ function Navbar() {
     "/manage-society",
     "/em-dashboard",
     "/leadership-transition",
+    "/member-enrollment",
     "/jam-the-web",
     "/login",
     "/signup",
@@ -143,6 +144,12 @@ font-montserrat opacity-90">
               <NavLink to="/gallery" className={navLinkClass}>
                 <SaxGalleryLinear className="mr-2" />
                 Gallery
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/member-enrollment" className={navLinkClass}>
+                <SaxProfile2UserLinear className="mr-2" />
+                Enroll
               </NavLink>
             </li>
             <li>
@@ -252,6 +259,15 @@ font-montserrat opacity-90">
   `}
       >
         <ul className="flex flex-col ml-8 mt-8 justify-center h-full gap-8">
+          <li>
+            <NavLink
+              to="/member-enrollment"
+              className={mobileNavLinkClass}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Face Enrollment
+            </NavLink>
+          </li>
           <li>
             <NavLink
               to="/"

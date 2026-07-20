@@ -389,6 +389,29 @@ const authFetch = (url, options = {}) => {
   });
 };
 
+/** VectorVision admin data. The server independently verifies per-user access. */
+export async function getVectorVisionAccess() {
+  const res = await authFetch('/api/admin/access');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to verify VectorVision access');
+  return Boolean(data.allowed);
+}
+
+export async function getPendingVectorVisionMembers() {
+  const res = await authFetch('/api/admin/members/pending');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load pending registrations');
+  return data;
+}
+
+/** Starts the configured GitHub Actions ingestion workflow; credentials never reach the browser. */
+export async function triggerVectorVisionIngestion() {
+  const res = await authFetch('/api/admin/trigger-ingestion', { method: 'POST' });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to trigger ingestion');
+  return data;
+}
+
 // Auth
 export const AUTH_DEPARTMENTS = [
   'ADMIN',
