@@ -407,8 +407,9 @@ async function applyDraftChanges(user, req) {
   const baseUrl = getFrontendBaseUrl(req);
   const emailResults = await sendQueuedEmails(emailEntries, baseUrl);
 
-  session.effectiveDate = session.createdAt || new Date();
-  session.appliedAt = new Date();
+  const appliedAt = new Date();
+  session.effectiveDate = appliedAt;
+  session.appliedAt = appliedAt;
   session.appliedBy = actor.id;
   session.appliedByName = actor.name;
   session.status = "APPLIED";

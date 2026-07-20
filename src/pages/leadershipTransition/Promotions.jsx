@@ -27,6 +27,7 @@ import {
 import { cloudinaryTinyAvatarUrl } from "../../utils/cloudinary";
 import { CollaboratorAvatars } from "../../components/LeadershipTransition/CollaboratorAvatars";
 import { LeadershipReportPdfViewer } from "../../components/LeadershipTransition/LeadershipReportPdfViewer";
+import HowItWorksStepper from "../../components/LeadershipTransition/HowItWorksStepper";
 import { useAuth } from "../../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, CheckCircle, Search as SearchIcon, X, TrendingUp, LogOut, FileText, Users, Play, Eye, ArrowUpRight, Zap } from "react-feather";
@@ -645,6 +646,8 @@ export default function Promotions() {
             onViewApplied={() => setViewAppliedOpen(true)}
           />
         </div>
+        
+        <HowItWorksStepper />
 
         <AnimatePresence>
           {viewAppliedOpen && (

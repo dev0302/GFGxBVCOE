@@ -1,50 +1,195 @@
-import GFGBentoGrid from "../components/GFGBentoGrid";
 import { NavLink, useNavigate } from "react-router-dom";
+import confetti from "canvas-confetti";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useRef, useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useEffect, useRef } from "react";
 import Footer from "../components/common/Footer";
+import CloudinaryIntroAnimation from "../components/CloudinaryIntroAnimation";
 import ImageGrid from "../components/ImageGrid";
 import UpcomingEventSection from "../components/UpcomingEventSection";
 import ProfileAvatarFlip from "../components/common/ProfileAvatarFlip";
+
 import Lenis from "lenis";
+import {
+  ArrowUpRight,
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  Check,
+  Code2,
+  Handshake,
+  Image as ImageIcon,
+  Instagram,
+  Linkedin,
+  Lightbulb,
+  MessageCircle,
+  Mic,
+  Settings,
+  Sparkles,
+  Trophy,
+  Users,
+  UsersRound,
+} from "lucide-react";
+import OrbitCarousel from "@/components/OrbitCarousel";
+import { ImagesScrollingAnimation } from "@/components/ImagesScrollingAnimation";
 gsap.registerPlugin(ScrollTrigger);
 
 function Home() {
-  const { user } = useAuth();
-
-  useEffect(() => {
-  const lenis = new Lenis({ lerp: 0.05, smoothWheel: true });
-
-  lenis.on("scroll", ScrollTrigger.update);
-
-  function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-  }
-  requestAnimationFrame(raf);
-
-  ScrollTrigger.refresh();
-
-  return () => {
-    lenis.destroy();
-  };
-}, []);
-
-  
   const navigate = useNavigate();
   const titleRef = useRef();
   const descRef = useRef();
   const btnRef = useRef();
+  const aboutSectionRef = useRef();
+  const exploreSectionRef = useRef();
   const teamTitleRef = useRef();
   const teamCardsRef = useRef();
 
-  // State for the counters
-  const [memberCount, setMemberCount] = useState(0);
-  const [eventCount, setEventCount] = useState(0);
-  const [workshopCount, setWorkshopCount] = useState(0);
+  const triggerResultConfetti = () => {
+    const end = Date.now() + 3 * 1000;
+    const colors = ["#a786ff", "#fd8bbc", "#eca184", "#f8deb1"];
+
+    const frame = () => {
+      if (Date.now() > end) return;
+
+      confetti({
+        particleCount: 2,
+        angle: 60,
+        spread: 55,
+        startVelocity: 60,
+        origin: { x: 0, y: 0.5 },
+        colors,
+      });
+      confetti({
+        particleCount: 2,
+        angle: 120,
+        spread: 55,
+        startVelocity: 60,
+        origin: { x: 1, y: 0.5 },
+        colors,
+      });
+
+      requestAnimationFrame(frame);
+    };
+
+    frame();
+  };
+
+  const handleRecruitmentResultClick = () => {
+    triggerResultConfetti();
+    window.setTimeout(() => navigate("/results"), 650);
+  };
+
+  useEffect(() => {
+    const lenis = new Lenis({
+      lerp: 0.08,
+      smoothWheel: true,
+    });
+    let rafId;
+
+    const updateScrollTrigger = () => ScrollTrigger.update();
+    lenis.on("scroll", updateScrollTrigger);
+
+    const raf = (time) => {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    };
+
+    rafId = requestAnimationFrame(raf);
+    ScrollTrigger.refresh();
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      lenis.off("scroll", updateScrollTrigger);
+      lenis.destroy();
+    };
+  }, []);
+
+  const stats = [
+    { value: "100+", label: "Active Members", icon: UsersRound },
+    { value: "10+", label: "Events Held", icon: CalendarDays },
+    { value: "10+", label: "Workshops Conducted", icon: Code2 },
+  ];
+
+  const exploreCards = [
+    {
+      eyebrow: "Upcoming",
+      title: "Events",
+      description: "Workshops, competitions, and exciting sessions.",
+      cta: "Explore Events",
+      icon: CalendarDays,
+      to: "/events",
+      tone: "from-emerald-400/20 via-emerald-500/10 to-teal-500/5",
+      iconTone: "bg-emerald-400/15 text-emerald-300",
+      textTone: "text-emerald-300",
+    },
+    {
+      eyebrow: "Our Amazing",
+      title: "Team",
+      description: "Meet the passionate minds driving our community.",
+      cta: "Meet The Team",
+      icon: Users,
+      to: "/team",
+      tone: "from-violet-400/20 via-violet-500/10 to-fuchsia-500/5",
+      iconTone: "bg-violet-400/15 text-violet-300",
+      textTone: "text-violet-300",
+    },
+    {
+      eyebrow: "Moments &",
+      title: "Gallery",
+      description: "Snapshots of creativity, collaboration and fun.",
+      cta: "View Gallery",
+      icon: ImageIcon,
+      to: "/gallery",
+      tone: "from-amber-300/20 via-amber-500/10 to-orange-500/5",
+      iconTone: "bg-amber-300/15 text-amber-200",
+      textTone: "text-amber-200",
+    },
+    {
+      eyebrow: "Get In",
+      title: "Touch",
+      description: "Have questions or ideas? We'd love to hear from you.",
+      cta: "Contact Us",
+      icon: Handshake,
+      to: "/contact",
+      tone: "from-blue-400/20 via-blue-500/10 to-cyan-500/5",
+      iconTone: "bg-blue-400/15 text-blue-300",
+      textTone: "text-blue-300",
+    },
+  ];
+
+const journeyPhotos = [
+  {
+    src: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,q_auto,f_auto/v1784357366/FreshersMeet5_z9qdup.webp",
+    label: "Group Discussions",
+    icon: Users,
+    color: "bg-emerald-400/90",
+  },
+  {
+    src: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,q_auto,f_auto/v1784357366/FreshersMeet3_haw3o6.webp",
+    label: "Interactive Sessions",
+    icon: MessageCircle,
+    color: "bg-violet-400/90",
+  },
+  {
+    src: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,q_auto,f_auto/v1784357366/FreshersMeet6_rc45g4.webp",
+    label: "Team Activities",
+    icon: Settings,
+    color: "bg-amber-400/90",
+  },
+  {
+    src: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,q_auto,f_auto/v1784357366/FreshersMeet_eryceo.webp",
+    label: "Expert Talks",
+    icon: Mic,
+    color: "bg-blue-400/90",
+  },
+  {
+    src: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,q_auto,f_auto/v1784357366/FreshersMeet4_qlm7yu.webp",
+    label: "Selected Candidates",
+    icon: Check,
+    color: "bg-emerald-400/90",
+  },
+];
 
   // GSAP animations
   useGSAP(() => {
@@ -70,20 +215,21 @@ function Home() {
       delay: 0.6,
     });
 
-    // Number counting animation
-    const counters = { members: 0, events: 0, workshops: 0 };
-    gsap.to(counters, {
-      duration: 4,
-      ease: "power2.out",
-      delay: 0.8,
-      members: 100,
-      events: 10,
-      workshops: 10,
-      onUpdate: () => {
-        setMemberCount(Math.ceil(counters.members));
-        setEventCount(Math.ceil(counters.events));
-        setWorkshopCount(Math.ceil(counters.workshops));
-      },
+    [aboutSectionRef.current, exploreSectionRef.current].forEach((section) => {
+      if (!section) return;
+
+      gsap.from(section.querySelectorAll(".reveal-up"), {
+        y: 44,
+        opacity: 0,
+        duration: 0.75,
+        ease: "power2.out",
+        stagger: 0.08,
+        scrollTrigger: {
+          trigger: section,
+          start: "top 76%",
+          toggleActions: "play none none reverse",
+        },
+      });
     });
 
     // Team section animations
@@ -114,148 +260,292 @@ function Home() {
   }, []);
 
   return (
-    <div className="relative overflow-x-hidden ">
-      {/* Hero Section with Background */}
-      <div className="relative min-h-screen">
-        {/* Background */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url('/landingpage_img2.jpg')`,
-            filter: "blur(1px)", // stronger blur if you like
-          }}
+    <div className="relative overflow-x-hidden bg-[#020808] text-white">
+      <section
+          className="
+            relative overflow-hidden
+            border-b border-emerald-400/10
+            lg:min-h-screen
+          "
         >
-          {/* Dark overlay for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/30 to-black/50"></div>
-          {/* Subtle pattern overlay */}
-          <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_18%,rgba(34,197,94,0.18),transparent_28%),radial-gradient(circle_at_18%_20%,rgba(16,185,129,0.08),transparent_30%),linear-gradient(180deg,#020607_0%,#031111_54%,#02100d_100%)]" />
+          <div className="absolute inset-0 opacity-35 [background-image:radial-gradient(circle,rgba(190,255,214,0.55)_1px,transparent_1px)] [background-size:42px_42px]" />
+          <div className="absolute left-1/2 top-24 h-72 w-72 -translate-x-1/2 rounded-full border border-emerald-300/10 md:left-[72%] md:top-24 md:h-[28rem] md:w-[28rem]" />
+          <div className="absolute left-[58%] top-20 hidden h-96 w-96 rounded-full border border-dashed border-emerald-200/10 md:block" />
+
+          <div
+            className="
+              relative z-10 mx-auto
+              flex min-h-[100svh] max-w-7xl flex-col
+              px-5 pb-14 pt-20
+
+              sm:min-h-0 sm:px-6 sm:pb-8 sm:pt-28
+
+              lg:min-h-screen
+              lg:px-8 lg:pb-12 lg:pt-24
+            "
+          >
+            {/* HERO */}
             <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: `radial-gradient(circle at 25% 25%, #10b981 1px, transparent 1px)`,
-                backgroundSize: "60px 60px",
-              }}
-            />
-          </div>
-        </div>
+              className="
+                relative grid
+                min-h-[68svh]
+                content-center
+                pb-16
 
-        {/* Hero Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 pt-20 pb-20 text-center">
-          {/* Title */}
-          <h1
-            ref={titleRef}
-            className="text-3xl md:text-5xl font-bold text-richblack-25 mb-8 tracking-tight pt-8 leading-tight md:leading-tight pb-1"
-            style={{
-              background: "linear-gradient(135deg, #22c55e, #10b981, #059669)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Empowering Students for
-            <br />
-            a Brighter Future
-          </h1>
+                sm:min-h-0 sm:content-normal sm:pb-10
 
-          {/* Description */}
-          <p
-            ref={descRef}
-            id="home-desc"
-            className="text-lg md:text-xl text-green-100 max-w-3xl leading-relaxed font-light font-nunito"
-          >
-            Join GFG BVCOE - learn, teach, and collaborate through workshops, events, project showcases and mentorship.
-          </p>
-
-          
-
-          {/* CTAs */}
-          <div
-            ref={btnRef}
-            className="flex flex-col sm:flex-row gap-6 mt-12 font-nunito items-center"
-          >
-            <NavLink to="/results">
-              <button
-                id="btn-join"
-                className=" px-3 py-3 bg-gradient-to-r 
-             from-green-500/50 via-emerald-400/50 to-teal-500/50
-             text-richblack-25 font-bold rounded-full transition-all duration-500 ease-in-out
-             transform hover:-translate-y-2 hover:scale-105
-             shadow-[0_0_20px_rgba(16,185,129,0.6)]
-            
-             border-2 border-white/20
-             overflow-hidden group"
-              >
-                {/* Shining sweep overlay */}
-                {/* <span
-                  className="absolute top-0 left-0 w-1/3 h-full bg-white/30 blur-md transform -skew-x-12 animate-shine hover:shadow-[0_0_35px_rgba(16,185,129,0.8)]"
-                ></span> */}
-
-                {/* Text + icon */}
-                <span className="relative  flex items-center justify-center">
-                  <span className="ml-3 font-nunito text-center">2025 Execoms Result out</span>
-                  <svg
-                    className="w-5 h-5 group-hover:translate-x-[2px] transition-transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    {/* <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M14 5l7 7m0 0l-7 7m7-7H3"
-                    ></path> */}
-                  </svg>
-                </span>
-              </button>
-            </NavLink>
-
-
-            <button
-              id="btn-about"
-              onClick={() => navigate("/about")}
-              className="px-8 py-3 bg-transparent text-green-100 font-semibold rounded-full text-lg border-2 border-green-300/40 backdrop-blur-sm transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:bg-green-400/20 hover:border-green-300"
+                lg:flex-1
+                lg:items-center
+                lg:gap-12
+                lg:grid-cols-[1fr_0.9fr]
+                lg:pb-0
+              "
             >
-              About Us
-            </button>
-          </div>
+              {/* TEXT */}
+              <div
+                className="
+                  relative z-10
+                  max-w-2xl text-left
 
-          {/* Stats */}
-          <div
-            id="stats-grid"
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 font-nunito"
-          >
-            <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
-              <div
-                id="count-members"
-                className="text-3xl font-bold text-green-300 mb-2"
+                  lg:-mt-32
+                "
               >
-                {memberCount}+
+                <h1
+                  ref={titleRef}
+                  className="
+                    font-nunito
+                    text-[2.7rem] font-extrabold
+                    leading-[1.12] tracking-normal
+                    text-richblack-25
+
+                    sm:text-4xl sm:leading-tight
+                    md:text-5xl
+                  "
+                >
+                  Empowering Students
+                  <br />
+                  to Build{" "}
+                  <span className="text-green-400 drop-shadow-[0_0_18px_rgba(74,222,128,0.45)]">
+                    the Future
+                  </span>
+                </h1>
+
+                <p
+                  ref={descRef}
+                  id="home-desc"
+                  className="
+                    mt-8 max-w-md
+                    font-nunito
+                    text-base leading-7
+                    text-slate-300
+
+                    sm:mt-6 sm:text-sm sm:leading-8
+                    md:text-lg
+                  "
+                >
+                  Join GFG BVCOE - learn, teach, and collaborate through workshops,
+                  events, project showcases and mentorship.
+                </p>
+
+                <div
+                  ref={btnRef}
+                  className="
+                    mt-10 flex flex-wrap
+                    items-center gap-4
+                    font-nunito
+
+                    sm:mt-8 sm:gap-4
+                  "
+                >
+                  <NavLink to="/events">
+                    <button
+                      id="btn-join"
+                      className="
+                        group inline-flex items-center gap-3
+                        rounded-full
+                        bg-green-600/80
+                        px-6 py-3.5
+                        text-sm font-bold text-richblack-25
+                        transition
+                        hover:-translate-y-1
+                        hover:bg-green-600
+
+                        sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
+                      "
+                    >
+                      Our Events
+
+                      <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    </button>
+                  </NavLink>
+
+                  <button
+                    id="btn-about"
+                    onClick={() => navigate("/about")}
+                    className="
+                      group inline-flex items-center gap-3
+                      rounded-full
+                      border border-white/10
+                      bg-white/[0.03]
+                      px-6 py-3.5
+                      text-sm font-semibold text-richblack-25
+                      backdrop-blur
+                      transition
+                      hover:-translate-y-1
+                      hover:border-green-300/40
+                      hover:bg-green-300/10
+                      sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
+                    "
+                  >
+                    About us
+
+                    <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </button>
+
+                  <button
+                    id="btn-recruitment-result"
+                    type="button"
+                    onClick={handleRecruitmentResultClick}
+                    className="
+                      group inline-flex items-center gap-3
+                      rounded-full
+                      border border-white/10
+                      bg-white/[0.03]
+                      px-6 py-3.5
+                      text-xs font-semibold text-richblack-25
+                      backdrop-blur
+                      transition
+                      hover:-translate-y-1
+                      hover:border-green-300/40
+                      hover:bg-green-300/10
+                      sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
+                    "
+                  >
+                    2025 Recruitment Result
+
+                    <Trophy className="h-4 w-4 transition group-hover:rotate-6 group-hover:scale-110" />
+                  </button>
+                </div>
               </div>
-              <div className="text-green-100">Active Members</div>
+
+              {/* LOGO BACKGROUND ON MOBILE */}
+              <div
+                className="
+                  pointer-events-none
+                  absolute inset-0 -z-10
+                  h-full w-full
+                  opacity-30 blur-[4px]
+
+                  lg:pointer-events-auto
+                  lg:relative
+                  lg:inset-auto
+                  lg:z-auto
+                  lg:mx-auto
+                  lg:h-[500px]
+                  lg:max-w-xl
+                  lg:opacity-100
+                  lg:blur-none
+                "
+              >
+                <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-500/20 blur-3xl" />
+
+                <div className="absolute left-1/2 top-[58%] h-20 w-80 -translate-x-1/2 rounded-full border border-green-300/35 bg-green-400/10 shadow-[0_0_70px_rgba(34,197,94,0.35)]" />
+
+                <div className="absolute left-1/2 top-[64%] h-14 w-[26rem] -translate-x-1/2 rounded-full border border-green-200/10" />
+
+                <div
+                  className="
+                    absolute left-1/2 top-[42%]
+                    -translate-x-1/2 -translate-y-1/2
+                    flex items-center
+                    font-audiowide
+                    text-[7rem] font-black leading-none
+                    text-green-500
+                    drop-shadow-[0_0_34px_rgba(34,197,94,0.8)]
+                    md:text-[12rem]
+                  "
+                >
+                  <span className="inline-block scale-x-[-1]">G</span>
+                  <span>G</span>
+                </div>
+
+                <div className="absolute left-[8%] top-[10%] rounded-full border border-green-300/15 bg-white/[0.04] p-3 text-green-200 backdrop-blur sm:left-[18%] sm:top-[18%] sm:p-4">
+                  <UsersRound className="h-5 w-5 sm:h-6 sm:w-6" />
+                </div>
+
+                <div className="absolute right-[8%] top-[5%] rounded-full border border-green-300/15 bg-white/[0.04] p-3 text-green-200 backdrop-blur sm:right-[18%] sm:top-[10%] sm:p-4">
+                  <Code2 className="h-5 w-5 sm:h-6 sm:w-6" />
+                </div>
+
+                <div className="absolute right-[2%] top-[45%] rounded-full border border-green-300/15 bg-white/[0.04] p-3 text-green-200 backdrop-blur sm:right-[4%] sm:top-[38%] sm:p-4">
+                  <CalendarDays className="h-5 w-5 sm:h-6 sm:w-6" />
+                </div>
+              </div>
             </div>
-            <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
-              <div
-                id="count-events"
-                className="text-3xl font-bold text-emerald-300 mb-2"
-              >
-                {eventCount}+
-              </div>
-              <div className="text-green-100">Events Held</div>
-            </div>
-            <div className="bg-green-800/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/20 hover:bg-green-800/40 transition-all duration-300 hover:scale-[1.03] hover:shadow-cyan-500/20 group">
-              <div
-                id="count-workshops"
-                className="text-3xl font-bold text-green-300 mb-2"
-              >
-                {workshopCount}+
-              </div>
-              <div className="text-green-100">Workshops Conducted</div>
+
+            {/* STATS */}
+            <div
+              id="stats-grid"
+              className="
+                relative z-20
+                mt-[-40px]
+                grid grid-cols-3
+                overflow-hidden rounded-3xl
+                border border-green-400/10
+                bg-green-950/30
+                font-nunito
+                shadow-lg
+                ring-1 ring-inset ring-green-400/5
+
+                sm:mt-6 sm:rounded-3xl
+
+                lg:-mt-16
+              "
+            >
+              {stats.map(({ value, label, icon: Icon, highlight }) => (
+                <div
+                  key={label}
+                  className="
+                    flex min-w-0
+                    flex-col items-center justify-center
+                    gap-4
+                    border-r border-green-400/10
+                    px-2 py-6
+                    text-center
+                    last:border-r-0
+
+                    sm:flex-row
+                    sm:justify-center
+                    sm:gap-5
+                    sm:px-6 sm:py-5
+                    sm:text-left
+                  "
+                >
+                  <div
+                    className={`rounded-full p-3 sm:p-4 ${
+                      highlight
+                        ? "bg-yellow-400/10 text-yellow-300"
+                        : "bg-green-400/10 text-green-300"
+                    }`}
+                  >
+                    <Icon className="h-5 w-5 sm:h-5 sm:w-5" />
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="text-lg font-extrabold text-green-300 sm:text-[22px]">
+                      {value}
+                    </div>
+
+                    <div className="mt-1.5 text-[10px] leading-relaxed text-slate-300 sm:mt-1 sm:text-sm sm:leading-5">
+                      {label}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
       <UpcomingEventSection variant="home" />
 
@@ -265,31 +555,231 @@ function Home() {
       </div>
 
       {/* About Section */}
-      <section className="py-20 bg-gradient-to-br from-green-950 via-green-900 to-emerald-900 text-richblack-25 text-center">
-        <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 font-audiowide">
-            Who We{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
-              Are
-            </span>
-          </h2>
-          <p className="text-lg md:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed font-light font-nunito mb-12 ">
-            GFG BVCOE is a community of tech enthusiasts dedicated to fostering
-            a culture of learning, innovation, and collaboration. We organize
-            workshops, hackathons, and speaker sessions to help students grow
-            their skills and connect with like-minded peers.
-          </p>
-          <button
-            onClick={() => navigate("/about")}
-            className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-richblack-25 font-semibold rounded-full text-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/40"
-          >
-            Learn More About Us
-          </button>
+      <section
+        ref={aboutSectionRef}
+        className="relative overflow-hidden bg-gradient-to-br from-[#020808] via-[#10101f] to-[#07140f] py-20 text-white"
+      >
+        <div className="absolute inset-x-0 top-0 mx-auto h-px max-w-6xl bg-gradient-to-r from-transparent via-green-300/20 to-transparent" />
+        <div className="absolute -left-24 top-16 h-72 w-72 rounded-full bg-green-500/10 blur-3xl" />
+        <div className="absolute -right-20 bottom-0 h-80 w-80 rounded-full bg-emerald-400/10 blur-3xl" />
+        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
+          
+          {/* Left Content */}
+          <div className="reveal-up text-center sm:text-left">
+            <p className="mb-4 font-nunito text-xs font-bold uppercase tracking-[0.2em] text-green-300">
+              About Us
+            </p>
+
+            <h2 className="mb-5 font-audiowide text-4xl font-extrabold tracking-normal md:text-5xl text-richblack-25">
+              Who We{" "}
+              <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                Are
+              </span>
+            </h2>
+
+            <p className="max-w-lg font-nunito text-base leading-8 text-slate-300 md:text-lg">
+              GFG BVCOE is a community of tech enthusiasts dedicated to fostering a
+              culture of learning, innovation, and collaboration. We organize
+              workshops, hackathons, and speaker sessions to help students grow their
+              skills and connect with like-minded peers.
+            </p>
+
+            <button
+              onClick={() => navigate("/about")}
+              className="group mt-8 inline-flex items-center gap-3 rounded-full  transition hover:-translate-y-1 
+              group 
+                        bg-green-600/80
+                        px-6 py-3.5
+                        text-sm font-bold text-richblack-25
+                        hover:bg-green-600
+                        sm:gap-3 sm:px-7 sm:py-3 sm:text-sm"
+            >
+              Learn More About Us
+              <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </button>
+          </div>
+
+          {/* Right Illustration - Desktop Only */}
+          <div className="reveal-up relative hidden h-[360px] overflow-hidden rounded-[2rem] border border-white/10 bg-[#0b1512]/70 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur lg:block"> {/* Left Person */} <div className="absolute bottom-8 left-[22%] h-36 w-24 rounded-t-full bg-emerald-400/30 shadow-[0_0_32px_rgba(74,222,128,0.22)]" /> <div className="absolute bottom-24 left-[27%] h-12 w-12 rounded-full bg-emerald-300/60 shadow-[0_0_20px_rgba(110,231,183,0.2)]" /> <div className="absolute bottom-0 left-[18%] h-28 w-40 rounded-[50%] bg-black/30" /> {/* Center Code Window */} <div className="absolute left-[48%] top-10 h-56 w-72 -translate-x-1/2 rounded-xl border border-green-200/20 bg-[#07100d]/80 p-5 shadow-[0_0_50px_rgba(74,222,128,0.18)] backdrop-blur-sm"> <div className="mb-5 flex gap-2"> <span className="h-2 w-2 rounded-full bg-green-300/90" /> <span className="h-2 w-2 rounded-full bg-green-300/60" /> <span className="h-2 w-2 rounded-full bg-green-300/40" /> </div> {[72, 48, 82, 62, 76, 54].map((width, index) => ( <div key={width + index} className="mb-4 flex items-center gap-3" > <span className="h-1.5 w-8 rounded-full bg-green-300/25" /> <span className="h-1.5 rounded-full bg-green-200/50" style={{ width: `${width}%` }} /> </div> ))} <div className="absolute right-5 top-16 rounded-xl bg-green-300/15 p-4 text-green-100 shadow-[0_0_20px_rgba(134,239,172,0.12)]"> <Code2 className="h-8 w-8" /> </div> </div> {/* Right Person */} <div className="absolute bottom-4 right-[12%] h-32 w-24 rounded-t-full bg-emerald-400/30 shadow-[0_0_32px_rgba(74,222,128,0.16)]" /> <div className="absolute bottom-32 right-[14%] h-11 w-11 rounded-full bg-emerald-300/60 shadow-[0_0_20px_rgba(110,231,183,0.2)]" /> <div className="absolute bottom-0 right-[8%] h-24 w-36 rounded-[50%] bg-black/30" /> {/* Users Icon */} <div className="absolute left-[7%] top-12 rounded-full border border-green-200/20 bg-green-300/10 p-4 text-green-100 shadow-[0_0_24px_rgba(74,222,128,0.12)] backdrop-blur"> <UsersRound className="h-7 w-7" /> </div> {/* Lightbulb Icon */} <div className="absolute right-[8%] top-8 rounded-full border border-green-200/20 bg-green-300/10 p-4 text-green-100 shadow-[0_0_24px_rgba(74,222,128,0.12)] backdrop-blur"> <Lightbulb className="h-7 w-7" /> </div> </div>
         </div>
       </section>
 
+
+      {/* ----------------------- */}
+
+      <section
+        ref={exploreSectionRef}
+        className="relative overflow-hidden bg-[#161629] px-4 py-10 text-white sm:px-6 lg:px-8"
+      >
+        <div className="absolute inset-x-0 top-0 mx-auto h-px max-w-6xl bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+        <div className="absolute inset-0 bg-[#161629]" />
+
+        <div className="relative z-10 mx-auto max-w-[1480px] rounded-[1.75rem] border border-white/[0.06] bg-[#161629] px-5 py-2 sm:px-8 sm:py-8 lg:px-10">
+
+          <div className="reveal-up mx-auto mt-6 max-w-3xl text-center font-nunito">
+            <h2 className="text-2xl font-extrabold tracking-normal text-white md:text-4xl">
+              Explore. Connect. <span className="text-green-400">Grow.</span>
+            </h2>
+            <p className="mx-auto mt-2 sm:mt-5 max-w-4xl text-sm leading-6 sm:leading-8 text-slate-300 md:text-lg">
+              Discover our journey through impactful events, amazing people,
+              and unforgettable moments.
+            </p>
+          </div>
+
+          <div className="reveal-up mx-auto mt-8 grid max-w-7xl grid-cols-4 gap-2 sm:mt-7 sm:gap-4">
+            {exploreCards.map(
+              ({
+                eyebrow,
+                title,
+                description,
+                cta,
+                icon: Icon,
+                to,
+                tone,
+                iconTone,
+                textTone,
+              }) => (
+                <button
+                  key={title}
+                  onClick={() => navigate(to)}
+                  className={`group min-w-0 rounded-xl border border-white/10 bg-gradient-to-br ${tone} p-2 text-left font-nunito transition-transform duration-200 hover:-translate-y-1 sm:min-h-[220px] sm:rounded-2xl sm:p-5`}
+                >
+                  <div className="flex h-full flex-col justify-between">
+                    <div>
+                      {/* Icon */}
+                      <div
+                        className={`mb-2 flex h-8 w-8 items-center justify-center rounded-full sm:mb-4 sm:h-14 sm:w-14 ${iconTone}`}
+                      >
+                        <Icon className="h-4 w-4 sm:h-6 sm:w-6" />
+                      </div>
+
+                      {/* Eyebrow + Title */}
+                      <div className="flex flex-col gap-0.5 sm:flex-row sm:flex-wrap sm:items-end sm:gap-x-2">
+                        <p
+                          className={`truncate text-[8px] font-bold leading-tight sm:text-sm ${textTone}`}
+                        >
+                          {eyebrow}
+                        </p>
+
+                        <h3 className="break-words text-[11px] font-extrabold leading-tight text-white sm:text-2xl sm:leading-none">
+                          {title}
+                        </h3>
+                      </div>
+
+                      {/* Description */}
+                      <p className="mt-2 hidden sm:block line-clamp-3 text-[8px] leading-3 text-slate-300 sm:mt-4 sm:max-w-[14rem] sm:text-sm sm:leading-6">
+                        {description}
+                      </p>
+                    </div>
+
+                    {/* CTA */}
+                    <div className="mt-3 flex items-center justify-between gap-1 sm:mt-5">
+                      <span
+                        className={`hidden sm:block truncate text-[8px] font-bold sm:text-sm ${textTone}`}
+                      >
+                        {cta}
+                      </span>
+
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white transition-transform duration-200 group-hover:translate-x-1 sm:h-9 sm:w-9">
+                        <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              )
+            )}
+          </div>
+
+          <div className="reveal-up mt-10 overflow-hidden rounded-2xl border border-white/10 bg-[#161629] p-5 sm:p-8 lg:p-10">
+  <div className="grid gap-8 lg:grid-cols-[minmax(220px,0.32fr)_minmax(0,0.68fr)] lg:items-center">
+    <div className="font-nunito">
+      <p className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-300">
+        Our Journey
+      </p>
+
+      <h3 className="mt-4 inline-block origin-left -rotate-1 text-xl font-extrabold text-white md:text-4xl">
+        Freshers Recruitment{" "}
+        <span className="text-green-400">2024</span>
+      </h3>
+
+      <p className=" mt-3 sm:mt-5 max-w-md text-base  text-richblack-25">
+        A glimpse of the energy, enthusiasm and talent from last year's
+        recruitment drive.
+      </p>
+
+      <button
+        type="button"
+        aria-label="Previous journey image"
+        className="mt-10 hidden h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/5 text-emerald-300 transition-colors hover:border-emerald-300/30 hover:bg-emerald-300/10 lg:flex"
+      >
+        <ArrowLeft className="h-6 w-6" />
+      </button>
+    </div>
+
+    <div className="relative min-w-0 overflow-hidden">
+      <div className="flex max-w-full gap-2 overflow-x-auto pb-3 [scrollbar-width:none] sm:gap-3 lg:overflow-hidden [&::-webkit-scrollbar]:hidden">
+        {journeyPhotos.map(({ src, label, icon: Icon, color }) => (
+          <div
+            key={label}
+            className="group relative h-[200px] min-w-[145px] flex-1 overflow-hidden rounded-2xl border border-white/10 bg-white/5 sm:min-w-[165px] md:h-[220px] lg:min-w-0 xl:h-[230px]"
+          >
+            <img
+              src={src}
+              alt={label}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+
+            <div className="absolute inset-x-2 bottom-2 flex items-center gap-2 rounded-full border border-white/10 bg-black/70 px-2 py-2 font-nunito text-xs font-bold text-white sm:inset-x-3 sm:bottom-3 sm:gap-3 sm:px-3 sm:text-sm">
+              <span
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${color} text-white`}
+              >
+                <Icon className="h-4 w-4" />
+              </span>
+
+              <span className="truncate">{label}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        aria-label="Next journey image"
+        className="absolute -right-3 top-1/2 hidden h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-[#07130f] text-emerald-300 transition-colors hover:border-emerald-300/30 hover:bg-emerald-300/10 lg:flex"
+      >
+        <ArrowRight className="h-6 w-6" />
+      </button>
+
+      <div className="mt-5 flex justify-center gap-3">
+        {[0, 1, 2, 3, 4, 5].map((dot) => (
+          <span
+            key={dot}
+            className={`h-3 w-3 rounded-full ${
+              dot === 0 ? "bg-green-400" : "bg-slate-600/50"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
+
+        </div>
+      </section>
+
+
+
+        <ImagesScrollingAnimation></ImagesScrollingAnimation>
+
+
+
+
       {/* Team Section */}
-      <section className="py-20 bg-[#161629] text-richblack-25 relative overflow-hidden border-b-2 border-gray-600 border-opacity-40">
+      <section className="py-20 bg-[#071426] text-richblack-25 relative overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0 opacity-5">
           <div
@@ -323,184 +813,7 @@ function Home() {
           </div>
 
           {/* Team Preview Grid */}
-          <div ref={teamCardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 max-w-6xl mx-auto">
-            {/* Chair Person - Featured */}
-            <div className="lg:col-span-1 md:col-span-2 group font-nunito">
-              <div className="relative bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-3xl p-8 border border-green-400/30 hover:border-green-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/20 backdrop-blur-sm">
-                {/* Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                
-                {/* Content */}
-                <div className="relative z-10 text-center">
-                  <ProfileAvatarFlip
-                    flipKey="toshika-goswami"
-                    src="/Toshika.webp"
-                    alt="Toshika Goswami"
-                    initials="TG"
-                    animateOnScroll
-                    imageLoading="lazy"
-                    className="h-24 w-24 mx-auto mb-6"
-                    borderClassName="border-4 border-green-400/50 shadow-lg group-hover:border-green-400 transition-colors duration-300"
-                    imageClassName="group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <h3 className="font-rounded text-2xl font-bold text-richblack-25 mb-2 group-hover:text-green-300 transition-colors duration-300">
-                    Toshika Goswami
-                  </h3>
-                  <p className="text-green-300 text-lg font-semibold mb-2">Chair Person</p>
-                  <p className="text-gray-300 text-sm mb-4">CSE • 4th Year</p>
-                  
-                  {/* Social Links */}
-                  <div className="flex justify-center gap-3">
-                    <a 
-                      href="mailto:toshikagoswami4@gmail.com"
-                      className="w-10 h-10 bg-green-500/80 rounded-full flex items-center justify-center hover:bg-green-400 hover:scale-110 transition-all duration-300"
-                      title="Email"
-                    >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                      </svg>
-                    </a>
-                    <a 
-                      href="https://www.linkedin.com/in/toshika-goswami-39791022a"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 bg-blue-600/80 rounded-full flex items-center justify-center hover:bg-blue-500 hover:scale-110 transition-all duration-300"
-                      title="LinkedIn"
-                    >
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.328v15.344C1 18.4 1.595 19 2.328 19h15.34c.734 0 1.332-.6 1.332-1.328V2.328C19 1.581 18.402 1 17.668 1z" />
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Vice Chair Person */}
-            <div className="group font-nunito">
-              <div className="relative bg-gradient-to-br from-blue-600/20 to-cyan-600/20 rounded-3xl p-6 border border-blue-400/30 hover:border-blue-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/20 backdrop-blur-sm">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                
-                <div className="relative z-10 text-center">
-                  <ProfileAvatarFlip
-                    flipKey="kartik-bhattacharya"
-                    src="/Kartik.webp"
-                    alt="Kartik Bhattacharya"
-                    initials="KB"
-                    animateOnScroll
-                    imageLoading="lazy"
-                    className="h-20 w-20 mx-auto mb-4"
-                    borderClassName="border-2 border-blue-400/50 shadow-lg group-hover:border-blue-400 transition-colors duration-300"
-                    imageClassName="group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <h3 className="font-rounded text-xl font-bold text-richblack-25 mb-1 group-hover:text-blue-300 transition-colors duration-300">
-                    Kartik Bhattacharya
-                  </h3>
-                  <p className="text-blue-300 font-semibold mb-1">Vice-Chairperson</p>
-                  <p className="text-gray-300 text-sm mb-3">CSE • 3rd Year</p>
-                  
-                  <div className="flex justify-center gap-2">
-                    <a 
-                      href="mailto:kartikbhattacharya10@gmail.com"
-                      className="w-8 h-8 bg-blue-500/80 rounded-full flex items-center justify-center hover:bg-blue-400 hover:scale-110 transition-all duration-300"
-                      title="Email"
-                    >
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                      </svg>
-                    </a>
-                    <a 
-                      href="https://linkedin.com/in/kafiltafish21"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 bg-blue-600/80 rounded-full flex items-center justify-center hover:bg-blue-500 hover:scale-110 transition-all duration-300"
-                      title="LinkedIn"
-                    >
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.328v15.344C1 18.4 1.595 19 2.328 19h15.34c.734 0 1.332-.6 1.332-1.328V2.328C19 1.581 18.402 1 17.668 1z" />
-                      </svg>
-                    </a>
-                    <a 
-                      href="https://www.instagram.com/_kafiltafish_21_/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 bg-pink-600/80 rounded-full flex items-center justify-center hover:bg-pink-500 hover:scale-110 transition-all duration-300"
-                      title="Instagram"
-                    >
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 2C6.686 2 6.343 2.014 5.514 2.072 4.69 2.13 4.188 2.333 3.77 2.551a2.5 2.5 0 0 0-.919.919C2.333 4.188 2.13 4.69 2.072 5.514 2.014 6.343 2 6.686 2 10s.014 3.657.072 4.486c.058.824.261 1.326.479 1.744a2.5 2.5 0 0 0 .919.919c.418.218.92.421 1.744.479.829.058 1.168.072 4.486.072s3.657-.014 4.486-.072c.824-.058 1.326-.261 1.744-.479a2.5 2.5 0 0 0 .919-.919c.218-.418.421-.92.479-1.744.058-.829.072-1.168.072-4.486s-.014-3.657-.072-4.486c-.058-.824-.261-1.326-.479-1.744a2.5 2.5 0 0 0-.919-.919c-.418-.218-.92-.421-1.744-.479C13.657 2.014 13.314 2 10 2zm0 1.5c3.136 0 3.389.007 4.61.045.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.919.11.281.24.705.275 1.485.038 1.22.045 1.475.045 4.61s-.007 3.389-.045 4.61c-.035.78-.166 1.204-.275 1.486a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.919.598-.28.11-.704.24-1.485.275-1.22.038-1.475.045-4.61.045s-3.389-.007-4.61-.045c-.78-.035-1.203-.166-1.485-.275a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.704-.275-1.485-.038-1.22-.045-1.475-.045-4.61s.007-3.389.045-4.61c.035-.78.166-1.203.275-1.485.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.281-.11.704-.24 1.485-.275C6.611 3.507 6.864 3.5 10 3.5z" clipRule="evenodd"/>
-                        <path d="M10 5.838a4.162 4.162 0 1 0 0 8.324 4.162 4.162 0 0 0 0-8.324zM10 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm4.208-7.208a.972.972 0 1 1-1.944 0 .972.972 0 0 1 1.944 0z"/>
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Design Lead */}
-            <div className="group font-nunito">
-              <div className="relative bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-3xl p-6 border border-purple-400/30 hover:border-purple-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/20 backdrop-blur-sm">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                
-                <div className="relative z-10 text-center">
-                  <ProfileAvatarFlip
-                    flipKey="archita"
-                    src="/Archita.webp"
-                    alt="Archita"
-                    initials="A"
-                    animateOnScroll
-                    imageLoading="lazy"
-                    className="h-20 w-20 mx-auto mb-4"
-                    borderClassName="border-2 border-purple-400/50 shadow-lg group-hover:border-purple-400 transition-colors duration-300"
-                    imageClassName="group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <h3 className="font-rounded text-xl font-bold text-richblack-25 mb-1 group-hover:text-purple-300 transition-colors duration-300">
-                    Archita
-                  </h3>
-                  <p className="text-purple-300 font-semibold mb-1">Design & Creative Lead</p>
-                  <p className="text-gray-300 text-sm mb-3">IT • 3rd Year</p>
-                  
-                  <div className="flex justify-center gap-2">
-                    <a 
-                      href="mailto:archita770@gmail.com"
-                      className="w-8 h-8 bg-purple-500/80 rounded-full flex items-center justify-center hover:bg-purple-400 hover:scale-110 transition-all duration-300"
-                      title="Email"
-                    >
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                      </svg>
-                    </a>
-                    <a 
-                      href="https://www.linkedin.com/in/archita-337521376"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 bg-blue-600/80 rounded-full flex items-center justify-center hover:bg-blue-500 hover:scale-110 transition-all duration-300"
-                      title="LinkedIn"
-                    >
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.328v15.344C1 18.4 1.595 19 2.328 19h15.34c.734 0 1.332-.6 1.332-1.328V2.328C19 1.581 18.402 1 17.668 1z" />
-                      </svg>
-                    </a>
-                    <a 
-                      href="https://www.instagram.com/archiitta.r?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 bg-pink-600/80 rounded-full flex items-center justify-center hover:bg-pink-500 hover:scale-110 transition-all duration-300"
-                      title="Instagram"
-                    >
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 2C6.686 2 6.343 2.014 5.514 2.072 4.69 2.13 4.188 2.333 3.77 2.551a2.5 2.5 0 0 0-.919.919C2.333 4.188 2.13 4.69 2.072 5.514 2.014 6.343 2 6.686 2 10s.014 3.657.072 4.486c.058.824.261 1.326.479 1.744a2.5 2.5 0 0 0 .919.919c.418.218.92.421 1.744.479.829.058 1.168.072 4.486.072s3.657-.014 4.486-.072c.824-.058 1.326-.261 1.744-.479a2.5 2.5 0 0 0 .919-.919c.218-.418.421-.92.479-1.744.058-.829.072-1.168.072-4.486s-.014-3.657-.072-4.486c-.058-.824-.261-1.326-.479-1.744a2.5 2.5 0 0 0-.919-.919c-.418-.218-.92-.421-1.744-.479C13.657 2.014 13.314 2 10 2zm0 1.5c3.136 0 3.389.007 4.61.045.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.919.11.281.24.705.275 1.485.038 1.22.045 1.475.045 4.61s-.007 3.389-.045 4.61c-.035.78-.166 1.204-.275 1.486a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.919.598-.28.11-.704.24-1.485.275-1.22.038-1.475.045-4.61.045s-3.389-.007-4.61-.045c-.78-.035-1.203-.166-1.485-.275a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.704-.275-1.485-.038-1.22-.045-1.475-.045-4.61s.007-3.389.045-4.61c.035-.78.166-1.203.275-1.485.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.281-.11.704-.24 1.485-.275C6.611 3.507 6.864 3.5 10 3.5z" clipRule="evenodd"/>
-                        <path d="M10 5.838a4.162 4.162 0 1 0 0 8.324 4.162 4.162 0 0 0 0-8.324zM10 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm4.208-7.208a.972.972 0 1 1-1.944 0 .972.972 0 0 1 1.944 0z"/>
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+         
 
           {/* Call to Action */}
           <div className="text-center">
@@ -521,8 +834,14 @@ function Home() {
         </div>
       </section>
 
+       <CloudinaryIntroAnimation />
+
+      <OrbitCarousel></OrbitCarousel>
+
       {/* Image Grid */}
       <ImageGrid />
+
+     
 
       {/* Footer */}
       <Footer />

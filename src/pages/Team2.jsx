@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState } from "react";
 import teamData from "../data/teamData";
 import NewCard from "../components/NewCard";
 import headsData from "../data/headsData";
-import FacultyIncharge from "../images/RachnaNarula.jpeg";
 import Lenis from "lenis";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
@@ -12,6 +11,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 function Team2() {
   const [activeTab, setActiveTab] = useState("core");
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
     const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
@@ -141,6 +141,17 @@ function Team2() {
 
   const displayedData = activeTab === "core" ? teamData : headsData;
 
+  const handleViewHeads = () => {
+  setActiveTab("heads");
+
+  setTimeout(() => {
+    teamGridRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, 100);
+};
+
   return (
     <div
       ref={containerRef}
@@ -167,12 +178,19 @@ function Team2() {
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
           <div className="relative shrink-0">
             <img
-              src={FacultyIncharge}
-              alt="RachnaNarula"
+              src="https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,q_auto,f_auto/v1784361994/rachna_hagu02.jpg"
+              alt="Rachna Narula"
               loading="eager"
-              className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-indigo-500 object-cover"
+              fetchPriority="high"
+              width={128}
+              height={128}
+              onLoad={() => setImageLoaded(true)}
+              className={`h-28 w-28 rounded-full border-4 border-indigo-500 object-cover transition-opacity duration-500 md:h-32 md:w-32 ${
+                imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
             />
-            <span className="absolute -bottom-2 right-0 w-4 h-4 bg-green-400 rounded-full ring-2 ring-gray-900"></span>
+
+            <span className="absolute -bottom-2 right-0 h-4 w-4 rounded-full bg-green-400 ring-2 ring-gray-900" />
           </div>
           <div className="text-left md:text-left flex-1">
             <h2 className="text-richblack-25 mb-1 text-center md:text-left text-lg font-bold font-montserrat">
@@ -218,20 +236,38 @@ function Team2() {
       </div>
 
       {/* Cards */}
-      <div
-        ref={teamGridRef}
-        className="TEAM_SECTION mt-16 justify-center items-center flex flex-wrap w-10/12 mx-auto gap-16 pb-12 md:gap-y-20"
-      >
-        {displayedData && displayedData.length > 0 ? (
-          displayedData.map((person, index) => (
-            <NewCard key={`${activeTab}-${index}`} person={person} />
-          ))
-        ) : (
-          <div className="text-center text-gray-300 w-full">
-            Heads data coming soon.
-          </div>
-        )}
+<div
+  ref={teamGridRef}
+  className="TEAM_SECTION mt-16 scroll-mt-28"
+>
+  <div className="flex w-10/12 mx-auto flex-wrap items-center justify-center gap-16 pb-12 md:gap-y-20">
+    {displayedData && displayedData.length > 0 ? (
+      displayedData.map((person, index) => (
+        <NewCard
+          key={`${activeTab}-${index}`}
+          person={person}
+        />
+      ))
+    ) : (
+      <div className="w-full text-center text-gray-300">
+        Heads data coming soon.
       </div>
+    )}
+  </div>
+
+  {/* Show only at the end of Core */}
+  {activeTab === "core" && (
+    <div className="flex justify-center pb-16">
+      <button
+        type="button"
+        onClick={handleViewHeads}
+        className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-6 py-3 font-nunito text-sm font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/20"
+      >
+        View Heads →
+      </button>
+    </div>
+  )}
+</div>
     </div>
   );
 }
