@@ -1,7 +1,8 @@
+import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Upload, Link2, Users, List, Calendar, Shield, Grid, Eye } from "react-feather";
+import { Upload, Link2, Users, List, Calendar, Shield, Grid, Eye, Database } from "react-feather";
 import { useAuth } from "../../context/AuthContext";
-import { canManageEventUploadConfig, canManageForceDeleteConfig } from "../../services/api";
+import { canManageEventUploadConfig, canManageForceDeleteConfig, getVectorVisionAccess } from "../../services/api";
 
 const sidebarLinks = [
   { name: "Upload new event", path: "/em-dashboard/upload", icon: Upload },
@@ -9,6 +10,7 @@ const sidebarLinks = [
   { name: "Generate upload link", path: "/em-dashboard/generate-link", icon: Link2 },
   { name: "Generate QR", path: "/em-dashboard/generate-qr", icon: Grid },
   { name: "Vector Vision", path: "/em-dashboard/vector-vision", icon: Eye },
+  { name: "VectorVision admin", path: "/vectorvision-admin", icon: Database, requireVectorVisionAccess: true },
   { name: "Departments allowed", path: "/em-dashboard/departments", icon: Users, requireConfig: true },
   { name: "Force delete permissions", path: "/em-dashboard/force-delete", icon: Shield, requireFacultyIncharge: true },
   { name: "Manage uploaded events", path: "/em-dashboard/manage", icon: List },
@@ -18,6 +20,15 @@ const sidebarLinks = [
 export default function EventSidebar() {
   const location = useLocation();
   const { user } = useAuth();
+  const [hasVectorVisionAccess, setHasVectorVisionAccess] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    getVectorVisionAccess()
+      .then((allowed) => { if (active) setHasVectorVisionAccess(allowed); })
+      .catch(() => { if (active) setHasVectorVisionAccess(false); });
+    return () => { active = false; };
+  }, [user?._id]);
 
   const matchRoute = (path) => {
     if (path === "/em-dashboard/upload") return location.pathname === path || location.pathname === "/em-dashboard";
@@ -30,6 +41,7 @@ export default function EventSidebar() {
         {sidebarLinks.map((link) => {
           if (link.requireConfig && !canManageEventUploadConfig(user?.accountType)) return null;
           if (link.requireFacultyIncharge && !canManageForceDeleteConfig(user?.accountType)) return null;
+          if (link.requireVectorVisionAccess && !hasVectorVisionAccess) return null;
           const Icon = link.icon;
           const isActive = matchRoute(link.path);
           return (

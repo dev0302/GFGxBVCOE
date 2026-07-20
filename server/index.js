@@ -23,6 +23,8 @@ const jamTheWebRoutes = require("./routes/jamTheWebRoute");
 const dashboardRoutes = require("./routes/dashboardRoute");
 const aiRoutes = require("./routes/aiRoutes");
 const leadershipTransitionRoutes = require("./routes/leadershipTransitionRoute");
+const memberEnrollRoutes = require("./routes/memberEnrollRoute");
+const vectorVisionAdminRoutes = require("./routes/vectorVisionAdminRoute");
 const { setIo, setEmitToUser } = require("./utils/socketBus");
 const { setDraftIo } = require("./utils/leadershipDraftBus");
 const {
@@ -60,6 +62,8 @@ app.use("/api/v1/activity-logs", activityLogRoutes);
 app.use("/api/v1/jamtheweb", jamTheWebRoutes);
 app.use("/api/v1/dashboards", dashboardRoutes);
 app.use("/api/v1/leadership-transition", leadershipTransitionRoutes);
+app.use("/api/v1/members/enroll", memberEnrollRoutes);
+app.use("/api/admin", vectorVisionAdminRoutes);
 app.use("/api", descriptionRouter);
 app.use("/api/v1/ai", aiRoutes);
 

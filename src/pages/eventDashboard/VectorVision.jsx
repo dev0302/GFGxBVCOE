@@ -206,8 +206,7 @@ export default function VectorVision() {
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-richblack-25">Vector Vision</h1>
           <p className="mt-2 text-gray-400 text-sm max-w-2xl">
-            Upload a group photo to detect society members via face recognition. Names above {MIN_CONFIDENCE}% confidence
-            are listed below.
+            Upload a group photo to detect society members via face recognition.
           </p>
         </div>
 
@@ -295,7 +294,7 @@ export default function VectorVision() {
 
           {loading && (
             <div className="mt-5 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-3">
-              <p className="text-sm text-cyan-300">Running face recognition on Hugging Face…</p>
+              <p className="text-sm text-cyan-300">Running face recognition…</p>
               <p className="mt-1 text-xs text-gray-500">
                 First request may take longer if the space is cold-starting.
               </p>
@@ -306,8 +305,8 @@ export default function VectorVision() {
         {(members.length > 0 || rawResult) && (
           <section className="bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">
             <SectionTitle icon="👥">Tagged members</SectionTitle>
-            <p className="text-sm text-gray-400 mb-4">
-              Unique names with confidence greater than {MIN_CONFIDENCE}%.
+            <p className="text-xs text-gray-400 mb-4">
+              Vector vision may make mistakes.
             </p>
 
             {members.length > 0 ? (
