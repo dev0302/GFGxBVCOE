@@ -8,6 +8,7 @@ import { animateProfileAvatarFlip } from "../../animations/profileAnimations";
  */
 export default function ProfileAvatarFlip({
   src,
+  highResSrc,
   initials = "",
   flipKey,
   hasImage = true,
@@ -26,10 +27,13 @@ export default function ProfileAvatarFlip({
   const spinnerRef = useRef(null);
   const frontRef = useRef(null);
   const imgRef = useRef(null);
+  const highResImgRef = useRef(null);
   const [imageFailed, setImageFailed] = useState(false);
   const [isInView, setIsInView] = useState(!animateOnScroll);
   const showImage = hasImage && !imageFailed;
   const [imageReady, setImageReady] = useState(!showImage);
+  const [highResLoaded, setHighResLoaded] = useState(false);
+  const useProgressive = Boolean(highResSrc && highResSrc !== src);
 
   useEffect(() => {
     if (!animateOnScroll) {
@@ -64,12 +68,24 @@ export default function ProfileAvatarFlip({
   }, [flipKey, showImage]);
 
   useLayoutEffect(() => {
+    setHighResLoaded(false);
+  }, [flipKey, highResSrc, src, useProgressive]);
+
+  useLayoutEffect(() => {
     if (!showImage) return;
     const img = imgRef.current;
     if (img?.complete && img.naturalWidth > 0) {
       setImageReady(true);
     }
   }, [flipKey, showImage, src]);
+
+  useLayoutEffect(() => {
+    if (!useProgressive || !showImage) return;
+    const img = highResImgRef.current;
+    if (img?.complete && img.naturalWidth > 0) {
+      setHighResLoaded(true);
+    }
+  }, [flipKey, showImage, highResSrc, useProgressive]);
 
   useGSAP(
     () => {
@@ -126,15 +142,40 @@ export default function ProfileAvatarFlip({
           aria-label={isInteractive && alt ? `Open ${alt} photo in new tab` : undefined}
         >
           {showImage ? (
-            <img
-              ref={imgRef}
-              src={src}
-              alt={alt}
-              loading={imageLoading}
-              onLoad={() => setImageReady(true)}
-              onError={handleImageError}
-              className={`h-full w-full object-cover ${imageClassName}`}
-            />
+            useProgressive ? (
+              <div className="relative h-full w-full">
+                <img
+                  ref={imgRef}
+                  src={src}
+                  alt={alt}
+                  loading={imageLoading}
+                  onLoad={() => setImageReady(true)}
+                  onError={handleImageError}
+                  className={`h-full w-full object-cover ${imageClassName}`}
+                />
+                <img
+                  ref={highResImgRef}
+                  src={highResSrc}
+                  alt=""
+                  aria-hidden
+                  loading="eager"
+                  onLoad={() => setHighResLoaded(true)}
+                  className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ease-out ${imageClassName} ${
+                    highResLoaded ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              </div>
+            ) : (
+              <img
+                ref={imgRef}
+                src={src}
+                alt={alt}
+                loading={imageLoading}
+                onLoad={() => setImageReady(true)}
+                onError={handleImageError}
+                className={`h-full w-full object-cover ${imageClassName}`}
+              />
+            )
           ) : (
             <div
               className={`flex h-full w-full items-center justify-center bg-cyan-600/80 font-semibold text-richblack-25 ${initialsClassName}`}

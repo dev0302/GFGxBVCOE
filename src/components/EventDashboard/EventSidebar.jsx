@@ -7,7 +7,11 @@ import { canManageEventUploadConfig, canManageForceDeleteConfig, getVectorVision
 const sidebarLinks = [
   { name: "Upload new event", path: "/em-dashboard/upload", icon: Upload },
   { name: "Upcoming event", path: "/em-dashboard/upcoming", icon: Calendar },
-  { name: "Generate upload link", path: "/em-dashboard/generate-link", icon: Link2 },
+  {
+    name: "Generate upload link",
+    path: "/em-dashboard/generate-link",
+    icon: Link2,
+  },
   { name: "Generate QR", path: "/em-dashboard/generate-qr", icon: Grid },
   { name: "Vector Vision", path: "/em-dashboard/vector-vision", icon: Eye },
   { name: "VectorVision admin", path: "/vectorvision-admin", icon: Database, requireVectorVisionAccess: true },
@@ -31,12 +35,17 @@ export default function EventSidebar() {
   }, [user?._id]);
 
   const matchRoute = (path) => {
-    if (path === "/em-dashboard/upload") return location.pathname === path || location.pathname === "/em-dashboard";
-    return location.pathname === path || location.pathname.startsWith(path + "/");
+    if (path === "/em-dashboard/upload")
+      return (
+        location.pathname === path || location.pathname === "/em-dashboard"
+      );
+    return (
+      location.pathname === path || location.pathname.startsWith(path + "/")
+    );
   };
 
   return (
-    <div className="flex h-[calc(100vh-5rem)] min-w-[60px] md:min-w-[220px] flex-col border-r border-gray-500/30 bg-[#1e1e2f]/95 py-6 transition-all duration-300">
+    <div className="flex h-screen min-w-[60px] md:min-w-[220px] flex-col border-r border-gray-500/30 bg-[#1e1e2f]/95 pb-6 pt-20 sm:pt-24 transition-all duration-300">
       <div className="flex flex-col gap-0.5 px-2 md:px-4">
         {sidebarLinks.map((link) => {
           if (link.requireConfig && !canManageEventUploadConfig(user?.accountType)) return null;

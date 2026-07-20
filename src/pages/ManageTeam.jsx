@@ -31,6 +31,8 @@ import {
   Printer,
   Mail,
   List,
+  Grid,
+  Phone,
 } from "react-feather";
 import {
   driveLinkToImageUrl,
@@ -55,6 +57,7 @@ import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import { uploadTeamPhoto } from "../services/api";
 import { Spinner } from "@/components/ui/spinner";
+import TeamMemberCard from "../components/TeamMemberCard";
 
 const COLS = [
   "name",
@@ -166,6 +169,7 @@ export default function ManageTeam({
   onBack,
 }) {
   const { user, loading: authLoading } = useAuth();
+  const [viewMode, setViewMode] = useState(window.innerWidth > 640 ? "list" : "grid");
   const [roster, setRoster] = useState([]);
   const [members, setMembers] = useState([]);
   const [showAllTeamOpen, setShowAllTeamOpen] = useState(false);
@@ -869,6 +873,32 @@ export default function ManageTeam({
             <div className="flex-1 min-w-0">
               <Search variant="manage-team" placeholder="Search members…" />
             </div>
+            <div className="flex items-center bg-[#1e1e2f] border border-gray-500/40 rounded-xl p-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                className={`p-1.5 rounded-lg transition-colors ${
+                  viewMode === "list"
+                    ? "bg-gray-500/30 text-gray-200"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
+                title="List view"
+              >
+                <List className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 rounded-lg transition-colors ${
+                  viewMode === "grid"
+                    ? "bg-cyan-500/20 text-cyan-400"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
+                title="Grid view"
+              >
+                <Grid className="h-5 w-5" />
+              </button>
+            </div>
             <button
               type="button"
               onClick={() => setShowAllTeamOpen(true)}
@@ -918,6 +948,28 @@ export default function ManageTeam({
                   </div>
                 );
               }
+              
+              if (viewMode === "grid") {
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-[#181824]">
+                    {tableRows.map((row) => {
+                      const isTeamMember = row.type === "teamMember";
+                      const m = isTeamMember ? row.teamMember : row;
+                      return (
+                        <TeamMemberCard
+                          key={isTeamMember ? `tm-${m._id}` : `roster-${row.email}`}
+                          row={row}
+                          openEdit={openEdit}
+                          deleteConfirmId={deleteConfirmId}
+                          setDeleteConfirmId={setDeleteConfirmId}
+                          handleDelete={handleDelete}
+                        />
+                      );
+                    })}
+                  </div>
+                );
+              }
+
               return (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">

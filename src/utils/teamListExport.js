@@ -10,6 +10,17 @@ import * as XLSX from "xlsx";
 applyPlugin(jsPDF);
 
 const ORG_NAME = "GFG BVCOE";
+const IST_DATE_OPTIONS = {
+  timeZone: "Asia/Kolkata",
+  dateStyle: "medium",
+  timeStyle: "short",
+};
+
+function formatISTDateTime(date = new Date()) {
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return "-";
+  return parsed.toLocaleString("en-IN", IST_DATE_OPTIONS);
+}
 
 /**
  * Build rows for export from members and selected column keys.
@@ -47,7 +58,7 @@ export function downloadTeamListPDF(members, columns, labels, title) {
   doc.setFontSize(12);
   doc.text(title || "Member list", 14, 26);
   doc.setFontSize(9);
-  doc.text(`Generated on ${new Date().toLocaleString()}`, 14, 32);
+  doc.text(`Generated on ${formatISTDateTime()}`, 14, 32);
 
   doc.autoTable({
     head: [head],
@@ -99,7 +110,7 @@ export function downloadAllDepartmentsPDF(departmentMembersMap, columns, labels,
   doc.text(title || "Society member list (all departments)", 14, startY);
   startY += 6;
   doc.setFontSize(9);
-  doc.text(`Generated on ${new Date().toLocaleString()}`, 14, startY);
+  doc.text(`Generated on ${formatISTDateTime()}`, 14, startY);
   startY += 12;
 
   const deptNames = Object.keys(departmentMembersMap).sort();

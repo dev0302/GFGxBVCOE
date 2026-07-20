@@ -34,6 +34,7 @@ async function uploadFileToCloudinary(file, folder, quality, publicId = null, ex
 }
 
 exports.cloudinaryConnect = cloudinaryConnect;
+exports.cloudinary = cloudinary;
 
 exports.imageUpload = async (file, folder, quality, publicId = null, extraOptions = {}) => {
   try {
