@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "playwright install chromium",
+    "setup:playwright": "playwright install chromium"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

@@ -525,7 +525,7 @@ function buildReportHtml(session) {
         <div>
           <span class="badge ${session.appliedByName ? "badge-approved" : "badge-pending"}">${session.appliedByName ? "Executed" : "Pending"}</span>
           <div class="approver-name">${session.appliedByName ? escapeHtml(session.appliedByName) : "System Executor"}</div>
-          <div class="approver-title">Faculty Incharge / Administrator</div>
+          <div class="approver-title">${session.appliedByRole ? escapeHtml(session.appliedByRole) : "Faculty Incharge / Administrator"}</div>
         </div>
         <div class="approver-date">${session.appliedByName && session.appliedAt ? formatDate(session.appliedAt) : "Execution Pending"}</div>
       </div>
