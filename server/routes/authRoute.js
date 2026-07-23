@@ -26,7 +26,7 @@ const {
   addEmail,
   removeEmail,
 } = require("../controllers/signupConfigController");
-const { auth, isAdmin, canAccessDashboard } = require("../middlewares/AuthZ");
+const { auth, isAdmin, canAccessDashboard, canAccessLeadershipTransition } = require("../middlewares/AuthZ");
 
 const router = express.Router();
 
@@ -43,7 +43,8 @@ router.get("/me", auth, me);
 router.post("/presence/heartbeat", auth, presenceHeartbeat);
 router.get("/presence/last-seen", auth, getLastSeenFeed);
 router.get("/search-people", auth, searchPeople);
-router.get("/all-users", auth, canAccessDashboard, getAllUsers);
+// This list powers the Leadership Transition delegated-access manager.
+router.get("/all-users", auth, canAccessLeadershipTransition, getAllUsers);
 router.get("/all-people", auth, getAllPeople);
 router.post("/send-signup-invite", auth, sendSignupInvite);
 router.delete("/account", auth, deleteAccount);

@@ -29,6 +29,7 @@ const {
   checkApprovalsComplete,
   serializeApprovalStatus,
 } = require("../utils/leadershipApproval");
+const { userCanAccessLeadershipTransition } = require("../utils/leadershipAccess");
 
 const ACTIVE_STATUSES = ["DRAFT", "APPROVAL_PENDING", "READY_TO_APPLY"];
 
@@ -211,17 +212,27 @@ async function addApproval(user) {
 
   const fullUser = await User.findById(user.id).populate("additionalDetails").lean();
   const approvalInfo = getUserApprovalInfo(fullUser || user);
-
-  if (!approvalInfo.canApprove) {
-    throw new Error("Your role is not authorized to approve leadership changes.");
+  const hasLeadershipAccess = await userCanAccessLeadershipTransition(
+    user.id,
+    fullUser?.accountType || user.accountType,
+    fullUser?.additionalDetails
+  );
+  if (!hasLeadershipAccess) {
+    throw new Error("Leadership Transition access is not granted for your account.");
   }
+
+  // A delegated user has the same transition authority as a default role. They
+  // count as the department-side approval when they do not hold a core role.
+  // This deliberately depends only on feature access, never on whether the
+  // approver is also included in the draft's promotion list.
+  const approvalCategory = approvalInfo.category || "department";
 
   session.approvals = session.approvals.filter((a) => a.userId !== String(user.id));
 
-  const existingCategory = session.approvals.find((a) => a.category === approvalInfo.category);
+  const existingCategory = session.approvals.find((a) => a.category === approvalCategory);
   if (existingCategory) {
     throw new Error(
-      `A ${approvalInfo.category === "core" ? "core" : "department"} approval has already been recorded.`
+      `A ${approvalCategory === "core" ? "core" : "department"} approval has already been recorded.`
     );
   }
 
@@ -231,7 +242,7 @@ async function addApproval(user) {
     image: fullUser.image || "",
     role: approvalInfo.role,
     department: approvalInfo.department,
-    category: approvalInfo.category,
+    category: approvalCategory,
     approvedAt: new Date(),
   });
 

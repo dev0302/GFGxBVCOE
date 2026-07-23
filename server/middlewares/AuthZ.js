@@ -90,7 +90,7 @@ exports.isAdmin = (req, res, next) => {
   }
 };
 
-/** Leadership Transition: society roles + users on the allowed list */
+/** Leadership Transition: default leadership roles + users on the allowed list */
 exports.canAccessLeadershipTransition = async (req, res, next) => {
   try {
     if (req.tenureEnded) {

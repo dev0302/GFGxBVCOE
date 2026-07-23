@@ -31,7 +31,7 @@ const pendingPromotionEmailSchema = new mongoose.Schema(
 
 const leadershipTransitionConfigSchema = new mongoose.Schema(
   {
-    /** User IDs (beyond society roles) who can access Leadership Transition */
+    /** User IDs (beyond default Leadership Transition roles) who can access it */
     allowedUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     /** Queued promotion emails awaiting batch send from the Promotions page */
     pendingPromotionEmails: [pendingPromotionEmailSchema],

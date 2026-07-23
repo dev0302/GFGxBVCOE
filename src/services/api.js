@@ -511,12 +511,15 @@ export function userCanManageEvents(user) {
   return user.canManageEvents === true || (user.canManageEvents !== false && canManageEvents(user.accountType));
 }
 
-/** Society roles + users on the Leadership Transition allowed list. */
+/** Default leadership roles (including Department Leads) + delegated users. */
 export function userCanAccessLeadershipTransition(user) {
   if (!user) return false;
   if (user.canAccessLeadershipTransition === true) return true;
   if (user.canAccessLeadershipTransition === false) return false;
-  return isSocietyRole(user.accountType);
+  const position = String(user.additionalDetails?.position || user.additionalDetails?.p0 || '').trim();
+  return isSocietyRole(user.accountType) || (
+    AUTH_DEPARTMENTS.includes(String(user.accountType || '').trim()) && /\blead\b/i.test(position)
+  );
 }
 
 export async function sendOTP({ email, department }) {

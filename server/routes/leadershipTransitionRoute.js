@@ -21,15 +21,15 @@ const {
   getAppliedSessions,
   removeDraftChange,
 } = require("../controllers/leadershipDraftController");
-const { auth, canAccessDashboard, canAccessLeadershipTransition } = require("../middlewares/AuthZ");
+const { auth, canAccessLeadershipTransition } = require("../middlewares/AuthZ");
 
 const router = express.Router();
 
 router.get("/positions", auth, canAccessLeadershipTransition, getPositions);
 router.get("/people", auth, canAccessLeadershipTransition, getPeople);
 router.get("/config", auth, canAccessLeadershipTransition, getConfig);
-router.post("/config/add", auth, canAccessDashboard, addAllowedUser);
-router.post("/config/remove", auth, canAccessDashboard, removeAllowedUser);
+router.post("/config/add", auth, canAccessLeadershipTransition, addAllowedUser);
+router.post("/config/remove", auth, canAccessLeadershipTransition, removeAllowedUser);
 router.post("/promote", auth, canAccessLeadershipTransition, promotePerson);
 router.post("/end-session", auth, canAccessLeadershipTransition, endSession);
 router.get("/history", auth, canAccessLeadershipTransition, getHistory);

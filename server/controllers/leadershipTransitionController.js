@@ -22,6 +22,10 @@ const {
   SOCIETY_ROLES,
   formatPreviousRoleLabel,
 } = require("../utils/leadershipPositions");
+const {
+  isDepartmentLead,
+  userCanAccessLeadershipTransition,
+} = require("../utils/leadershipAccess");
 
 const ALL_SIGNUP_DEPARTMENTS = [
   "ADMIN",
@@ -36,10 +40,17 @@ async function buildConfigResponse(config) {
       .select("-password")
       .populate("additionalDetails")
       .lean(),
-    User.find({ accountType: { $in: SOCIETY_ROLES } }).select("-password").lean(),
+    User.find({ accountType: { $in: [...SOCIETY_ROLES, ...TEAM_DEPARTMENTS] } })
+      .select("-password")
+      .populate("additionalDetails")
+      .lean(),
   ]);
 
-  builtinAllowedUsers.sort((a, b) => {
+  const defaultAccessUsers = builtinAllowedUsers.filter((user) =>
+    SOCIETY_ROLES.includes(user.accountType) || isDepartmentLead(user.accountType, user.additionalDetails)
+  );
+
+  defaultAccessUsers.sort((a, b) => {
     const roleDiff =
       SOCIETY_ROLES.indexOf(a.accountType) - SOCIETY_ROLES.indexOf(b.accountType);
     if (roleDiff !== 0) return roleDiff;
@@ -48,13 +59,13 @@ async function buildConfigResponse(config) {
     return nameA.localeCompare(nameB);
   });
 
-  const builtinIds = new Set(builtinAllowedUsers.map((u) => String(u._id)));
+  const builtinIds = new Set(defaultAccessUsers.map((u) => String(u._id)));
   const allowedUsers = users.filter((u) => !builtinIds.has(String(u._id)));
 
   return {
     allowedUserIds: config.allowedUserIds.map(String),
     allowedUsers,
-    builtinAllowedUsers,
+    builtinAllowedUsers: defaultAccessUsers,
   };
 }
 
@@ -410,7 +421,11 @@ exports.addAllowedUser = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found." });
     }
 
-    if (SOCIETY_ROLES.includes(targetUser.accountType)) {
+    if (await userCanAccessLeadershipTransition(
+      targetUser._id,
+      targetUser.accountType,
+      targetUser.additionalDetails
+    )) {
       return res.status(400).json({
         success: false,
         message: "This user already has access through their role.",

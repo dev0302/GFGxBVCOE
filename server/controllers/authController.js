@@ -344,7 +344,8 @@ exports.login = async (req, res) => {
     user.dashboardAccess = Array.from(dashboardAccess);
     user.canAccessLeadershipTransition = await userCanAccessLeadershipTransition(
       user._id,
-      accountType
+      accountType,
+      user.additionalDetails
     );
 
     const isProduction = process.env.NODE_ENV === "production";
@@ -625,7 +626,8 @@ exports.me = async (req, res) => {
     user.dashboardAccess = Array.from(dashboardAccess);
     user.canAccessLeadershipTransition = await userCanAccessLeadershipTransition(
       user._id,
-      accountType
+      accountType,
+      user.additionalDetails
     );
     if (user.tenureEndedAt) {
       user.canAccessLeadershipTransition = false;
