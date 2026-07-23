@@ -1,8 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { getUpcomingEvents } from "../services/api";
-import { MapPin, Clock, Users, ExternalLink, Calendar, ChevronDown, ChevronUp } from "react-feather";
-import { motion, AnimatePresence } from "framer-motion";
-import CornerFrameScrambleText from "./ui/corner-frame-scramble-text";
+import { MapPin, Clock, Users, ExternalLink, ChevronDown, ChevronUp } from "react-feather";
 import { Accordion } from "./ui/accordion";
 import { cloudinaryEventCardImageUrl } from "../utils/cloudinary";
 
@@ -49,6 +47,48 @@ function useCountdown(targetDate) {
   return left;
 }
 
+function parseLinks(str) {
+  if (!str?.trim()) return [];
+  try {
+    const parsed = JSON.parse(str);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return str.split("\n").filter(Boolean).map((l) => ({
+      label: l.split(",")[0],
+      url: l.split(",")[1],
+    }));
+  }
+}
+
+function CountdownGrid({ targetDateTime, theme }) {
+  const countdown = useCountdown(targetDateTime);
+
+  if (countdown.expired) return null;
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+      {[
+        { v: countdown.days, l: "Days" },
+        { v: countdown.hours, l: "Hours" },
+        { v: countdown.minutes, l: "Minutes" },
+        { v: countdown.seconds, l: "Seconds" }
+      ].map((item) => (
+        <div
+          key={item.l}
+          className={`${theme.card} rounded-3xl p-6 flex flex-col items-center justify-center border animate-fadeIn`}
+        >
+          <span className="text-4xl md:text-5xl font-black text-richblack-25 tabular-nums tracking-tighter">
+            {String(item.v).padStart(2, "0")}
+          </span>
+          <span className={`text-[10px] uppercase font-bold tracking-widest mt-2 opacity-60 ${theme.text}`}>
+            {item.l}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function UpcomingEventSection({ variant = "events" }) {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -76,7 +116,15 @@ export default function UpcomingEventSection({ variant = "events" }) {
     () => (event ? parseTimeIntoDate(event.date, event.time) : null),
     [event?.date, event?.time]
   );
-  const countdown = useCountdown(targetDateTime);
+  const isHome = variant === "home";
+  const links = useMemo(() => parseLinks(event?.otherLinks), [event?.otherLinks]);
+  const theme = useMemo(() => ({
+    bg: isHome ? "bg-[#061a11]" : "bg-[#0f0f1a]",
+    accent: isHome ? "from-green-400 to-emerald-500" : "from-cyan-400 to-blue-500",
+    card: isHome ? "bg-green-900/20 border-green-500/20" : "bg-white/[0.03] border-white/10",
+    text: isHome ? "text-green-400" : "text-cyan-400",
+    btn: isHome ? "bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/20" : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20"
+  }), [isHome]);
 
   if (loading || !event) return null;
 
@@ -86,101 +134,48 @@ export default function UpcomingEventSection({ variant = "events" }) {
   const weekday = eventDate ? eventDate.toLocaleDateString(undefined, { weekday: "long" }) : "";
   const displayTime = event.time?.trim() || null;
 
-  const parseLinks = (str) => {
-    if (!str?.trim()) return [];
-    try {
-      const parsed = JSON.parse(str);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return str.split("\n").filter(Boolean).map(l => ({ label: l.split(",")[0], url: l.split(",")[1] }));
-    }
-  };
-
-  const links = parseLinks(event.otherLinks);
-  const isHome = variant === "home";
-
-  // MODERN THEME MAPPING
-  const theme = {
-    bg: isHome ? "bg-[#061a11]" : "bg-[#0f0f1a]",
-    accent: isHome ? "from-green-400 to-emerald-500" : "from-cyan-400 to-blue-500",
-    glow: isHome ? "shadow-green-500/20" : "shadow-cyan-500/20",
-    card: isHome ? "bg-green-900/20 border-green-500/20" : "bg-white/[0.03] border-white/10",
-    text: isHome ? "text-green-400" : "text-cyan-400",
-    btn: isHome ? "bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/20" : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20"
-  };
-
   return (
     <section className={`relative overflow-hidden py-24 ${theme.bg}`}>
       {/* Background Mesh Glows */}
-      <div className={`absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r ${theme.accent} opacity-10 blur-[120px] rounded-full`} />
-      <div className={`absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r ${theme.accent} opacity-5 blur-[120px] rounded-full`} />
+      <div className={`absolute top-0 left-1/4 w-80 h-80 bg-gradient-to-r ${theme.accent} opacity-10 blur-3xl rounded-full`} />
+      <div className={`absolute bottom-0 right-1/4 w-80 h-80 bg-gradient-to-r ${theme.accent} opacity-5 blur-3xl rounded-full`} />
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-5xl mx-auto">
           
           {/* Header Section */}
           <div className="text-center mb-12">
-            <motion.div 
-              initial={{ opacity: 0, y: -10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 mb-6`}
-            >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 mb-6 animate-fadeIn">
               <span className="relative flex h-2 w-2">
                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-current ${theme.text}`}></span>
                 <span className={`relative inline-flex rounded-full h-2 w-2 bg-current ${theme.text}`}></span>
               </span>
               <span className={`text-[10px] uppercase font-bold tracking-[0.2em] text-richblack-25/80`}>Live Countdown</span>
-            </motion.div>
+            </div>
             <h2 className="text-4xl md:text-5xl font-black text-richblack-25 tracking-tight mb-4">
               <span className={`bg-gradient-to-r ${theme.accent} bg-clip-text text-transparent`}>UPCOMING</span> EVENT
             </h2>
           </div>
 
           {/* Countdown Grid */}
-          {!countdown.expired && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-              {[
-                { v: countdown.days, l: "Days" },
-                { v: countdown.hours, l: "Hours" },
-                { v: countdown.minutes, l: "Minutes" },
-                { v: countdown.seconds, l: "Seconds" }
-              ].map((item, i) => (
-                <motion.div
-                  key={item.l}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.1 }}
-                  className={`${theme.card} backdrop-blur-md rounded-3xl p-6 flex flex-col items-center justify-center border`}
-                >
-                  <span className="text-4xl md:text-5xl font-black text-richblack-25 tabular-nums tracking-tighter">
-                    {String(item.v).padStart(2, "0")}
-                  </span>
-                  <span className={`text-[10px] uppercase font-bold tracking-widest mt-2 opacity-60 ${theme.text}`}>
-                    {item.l}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
-          )}
+          <CountdownGrid targetDateTime={targetDateTime} theme={theme} />
 
           {/* Main Content Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className={`${theme.card} backdrop-blur-xl rounded-[2.5rem] overflow-hidden border flex flex-col lg:flex-row shadow-2xl shadow-black/50`}
-          >
+          <div className={`${theme.card} rounded-[2.5rem] overflow-hidden border flex flex-col lg:flex-row shadow-xl shadow-black/40 animate-fadeIn`}>
             {/* Poster Area */}
             {event.poster && (
               <div className="lg:w-1/2 relative group">
                 <img 
                   src={cloudinaryEventCardImageUrl(event.poster)} 
-                  className="w-full h-full object-cover aspect-video lg:aspect-auto min-h-[400px] transition-transform duration-700 group-hover:scale-110" 
+                  className="w-full h-full object-cover aspect-video lg:aspect-auto min-h-[400px] transition-transform duration-500 group-hover:scale-[1.04]" 
                   alt="Poster" 
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent lg:bg-gradient-to-r" />
                 
                 {/* Floating Date Badge */}
-                <div className="absolute top-6 left-6 p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex flex-col items-center">
+                <div className="absolute top-6 left-6 p-4 rounded-2xl bg-black/45 border border-white/20 flex flex-col items-center">
                   <span className="text-2xl font-black text-richblack-25 leading-none">{dayNum}</span>
                   <span className="text-[10px] uppercase font-bold text-richblack-25/70">{monthShort}</span>
                 </div>
@@ -190,15 +185,13 @@ export default function UpcomingEventSection({ variant = "events" }) {
             {/* Content Area */}
             <div className="p-8 md:p-12 lg:w-1/2 flex flex-col">
               <div className="flex-1">
-                <CornerFrameScrambleText
-                  value={event.title}
-                  as="h3"
-                  loop
-                  loopDelay={2500}
-                  className="mb-6"
-                  style={{ '--foreground': 'rgba(255,255,255,0.25)' }}
-                  textClassName="text-3xl font-bold leading-[1.1] bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent"
-                />
+                <div
+                  className="relative mb-6 inline-block px-6 py-3 bg-[linear-gradient(to_right,rgba(255,255,255,0.25)_1.5px,transparent_1.5px),linear-gradient(to_right,rgba(255,255,255,0.25)_1.5px,transparent_1.5px),linear-gradient(to_left,rgba(255,255,255,0.25)_1.5px,transparent_1.5px),linear-gradient(to_left,rgba(255,255,255,0.25)_1.5px,transparent_1.5px),linear-gradient(to_bottom,rgba(255,255,255,0.25)_1.5px,transparent_1.5px),linear-gradient(to_bottom,rgba(255,255,255,0.25)_1.5px,transparent_1.5px),linear-gradient(to_top,rgba(255,255,255,0.25)_1.5px,transparent_1.5px),linear-gradient(to_top,rgba(255,255,255,0.25)_1.5px,transparent_1.5px)] bg-[length:15px_15px] bg-no-repeat bg-[position:0_0,0_100%,100%_0,100%_100%,0_0,100%_0,0_100%,100%_100%]"
+                >
+                  <h3 className="relative z-10 text-3xl font-bold leading-[1.1] bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                    {event.title}
+                  </h3>
+                </div>
                 
                 <div className="grid grid-cols-1 gap-5 mb-8">
                   <div className="flex items-center gap-4 text-richblack-25/70">
@@ -256,29 +249,22 @@ export default function UpcomingEventSection({ variant = "events" }) {
               {/* Action Bar */}
               <div className="flex flex-wrap gap-3 pt-8 border-t border-white/5">
                 {links.map((link, i) => (
-                  <motion.a
-                    whileHover={{ y: -3 }}
-                    whileTap={{ scale: 0.95 }}
+                  <a
                     key={i}
                     href={link.url}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-bold transition-all ${theme.btn}`}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-bold transition-transform hover:-translate-y-0.5 active:scale-95 ${theme.btn}`}
                   >
                     {link.label}
                     <ExternalLink size={14} />
-                  </motion.a>
+                  </a>
                 ))}
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* FAQ Accordion – only when event has FAQs */}
           {Array.isArray(event.faqs) && event.faqs.filter((f) => (f.question || "").trim() || (f.answer || "").trim()).length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              className="mt-16"
-            >
+            <div className="mt-16 animate-fadeIn">
               <h3 className={`text-2xl font-bold text-richblack-25 mb-6 flex items-center gap-2`}>
                 <span className={`bg-gradient-to-r ${theme.accent} bg-clip-text text-transparent`}>FAQ</span>
                 <span className="h-px flex-1 max-w-[80px] bg-white/20 rounded" />
@@ -291,7 +277,7 @@ export default function UpcomingEventSection({ variant = "events" }) {
                 triggerClassName="text-richblack-25/90"
                 contentClassName="text-richblack-25/60"
               />
-            </motion.div>
+            </div>
           )}
         </div>
       </div>

@@ -22,17 +22,19 @@ function escapeHtml(value) {
 
 function formatDate(date) {
   if (!date) return "—";
-  return new Date(date).toLocaleString("en-IN", {
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return "-";
+  return parsed.toLocaleString("en-IN", {
     timeZone: "Asia/Kolkata",
     dateStyle: "medium",
     timeStyle: "short",
   });
 }
 
-/** Session start time — when "Start session" was clicked (draft created). */
+/** Actual transition time. Older sessions may only have createdAt. */
 function getTransitionDate(session) {
   return (
-    session?.createdAt || session?.effectiveDate || session?.appliedAt || null
+    session?.appliedAt || session?.effectiveDate || session?.createdAt || null
   );
 }
 

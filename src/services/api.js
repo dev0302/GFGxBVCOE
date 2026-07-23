@@ -375,6 +375,44 @@ export function canManageForceDeleteConfig(accountType) {
   return accountType === 'ADMIN' || accountType === 'Chairperson' || accountType === 'Vice-Chairperson';
 }
 
+export async function fetchCloudinaryStorageUsage() {
+  const res = await authFetch('/api/v1/settings/cloudinary-storage');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load Cloudinary storage usage');
+  return data;
+}
+
+export async function fetchDatabaseAnalytics() {
+  const res = await authFetch('/api/v1/settings/database');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load database analytics');
+  return data;
+}
+
+export async function fetchEmailServiceAnalytics({ refresh = false } = {}) {
+  const res = await authFetch(`/api/v1/settings/email-service${refresh ? '?refresh=1' : ''}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load email service analytics');
+  return data;
+}
+
+export async function fetchBroadcastEmailAudience() {
+  const res = await authFetch('/api/v1/settings/broadcast-email/audience');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load email audience');
+  return data;
+}
+
+export async function sendBroadcastEmail(payload) {
+  const res = await authFetch('/api/v1/settings/broadcast-email/send', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to send email');
+  return data;
+}
+
 const authFetch = (url, options = {}) => {
   const token = getAuthToken();
   const headers = {
@@ -388,6 +426,29 @@ const authFetch = (url, options = {}) => {
     headers,
   });
 };
+
+/** VectorVision admin data. The server independently verifies per-user access. */
+export async function getVectorVisionAccess() {
+  const res = await authFetch('/api/admin/access');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to verify VectorVision access');
+  return Boolean(data.allowed);
+}
+
+export async function getPendingVectorVisionMembers() {
+  const res = await authFetch('/api/admin/members/pending');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load pending registrations');
+  return data;
+}
+
+/** Starts the configured GitHub Actions ingestion workflow; credentials never reach the browser. */
+export async function triggerVectorVisionIngestion() {
+  const res = await authFetch('/api/admin/trigger-ingestion', { method: 'POST' });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to trigger ingestion');
+  return data;
+}
 
 // Auth
 export const AUTH_DEPARTMENTS = [

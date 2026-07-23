@@ -25,7 +25,11 @@ export default function EventDashboardLayout() {
     );
   }
 
-  if (!userCanManageEvents(user)) {
+  // VectorVision uses its own email allowlist, which is verified by the API.
+  // Do not make access depend on an Event Management role as well.
+  const isVectorVisionAdmin = location.pathname === "/vectorvision-admin";
+
+  if (!isVectorVisionAdmin && !userCanManageEvents(user)) {
     return (
       <div className="flex min-h-[calc(100vh-5rem)] w-full items-center justify-center bg-[#1e1e2f]">
         <p className="text-gray-400">Redirecting…</p>
@@ -35,9 +39,9 @@ export default function EventDashboardLayout() {
   }
 
   return (
-    <div className="relative flex min-h-[calc(100vh-4rem)] w-full overflow-hidden bg-[#1e1e2f] mt-16">
+    <div className="relative flex min-h-screen w-full overflow-hidden bg-[#1e1e2f]">
       <EventSidebar />
-      <main className="flex-1 h-[calc(100vh-5rem)] overflow-y-auto overflow-x-hidden">
+      <main className="flex-1 h-screen overflow-y-auto overflow-x-hidden pt-16 sm:pt-20">
         <div className="h-full w-full overflow-x-hidden">
           <motion.div
             key={location.pathname}
