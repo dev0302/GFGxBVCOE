@@ -201,8 +201,9 @@ export default function PersonsAllowed() {
             Persons allowed
           </h1>
           <p className="mt-2 text-sm text-gray-400">
-            Faculty Incharge, Chairperson, and Vice-Chairperson always have access.
-            Add other registered members who should also use Leadership Transition.
+            Faculty Incharge, Chairperson, Vice-Chairperson, and all Department Leads
+            always have access. Add other registered members who should also use
+            Leadership Transition.
           </p>
         </div>
 
@@ -216,8 +217,7 @@ export default function PersonsAllowed() {
               </p>
               {builtinUsers.length === 0 ? (
                 <p className="rounded-xl border border-dashed border-gray-500/25 bg-[#151525]/30 px-4 py-6 text-sm text-gray-500">
-                  No Faculty Incharge, Chairperson, or Vice-Chairperson accounts are
-                  registered yet.
+                  No default Leadership Transition role accounts are registered yet.
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -256,7 +256,7 @@ export default function PersonsAllowed() {
         <section className="rounded-2xl border border-gray-500/20 bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 p-6 shadow-xl md:p-8">
           <SectionTitle icon="➕">Add from registered users</SectionTitle>
           <p className="mt-2 text-xs text-gray-500">
-            Society core roles are excluded because they already have access.
+            Default Leadership Transition roles are excluded because they already have access.
           </p>
 
           <div className="mt-4 space-y-3">

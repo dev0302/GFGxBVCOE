@@ -22,7 +22,7 @@ function resolveUserRoleLabel(user = {}) {
   });
 }
 
-function getUserApprovalInfo(user = {}) {
+function getUserApprovalInfo(user = {}, { hasLeadershipAccess = false } = {}) {
   const accountType = String(user.accountType || "").trim();
   const profile = user.additionalDetails || {};
   const position = profile.position || profile.p0 || "";
@@ -43,6 +43,18 @@ function getUserApprovalInfo(user = {}) {
     return {
       category: "department",
       role: roleLabel,
+      department,
+      canApprove: true,
+    };
+  }
+
+  // Delegated Leadership Transition access is intentionally sufficient for
+  // departmental approval. The transition middleware has already validated
+  // that access; a person's presence in a draft is not relevant here.
+  if (hasLeadershipAccess) {
+    return {
+      category: "department",
+      role: roleLabel || "Leadership Transition delegate",
       department,
       canApprove: true,
     };

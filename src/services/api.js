@@ -450,12 +450,17 @@ export function userCanManageEvents(user) {
   return user.canManageEvents === true || (user.canManageEvents !== false && canManageEvents(user.accountType));
 }
 
-/** Society roles + users on the Leadership Transition allowed list. */
+/** Default leadership roles + users on the Leadership Transition allowed list. */
 export function userCanAccessLeadershipTransition(user) {
   if (!user) return false;
   if (user.canAccessLeadershipTransition === true) return true;
   if (user.canAccessLeadershipTransition === false) return false;
-  return isSocietyRole(user.accountType);
+  const position = String(
+    user.additionalDetails?.position || user.additionalDetails?.p0 || user.position || user.p0 || ""
+  ).trim();
+  const isDepartmentLead =
+    !isSocietyRole(user.accountType) && /\blead\b/i.test(position);
+  return isSocietyRole(user.accountType) || isDepartmentLead;
 }
 
 export async function sendOTP({ email, department }) {

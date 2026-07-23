@@ -22,6 +22,7 @@ const {
   SOCIETY_ROLES,
   formatPreviousRoleLabel,
 } = require("../utils/leadershipPositions");
+const { userHasDefaultLeadershipTransitionAccess } = require("../utils/leadershipAccess");
 
 const ALL_SIGNUP_DEPARTMENTS = [
   "ADMIN",
@@ -36,25 +37,33 @@ async function buildConfigResponse(config) {
       .select("-password")
       .populate("additionalDetails")
       .lean(),
-    User.find({ accountType: { $in: SOCIETY_ROLES } }).select("-password").lean(),
+    User.find({ accountType: { $in: [...SOCIETY_ROLES, ...TEAM_DEPARTMENTS] } })
+      .select("-password")
+      .populate("additionalDetails")
+      .lean(),
   ]);
 
-  builtinAllowedUsers.sort((a, b) => {
+  const defaultAllowedUsers = builtinAllowedUsers.filter(
+    userHasDefaultLeadershipTransitionAccess
+  );
+
+  defaultAllowedUsers.sort((a, b) => {
     const roleDiff =
-      SOCIETY_ROLES.indexOf(a.accountType) - SOCIETY_ROLES.indexOf(b.accountType);
+      (SOCIETY_ROLES.indexOf(a.accountType) + 1 || 99) -
+      (SOCIETY_ROLES.indexOf(b.accountType) + 1 || 99);
     if (roleDiff !== 0) return roleDiff;
     const nameA = `${a.firstName || ""} ${a.lastName || ""}`.trim().toLowerCase();
     const nameB = `${b.firstName || ""} ${b.lastName || ""}`.trim().toLowerCase();
     return nameA.localeCompare(nameB);
   });
 
-  const builtinIds = new Set(builtinAllowedUsers.map((u) => String(u._id)));
+  const builtinIds = new Set(defaultAllowedUsers.map((u) => String(u._id)));
   const allowedUsers = users.filter((u) => !builtinIds.has(String(u._id)));
 
   return {
     allowedUserIds: config.allowedUserIds.map(String),
     allowedUsers,
-    builtinAllowedUsers,
+    builtinAllowedUsers: defaultAllowedUsers,
   };
 }
 
@@ -405,12 +414,15 @@ exports.addAllowedUser = async (req, res) => {
       return res.status(400).json({ success: false, message: "userId is required." });
     }
 
-    const targetUser = await User.findById(userId).select("-password").lean();
+    const targetUser = await User.findById(userId)
+      .select("-password")
+      .populate("additionalDetails")
+      .lean();
     if (!targetUser) {
       return res.status(404).json({ success: false, message: "User not found." });
     }
 
-    if (SOCIETY_ROLES.includes(targetUser.accountType)) {
+    if (userHasDefaultLeadershipTransitionAccess(targetUser)) {
       return res.status(400).json({
         success: false,
         message: "This user already has access through their role.",

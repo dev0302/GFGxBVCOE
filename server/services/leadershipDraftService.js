@@ -29,6 +29,7 @@ const {
   checkApprovalsComplete,
   serializeApprovalStatus,
 } = require("../utils/leadershipApproval");
+const { userCanAccessLeadershipTransition } = require("../utils/leadershipAccess");
 
 const ACTIVE_STATUSES = ["DRAFT", "APPROVAL_PENDING", "READY_TO_APPLY"];
 
@@ -210,7 +211,11 @@ async function addApproval(user) {
   }
 
   const fullUser = await User.findById(user.id).populate("additionalDetails").lean();
-  const approvalInfo = getUserApprovalInfo(fullUser || user);
+  const hasLeadershipAccess = await userCanAccessLeadershipTransition(
+    user.id,
+    fullUser?.accountType || user.accountType
+  );
+  const approvalInfo = getUserApprovalInfo(fullUser || user, { hasLeadershipAccess });
 
   if (!approvalInfo.canApprove) {
     throw new Error("Your role is not authorized to approve leadership changes.");
