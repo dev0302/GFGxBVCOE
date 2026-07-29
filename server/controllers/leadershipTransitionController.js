@@ -30,6 +30,9 @@ const ALL_SIGNUP_DEPARTMENTS = [
   "Vice-Chairperson",
   ...TEAM_DEPARTMENTS,
 ];
+const ACTIVE_TEAM_MEMBER_FILTER = {
+  $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+};
 
 async function buildConfigResponse(config) {
   const [users, defaultAccessCandidates] = await Promise.all([
@@ -315,7 +318,7 @@ async function buildPeopleList() {
   const teamMembers = [];
   for (const dept of TEAM_DEPARTMENTS) {
     const Model = getTeamMemberModel(dept);
-    const members = await Model.find({}).sort({ createdAt: -1 }).lean();
+    const members = await Model.find(ACTIVE_TEAM_MEMBER_FILTER).sort({ createdAt: -1 }).lean();
     for (const m of members) {
       teamMembers.push({ type: "teamMember", data: m, department: dept });
     }

@@ -74,7 +74,7 @@ export default function DepartmentsAllowed() {
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-richblack-25">Departments allowed to access EM Dashboard</h1>
           <p className="mt-2 text-gray-400 text-sm">
-            Faculty Incharge, Chairperson, Vice-Chairperson and Event Management are always allowed. Add or remove other departments below.
+            Faculty Incharge, Chairperson, Vice-Chairperson, Treasurer and Event Management are always allowed. Add or remove other departments below.
           </p>
         </div>
 

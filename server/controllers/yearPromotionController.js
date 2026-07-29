@@ -6,7 +6,7 @@ const { getTeamMemberModel } = require("../models/TeamMember");
 const { logActivity } = require("../utils/activityLog");
 const { promoteYear, getProfileYear, normalizeYear } = require("../utils/yearPromotion");
 
-const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
+const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
 
 const TEAM_DEPARTMENTS = [
   "Social Media and Promotion",
@@ -17,8 +17,10 @@ const TEAM_DEPARTMENTS = [
   "Content and Documentation",
   "Capture The Event",
   "Sponsorship and Marketing",
-  "Treasurer",
 ];
+const ACTIVE_TEAM_MEMBER_FILTER = {
+  $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+};
 
 function requireSocietyRole(req, res) {
   if (!SOCIETY_ROLES.includes(req.user?.accountType)) {
@@ -111,7 +113,7 @@ async function collectAndApplyPromotions() {
 
   for (const dept of TEAM_DEPARTMENTS) {
     const Model = getTeamMemberModel(dept);
-    const members = await Model.find({}).lean();
+    const members = await Model.find(ACTIVE_TEAM_MEMBER_FILTER).lean();
     for (const member of members) {
       const current = member.year || "";
       const next = promoteYear(current);

@@ -3,11 +3,11 @@ const mongoose = require("mongoose");
 const CONFIG_KEY = "event-upload-allowed";
 const FORCE_DELETE_CONFIG_KEY = "event-force-delete-allowed";
 
-/** Always allowed to access /uploadevent (Faculty Incharge, Chairperson, Vice-Chairperson, Event Management). */
-const CORE_EVENT_UPLOAD_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Event Management"];
+/** Always allowed to access /uploadevent (core roles and Event Management). */
+const CORE_EVENT_UPLOAD_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer", "Event Management"];
 
-/** Faculty Incharge, Chairperson, Vice-Chairperson can always force-delete; Faculty Incharge can allow other departments via config. */
-const CORE_FORCE_DELETE_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
+/** Core roles can always force-delete; Faculty Incharge can allow other departments via config. */
+const CORE_FORCE_DELETE_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
 
 const eventUploadConfigSchema = new mongoose.Schema(
   {

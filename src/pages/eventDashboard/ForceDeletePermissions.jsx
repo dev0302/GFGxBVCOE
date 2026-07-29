@@ -77,7 +77,7 @@ export default function ForceDeletePermissions() {
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-richblack-25">Force delete permissions</h1>
           <p className="mt-2 text-gray-400 text-sm">
-            Faculty Incharge, Chairperson and Vice-Chairperson can add or remove departments that are allowed to use "Force delete" on events (immediate permanent delete, no 10-day delay). Faculty Incharge, Chairperson and Vice-Chairperson are always allowed.
+            Faculty Incharge, Chairperson, Vice-Chairperson and Treasurer can add or remove departments that are allowed to use "Force delete" on events (immediate permanent delete, no 10-day delay). They are always allowed.
           </p>
         </div>
 
@@ -88,7 +88,7 @@ export default function ForceDeletePermissions() {
           ) : config ? (
             <div className="space-y-4">
               <div>
-                <p className="text-xs font-medium text-gray-400 mb-2">Always allowed (Faculty Incharge, Chairperson, Vice-Chairperson)</p>
+                <p className="text-xs font-medium text-gray-400 mb-2">Always allowed (Faculty Incharge, Chairperson, Vice-Chairperson, Treasurer)</p>
                 <div className="flex flex-wrap gap-2">
                   {config.core?.map((d) => (
                     <span key={d} className="px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 text-sm font-medium">

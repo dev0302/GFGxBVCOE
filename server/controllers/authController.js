@@ -15,7 +15,10 @@ const { getTeamMemberModel } = require("../models/TeamMember");
 const { getEventUploadAllowedList } = require("./eventController");
 const DashboardAccessConfig = require("../models/DashboardAccessConfig");
 const { userCanAccessLeadershipTransition } = require("../utils/leadershipAccess");
-const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
+const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
+const ACTIVE_TEAM_MEMBER_FILTER = {
+  $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+};
 
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
 
@@ -315,7 +318,6 @@ exports.login = async (req, res) => {
       "Content and Documentation",
       "Capture The Event",
       "Sponsorship and Marketing",
-      "Treasurer",
     ];
 
     const dashboardAccess = new Set();
@@ -596,7 +598,6 @@ exports.me = async (req, res) => {
       "Content and Documentation",
       "Capture The Event",
       "Sponsorship and Marketing",
-      "Treasurer",
     ];
 
     const dashboardAccess = new Set();
@@ -883,7 +884,7 @@ exports.searchPeople = async (req, res) => {
 
     if (department && !SOCIETY_ROLES.includes(department)) {
       const TeamModel = getTeamMemberModel(department);
-      const all = await TeamModel.find({}).sort({ createdAt: -1 }).lean();
+      const all = await TeamModel.find(ACTIVE_TEAM_MEMBER_FILTER).sort({ createdAt: -1 }).lean();
       if (q.length >= 2) {
         const lower = q.toLowerCase();
         teamMembers = all.filter(
@@ -974,7 +975,6 @@ const TEAM_DEPARTMENTS = [
   "Content and Documentation",
   "Capture The Event",
   "Sponsorship and Marketing",
-  "Treasurer",
 ];
 
 /**
@@ -1013,7 +1013,7 @@ exports.getAllPeople = async (req, res) => {
     const teamMembers = [];
     for (const dept of TEAM_DEPARTMENTS) {
       const Model = getTeamMemberModel(dept);
-      const members = await Model.find({}).sort({ createdAt: -1 }).lean();
+      const members = await Model.find(ACTIVE_TEAM_MEMBER_FILTER).sort({ createdAt: -1 }).lean();
       for (const m of members) {
         teamMembers.push({ type: "teamMember", data: m, department: dept });
       }

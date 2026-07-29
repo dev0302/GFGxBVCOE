@@ -5,6 +5,7 @@ const ALL_DEPARTMENTS = [
   "ADMIN",
   "Chairperson",
   "Vice-Chairperson",
+  "Treasurer",
   "Social Media and Promotion",
   "Technical",
   "Event Management",
@@ -13,7 +14,6 @@ const ALL_DEPARTMENTS = [
   "Content and Documentation",
   "Capture The Event",
   "Sponsorship and Marketing",
-  "Treasurer",
 ];
 
 exports.getAllSignupConfigs = async (req, res) => {

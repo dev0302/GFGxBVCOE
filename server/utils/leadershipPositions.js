@@ -7,15 +7,15 @@ const TEAM_DEPARTMENTS = [
   "Content and Documentation",
   "Capture The Event",
   "Sponsorship and Marketing",
-  "Treasurer",
 ];
 
-const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
+const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
 
 const SOCIETY_ROLE_LABELS = {
   ADMIN: "Faculty Incharge",
   Chairperson: "Chairperson",
   "Vice-Chairperson": "Vice-Chairperson",
+  Treasurer: "Treasurer",
 };
 
 function getDepartmentRankFromPosition(positionTitle) {
@@ -114,6 +114,12 @@ function getAllLeadershipPositions() {
       label: "Vice-Chairperson",
       accountType: "Vice-Chairperson",
       positionTitle: "Vice-Chairperson",
+    },
+    {
+      id: "treasurer",
+      label: "Treasurer",
+      accountType: "Treasurer",
+      positionTitle: "Treasurer",
     },
   ];
 

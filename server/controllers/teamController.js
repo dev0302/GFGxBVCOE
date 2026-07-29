@@ -10,7 +10,7 @@ const { logActivity } = require("../utils/activityLog");
 const { notifyTeamInviteSubmission } = require("../utils/notificationService");
 const XLSX = require("xlsx");
 
-const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
+const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
 const TEAM_DEPARTMENTS = [
   "Social Media and Promotion",
   "Technical",
@@ -20,7 +20,6 @@ const TEAM_DEPARTMENTS = [
   "Content and Documentation",
   "Capture The Event",
   "Sponsorship and Marketing",
-  "Treasurer",
 ];
 
 const EXCEL_COLUMNS = [

@@ -645,12 +645,12 @@ const UploadEvent = () => {
           )}
         </section>
 
-        {/* Departments allowed to upload events (only Faculty Incharge, Chairperson, Vice-Chairperson, Event Management can see and edit) */}
+        {/* Departments allowed to upload events (society core roles and Event Management can see and edit) */}
         {canManageEventUploadConfig(user?.accountType) && (
         <section className="mt-14 bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">
           <SectionTitle icon="👥">Departments allowed to access EM Dashboard</SectionTitle>
           <p className="text-sm text-gray-400 mb-4">
-            Faculty Incharge, Chairperson, Vice-Chairperson and Event Management are always allowed. Add or remove other departments below. Added departments will see &quot;EM Dashboard&quot; in their profile dropdown.
+            Faculty Incharge, Chairperson, Vice-Chairperson, Treasurer and Event Management are always allowed. Add or remove other departments below. Added departments will see &quot;EM Dashboard&quot; in their profile dropdown.
           </p>
           {loadingAllowed ? (
             <p className="text-gray-500 py-4"><Spinner className="size-4 text-gray-400" /></p>

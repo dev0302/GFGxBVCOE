@@ -1,6 +1,7 @@
 const { cloudinary } = require("../config/cloudinary");
 const mongoose = require("mongoose");
 const User = require("../models/User");
+const { getTeamMemberModel } = require("../models/TeamMember");
 const mailSender = require("../utils/mailSender");
 const { broadcastEmailTemplate } = require("../mail/templates");
 
@@ -9,9 +10,23 @@ const MAX_RESULTS_PER_PAGE = 500;
 const MAX_PAGES_PER_TYPE = 20;
 const CACHE_TTL_MS = 60 * 1000;
 const cache = new Map();
+const TEAM_DEPARTMENTS = [
+  "Social Media and Promotion",
+  "Technical",
+  "Event Management",
+  "Public Relation and Outreach",
+  "Design and Creative",
+  "Content and Documentation",
+  "Capture The Event",
+  "Sponsorship and Marketing",
+];
 
 function normalizeText(value) {
   return String(value || "").trim();
+}
+
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
 function isValidHttpUrl(value) {
@@ -520,5 +535,81 @@ exports.sendBroadcastEmail = async (req, res) => {
       success: false,
       message: error?.message || "Failed to send broadcast email.",
     });
+  }
+};
+
+exports.getTargetedEmailRecipients = async (_req, res) => {
+  try {
+    const users = await User.find({ email: { $exists: true, $ne: "" } })
+      .select("firstName lastName email accountType")
+      .sort({ firstName: 1, lastName: 1, email: 1 })
+      .lean();
+    const teamMemberGroups = await Promise.all(
+      TEAM_DEPARTMENTS.map(async (department) => {
+        const members = await getTeamMemberModel(department).find({
+          email: { $exists: true, $ne: "" },
+          $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+        }).select("name email").lean();
+        return members.map((member) => ({
+          _id: member._id,
+          name: member.name || member.email,
+          email: member.email,
+          department,
+          type: "teamMember",
+        }));
+      })
+    );
+    const recipients = [
+      ...users.map((user) => ({
+        _id: user._id,
+        name: [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email,
+        email: user.email,
+        department: user.accountType || "Society",
+        type: "user",
+      })),
+      ...teamMemberGroups.flat(),
+    ];
+    const uniqueRecipients = Array.from(
+      new Map(recipients.map((recipient) => [String(recipient.email).toLowerCase(), recipient])).values()
+    ).sort((a, b) => a.name.localeCompare(b.name));
+    res.json({ success: true, data: uniqueRecipients });
+  } catch (error) {
+    console.error("Targeted email recipients error:", error);
+    res.status(500).json({ success: false, message: error?.message || "Failed to load members." });
+  }
+};
+
+exports.sendTargetedEmail = async (req, res) => {
+  try {
+    const recipientEmail = normalizeText(req.body?.recipientEmail).toLowerCase();
+    const title = normalizeText(req.body?.title);
+    const subject = normalizeText(req.body?.subject);
+    const description = normalizeText(req.body?.description);
+    const linkUrl = normalizeText(req.body?.linkUrl);
+    const linkLabel = normalizeText(req.body?.linkLabel) || "Open link";
+
+    if (!isValidEmail(recipientEmail)) {
+      return res.status(400).json({ success: false, message: "Enter a valid recipient email address." });
+    }
+    if (!title || !subject || !description) {
+      return res.status(400).json({ success: false, message: "Title, subject and description are required." });
+    }
+    if (title.length > 120 || subject.length > 160 || description.length > 5000) {
+      return res.status(400).json({ success: false, message: "One or more email fields are too long." });
+    }
+    if (!isValidHttpUrl(linkUrl)) {
+      return res.status(400).json({ success: false, message: "Link must start with http:// or https://." });
+    }
+
+    const senderName = [req.user?.firstName, req.user?.lastName].filter(Boolean).join(" ") || "GFG BVCOE Team";
+    const html = broadcastEmailTemplate({ title, description, linkUrl, linkLabel, senderName });
+    const delivered = await mailSender(recipientEmail, subject, html);
+    if (!delivered) {
+      return res.status(502).json({ success: false, message: "Email provider could not deliver this email." });
+    }
+    res.json({ success: true, message: `Email sent to ${recipientEmail}.`, recipientEmail });
+  } catch (error) {
+    console.error("Targeted email error:", error);
+    res.status(500).json({ success: false, message: error?.message || "Failed to send email." });
   }
 };

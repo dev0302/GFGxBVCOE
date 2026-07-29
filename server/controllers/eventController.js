@@ -547,12 +547,12 @@ async function requireEventUploadAccess(req, res, next) {
   }
 }
 
-/** Only Faculty Incharge, Chairperson, Vice-Chairperson, Event Management can add/remove allowed departments. */
+/** Only core roles and Event Management can add/remove allowed departments. */
 function requireCanManageEventUploadConfig(req, res, next) {
   if (!CORE_EVENT_UPLOAD_ROLES.includes(req.user?.accountType)) {
     return res.status(403).json({
       success: false,
-      message: "Only Faculty Incharge, Chairperson, Vice-Chairperson and Event Management can manage this list.",
+      message: "Only society core roles and Event Management can manage this list.",
     });
   }
   next();
@@ -642,7 +642,7 @@ const removeEventUploadDepartment = async (req, res) => {
     if (CORE_EVENT_UPLOAD_ROLES.includes(dept)) {
       return res.status(400).json({
         success: false,
-        message: "Core departments (Faculty Incharge, Chairperson, Vice-Chairperson, Event Management) cannot be removed.",
+        message: "Core roles and Event Management cannot be removed.",
       });
     }
     const doc = await EventUploadConfig.findOne({ configKey: CONFIG_KEY });
@@ -679,12 +679,12 @@ async function getForceDeleteAllowedList() {
   return [...CORE_FORCE_DELETE_ROLES, ...extra];
 }
 
-/** Only Faculty Incharge, Chairperson and Vice-Chairperson can manage the force-delete allowed list. */
+/** Only society core roles can manage the force-delete allowed list. */
 function requireCanManageForceDeleteConfig(req, res, next) {
   if (!CORE_FORCE_DELETE_ROLES.includes(req.user?.accountType)) {
     return res.status(403).json({
       success: false,
-      message: "Only Faculty Incharge, Chairperson and Vice-Chairperson can manage force-delete permissions.",
+      message: "Only society core roles can manage force-delete permissions.",
     });
   }
   next();
@@ -779,7 +779,7 @@ const addForceDeleteDepartment = async (req, res) => {
     if (CORE_FORCE_DELETE_ROLES.includes(dept)) {
       return res.status(400).json({
         success: false,
-        message: "Faculty Incharge, Chairperson and Vice-Chairperson are already in the list and cannot be added again.",
+        message: "Society core roles are already in the list and cannot be added again.",
       });
     }
     let doc = await EventUploadConfig.findOne({ configKey: FORCE_DELETE_CONFIG_KEY });
@@ -828,7 +828,7 @@ const removeForceDeleteDepartment = async (req, res) => {
     if (CORE_FORCE_DELETE_ROLES.includes(dept)) {
       return res.status(400).json({
         success: false,
-        message: "Faculty Incharge, Chairperson and Vice-Chairperson cannot be removed from force-delete permissions.",
+        message: "Society core roles cannot be removed from force-delete permissions.",
       });
     }
     const doc = await EventUploadConfig.findOne({ configKey: FORCE_DELETE_CONFIG_KEY });

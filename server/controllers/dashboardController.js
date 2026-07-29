@@ -1,6 +1,6 @@
 const DashboardAccessConfig = require("../models/DashboardAccessConfig");
 
-const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
+const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
 
 // These keys should match the department/accountType values in the frontend AUTH_DEPARTMENTS list (excluding society roles).
 const DASHBOARD_KEYS = [
@@ -12,7 +12,6 @@ const DASHBOARD_KEYS = [
   "Content and Documentation",
   "Capture The Event",
   "Sponsorship and Marketing",
-  "Treasurer",
 ];
 
 function computeCoreRoles(dashboardKey) {
