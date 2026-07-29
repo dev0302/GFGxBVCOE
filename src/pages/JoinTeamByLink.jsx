@@ -1,6 +1,7 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { validateTeamInviteLink, addTeamMemberByInviteLink, uploadTeamPhotoByInviteLink } from "../services/api";
+import { addTeamMemberByInviteLink, uploadTeamPhotoByInviteLink } from "../services/api";
+import { useTeamInviteValidation } from "../hooks/useTeamInviteValidation";
 import { toast } from "sonner";
 import { Users } from "react-feather";
 import { photoPreviewUrl, avatarPlaceholder } from "../utils/teamMemberUtils";
@@ -39,10 +40,11 @@ const BRANCH_OPTIONS = ["CSE", "AIML", "IT", "EEE", "ECE", "ICE"];
 
 export default function JoinTeamByLink() {
   const { token } = useParams();
-  const [status, setStatus] = useState("loading"); // loading | valid | invalid | done
-  const [department, setDepartment] = useState("");
+  const validation = useTeamInviteValidation(token);
+  const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState(COLS.reduce((acc, k) => ({ ...acc, [k]: "" }), {}));
   const [saving, setSaving] = useState(false);
+  const formDisabled = validation.status === "invalid";
   const [cropImageSrc, setCropImageSrc] = useState(null);
   const [crop, setCrop] = useState(null);
   const [photoUploading, setPhotoUploading] = useState(false);
@@ -163,23 +165,6 @@ export default function JoinTeamByLink() {
     }
   };
 
-  useEffect(() => {
-    if (!token) {
-      setStatus("invalid");
-      return;
-    }
-    validateTeamInviteLink(token)
-      .then((res) => {
-        if (res.valid && res.department) {
-          setStatus("valid");
-          setDepartment(res.department);
-        } else {
-          setStatus("invalid");
-        }
-      })
-      .catch(() => setStatus("invalid"));
-  }, [token]);
-
   const inputClass =
     "w-full px-3 py-2 rounded-lg bg-[#252536] border border-gray-500/40 text-richblack-25 placeholder-gray-500 focus:border-cyan-500 outline-none text-sm";
 
@@ -196,7 +181,7 @@ export default function JoinTeamByLink() {
     try {
       await addTeamMemberByInviteLink(token, form);
       toast.success("You have been added to the team.");
-      setStatus("done");
+      setSubmitted(true);
       setForm(COLS.reduce((acc, k) => ({ ...acc, [k]: "" }), {}));
     } catch (e) {
       toast.error(e.message || "Failed to submit");
@@ -208,126 +193,130 @@ export default function JoinTeamByLink() {
   return (
     <div className="min-h-screen darkthemebg pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-lg">
-        {status === "loading" && (
-          <div className="rounded-2xl border border-gray-500/30 bg-[#1e1e2f]/80 p-12 text-center">
-            <p className="text-gray-400">Checking invite link…</p>
-          </div>
-        )}
-
-        {status === "invalid" && (
+        {submitted ? (
           <div className="rounded-2xl border border-gray-500/30 bg-[#1e1e2f]/80 p-8 text-center">
-            <p className="text-red-400 font-medium">Invalid or expired link</p>
-            <p className="text-gray-400 text-sm mt-2">This invite link may have expired or does not exist. Ask for a new link.</p>
+            <p className="text-cyan-400 font-medium">You’re in!</p>
+            <p className="text-gray-400 text-sm mt-2">Your details have been added to the team. You can close this page.</p>
           </div>
-        )}
-
-        {status === "valid" && (
+        ) : (
           <div className="rounded-2xl border border-gray-500/30 bg-[#1e1e2f]/80 p-6">
             <h1 className="text-xl font-bold text-richblack-25 flex items-center gap-2 mb-1">
               <Users className="h-6 w-6 text-cyan-400" />
               Join the team
             </h1>
             <p className="text-gray-400 text-sm mb-6">
-              You’re joining <span className="text-cyan-300 font-medium">{department}</span> <span className="text-cyan-300 font-medium">department</span>. Fill in your details below.
+              {validation.status === "valid" ? (
+                <>
+                  You’re joining <span className="text-cyan-300 font-medium">{validation.department}</span>{" "}
+                  <span className="text-cyan-300 font-medium">department</span>. Fill in your details below.
+                </>
+              ) : (
+                "Fill in your details below."
+              )}
             </p>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              {COLS.map((k) => (
-                <div key={k}>
-                  <label className="block text-xs font-medium text-gray-400 mb-1">{LABELS[k]}{k !== "non_tech_society" ? " *" : ""}</label>
-                  {k === "year" ? (
-                    <select
-                      value={form[k]}
-                      onChange={(e) => setForm((p) => ({ ...p, [k]: e.target.value }))}
-                      className={inputClass}
-                      required
-                    >
-                      <option value="">Select year</option>
-                      {YEAR_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  ) : k === "branch" ? (
-                    <select
-                      value={form[k]}
-                      onChange={(e) => setForm((p) => ({ ...p, [k]: e.target.value }))}
-                      className={inputClass}
-                      required
-                    >
-                      <option value="">Select branch</option>
-                      {BRANCH_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  ) : k === "photo" ? (
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap gap-2 items-center">
-                        <label className="px-3 py-2 rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 text-sm font-medium cursor-pointer">
-                          {form.photo ? "Reupload photo" : "Upload photo"}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handlePhotoFile}
-                            disabled={photoUploading}
-                          />
-                        </label>
-                        <span className="text-xs text-gray-500">Max 5MB · then crop</span>
-                      </div>
-                      {form.photo && (
-                        <div className="relative w-24 h-24 rounded-full overflow-hidden border border-gray-500/50 bg-[#252536]">
-                          <img
-                            src={photoPreviewUrl(form.photo)}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                            onError={(ev) => { ev.target.onerror = null; ev.target.src = avatarPlaceholder(""); }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ) : k === "section" ? (
-                    <input
-                      type="text"
-                      value={form[k]}
-                      onChange={(e) => setForm((p) => ({ ...p, [k]: e.target.value }))}
-                      className={inputClass}
-                      placeholder="e.g. CSE-4"
-                      required
-                    />
-                  ) : k === "non_tech_society" ? (
-                    <input
-                      type="text"
-                      value={form[k]}
-                      onChange={(e) => setForm((p) => ({ ...p, [k]: e.target.value }))}
-                      className={inputClass}
-                      placeholder="if any"
-                    />
-                  ) : (
-                    <input
-                      type={k === "email" ? "email" : "text"}
-                      value={form[k]}
-                      onChange={(e) => setForm((p) => ({ ...p, [k]: e.target.value }))}
-                      className={inputClass}
-                      placeholder={LABELS[k]}
-                      required
-                    />
-                  )}
-                </div>
-              ))}
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold disabled:opacity-50 mt-4"
-              >
-                {saving ? "Submitting…" : "Submit"}
-              </button>
-            </form>
-          </div>
-        )}
 
-        {status === "done" && (
-          <div className="rounded-2xl border border-gray-500/30 bg-[#1e1e2f]/80 p-8 text-center">
-            <p className="text-cyan-400 font-medium">You’re in!</p>
-            <p className="text-gray-400 text-sm mt-2">Your details have been added to the team. You can close this page.</p>
+            {formDisabled && (
+              <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-center">
+                <p className="text-red-400 font-medium">{validation.message || "Invalid or expired link"}</p>
+                <p className="text-gray-400 text-sm mt-1">
+                  This invite link may have expired or does not exist. Ask for a new link.
+                </p>
+              </div>
+            )}
+
+            <fieldset disabled={formDisabled} className="space-y-3 border-0 p-0 m-0 min-w-0">
+              <form onSubmit={handleSubmit} className="space-y-3">
+                {COLS.map((k) => (
+                  <div key={k}>
+                    <label className="block text-xs font-medium text-gray-400 mb-1">{LABELS[k]}{k !== "non_tech_society" ? " *" : ""}</label>
+                    {k === "year" ? (
+                      <select
+                        value={form[k]}
+                        onChange={(e) => setForm((p) => ({ ...p, [k]: e.target.value }))}
+                        className={inputClass}
+                        required
+                      >
+                        <option value="">Select year</option>
+                        {YEAR_OPTIONS.map((opt) => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    ) : k === "branch" ? (
+                      <select
+                        value={form[k]}
+                        onChange={(e) => setForm((p) => ({ ...p, [k]: e.target.value }))}
+                        className={inputClass}
+                        required
+                      >
+                        <option value="">Select branch</option>
+                        {BRANCH_OPTIONS.map((opt) => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    ) : k === "photo" ? (
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap gap-2 items-center">
+                          <label className={`px-3 py-2 rounded-lg bg-cyan-500/20 text-cyan-400 text-sm font-medium ${formDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-cyan-500/30 cursor-pointer"}`}>
+                            {form.photo ? "Reupload photo" : "Upload photo"}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={handlePhotoFile}
+                              disabled={photoUploading || formDisabled}
+                            />
+                          </label>
+                          <span className="text-xs text-gray-500">Max 5MB · then crop</span>
+                        </div>
+                        {form.photo && (
+                          <div className="relative w-24 h-24 rounded-full overflow-hidden border border-gray-500/50 bg-[#252536]">
+                            <img
+                              src={photoPreviewUrl(form.photo)}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                              onError={(ev) => { ev.target.onerror = null; ev.target.src = avatarPlaceholder(""); }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ) : k === "section" ? (
+                      <input
+                        type="text"
+                        value={form[k]}
+                        onChange={(e) => setForm((p) => ({ ...p, [k]: e.target.value }))}
+                        className={inputClass}
+                        placeholder="e.g. CSE-4"
+                        required
+                      />
+                    ) : k === "non_tech_society" ? (
+                      <input
+                        type="text"
+                        value={form[k]}
+                        onChange={(e) => setForm((p) => ({ ...p, [k]: e.target.value }))}
+                        className={inputClass}
+                        placeholder="if any"
+                      />
+                    ) : (
+                      <input
+                        type={k === "email" ? "email" : "text"}
+                        value={form[k]}
+                        onChange={(e) => setForm((p) => ({ ...p, [k]: e.target.value }))}
+                        className={inputClass}
+                        placeholder={LABELS[k]}
+                        required
+                      />
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="submit"
+                  disabled={saving || formDisabled}
+                  className="w-full py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold disabled:opacity-50 mt-4"
+                >
+                  {saving ? "Submitting…" : "Submit"}
+                </button>
+              </form>
+            </fieldset>
           </div>
         )}
       </div>
