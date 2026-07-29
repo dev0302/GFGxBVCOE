@@ -11,6 +11,7 @@ const REPORTS_DIR = path.join(__dirname, "..", "reports", "leadership");
 const ORG_NAME =
   process.env.ORG_NAME || "GeeksforGeeks Student Chapter – BVCOE";
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
+const REPORT_STYLE_VERSION = "2";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -176,20 +177,22 @@ function buildReportHtml(session) {
       padding: 32px 36px;
       font-size: 9.5pt;
       line-height: 1.45;
-      background-color: #ffffff;
+      background: #f7fbff;
       -webkit-print-color-adjust: exact;
-      border: 1px solid #1d1d1f;
+      border: 1px solid #b8d9ee;
       min-height: 279mm;
     }
     .header-container {
       text-align: center;
-      margin-bottom: 16px;
-      padding-top: 10px;
+      margin: -32px -36px 18px;
+      padding: 24px 26px 20px;
+      background: linear-gradient(135deg, #073b5c 0%, #075985 48%, #0f766e 100%);
+      border-bottom: 5px solid #f59e0b;
     }
     .org-name {
       font-size: 9.5pt;
       font-weight: 600;
-      color: #86868b;
+      color: #bae6fd;
       margin: 0 0 4px;
       text-transform: uppercase;
       letter-spacing: 1.5px;
@@ -197,7 +200,7 @@ function buildReportHtml(session) {
     .doc-title {
       font-size: 18pt;
       font-weight: 700;
-      color: #1d1d1f;
+      color: #ffffff;
       margin: 0;
       letter-spacing: -0.5px;
     }
@@ -208,8 +211,8 @@ function buildReportHtml(session) {
       margin-bottom: 16px;
     }
     .meta-card {
-      background: #f5f5f7;
-      border: 1px solid #d2d2d7;
+      background: #e8f5ff;
+      border: 1px solid #b8d9ee;
       padding: 8px 12px;
       border-radius: 6px;
     }
@@ -217,14 +220,14 @@ function buildReportHtml(session) {
       font-size: 7pt;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #86868b;
+      color: #256985;
       margin-bottom: 2px;
       font-weight: 700;
     }
     .meta-value {
       font-size: 9.5pt;
       font-weight: 600;
-      color: #1d1d1f;
+      color: #073b5c;
     }
     .section {
       margin-bottom: 18px;
@@ -233,8 +236,8 @@ function buildReportHtml(session) {
     .section-title {
       font-size: 11pt;
       font-weight: 700;
-      color: #1d1d1f;
-      border-bottom: 1px solid #d2d2d7;
+      color: #075985;
+      border-bottom: 2px solid #22c55e;
       padding-bottom: 4px;
       margin-bottom: 8px;
       letter-spacing: 0.2px;
@@ -244,7 +247,7 @@ function buildReportHtml(session) {
       grid-template-columns: 1fr 1fr;
       gap: 8px 16px;
       background: #ffffff;
-      border: 1px solid #d2d2d7;
+      border: 1px solid #b8d9ee;
       padding: 10px 14px;
       border-radius: 6px;
     }
@@ -255,21 +258,21 @@ function buildReportHtml(session) {
     .info-label {
       font-size: 8pt;
       font-weight: 700;
-      color: #86868b;
+      color: #256985;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 2px;
     }
     .info-value {
       font-size: 9.5pt;
-      color: #1d1d1f;
+      color: #073b5c;
     }
     table {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
       margin-top: 4px;
-      border: 1px solid #d2d2d7;
+      border: 1px solid #b8d9ee;
       border-radius: 6px;
       overflow: hidden;
     }
@@ -280,10 +283,10 @@ function buildReportHtml(session) {
       border-bottom: 1px solid #d2d2d7;
     }
     th {
-      background: #f5f5f7;
+      background: #075985;
       font-weight: 700;
-      color: #1d1d1f;
-      border-bottom: 1.5px solid #d2d2d7;
+      color: #ffffff;
+      border-bottom: 1.5px solid #064466;
       text-transform: uppercase;
       font-size: 8pt;
       letter-spacing: 0.5px;
@@ -292,7 +295,7 @@ function buildReportHtml(session) {
       border-bottom: none;
     }
     tr:nth-child(even) td {
-      background: #fafafa;
+      background: #f0f9ff;
     }
     .member-cell {
       display: flex;
@@ -304,14 +307,13 @@ function buildReportHtml(session) {
       height: 36px;
       border-radius: 50%;
       object-fit: cover;
-      border: 1px solid #c7c7cc;
-      filter: grayscale(100%);
+      border: 2px solid #38bdf8;
       flex-shrink: 0;
-      background: #f5f5f7;
+      background: #e0f2fe;
     }
     .member-name {
       font-weight: 600;
-      color: #1d1d1f;
+      color: #073b5c;
       line-height: 1.25;
     }
     .approval-grid {
@@ -321,8 +323,8 @@ function buildReportHtml(session) {
       margin-top: 4px;
     }
     .approval-card {
-      border: 1px dashed #d2d2d7;
-      background: #ffffff;
+      border: 1px dashed #7dd3fc;
+      background: #f0f9ff;
       border-radius: 6px;
       padding: 10px;
       text-align: center;
@@ -333,8 +335,8 @@ function buildReportHtml(session) {
       min-height: 100px;
     }
     .approval-card.approved {
-      border: 1.5px solid #1d1d1f;
-      background: #ffffff;
+      border: 1.5px solid #14b8a6;
+      background: #ecfdf5;
     }
     .badge {
       font-size: 7.5pt;
@@ -347,48 +349,48 @@ function buildReportHtml(session) {
       letter-spacing: 0.5px;
     }
     .badge-approved {
-      background-color: #1d1d1f;
+      background-color: #0f766e;
       color: #ffffff;
-      border: 1px solid #1d1d1f;
+      border: 1px solid #0f766e;
     }
     .badge-pending {
       background-color: transparent;
-      color: #86868b;
-      border: 1px solid #d2d2d7;
+      color: #256985;
+      border: 1px solid #b8d9ee;
     }
     .approver-name {
       font-weight: 600;
       font-size: 9.5pt;
-      color: #1d1d1f;
+      color: #073b5c;
       margin-bottom: 1px;
     }
     .approver-title {
       font-size: 8pt;
-      color: #86868b;
+      color: #256985;
       margin-bottom: 4px;
     }
     .approver-date {
       font-size: 7.5pt;
       color: #86868b;
       font-style: italic;
-      border-top: 1px solid #f5f5f7;
+      border-top: 1px solid #bae6fd;
       padding-top: 4px;
       width: 100%;
     }
     .footer {
       margin-top: 24px;
       padding-top: 12px;
-      border-top: 1px solid #d2d2d7;
+      border-top: 1px solid #b8d9ee;
       font-size: 8pt;
-      color: #86868b;
+      color: #256985;
       text-align: center;
       line-height: 1.5;
     }
     .hash-ref {
       font-family: monospace;
       font-size: 7.5pt;
-      color: #1d1d1f;
-      background: #f5f5f7;
+      color: #075985;
+      background: #e0f2fe;
       padding: 1px 4px;
       border-radius: 3px;
       display: inline-block;
@@ -583,7 +585,7 @@ async function generateLeadershipReportPdf(session) {
     console.error("Leadership report Cloudinary upload failed:", error.message);
   }
 
-  return { filepath, filename, documentHash: hash, reportPdfUrl };
+  return { filepath, filename, documentHash: hash, reportPdfUrl, reportStyleVersion: REPORT_STYLE_VERSION };
 }
 
 function resolveLocalReportPath(storedPath) {
@@ -603,5 +605,6 @@ module.exports = {
   generateLeadershipReportPdf,
   REPORTS_DIR,
   buildReportHtml,
+  REPORT_STYLE_VERSION,
   resolveLocalReportPath,
 };

@@ -22,6 +22,7 @@ const { getUserApprovalInfo, resolveUserRoleLabel } = require("../utils/leadersh
 const {
   generateLeadershipReportPdf,
   resolveLocalReportPath,
+  REPORT_STYLE_VERSION,
 } = require("../utils/leadershipReportPdf");
 const {
   emitDraftUpdated,
@@ -267,29 +268,34 @@ exports.downloadReport = async (req, res) => {
   try {
     const { sessionId } = req.params;
     const session = await LeadershipDraftSession.findOne({ sessionId, status: "APPLIED" });
-    if (!session?.reportPdfPath && !session?.reportPdfUrl) {
+    if (!session) {
       return res.status(404).json({ success: false, message: "Report not found." });
     }
 
+    const mustRegenerate = session.reportStyleVersion !== REPORT_STYLE_VERSION;
+
     setReportPdfHeaders(res, session.sessionId);
 
-    const localPath = resolveLocalReportPath(session.reportPdfPath);
-    if (localPath && fs.existsSync(localPath)) {
-      return res.sendFile(localPath);
-    }
+    if (!mustRegenerate) {
+      const localPath = resolveLocalReportPath(session.reportPdfPath);
+      if (localPath && fs.existsSync(localPath)) {
+        return res.sendFile(localPath);
+      }
 
-    if (session.reportPdfUrl) {
-      try {
-        return await streamReportFromUrl(session.reportPdfUrl, res);
-      } catch (error) {
-        console.error("Leadership report Cloudinary fetch failed:", error.message);
+      if (session.reportPdfUrl) {
+        try {
+          return await streamReportFromUrl(session.reportPdfUrl, res);
+        } catch (error) {
+          console.error("Leadership report Cloudinary fetch failed:", error.message);
+        }
       }
     }
 
-    const { filename, documentHash, reportPdfUrl } = await generateLeadershipReportPdf(session);
+    const { filename, documentHash, reportPdfUrl, reportStyleVersion } = await generateLeadershipReportPdf(session);
     session.reportPdfPath = filename;
     session.documentHash = documentHash;
     if (reportPdfUrl) session.reportPdfUrl = reportPdfUrl;
+    session.reportStyleVersion = reportStyleVersion;
     await session.save();
 
     const regeneratedPath = resolveLocalReportPath(filename);

@@ -71,6 +71,7 @@ const leadershipDraftSessionSchema = new mongoose.Schema(
     effectiveDate: { type: Date, default: null },
     reportPdfPath: { type: String, default: "" },
     reportPdfUrl: { type: String, default: "" },
+    reportStyleVersion: { type: String, default: "" },
     documentHash: { type: String, default: "" },
     version: { type: String, default: "1.0.0" },
     discardReason: { type: String, default: "" },
