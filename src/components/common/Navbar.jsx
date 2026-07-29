@@ -10,6 +10,7 @@ import { SaxUserTwotone } from "@meysam213/iconsax-react";
 import { SaxGalleryLinear } from "@meysam213/iconsax-react";
 import { Settings } from "react-feather";
 import ProfileDropDown from "./ProfileDropDown";
+import NotificationsButton from "../notifications/NotificationsButton";
 import Search from "../Search";
 import { isSocietyRole } from "../../services/api";
 
@@ -210,6 +211,14 @@ function Navbar() {
               >
                 <Settings className="h-[18px] w-[18px]" />
               </NavLink>
+              <NotificationsButton
+                className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150 ${
+                  isDarkNavbar
+                    ? "hover:bg-green-300/12 hover:text-green-300"
+                    : "hover:bg-green-300/12 hover:text-green-300"
+                }`}
+                iconClassName="h-[18px] w-[18px]"
+              />
               <ProfileDropDown onLogout={logout} isDarkNavbar={isDarkNavbar} embedded />
             </div>
           ) : (
@@ -266,6 +275,24 @@ function Navbar() {
       >
         <Settings className="h-[17px] w-[17px]" />
       </NavLink>
+
+      {/* NOTIFICATIONS */}
+      <NotificationsButton
+        onBeforeToggle={() => {
+          if (isMenuOpen) setIsMenuOpen(false);
+        }}
+        className="
+          flex items-center justify-center
+          h-8 w-8
+          rounded-full
+          text-green-100
+          transition-all duration-200
+          hover:bg-green-300/10
+          hover:text-green-300
+          shrink-0
+        "
+        iconClassName="h-[17px] w-[17px]"
+      />
 
       {/* PROFILE */}
       <div className="shrink-0">

@@ -776,6 +776,40 @@ export async function getActivityLogs(userId) {
   return data;
 }
 
+/** Fetch notifications for the current user. */
+export async function getNotifications(limit = 50) {
+  const res = await authFetch(`/api/v1/notifications?limit=${limit}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch notifications');
+  return data;
+}
+
+/** Fetch unread notification count. */
+export async function getUnreadNotificationCount() {
+  const res = await authFetch('/api/v1/notifications/unread-count');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch unread count');
+  return data;
+}
+
+/** Mark a single notification as read. */
+export async function markNotificationRead(id) {
+  const res = await authFetch(`/api/v1/notifications/${encodeURIComponent(id)}/read`, {
+    method: 'PATCH',
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to mark notification as read');
+  return data;
+}
+
+/** Mark all notifications as read. */
+export async function markAllNotificationsRead() {
+  const res = await authFetch('/api/v1/notifications/read-all', { method: 'PATCH' });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to mark all as read');
+  return data;
+}
+
 // Team (manage your department members; society roles pass department)
 export async function getTeamDepartments() {
   const res = await authFetch('/api/v1/team/departments');

@@ -7,6 +7,7 @@ const User = require("../models/User");
 const PredefinedProfile = require("../models/PredefinedProfile");
 const { imageUpload, deleteImageByUrl } = require("../config/cloudinary");
 const { logActivity } = require("../utils/activityLog");
+const { notifyTeamInviteSubmission } = require("../utils/notificationService");
 const XLSX = require("xlsx");
 
 const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
@@ -772,6 +773,12 @@ exports.addMemberByInviteLink = async (req, res) => {
       non_tech_society: (non_tech_society || "").trim(),
       addedBy: null,
     });
+
+    notifyTeamInviteSubmission({
+      department: link.department,
+      memberName: member.name,
+      memberId: member._id,
+    }).catch((err) => console.error("notifyTeamInviteSubmission error:", err));
 
     return res.status(201).json({ success: true, data: member, message: "You have been added to the team." });
   } catch (error) {
