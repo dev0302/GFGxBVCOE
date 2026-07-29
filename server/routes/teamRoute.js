@@ -16,6 +16,11 @@ const {
   addMemberByInviteLink,
   uploadTeamPhoto,
 } = require("../controllers/teamController");
+const {
+  applyNextSession,
+  getYearPromotionHistory,
+  revertYearPromotion,
+} = require("../controllers/yearPromotionController");
 const { auth } = require("../middlewares/AuthZ");
 
 const router = express.Router();
@@ -24,6 +29,10 @@ const router = express.Router();
 router.get("/join/:token", validateTeamInviteLink);
 router.post("/join/:token/upload-photo", uploadTeamPhotoByInviteLink);
 router.post("/join/:token", addMemberByInviteLink);
+
+router.post("/year-promotion/apply", auth, applyNextSession);
+router.get("/year-promotion/history", auth, getYearPromotionHistory);
+router.post("/year-promotion/:id/revert", auth, revertYearPromotion);
 
 router.get("/departments", auth, getDepartments);
 router.get("/roster", auth, getDepartmentRoster);

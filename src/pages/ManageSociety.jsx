@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { getTeamDepartments, getTeamMembers, getDepartmentRoster, getAllPeople, getAccountTypeLabel, sendSignupInvite } from "../services/api";
+import { getTeamDepartments, getTeamMembers, getDepartmentRoster, getAllPeople, getAccountTypeLabel, sendSignupInvite, applyNextSessionYearPromotion, getYearPromotionHistory, revertYearPromotion } from "../services/api";
 import { isSocietyRole } from "../services/api";
 import { toast } from "sonner";
-import { Users, ChevronRight, Printer, FileText, X, Download, List, Mail } from "react-feather";
+import { Users, ChevronRight, Printer, FileText, X, Download, List, Mail, RefreshCw, RotateCcw, Clock } from "react-feather";
 import { avatarPlaceholder, photoPreviewUrl } from "../utils/teamMemberUtils";
 import ManageTeam from "./ManageTeam";
 import Search from "../components/Search";
@@ -38,6 +38,31 @@ const EXPORT_LABELS = {
 const ORG_NAME = "GFG BVCOE";
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
 
+function formatSessionDate(value) {
+  if (!value) return "—";
+  return new Date(value).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
+function formatPromotionSummary(summary) {
+  if (!summary || typeof summary !== "object") return "";
+  const entries = summary instanceof Map ? [...summary.entries()] : Object.entries(summary);
+  if (!entries.length) return "";
+  return entries.map(([key, count]) => `${key} (${count})`).join(", ");
+}
+
+/** Total members in a department: roster (signup config incl. heads/leads) + team members not in roster */
+function getDepartmentMemberCount(roster, members) {
+  const rosterArr = roster || [];
+  const rosterEmails = new Set(rosterArr.map((r) => (r.email || "").toLowerCase()));
+  const extraCount = (members || []).filter(
+    (m) => !rosterEmails.has((m.email || "").toLowerCase()),
+  ).length;
+  return rosterArr.length + extraCount;
+}
+
 const iosRowVariants = {
   hidden: { 
     opacity: 0, 
@@ -61,12 +86,14 @@ const iosRowVariants = {
 export default function ManageSociety() {
   const { user, loading: authLoading } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const selectedDepartment = searchParams.get("department");
   const dispatch = useDispatch();
   const manageSociety = useSelector((state) => state.manageSociety);
   const [departments, setDepartments] = useState(manageSociety.departments || []);
   const [departmentCounts, setDepartmentCounts] = useState(manageSociety.departmentCounts || {});
   const [loading, setLoading] = useState(!manageSociety.departments?.length);
-  const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [printAllModalOpen, setPrintAllModalOpen] = useState(false);
   const [printAllSelectedFields, setPrintAllSelectedFields] = useState([...EXPORT_COLS]);
   const [printAllLoading, setPrintAllLoading] = useState(false);
@@ -77,6 +104,14 @@ export default function ManageSociety() {
   const [selectedDetailItem, setSelectedDetailItem] = useState(null); // { type: 'user'|'predefinedOnly'|'teamMember', data }
   const [sendingInviteTo, setSendingInviteTo] = useState(null);
   const [activityLogUser, setActivityLogUser] = useState(null);
+  const [nextSessionModalOpen, setNextSessionModalOpen] = useState(false);
+  const [nextSessionApplying, setNextSessionApplying] = useState(false);
+  const [promotionHistory, setPromotionHistory] = useState([]);
+  const [latestActivePromotionId, setLatestActivePromotionId] = useState(null);
+  const [promotionHistoryLoading, setPromotionHistoryLoading] = useState(true);
+  const [revertTargetId, setRevertTargetId] = useState(null);
+  const [revertConfirmOpen, setRevertConfirmOpen] = useState(false);
+  const [revertingPromotion, setRevertingPromotion] = useState(false);
 
   // Initial departments load: if Redux has nothing, show spinner; otherwise hydrate from Redux and refresh in background.
   useEffect(() => {
@@ -99,15 +134,22 @@ export default function ManageSociety() {
       .finally(() => setLoading(false));
   }, [user, location.pathname, manageSociety.departments?.length, dispatch]);
 
-  // Department member counts: always fetch fresh when departments change, cache in Redux.
+  useEffect(() => {
+    if (!selectedDepartment || loading || departments.length === 0) return;
+    if (!departments.includes(selectedDepartment)) {
+      navigate("/manage-society", { replace: true });
+    }
+  }, [selectedDepartment, departments, loading, navigate]);
+
+  // Department member counts: roster (heads/leads/members incl. not logged in) + extra team members, cached in Redux.
   useEffect(() => {
     if (!user || departments.length === 0) return;
     const counts = {};
     Promise.all(
       departments.map((dept) =>
-        getTeamMembers(dept)
-          .then((res) => {
-            counts[dept] = (res.data || []).length;
+        Promise.all([getDepartmentRoster(dept), getTeamMembers(dept)])
+          .then(([rosterRes, membersRes]) => {
+            counts[dept] = getDepartmentMemberCount(rosterRes.data, membersRes.data);
           })
           .catch(() => {
             counts[dept] = 0;
@@ -143,6 +185,39 @@ export default function ManageSociety() {
     }
   }, [showListOpen, selectedDepartment, user, dispatch, manageSociety.allPeopleList?.length]);
 
+  const refreshAllPeople = () => {
+    return getAllPeople()
+      .then((res) => {
+        const list = res.data || [];
+        setAllPeopleList(list);
+        dispatch(setAllPeopleListInStore(list));
+        return list;
+      })
+      .catch((e) => {
+        toast.error(e.message || "Failed to refresh people list");
+      });
+  };
+
+  const loadPromotionHistory = () => {
+    setPromotionHistoryLoading(true);
+    return getYearPromotionHistory()
+      .then((res) => {
+        setPromotionHistory(res.data || []);
+        setLatestActivePromotionId(res.latestActiveId || null);
+      })
+      .catch((e) => {
+        toast.error(e.message || "Failed to load session history");
+        setPromotionHistory([]);
+        setLatestActivePromotionId(null);
+      })
+      .finally(() => setPromotionHistoryLoading(false));
+  };
+
+  useEffect(() => {
+    if (!user || !isSocietyRole(user?.accountType) || !nextSessionModalOpen) return;
+    loadPromotionHistory();
+  }, [user, nextSessionModalOpen]);
+
   useEffect(() => {
     if (showListOpen) {
       const prev = document.body.style.overflow;
@@ -158,6 +233,36 @@ export default function ManageSociety() {
   };
   const selectAllPrintFields = () => setPrintAllSelectedFields([...EXPORT_COLS]);
   const deselectAllPrintFields = () => setPrintAllSelectedFields([]);
+
+  const handleApplyNextSession = async () => {
+    setNextSessionApplying(true);
+    try {
+      const res = await applyNextSessionYearPromotion();
+      toast.success(res.message || "Next session changes applied.");
+      setNextSessionModalOpen(false);
+      await Promise.all([refreshAllPeople(), loadPromotionHistory()]);
+    } catch (e) {
+      toast.error(e.message || "Failed to apply next session changes");
+    } finally {
+      setNextSessionApplying(false);
+    }
+  };
+
+  const handleRevertPromotion = async () => {
+    if (!revertTargetId) return;
+    setRevertingPromotion(true);
+    try {
+      const res = await revertYearPromotion(revertTargetId);
+      toast.success(res.message || "Changes reverted.");
+      setRevertConfirmOpen(false);
+      setRevertTargetId(null);
+      await Promise.all([refreshAllPeople(), loadPromotionHistory()]);
+    } catch (e) {
+      toast.error(e.message || "Failed to revert changes");
+    } finally {
+      setRevertingPromotion(false);
+    }
+  };
 
   /** Build combined export rows for a department: roster (signup config + registered/predefined) + team members not in roster */
   const buildDepartmentExportRows = (roster, members) => {
@@ -296,12 +401,12 @@ export default function ManageSociety() {
   if (!user) return <Navigate to="/login" replace />;
   if (!isSocietyRole(user.accountType)) return <Navigate to="/manage-team" replace />;
 
-  if (selectedDepartment) {
+  if (selectedDepartment && departments.includes(selectedDepartment)) {
     return (
       <ManageTeam
         department={selectedDepartment}
         isSociety
-        onBack={() => setSelectedDepartment(null)}
+        onBack={() => navigate("/manage-society")}
       />
     );
   }
@@ -348,6 +453,14 @@ export default function ManageSociety() {
             <Printer className="h-4 w-4" />
             Print whole list (all departments)
           </button>
+          <button
+            type="button"
+            onClick={() => setNextSessionModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-600/40 border border-gray-500/40 text-gray-200 hover:bg-cyan-500/20 hover:border-cyan-500/40 hover:text-cyan-300 transition-colors text-sm font-medium"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Apply next session
+          </button>
         </div>
 
         {loading ? (
@@ -359,7 +472,9 @@ export default function ManageSociety() {
             {departments.map((dept, idx) => (
               <motion.div
                 key={dept}
-                onClick={() => setSelectedDepartment(dept)}
+                onClick={() =>
+                  navigate(`/manage-society?department=${encodeURIComponent(dept)}`)
+                }
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -664,6 +779,200 @@ export default function ManageSociety() {
             />,
             document.body
           )}
+
+        {nextSessionModalOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => !nextSessionApplying && setNextSessionModalOpen(false)}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div
+              className="darkthemebg rounded-2xl border border-gray-500/30 w-full max-w-lg max-h-[min(90vh,720px)] flex flex-col overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-4 border-b border-gray-500/30 shrink-0">
+                <h2 className="text-lg font-bold text-richblack-25 flex items-center gap-2">
+                  <RefreshCw className="h-5 w-5 text-cyan-400" />
+                  Apply next session
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => !nextSessionApplying && setNextSessionModalOpen(false)}
+                  className="p-2 rounded-lg text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30"
+                  aria-label="Close"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="p-4 space-y-4 overflow-y-auto min-h-0">
+                <p className="text-sm text-gray-300">
+                  This promotes every member&apos;s year of study for the new academic session across all departments and all people in the society list.
+                </p>
+                <ul className="text-sm text-gray-400 space-y-1 list-disc list-inside">
+                  <li>1st year → 2nd year</li>
+                  <li>2nd year → 3rd year</li>
+                  <li>3rd year → 4th year</li>
+                  <li>4th year → 4+</li>
+                </ul>
+                <p className="text-sm text-gray-300 bg-gray-600/25 border border-gray-500/40 rounded-lg px-3 py-2">
+                  This updates registered users, predefined profiles, and team member records. You can revert the most recent active change from the history below.
+                </p>
+                <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-500/30">
+                  <button
+                    type="button"
+                    onClick={handleApplyNextSession}
+                    disabled={nextSessionApplying}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-medium text-sm disabled:opacity-50"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${nextSessionApplying ? "animate-spin" : ""}`} />
+                    {nextSessionApplying ? "Applying…" : "Confirm & apply"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNextSessionModalOpen(false)}
+                    disabled={nextSessionApplying}
+                    className="px-4 py-2.5 rounded-xl border border-gray-500/50 text-gray-400 hover:bg-gray-500/20 text-sm disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+
+                <div className="pt-2 border-t border-gray-500/30">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Clock className="h-4 w-4 text-cyan-400 shrink-0" />
+                    <h3 className="text-sm font-semibold text-richblack-25">Next session history</h3>
+                  </div>
+                  {promotionHistoryLoading ? (
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <Spinner className="size-4 text-cyan-400" />
+                      Loading history…
+                    </div>
+                  ) : promotionHistory.length === 0 ? (
+                    <p className="text-sm text-gray-500">
+                      No next session changes have been applied yet.
+                    </p>
+                  ) : (
+                    <ul className="space-y-3">
+                      {promotionHistory.map((session) => {
+                        const isLatestActive =
+                          session.status === "active" &&
+                          String(session._id) === String(latestActivePromotionId);
+                        return (
+                          <li
+                            key={session._id}
+                            className="rounded-lg border border-gray-500/30 bg-[#252536]/60 px-4 py-3"
+                          >
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="text-sm text-richblack-25 font-medium">
+                                  {formatSessionDate(session.appliedAt)}
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  Applied by {session.appliedBy?.name || session.appliedBy?.email || "Unknown"}
+                                  {" · "}
+                                  {session.totalUpdated} member{session.totalUpdated === 1 ? "" : "s"} updated
+                                </p>
+                                {formatPromotionSummary(session.summary) && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {formatPromotionSummary(session.summary)}
+                                  </p>
+                                )}
+                                {session.status === "reverted" && (
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    Reverted on {formatSessionDate(session.revertedAt)} by{" "}
+                                    {session.revertedBy?.name || session.revertedBy?.email || "Unknown"}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="shrink-0 flex items-center gap-2">
+                                <span
+                                  className={`px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold border ${
+                                    session.status === "active"
+                                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                      : "bg-gray-500/10 text-gray-400 border-gray-500/20"
+                                  }`}
+                                >
+                                  {session.status === "active" ? "Active" : "Reverted"}
+                                </span>
+                                {isLatestActive && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setRevertTargetId(String(session._id));
+                                      setRevertConfirmOpen(true);
+                                    }}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-600/40 border border-gray-500/40 text-gray-200 hover:bg-red-500/15 hover:border-red-500/40 hover:text-red-300 transition-colors text-xs font-medium"
+                                  >
+                                    <RotateCcw className="h-3.5 w-3.5" />
+                                    Revert
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {revertConfirmOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => !revertingPromotion && setRevertConfirmOpen(false)}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div
+              className="darkthemebg rounded-2xl border border-gray-500/30 w-full max-w-md overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-4 border-b border-gray-500/30">
+                <h2 className="text-lg font-bold text-richblack-25 flex items-center gap-2">
+                  <RotateCcw className="h-5 w-5 text-red-400" />
+                  Revert next session changes
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => !revertingPromotion && setRevertConfirmOpen(false)}
+                  className="p-2 rounded-lg text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30"
+                  aria-label="Close"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="p-4 space-y-4">
+                <p className="text-sm text-gray-300">
+                  This will restore every member&apos;s year to what it was before the most recent next session promotion.
+                </p>
+                <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-500/30">
+                  <button
+                    type="button"
+                    onClick={handleRevertPromotion}
+                    disabled={revertingPromotion}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-richblack-25 font-medium text-sm disabled:opacity-50"
+                  >
+                    <RotateCcw className={`h-4 w-4 ${revertingPromotion ? "animate-spin" : ""}`} />
+                    {revertingPromotion ? "Reverting…" : "Confirm revert"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRevertConfirmOpen(false)}
+                    disabled={revertingPromotion}
+                    className="px-4 py-2.5 rounded-xl border border-gray-500/50 text-gray-400 hover:bg-gray-500/20 text-sm disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {printAllModalOpen && (
           <div
