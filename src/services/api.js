@@ -823,6 +823,16 @@ export async function uploadTeamPhoto(file) {
   return data;
 }
 
+/** Fetch the active (non-expired) invite link for a department, if any. Pass department for society roles. */
+export async function getActiveTeamInviteLink(department) {
+  const params = new URLSearchParams();
+  if (department) params.set('department', department);
+  const res = await authFetch(`/api/v1/team/invite-link?${params.toString()}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch invite link');
+  return data;
+}
+
 /** Create team invite link for a department. Pass { department } for society; core team uses accountType. */
 export async function createTeamInviteLink(payload = {}) {
   const res = await authFetch('/api/v1/team/invite-link', {
@@ -842,10 +852,16 @@ export async function suspendTeamInviteLink(token) {
   return data;
 }
 
-/** Validate team invite link (public). */
+/** Ping backend root to wake cold-start servers (best-effort, no throw). */
+export function wakeBackend() {
+  fetch(`${BASE}/`, { method: 'GET' }).catch(() => {});
+}
+
+/** Validate team invite link (public). Throws on network failure. */
 export async function validateTeamInviteLink(token) {
   const res = await fetch(`${BASE}/api/v1/team/join/${token}`);
-  return res.json().catch(() => ({ success: false, valid: false }));
+  const data = await res.json().catch(() => ({}));
+  return { ...data, httpStatus: res.status };
 }
 
 /** Submit member form via invite link (public). Adds member to the link's department. */
