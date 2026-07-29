@@ -414,10 +414,11 @@ async function applyDraftChanges(user, req) {
   session.appliedByName = actor.name;
   session.status = "APPLIED";
 
-  const { filename, documentHash, reportPdfUrl } = await generateLeadershipReportPdf(session);
+  const { filename, documentHash, reportPdfUrl, reportStyleVersion } = await generateLeadershipReportPdf(session);
   session.reportPdfPath = filename;
   session.reportPdfUrl = reportPdfUrl || "";
   session.documentHash = documentHash;
+  session.reportStyleVersion = reportStyleVersion;
   await session.save();
 
   await logActivity(
