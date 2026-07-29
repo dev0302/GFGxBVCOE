@@ -33,6 +33,28 @@ const EXCEL_COLUMNS = [
   "non_tech_society",
 ];
 
+/** Days to keep soft-deleted team members before DB + photo purge. */
+const TEAM_MEMBER_SOFT_RETENTION_DAYS = 7;
+
+const activeTeamMemberFilter = {
+  $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+};
+
+async function purgeExpiredDeletedTeamMembers(Model) {
+  const cutoff = new Date(Date.now() - TEAM_MEMBER_SOFT_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+  const expired = await Model.find({
+    deletedAt: { $ne: null, $lte: cutoff },
+  }).lean();
+  for (const member of expired) {
+    if (member.photo) await deleteImageByUrl(member.photo);
+  }
+  if (expired.length > 0) {
+    await Model.deleteMany({
+      deletedAt: { $ne: null, $lte: cutoff },
+    });
+  }
+}
+
 function resolveDepartment(req) {
   const accountType = req.user?.accountType;
   if (!accountType) return null;
@@ -69,7 +91,8 @@ exports.getMyTeamMembers = async (req, res) => {
       });
     }
     const Model = getTeamMemberModel(department);
-    const members = await Model.find({}).sort({ createdAt: -1 });
+    await purgeExpiredDeletedTeamMembers(Model);
+    const members = await Model.find(activeTeamMemberFilter).sort({ createdAt: -1 });
     return res.status(200).json({ success: true, data: members });
   } catch (error) {
     console.error("getMyTeamMembers error:", error);
@@ -157,7 +180,7 @@ exports.addMember = async (req, res) => {
 
       // 2. Check if already in the team for this department
       const Model = getTeamMemberModel(department);
-      const existingMember = await Model.findOne({ email: emailNorm });
+      const existingMember = await Model.findOne({ email: emailNorm, ...activeTeamMemberFilter });
       if (existingMember) {
         return res.status(400).json({ success: false, message: "This email is already added to this department." });
       }
@@ -217,8 +240,8 @@ exports.updateMember = async (req, res) => {
         await deleteImageByUrl(existing.photo);
       }
     }
-    const member = await Model.findByIdAndUpdate(
-      id,
+    const member = await Model.findOneAndUpdate(
+      { _id: id, ...activeTeamMemberFilter },
       {
         ...(name !== undefined && { name: (name || "").trim() }),
         ...(year !== undefined && { year: (year || "").toString().trim() }),
@@ -257,22 +280,148 @@ exports.deleteMember = async (req, res) => {
     }
     const { id } = req.params;
     const Model = getTeamMemberModel(department);
-    const member = await Model.findById(id);
+    await purgeExpiredDeletedTeamMembers(Model);
+    const member = await Model.findOne({ _id: id, ...activeTeamMemberFilter });
     if (!member) {
       return res.status(404).json({ success: false, message: "Member not found." });
     }
-    if (member.photo) {
-      await deleteImageByUrl(member.photo);
-    }
     const email = member.email;
     const name = member.name;
-    await Model.findByIdAndDelete(id);
+    member.deletedAt = new Date();
+    member.deletedBy = req.user?.id || null;
+    await member.save();
     if (req.user?.id) {
-      await logActivity(req.user.id, "team_member_delete", "team", { department, email, name }, id, "TeamMember");
+      await logActivity(req.user.id, "team_member_delete", "team", { department, email, name, softDelete: true }, id, "TeamMember");
     }
-    return res.status(200).json({ success: true, message: "Member deleted." });
+    return res.status(200).json({ success: true, message: "Member moved to deleted list." });
   } catch (error) {
     console.error("deleteMember error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.getDeletedTeamMembers = async (req, res) => {
+  try {
+    const department = resolveDepartment(req);
+    if (!department) {
+      return res.status(400).json({
+        success: false,
+        message: SOCIETY_ROLES.includes(req.user?.accountType)
+          ? "Department query required (e.g. ?department=Technical)."
+          : "Department not found.",
+      });
+    }
+    const Model = getTeamMemberModel(department);
+    await purgeExpiredDeletedTeamMembers(Model);
+    const members = await Model.find({ deletedAt: { $ne: null } }).sort({ deletedAt: -1 });
+    return res.status(200).json({
+      success: true,
+      data: members,
+      retentionDays: TEAM_MEMBER_SOFT_RETENTION_DAYS,
+    });
+  } catch (error) {
+    console.error("getDeletedTeamMembers error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.restoreTeamMember = async (req, res) => {
+  try {
+    const department = resolveDepartment(req);
+    if (!department) {
+      return res.status(400).json({
+        success: false,
+        message: SOCIETY_ROLES.includes(req.user?.accountType)
+          ? "Department required in body."
+          : "Department not found.",
+      });
+    }
+    const { id } = req.params;
+    const Model = getTeamMemberModel(department);
+    await purgeExpiredDeletedTeamMembers(Model);
+    const member = await Model.findOne({ _id: id, deletedAt: { $ne: null } });
+    if (!member) {
+      return res.status(404).json({ success: false, message: "Deleted member not found." });
+    }
+    const emailNorm = (member.email || "").trim().toLowerCase();
+    if (emailNorm) {
+      const conflict = await Model.findOne({
+        _id: { $ne: id },
+        email: emailNorm,
+        ...activeTeamMemberFilter,
+      });
+      if (conflict) {
+        return res.status(400).json({
+          success: false,
+          message: "Another active member already uses this email.",
+        });
+      }
+    }
+    member.deletedAt = null;
+    member.deletedBy = null;
+    await member.save();
+    if (req.user?.id) {
+      await logActivity(
+        req.user.id,
+        "team_member_restore",
+        "team",
+        { department, email: member.email, name: member.name },
+        id,
+        "TeamMember"
+      );
+    }
+    return res.status(200).json({ success: true, data: member, message: "Member restored." });
+  } catch (error) {
+    console.error("restoreTeamMember error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.restoreAllDeletedTeamMembers = async (req, res) => {
+  try {
+    const department = resolveDepartment(req);
+    if (!department) {
+      return res.status(400).json({
+        success: false,
+        message: SOCIETY_ROLES.includes(req.user?.accountType)
+          ? "Department required in body."
+          : "Department not found.",
+      });
+    }
+    const Model = getTeamMemberModel(department);
+    await purgeExpiredDeletedTeamMembers(Model);
+    const deleted = await Model.find({ deletedAt: { $ne: null } }).sort({ deletedAt: -1 });
+    let restored = 0;
+    const skipped = [];
+    for (const member of deleted) {
+      const emailNorm = (member.email || "").trim().toLowerCase();
+      if (emailNorm) {
+        const conflict = await Model.findOne({
+          _id: { $ne: member._id },
+          email: emailNorm,
+          ...activeTeamMemberFilter,
+        });
+        if (conflict) {
+          skipped.push({ id: member._id, email: member.email, reason: "email_conflict" });
+          continue;
+        }
+      }
+      member.deletedAt = null;
+      member.deletedBy = null;
+      await member.save();
+      restored += 1;
+    }
+    if (req.user?.id && restored > 0) {
+      await logActivity(req.user.id, "team_member_restore_all", "team", { department, restored }, null, "TeamMember");
+    }
+    return res.status(200).json({
+      success: true,
+      message: restored > 0 ? `Restored ${restored} member(s).` : "No members to restore.",
+      restored,
+      skipped,
+    });
+  } catch (error) {
+    console.error("restoreAllDeletedTeamMembers error:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -605,7 +754,7 @@ exports.addMemberByInviteLink = async (req, res) => {
       }
 
       const Model = getTeamMemberModel(link.department);
-      const existingMember = await Model.findOne({ email: emailNorm });
+      const existingMember = await Model.findOne({ email: emailNorm, ...activeTeamMemberFilter });
       if (existingMember) {
         return res.status(400).json({ success: false, message: "You are already registered in this department." });
       }

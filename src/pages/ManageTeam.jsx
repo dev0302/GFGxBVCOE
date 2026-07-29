@@ -10,6 +10,9 @@ import {
   addTeamMember,
   updateTeamMember,
   deleteTeamMember,
+  getDeletedTeamMembers,
+  restoreTeamMember,
+  restoreAllDeletedTeamMembers,
   uploadTeamExcel,
   downloadTeamTemplate,
   createTeamInviteLink,
@@ -34,6 +37,7 @@ import {
   List,
   Grid,
   Phone,
+  RotateCcw,
 } from "react-feather";
 import {
   driveLinkToImageUrl,
@@ -59,6 +63,22 @@ import "react-image-crop/dist/ReactCrop.css";
 import { uploadTeamPhoto } from "../services/api";
 import { Spinner } from "@/components/ui/spinner";
 import TeamMemberCard from "../components/TeamMemberCard";
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
+
+const DELETED_MEMBER_RETENTION_DAYS = 7;
+
+function formatDeletedAt(value) {
+  if (!value) return "—";
+  return new Date(value).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
+function daysUntilPermanentDelete(deletedAt, retentionDays = DELETED_MEMBER_RETENTION_DAYS) {
+  const purgeAt = new Date(deletedAt).getTime() + retentionDays * 24 * 60 * 60 * 1000;
+  return Math.max(0, Math.ceil((purgeAt - Date.now()) / (24 * 60 * 60 * 1000)));
+}
 
 const COLS = [
   "name",
@@ -192,7 +212,13 @@ export default function ManageTeam({
   const [inviteLinkSuspending, setInviteLinkSuspending] = useState(false);
   const [expiresIn, setExpiresIn] = useState("12h");
   const [editMember, setEditMember] = useState(null);
-  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [deleteConfirmMember, setDeleteConfirmMember] = useState(null);
+  const [deletingMember, setDeletingMember] = useState(false);
+  const [deletedMembers, setDeletedMembers] = useState([]);
+  const [deletedRetentionDays, setDeletedRetentionDays] = useState(DELETED_MEMBER_RETENTION_DAYS);
+  const [deletedMembersLoading, setDeletedMembersLoading] = useState(false);
+  const [restoringMemberId, setRestoringMemberId] = useState(null);
+  const [restoringAllDeleted, setRestoringAllDeleted] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(
@@ -306,6 +332,20 @@ export default function ManageTeam({
     }
   };
 
+  const loadDeletedMembers = async () => {
+    if (!department) return;
+    setDeletedMembersLoading(true);
+    try {
+      const res = await getDeletedTeamMembers(department);
+      setDeletedMembers(res.data || []);
+      setDeletedRetentionDays(res.retentionDays ?? DELETED_MEMBER_RETENTION_DAYS);
+    } catch {
+      setDeletedMembers([]);
+    } finally {
+      setDeletedMembersLoading(false);
+    }
+  };
+
   const load = async () => {
     try {
       const [rosterRes, membersRes] = await Promise.all([
@@ -314,6 +354,7 @@ export default function ManageTeam({
       ]);
       setRoster(rosterRes.data || []);
       setMembers(membersRes.data || []);
+      await loadDeletedMembers();
     } catch (e) {
       toast.error(e.message || "Failed to load team");
     } finally {
@@ -715,14 +756,54 @@ export default function ManageTeam({
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleConfirmDeleteMember = async () => {
+    if (!deleteConfirmMember?._id) return;
+    setDeletingMember(true);
     try {
-      await deleteTeamMember(id, department ? { department } : {});
-      toast.success("Member removed");
-      setDeleteConfirmId(null);
-      load();
+      await deleteTeamMember(
+        deleteConfirmMember._id,
+        department ? { department } : {},
+      );
+      toast.success("Member moved to deleted list");
+      setDeleteConfirmMember(null);
+      await load();
     } catch (e) {
       toast.error(e.message || "Failed to delete member");
+    } finally {
+      setDeletingMember(false);
+    }
+  };
+
+  const handleRestoreMember = async (id) => {
+    setRestoringMemberId(id);
+    try {
+      await restoreTeamMember(id, department ? { department } : {});
+      toast.success("Member restored");
+      await load();
+    } catch (e) {
+      toast.error(e.message || "Failed to restore member");
+    } finally {
+      setRestoringMemberId(null);
+    }
+  };
+
+  const handleRestoreAllDeleted = async () => {
+    setRestoringAllDeleted(true);
+    try {
+      const res = await restoreAllDeletedTeamMembers(
+        department ? { department } : {},
+      );
+      toast.success(res.message || "Members restored");
+      if (res.skipped?.length) {
+        toast.message(
+          `${res.skipped.length} member(s) skipped (email already in use).`,
+        );
+      }
+      await load();
+    } catch (e) {
+      toast.error(e.message || "Failed to restore members");
+    } finally {
+      setRestoringAllDeleted(false);
     }
   };
 
@@ -954,9 +1035,7 @@ export default function ManageTeam({
                           key={isTeamMember ? `tm-${m._id}` : `roster-${row.email}`}
                           row={row}
                           openEdit={openEdit}
-                          deleteConfirmId={deleteConfirmId}
-                          setDeleteConfirmId={setDeleteConfirmId}
-                          handleDelete={handleDelete}
+                          onRequestDelete={(member) => setDeleteConfirmMember(member)}
                         />
                       );
                     })}
@@ -1030,46 +1109,24 @@ export default function ManageTeam({
                                 </td>
                               ))}
                               <td className="px-4 py-3 align-middle">
-                                {deleteConfirmId === m._id ? (
-                                  <span className="flex items-center gap-2 text-sm">
-                                    <span className="text-gray-400">
-                                      Remove?
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleDelete(m._id)}
-                                      className="text-red-400 hover:text-red-300 font-medium"
-                                    >
-                                      Yes
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => setDeleteConfirmId(null)}
-                                      className="text-gray-400 hover:text-gray-300"
-                                    >
-                                      No
-                                    </button>
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-2">
-                                    <button
-                                      type="button"
-                                      onClick={() => openEdit(m)}
-                                      className="p-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/20 transition-colors"
-                                      title="Edit"
-                                    >
-                                      <Edit3 className="h-4 w-4" />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => setDeleteConfirmId(m._id)}
-                                      className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/20 transition-colors"
-                                      title="Delete"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </button>
-                                  </span>
-                                )}
+                                <span className="inline-flex items-center gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => openEdit(m)}
+                                    className="p-1.5 rounded-lg text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+                                    title="Edit"
+                                  >
+                                    <Edit3 className="h-4 w-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setDeleteConfirmMember(m)}
+                                    className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/20 transition-colors"
+                                    title="Delete"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1173,7 +1230,100 @@ export default function ManageTeam({
             })()
           )}
         </div>
+
+        <section className="mt-8 rounded-2xl border border-gray-500/30 bg-[#1e1e2f]/80 overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border-b border-gray-500/30">
+            <div>
+              <h2 className="text-sm font-semibold text-richblack-25 flex items-center gap-2">
+                <Trash2 className="h-4 w-4 text-gray-400" />
+                Deleted members
+              </h2>
+              <p className="text-xs text-gray-500 mt-1">
+                Removed team members stay here for {deletedRetentionDays} days, then are deleted permanently.
+              </p>
+            </div>
+            {deletedMembers.length > 0 && (
+              <button
+                type="button"
+                onClick={handleRestoreAllDeleted}
+                disabled={restoringAllDeleted || restoringMemberId}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-600/40 border border-gray-500/40 text-gray-200 hover:bg-cyan-500/20 hover:border-cyan-500/40 hover:text-cyan-300 transition-colors text-xs font-medium disabled:opacity-50 shrink-0"
+              >
+                <RotateCcw className={`h-3.5 w-3.5 ${restoringAllDeleted ? "animate-spin" : ""}`} />
+                {restoringAllDeleted ? "Restoring…" : "Restore all"}
+              </button>
+            )}
+          </div>
+          <div className="p-4">
+            {deletedMembersLoading ? (
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <Spinner className="size-4 text-cyan-400" />
+                Loading…
+              </div>
+            ) : deletedMembers.length === 0 ? (
+              <p className="text-sm text-gray-500">No deleted members.</p>
+            ) : (
+              <ul className="space-y-3">
+                {deletedMembers.map((m) => {
+                  const daysLeft = daysUntilPermanentDelete(m.deletedAt, deletedRetentionDays);
+                  const name = m.name || m.email || "—";
+                  return (
+                    <li
+                      key={m._id}
+                      className="rounded-lg border border-gray-500/30 bg-[#252536]/60 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-richblack-25 truncate">{name}</p>
+                        <p className="text-xs text-gray-400 mt-0.5 truncate">{m.email || "—"}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Deleted {formatDeletedAt(m.deletedAt)}
+                          {" · "}
+                          {daysLeft <= 0
+                            ? "Purging soon"
+                            : `${daysLeft} day${daysLeft === 1 ? "" : "s"} until permanent removal`}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRestoreMember(m._id)}
+                        disabled={restoringMemberId === m._id || restoringAllDeleted}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-600/40 border border-gray-500/40 text-gray-200 hover:bg-cyan-500/15 hover:border-cyan-500/40 hover:text-cyan-300 transition-colors text-xs font-medium disabled:opacity-50 shrink-0"
+                      >
+                        <RotateCcw
+                          className={`h-3.5 w-3.5 ${restoringMemberId === m._id ? "animate-spin" : ""}`}
+                        />
+                        {restoringMemberId === m._id ? "Restoring…" : "Restore"}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </section>
       </div>
+
+      <ConfirmDeleteModal
+        open={!!deleteConfirmMember}
+        title="Remove team member?"
+        description={
+          deleteConfirmMember ? (
+            <>
+              <span className="font-medium text-gray-300 line-clamp-3 break-words">
+                &ldquo;{deleteConfirmMember.name || deleteConfirmMember.email}&rdquo;
+              </span>{" "}
+              will be removed from the team list immediately and moved to{" "}
+              <span className="font-medium text-gray-300">Deleted members</span> at the bottom of this page for{" "}
+              <span className="font-medium text-gray-300">{deletedRetentionDays} days</span>. You can restore them
+              before then; after that they are deleted permanently from the database.
+            </>
+          ) : null
+        }
+        confirmLabel={deletingMember ? "Removing" : "Remove"}
+        loading={deletingMember}
+        onConfirm={handleConfirmDeleteMember}
+        onClose={() => !deletingMember && setDeleteConfirmMember(null)}
+      />
 
       {exportModalOpen && (
         <div

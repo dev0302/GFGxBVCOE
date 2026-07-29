@@ -938,6 +938,34 @@ export async function deleteTeamMember(id, body = {}) {
   return data;
 }
 
+export async function getDeletedTeamMembers(department) {
+  const q = department ? `?department=${encodeURIComponent(department)}` : '';
+  const res = await authFetch(`/api/v1/team/members/deleted${q}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load deleted members');
+  return data;
+}
+
+export async function restoreTeamMember(id, body = {}) {
+  const res = await authFetch(`/api/v1/team/members/${id}/restore`, {
+    method: 'POST',
+    body: Object.keys(body).length ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to restore member');
+  return data;
+}
+
+export async function restoreAllDeletedTeamMembers(body = {}) {
+  const res = await authFetch('/api/v1/team/members/deleted/restore-all', {
+    method: 'POST',
+    body: Object.keys(body).length ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to restore members');
+  return data;
+}
+
 export async function uploadTeamExcel(file, department) {
   const formData = new FormData();
   formData.append('file', file);

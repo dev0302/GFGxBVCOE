@@ -18,6 +18,7 @@ import {
   downloadAllDepartmentsExcel,
 } from "../utils/teamListExport";
 import { Spinner } from "@/components/ui/spinner";
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setDepartments as setDepartmentsInStore,
@@ -105,6 +106,7 @@ export default function ManageSociety() {
   const [sendingInviteTo, setSendingInviteTo] = useState(null);
   const [activityLogUser, setActivityLogUser] = useState(null);
   const [nextSessionModalOpen, setNextSessionModalOpen] = useState(false);
+  const [nextSessionConfirmOpen, setNextSessionConfirmOpen] = useState(false);
   const [nextSessionApplying, setNextSessionApplying] = useState(false);
   const [promotionHistory, setPromotionHistory] = useState([]);
   const [latestActivePromotionId, setLatestActivePromotionId] = useState(null);
@@ -239,6 +241,7 @@ export default function ManageSociety() {
     try {
       const res = await applyNextSessionYearPromotion();
       toast.success(res.message || "Next session changes applied.");
+      setNextSessionConfirmOpen(false);
       setNextSessionModalOpen(false);
       await Promise.all([refreshAllPeople(), loadPromotionHistory()]);
     } catch (e) {
@@ -821,12 +824,12 @@ export default function ManageSociety() {
                 <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-500/30">
                   <button
                     type="button"
-                    onClick={handleApplyNextSession}
+                    onClick={() => setNextSessionConfirmOpen(true)}
                     disabled={nextSessionApplying}
                     className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-medium text-sm disabled:opacity-50"
                   >
-                    <RefreshCw className={`h-4 w-4 ${nextSessionApplying ? "animate-spin" : ""}`} />
-                    {nextSessionApplying ? "Applying…" : "Confirm & apply"}
+                    <RefreshCw className="h-4 w-4" />
+                    Confirm & apply
                   </button>
                   <button
                     type="button"
@@ -920,6 +923,22 @@ export default function ManageSociety() {
             </div>
           </div>
         )}
+
+        <ConfirmDeleteModal
+          open={nextSessionConfirmOpen}
+          title="Apply next session?"
+          description={
+            <>
+              This will increase the year of study for every member by one year across all departments
+              (1st → 2nd, 2nd → 3rd, 3rd → 4th, 4th → 4+). Registered users, predefined profiles, and
+              team member records will all be updated.
+            </>
+          }
+          confirmLabel={nextSessionApplying ? "Applying" : "Confirm & apply"}
+          loading={nextSessionApplying}
+          onConfirm={handleApplyNextSession}
+          onClose={() => !nextSessionApplying && setNextSessionConfirmOpen(false)}
+        />
 
         {revertConfirmOpen && (
           <div

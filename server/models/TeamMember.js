@@ -11,6 +11,9 @@ const teamMemberSchema = new mongoose.Schema(
     photo: { type: String, default: "" },
     non_tech_society: { type: String, default: "" },
     addedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    /** When set, hidden from team list; purged permanently after retention window. */
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
   },
   { timestamps: true }
 );
