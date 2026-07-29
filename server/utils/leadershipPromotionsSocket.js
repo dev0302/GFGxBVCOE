@@ -36,7 +36,7 @@ async function buildPresenceUser(socketUser) {
     };
   }
 
-  const approvalInfo = getUserApprovalInfo(user);
+  const approvalInfo = await getUserApprovalInfo(user);
   return {
     userId: String(user._id),
     name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email,

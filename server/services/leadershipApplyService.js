@@ -48,11 +48,16 @@ async function findSignupDepartmentsForEmail(emailNorm) {
 }
 
 async function removeEmailFromAllSignupConfigs(emailNorm, exceptDepartment = null) {
-  const configs = await SignupConfig.find({ allowedEmails: emailNorm });
+  const configs = await SignupConfig.find({});
   for (const config of configs) {
     if (exceptDepartment && config.department === exceptDepartment) continue;
-    config.allowedEmails = config.allowedEmails.filter((e) => e !== emailNorm);
-    await config.save();
+    const remainingEmails = config.allowedEmails.filter(
+      (email) => String(email || "").trim().toLowerCase() !== emailNorm
+    );
+    if (remainingEmails.length !== config.allowedEmails.length) {
+      config.allowedEmails = remainingEmails;
+      await config.save();
+    }
   }
 }
 
@@ -72,15 +77,17 @@ async function addEmailToSignupConfig(department, emailNorm) {
 
 async function removeTeamMemberByEmail(emailNorm, departmentHint = null) {
   const departments = departmentHint ? [departmentHint] : TEAM_DEPARTMENTS;
+  const escapedEmail = emailNorm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const emailPattern = new RegExp(`^${escapedEmail}$`, "i");
+  const removed = [];
   for (const dept of departments) {
     const Model = getTeamMemberModel(dept);
-    const member = await Model.findOne({ email: emailNorm });
-    if (member) {
-      await Model.findByIdAndDelete(member._id);
-      return { removed: true, department: dept, memberId: member._id };
+    const result = await Model.deleteMany({ email: emailPattern });
+    if (result.deletedCount) {
+      removed.push({ department: dept, count: result.deletedCount });
     }
   }
-  return { removed: false };
+  return { removed: removed.length > 0, departments: removed };
 }
 
 function extractPersonDetails(personType, data, sourceDepartment) {

@@ -113,8 +113,22 @@ export function downloadAllDepartmentsPDF(departmentMembersMap, columns, labels,
   doc.text(`Generated on ${formatISTDateTime()}`, 14, startY);
   startY += 12;
 
-  const deptNames = Object.keys(departmentMembersMap).sort();
+  // Preserve the caller's insertion order so society exports can place shared
+  // leadership sections before the department-by-department sections.
+  const deptNames = Object.keys(departmentMembersMap);
   const head = columns.map((k) => labels[k] || k);
+  const uniquePeople = new Set();
+  deptNames.forEach((section) => {
+    (departmentMembersMap[section] || []).forEach((member) => {
+      const key = String(member.email || member.name || "").trim().toLowerCase();
+      if (key) uniquePeople.add(key);
+    });
+  });
+  const totalPeople = uniquePeople.size;
+
+  doc.setFontSize(10);
+  doc.text(`Total persons in society: ${totalPeople}`, 14, startY);
+  startY += 8;
 
   deptNames.forEach((dept) => {
     const members = departmentMembersMap[dept] || [];
@@ -127,7 +141,7 @@ export function downloadAllDepartmentsPDF(departmentMembersMap, columns, labels,
 
     doc.setFontSize(11);
     doc.setTextColor(58, 58, 58);
-    doc.text(dept, 14, startY);
+    doc.text(`${dept} (${members.length})`, 14, startY);
     doc.setTextColor(0, 0, 0);
     startY += 6;
 
@@ -157,7 +171,22 @@ export function downloadAllDepartmentsPDF(departmentMembersMap, columns, labels,
 export function downloadAllDepartmentsExcel(departmentMembersMap, columns, labels, title) {
   const wb = XLSX.utils.book_new();
   const head = columns.map((k) => labels[k] || k);
-  const deptNames = Object.keys(departmentMembersMap).sort();
+  const deptNames = Object.keys(departmentMembersMap);
+  const uniquePeople = new Set();
+  deptNames.forEach((section) => {
+    (departmentMembersMap[section] || []).forEach((member) => {
+      const key = String(member.email || member.name || "").trim().toLowerCase();
+      if (key) uniquePeople.add(key);
+    });
+  });
+  const summaryData = [
+    [title || "Society member list"],
+    ["Total persons in society", uniquePeople.size],
+    [],
+    ["Section", "Count"],
+    ...deptNames.map((section) => [section, (departmentMembersMap[section] || []).length]),
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryData), "Summary");
 
   deptNames.forEach((dept) => {
     const members = departmentMembersMap[dept] || [];
@@ -167,7 +196,7 @@ export function downloadAllDepartmentsExcel(departmentMembersMap, columns, label
         return raw != null && String(raw).trim() !== "" ? String(raw).trim() : "—";
       })
     );
-    const data = [[`Department: ${dept}`], head, ...rows];
+    const data = [[`Section: ${dept}`, `Count: ${members.length}`], head, ...rows];
     const ws = XLSX.utils.aoa_to_sheet(data);
     const sheetName = dept.replace(/[\\/*?:\[\]]/g, "").substring(0, 31);
     XLSX.utils.book_append_sheet(wb, ws, sheetName);

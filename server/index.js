@@ -13,6 +13,8 @@ const fileUpload = require("express-fileupload");
 const jwt = require("jsonwebtoken");
 const { Server } = require("socket.io");
 const User = require("./models/User");
+const { cleanupExpiredTenureUsers } = require("./utils/tenureSession");
+const { migrateDepartmentNames } = require("./utils/departmentMigration");
 
 const descriptionRouter = require("./routes/generateDescription");
 const eventRoutes = require("./routes/eventRoute");
@@ -283,9 +285,24 @@ io.on("connection", (socket) => {
 dbConnect()
   .then(() => {
     cloudinaryConnect();
+    const runTenureCleanup = async () => {
+      try {
+        const removed = await cleanupExpiredTenureUsers();
+        if (removed) console.log(`Removed ${removed} expired tenure account(s).`);
+      } catch (error) {
+        console.error("Expired tenure cleanup failed:", error);
+      }
+    };
+    runTenureCleanup();
+    setInterval(runTenureCleanup, 15 * 60 * 1000);
     httpServer.listen(PORT, () =>
       console.log(`Server running on port: ${PORT}`)
     );
+    setImmediate(() => {
+      migrateDepartmentNames()
+        .then(() => console.log("Department names migrated."))
+        .catch((error) => console.error("Department name migration failed:", error));
+    });
   })
   .catch((err) => {
     console.log("Server could not start:", err);

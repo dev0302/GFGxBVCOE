@@ -9,7 +9,6 @@ import {
   addLeadershipAllowedUser,
   removeLeadershipAllowedUser,
   getAccountTypeLabel,
-  isSocietyRole,
   getMe,
 } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
@@ -18,6 +17,11 @@ import { cloudinaryTinyAvatarUrl } from "../../utils/cloudinary";
 
 function userDisplayName(user) {
   return `${user.firstName || ""} ${user.lastName || ""}`.trim();
+}
+
+function userRoleLabel(user) {
+  const position = user.additionalDetails?.position || user.additionalDetails?.p0 || "";
+  return position || getAccountTypeLabel(user.accountType) || user.accountType;
 }
 
 function UserAvatar({ user, name }) {
@@ -61,7 +65,7 @@ function AllowedUserRow({ user, removable, removingId, onRemove }) {
       </div>
 
       <span className="hidden shrink-0 rounded-full bg-cyan-500/15 px-2 py-0.5 text-[10px] font-medium text-cyan-300 sm:inline-flex">
-        {getAccountTypeLabel(user.accountType) || user.accountType}
+        {userRoleLabel(user)}
       </span>
 
       {removable ? (
@@ -139,7 +143,6 @@ export default function PersonsAllowed() {
     const q = search.trim().toLowerCase();
     return allUsers
       .filter((u) => !allowedIdSet.has(String(u._id)))
-      .filter((u) => !isSocietyRole(u.accountType))
       .filter((u) => {
         if (!q) return true;
         const name = userDisplayName(u).toLowerCase();
@@ -201,8 +204,9 @@ export default function PersonsAllowed() {
             Persons allowed
           </h1>
           <p className="mt-2 text-sm text-gray-400">
-            Faculty Incharge, Chairperson, and Vice-Chairperson always have access.
-            Add other registered members who should also use Leadership Transition.
+            Faculty Incharge, Chairperson, Vice-Chairperson, and every Department
+            Lead automatically have access. Add other registered members to delegate
+            access.
           </p>
         </div>
 
@@ -216,8 +220,7 @@ export default function PersonsAllowed() {
               </p>
               {builtinUsers.length === 0 ? (
                 <p className="rounded-xl border border-dashed border-gray-500/25 bg-[#151525]/30 px-4 py-6 text-sm text-gray-500">
-                  No Faculty Incharge, Chairperson, or Vice-Chairperson accounts are
-                  registered yet.
+                  No default-authorized leadership accounts are registered yet.
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -256,7 +259,8 @@ export default function PersonsAllowed() {
         <section className="rounded-2xl border border-gray-500/20 bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 p-6 shadow-xl md:p-8">
           <SectionTitle icon="➕">Add from registered users</SectionTitle>
           <p className="mt-2 text-xs text-gray-500">
-            Society core roles are excluded because they already have access.
+            Default-authorized roles, including Department Leads, are excluded because
+            they already have access.
           </p>
 
           <div className="mt-4 space-y-3">
@@ -290,7 +294,7 @@ export default function PersonsAllowed() {
                         <div className="truncate text-xs text-gray-500">{u.email}</div>
                       </div>
                       <span className="text-[10px] text-gray-400">
-                        {getAccountTypeLabel(u.accountType) || u.accountType}
+                        {userRoleLabel(u)}
                       </span>
                     </button>
                   );

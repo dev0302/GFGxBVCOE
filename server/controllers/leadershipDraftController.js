@@ -32,7 +32,7 @@ const { getPresenceList } = require("../utils/leadershipPromotionsSocket");
 async function buildUserCollaboratorInfo(userId) {
   const user = await User.findById(userId).populate("additionalDetails").lean();
   if (!user) return null;
-  const approvalInfo = getUserApprovalInfo(user);
+  const approvalInfo = await getUserApprovalInfo(user);
   return {
     userId: String(user._id),
     name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email,

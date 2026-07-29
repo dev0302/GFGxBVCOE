@@ -4,6 +4,7 @@ const {
   TEAM_DEPARTMENTS,
   formatLeadershipRoleLabel,
 } = require("./leadershipPositions");
+const { userCanAccessLeadershipTransition } = require("./leadershipAccess");
 
 function getDepartmentRank(position = "") {
   const lower = String(position || "").trim().toLowerCase();
@@ -22,7 +23,7 @@ function resolveUserRoleLabel(user = {}) {
   });
 }
 
-function getUserApprovalInfo(user = {}) {
+async function getUserApprovalInfo(user = {}) {
   const accountType = String(user.accountType || "").trim();
   const profile = user.additionalDetails || {};
   const position = profile.position || profile.p0 || "";
@@ -40,6 +41,17 @@ function getUserApprovalInfo(user = {}) {
 
   const rank = getDepartmentRank(position);
   if (TEAM_DEPARTMENTS.includes(accountType) && (rank === "Head" || rank === "Lead")) {
+    return {
+      category: "department",
+      role: roleLabel,
+      department,
+      canApprove: true,
+    };
+  }
+
+  // Delegated access is full Leadership Transition access. It provides the
+  // department-category approval without changing the core + department flow.
+  if (await userCanAccessLeadershipTransition(user._id || user.id, accountType, position)) {
     return {
       category: "department",
       role: roleLabel,

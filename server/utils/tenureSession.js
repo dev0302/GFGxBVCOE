@@ -17,6 +17,23 @@ async function deleteUserAndProfile(userDoc) {
 }
 
 /**
+ * Remove all accounts whose leadership-tenure grace period has elapsed.
+ * This is intentionally callable by a server-side scheduler so cleanup does
+ * not depend on the former member returning to the site.
+ */
+async function cleanupExpiredTenureUsers(now = new Date()) {
+  const expiredUsers = await User.find({
+    sessionExpiresAt: { $ne: null, $lte: now },
+  }).select("additionalDetails");
+
+  for (const user of expiredUsers) {
+    await deleteUserAndProfile(user);
+  }
+
+  return expiredUsers.length;
+}
+
+/**
  * If the user's 24h grace period has passed, delete account and return expired=true.
  */
 async function checkAndFinalizeExpiredSession(userId) {
@@ -42,5 +59,6 @@ module.exports = {
   GRACE_PERIOD_MS,
   getSessionExpiresAt,
   deleteUserAndProfile,
+  cleanupExpiredTenureUsers,
   checkAndFinalizeExpiredSession,
 };
