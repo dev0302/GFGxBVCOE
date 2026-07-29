@@ -354,8 +354,8 @@ async function buildPromotionPreview({ personType, personId, sourceDepartment, t
     TEAM_DEPARTMENTS.includes(position.accountType);
 
   const isCoreChange =
-    ["Chairperson", "Vice-Chairperson"].includes(position.accountType) ||
-    ["Chairperson", "Vice-Chairperson"].includes(oldAccountType);
+    ["Chairperson", "Vice-Chairperson", "Treasurer"].includes(position.accountType) ||
+    ["Chairperson", "Vice-Chairperson", "Treasurer"].includes(oldAccountType);
 
   let changeType = "promotion";
   if (isDeptTransfer) changeType = "department_transfer";

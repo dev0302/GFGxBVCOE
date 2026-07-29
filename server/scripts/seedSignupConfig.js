@@ -4,6 +4,9 @@ const SignupConfig = require("../models/SignupConfig");
 
 const DEPARTMENTS = [
   "ADMIN",
+  "Chairperson",
+  "Vice-Chairperson",
+  "Treasurer",
   "Social Media and Promotion",
   "Technical",
   "Event Management",
@@ -12,7 +15,6 @@ const DEPARTMENTS = [
   "Content and Documentation",
   "Capture The Event",
   "Sponsorship and Marketing",
-  "Treasurer",
 ];
 
 async function seed() {

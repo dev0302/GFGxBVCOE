@@ -20,12 +20,15 @@ import {
   User,
 } from "react-feather";
 import { FiSettings } from "react-icons/fi";
+import { toast } from "sonner";
 import {
   fetchCloudinaryStorageUsage,
   fetchDatabaseAnalytics,
   fetchBroadcastEmailAudience,
   fetchEmailServiceAnalytics,
   sendBroadcastEmail,
+  fetchTargetedEmailRecipients,
+  sendTargetedEmail,
 } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
@@ -44,6 +47,7 @@ const personalItems = [
 
 const otherItems = [
   { id: "send-email", label: "Send Email To All", icon: Mail },
+  { id: "send-email-person", label: "Send Email To Person", icon: User },
   { id: "team-roles", label: "Team Roles", icon: Users },
   { id: "manage-members", label: "Manage Members", icon: Users },
   { id: "billing-usage", label: "Billing & Usage", icon: CreditCard },
@@ -1256,6 +1260,211 @@ function SendEmailToAllContent() {
   );
 }
 
+function SendEmailToPersonContent() {
+  const [members, setMembers] = useState([]);
+  const [loadingMembers, setLoadingMembers] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [memberQuery, setMemberQuery] = useState("");
+  const [memberMenuOpen, setMemberMenuOpen] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [form, setForm] = useState({
+    recipientEmail: "",
+    title: "",
+    subject: "",
+    description: "",
+    linkUrl: "",
+    linkLabel: "Open link",
+  });
+
+  const loadMembers = async () => {
+    try {
+      setLoadingMembers(true);
+      setError("");
+      const result = await fetchTargetedEmailRecipients();
+      setMembers(result.data || []);
+    } catch (err) {
+      setError(err?.message || "Failed to load society members");
+    } finally {
+      setLoadingMembers(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMembers();
+  }, []);
+
+  const updateField = (field) => (event) => {
+    setForm((prev) => ({ ...prev, [field]: event.target.value }));
+    setError("");
+    setSuccess("");
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setConfirmOpen(true);
+  };
+
+  const sendEmail = async () => {
+    const email = form.recipientEmail.trim();
+    try {
+      setSending(true);
+      setError("");
+      setSuccess("");
+      const result = await sendTargetedEmail({ ...form, recipientEmail: email });
+      setSuccess(result.message || "Email sent.");
+      toast.success(result.message || "Email sent.");
+      setConfirmOpen(false);
+    } catch (err) {
+      setError(err?.message || "Failed to send email");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const inputClass =
+    "w-full rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm text-richblack-25 outline-none transition placeholder:text-gray-500 focus:border-cyan-300/50 focus:bg-white/[0.055]";
+  const labelClass = "mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400";
+  const canSend = form.recipientEmail.trim() && form.title.trim() && form.subject.trim() && form.description.trim() && !sending;
+  const matchingMembers = members.filter((member) => {
+    const query = memberQuery.trim().toLowerCase();
+    if (!query) return true;
+    return [member.name, member.email, member.department].some((value) => String(value || "").toLowerCase().includes(query));
+  });
+  const selectMember = (member) => {
+    setForm((prev) => ({ ...prev, recipientEmail: member.email }));
+    setMemberQuery(`${member.name} — ${member.email}`);
+    setMemberMenuOpen(false);
+    setError("");
+    setSuccess("");
+  };
+
+  return (
+    <div className="space-y-3 sm:space-y-4">
+      <Panel
+        title="Send Email To Person"
+        subtitle="Send an announcement to one society member, or enter any recipient email address directly."
+      >
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <AnalyticsCard
+            label="Society Members"
+            value={loadingMembers ? "Checking..." : formatNumber(members.length)}
+            icon={Users}
+            tone="text-cyan-300"
+            subtext="Available to select"
+          />
+          <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-lg shadow-black/10 sm:p-4">
+            <p className="text-[11px] font-semibold text-gray-400 sm:text-sm">Member list</p>
+            <button
+              type="button"
+              onClick={loadMembers}
+              disabled={loadingMembers || sending}
+              className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCw className={`h-4 w-4 ${loadingMembers ? "animate-spin" : ""}`} />
+              Refresh Members
+            </button>
+          </div>
+        </div>
+
+        {error && <div className="mb-4 rounded-lg border border-red-400/20 bg-red-500/10 p-3 text-xs text-red-200 sm:text-sm">{error}</div>}
+        {success && <div className="mb-4 rounded-lg border border-emerald-400/20 bg-emerald-500/10 p-3 text-xs text-emerald-100 sm:text-sm">{success}</div>}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label className={labelClass}>Select Society Member</label>
+              <div className="relative">
+                <input
+                  className={inputClass}
+                  value={memberQuery}
+                  onChange={(event) => { setMemberQuery(event.target.value); setMemberMenuOpen(true); }}
+                  onFocus={() => setMemberMenuOpen(true)}
+                  disabled={loadingMembers}
+                  placeholder={loadingMembers ? "Loading members..." : "Search name, email, or department"}
+                />
+                {memberMenuOpen && !loadingMembers && (
+                  <div className="absolute z-30 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-cyan-300/20 bg-[#202237] p-1 shadow-2xl shadow-black/40">
+                    {matchingMembers.length ? matchingMembers.slice(0, 100).map((member) => (
+                      <button
+                        key={`${member.type}-${member._id || member.email}`}
+                        type="button"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => selectMember(member)}
+                        className="w-full rounded-md px-3 py-2 text-left transition hover:bg-cyan-400/10"
+                      >
+                        <span className="block text-sm font-medium text-richblack-25">{member.name}</span>
+                        <span className="block truncate text-xs text-gray-400">{member.email} · {member.department}</span>
+                      </button>
+                    )) : <p className="px-3 py-3 text-sm text-gray-400">No members found.</p>}
+                  </div>
+                )}
+              </div>
+              <select
+                className="hidden"
+                value={members.some((member) => member.email === form.recipientEmail) ? form.recipientEmail : ""}
+                onChange={updateField("recipientEmail")}
+                disabled={loadingMembers}
+              >
+                <option value="">Choose from the member list</option>
+                {members.map((member) => {
+                  const name = [member.firstName, member.lastName].filter(Boolean).join(" ") || member.email;
+                  return <option key={member._id || member.email} value={member.email}>{name} — {member.email}</option>;
+                })}
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Recipient Email</label>
+              <input
+                value={form.recipientEmail}
+                onChange={updateField("recipientEmail")}
+                className={inputClass}
+                type="email"
+                placeholder="member@example.com"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div><label className={labelClass}>Email Title</label><input value={form.title} onChange={updateField("title")} className={inputClass} maxLength={120} required /></div>
+            <div><label className={labelClass}>Subject</label><input value={form.subject} onChange={updateField("subject")} className={inputClass} maxLength={160} required /></div>
+          </div>
+          <div>
+            <label className={labelClass}>Description</label>
+            <textarea value={form.description} onChange={updateField("description")} className={`${inputClass} min-h-40 resize-y leading-6`} maxLength={5000} placeholder="Write the email body..." required />
+            <p className="mt-1 text-right text-[11px] text-gray-500">{form.description.length}/5000</p>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+            <div><label className={labelClass}>Link URL (Optional)</label><input value={form.linkUrl} onChange={updateField("linkUrl")} className={inputClass} type="url" placeholder="https://www.gfg-bvcoe.com/events" /></div>
+            <div><label className={labelClass}>Link Button Text</label><input value={form.linkLabel} onChange={updateField("linkLabel")} className={inputClass} placeholder="Open link" /></div>
+          </div>
+          <div className="flex flex-col gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+            <p className="text-xs leading-5 text-gray-400 sm:text-sm">This email will be sent only to <span className="font-bold text-cyan-300">{form.recipientEmail.trim() || "the selected recipient"}</span>.</p>
+            <button type="submit" disabled={!canSend} className="inline-flex items-center justify-center gap-2 rounded-full bg-cyan-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50">
+              <Mail className="h-4 w-4" />{sending ? "Sending..." : "Send Email"}
+            </button>
+          </div>
+        </form>
+      </Panel>
+      {confirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="email-confirmation-title">
+          <div className="w-full max-w-md rounded-2xl border border-cyan-300/20 bg-[#202237] p-5 shadow-2xl shadow-black/50 sm:p-6">
+            <h2 id="email-confirmation-title" className="text-lg font-bold text-richblack-25">Send this email?</h2>
+            <p className="mt-2 text-sm leading-6 text-gray-300">The announcement will be sent only to <span className="font-semibold text-cyan-300">{form.recipientEmail.trim()}</span>.</p>
+            <p className="mt-1 text-xs text-gray-500">Subject: {form.subject}</p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button type="button" onClick={() => setConfirmOpen(false)} disabled={sending} className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:opacity-50">Cancel</button>
+              <button type="button" onClick={sendEmail} disabled={sending} className="inline-flex items-center gap-2 rounded-full bg-cyan-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-cyan-400 disabled:opacity-50"><Mail className="h-4 w-4" />{sending ? "Sending..." : "Confirm & Send"}</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Settings() {
   const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
@@ -1329,6 +1538,8 @@ function Settings() {
                 <EmailServiceAnalyticsContent />
               ) : activeTab === "send-email" ? (
                 <SendEmailToAllContent />
+              ) : activeTab === "send-email-person" ? (
+                <SendEmailToPersonContent />
               ) : (
                 <PlaceholderContent activeTab={activeTab} />
               )}

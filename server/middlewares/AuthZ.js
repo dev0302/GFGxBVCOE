@@ -70,7 +70,7 @@ exports.optionalAuth = async (req, res, next) => {
   }
 };
 
-const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson"];
+const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
 
 exports.isAdmin = (req, res, next) => {
   try {
@@ -119,7 +119,7 @@ exports.canAccessLeadershipTransition = async (req, res, next) => {
   }
 };
 
-/** Dashboard (signup config): Faculty Incharge, Chairperson, Vice-Chairperson */
+/** Dashboard (signup config): society core roles. */
 exports.canAccessDashboard = (req, res, next) => {
   try {
     if (req.tenureEnded) {
@@ -132,7 +132,7 @@ exports.canAccessDashboard = (req, res, next) => {
     if (!SOCIETY_ROLES.includes(accountType)) {
       return res.status(403).json({
         success: false,
-        message: "Dashboard access is limited to Faculty Incharge, Chairperson and Vice-Chairperson.",
+        message: "Dashboard access is limited to society core roles.",
       });
     }
     next();

@@ -4,8 +4,11 @@ const PredefinedProfile = require("../models/PredefinedProfile");
 const Alumni = require("../models/Alumni");
 const SignupConfig = require("../models/SignupConfig");
 const DashboardAccessConfig = require("../models/DashboardAccessConfig");
+const EventUploadConfig = require("../models/EventUploadConfig");
 const LeadershipDraftSession = require("../models/LeadershipDraftSession");
 const { getTeamMemberModel } = require("../models/TeamMember");
+
+const LEGACY_TREASURER_DEPARTMENT = "Treasurer";
 
 const RENAMES = {
   Design: "Design and Creative",
@@ -116,6 +119,60 @@ async function migrateLeadershipDrafts() {
   }
 }
 
+function normalizeTreasurerRole(value) {
+  const text = String(value || "").trim();
+  return /^Treasurer(?:\s+(?:Member|Lead|Head))?$/i.test(text)
+    ? LEGACY_TREASURER_DEPARTMENT
+    : text;
+}
+
+async function migrateTreasurerToCoreRole() {
+  // Treasurer keeps the same accountType value, but is now authorized as a
+  // society role. Remove only the department-specific data that is no longer
+  // meaningful; signup configuration remains so a Treasurer can still enroll.
+  await Promise.all([
+    DashboardAccessConfig.deleteOne({ dashboardKey: LEGACY_TREASURER_DEPARTMENT }),
+    DashboardAccessConfig.updateMany(
+      { extraAllowedDepartments: LEGACY_TREASURER_DEPARTMENT },
+      { $pull: { extraAllowedDepartments: LEGACY_TREASURER_DEPARTMENT } }
+    ),
+    EventUploadConfig.updateMany(
+      { extraAllowedDepartments: LEGACY_TREASURER_DEPARTMENT },
+      { $pull: { extraAllowedDepartments: LEGACY_TREASURER_DEPARTMENT } }
+    ),
+  ]);
+
+  const profileModels = [Profile, PredefinedProfile, Alumni];
+  for (const Model of profileModels) {
+    const docs = await Model.find({
+      $or: ["position", "p0", "p1", "p2", "role"].map((field) => ({
+        [field]: { $regex: "^Treasurer(?:\\s+(?:Member|Lead|Head))?$", $options: "i" },
+      })),
+    });
+    for (const doc of docs) {
+      let changed = false;
+      ["position", "p0", "p1", "p2", "role"].forEach((field) => {
+        const current = doc.get(field);
+        if (typeof current !== "string") return;
+        const normalized = normalizeTreasurerRole(current);
+        if (normalized !== current) {
+          doc.set(field, normalized);
+          changed = true;
+        }
+      });
+      if (changed) await doc.save();
+    }
+  }
+
+  // Team-member documents belong to the retired department. Treasurer users
+  // remain in the User collection and now receive society/core permissions.
+  try {
+    await getTeamMemberModel(LEGACY_TREASURER_DEPARTMENT).collection.drop();
+  } catch (error) {
+    if (error.codeName !== "NamespaceNotFound") throw error;
+  }
+}
+
 async function migrateDepartmentNames() {
   await User.updateMany({ accountType: { $in: Object.keys(RENAMES) } }, [
     { $set: { accountType: { $switch: { branches: Object.entries(RENAMES).map(([oldName, newName]) => ({ case: { $eq: ["$accountType", oldName] }, then: newName })), default: "$accountType" } } } },
@@ -123,6 +180,7 @@ async function migrateDepartmentNames() {
   await migrateSignupConfigs();
   await migrateTeamCollections();
   await migrateDashboardConfigs();
+  await migrateTreasurerToCoreRole();
   await Promise.all([
     migrateTextFields(Profile, ["position", "p0", "p1", "p2"]),
     migrateTextFields(PredefinedProfile, ["position", "p0", "p1", "p2"]),

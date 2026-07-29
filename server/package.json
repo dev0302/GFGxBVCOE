@@ -9,7 +9,8 @@
     "dev": "nodemon index.js",
     "postinstall": "playwright install chromium",
     "setup:playwright": "playwright install chromium",
-    "clear:leadership-records": "node scripts/clearLeadershipTestRecords.js"
+    "clear:leadership-records": "node scripts/clearLeadershipTestRecords.js",
+    "migrate:treasurer-core": "node scripts/migrateTreasurerToCore.js"
   },
   "keywords": [],
   "author": "",

@@ -204,7 +204,7 @@ export default function PersonsAllowed() {
             Persons allowed
           </h1>
           <p className="mt-2 text-sm text-gray-400">
-            Faculty Incharge, Chairperson, Vice-Chairperson, and every Department
+            Faculty Incharge, Chairperson, Vice-Chairperson, Treasurer, and every Department
             Lead automatically have access. Add other registered members to delegate
             access.
           </p>

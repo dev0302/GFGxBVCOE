@@ -370,7 +370,7 @@ export async function removeForceDeleteDepartment(department) {
   return data;
 }
 
-/** Faculty Incharge, Chairperson, Vice-Chairperson can see the Force delete permissions sidebar and page. */
+/** Society core roles can see the Force delete permissions sidebar and page. */
 export function canManageForceDeleteConfig(accountType) {
   return accountType === 'ADMIN' || accountType === 'Chairperson' || accountType === 'Vice-Chairperson';
 }
@@ -405,6 +405,23 @@ export async function fetchBroadcastEmailAudience() {
 
 export async function sendBroadcastEmail(payload) {
   const res = await authFetch('/api/v1/settings/broadcast-email/send', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to send email');
+  return data;
+}
+
+export async function fetchTargetedEmailRecipients() {
+  const res = await authFetch('/api/v1/settings/targeted-email/recipients');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load society members');
+  return data;
+}
+
+export async function sendTargetedEmail(payload) {
+  const res = await authFetch('/api/v1/settings/targeted-email/send', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
@@ -455,6 +472,7 @@ export const AUTH_DEPARTMENTS = [
   'ADMIN',
   'Chairperson',
   'Vice-Chairperson',
+  'Treasurer',
   'Social Media and Promotion',
   'Technical',
   'Event Management',
@@ -463,7 +481,6 @@ export const AUTH_DEPARTMENTS = [
   'Content and Documentation',
   'Capture The Event',
   'Sponsorship and Marketing',
-  'Treasurer',
 ];
 
 /** Display label for account type (e.g. ADMIN → "Faculty Incharge") */
@@ -471,6 +488,7 @@ export const ACCOUNT_TYPE_LABELS = {
   ADMIN: 'Faculty Incharge',
   Chairperson: 'Chairperson',
   'Vice-Chairperson': 'Vice-Chairperson',
+  Treasurer: 'Treasurer',
 };
 export function getAccountTypeLabel(accountType) {
   return ACCOUNT_TYPE_LABELS[accountType] ?? accountType ?? '';
@@ -489,7 +507,7 @@ export function formatLeadershipRoleLabel(value) {
 }
 
 /** True if user can access "Manage society" (all departments) */
-export const SOCIETY_ROLES = ['ADMIN', 'Chairperson', 'Vice-Chairperson'];
+export const SOCIETY_ROLES = ['ADMIN', 'Chairperson', 'Vice-Chairperson', 'Treasurer'];
 export function isSocietyRole(accountType) {
   const t = String(accountType || '').trim();
   return SOCIETY_ROLES.includes(t);
@@ -500,7 +518,7 @@ export function canManageEvents(accountType) {
   return accountType === 'Event Management' || isSocietyRole(accountType);
 }
 
-/** Only these roles can add/remove departments in the event-upload allowed list (Faculty Incharge, Chairperson, Vice-Chairperson, Event Management). */
+/** Society core roles and Event Management can add/remove event-upload departments. */
 export function canManageEventUploadConfig(accountType) {
   return canManageEvents(accountType);
 }
@@ -522,7 +540,7 @@ export function userCanAccessLeadershipTransition(user) {
   const isDepartmentLead = [
     'Social Media and Promotion', 'Technical', 'Event Management',
     'Public Relation and Outreach', 'Design and Creative', 'Content and Documentation',
-    'Capture The Event', 'Sponsorship and Marketing', 'Treasurer',
+    'Capture The Event', 'Sponsorship and Marketing',
   ].includes(String(user.accountType || '').trim()) && position.includes('lead');
   return isSocietyRole(user.accountType) || isDepartmentLead;
 }
@@ -768,7 +786,7 @@ export async function getAllPeople() {
   return data;
 }
 
-/** Activity logs for a user. Society roles only (Faculty Incharge, Chairperson, Vice-Chairperson). */
+/** Activity logs for a user. Society core roles only. */
 export async function getActivityLogs(userId) {
   const res = await authFetch(`/api/v1/activity-logs/${encodeURIComponent(userId)}`);
   const data = await res.json().catch(() => ({}));
