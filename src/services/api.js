@@ -776,6 +776,32 @@ export async function getTeamDepartments() {
   return data;
 }
 
+/** Apply next academic session: promote all member years (society roles). */
+export async function applyNextSessionYearPromotion() {
+  const res = await authFetch('/api/v1/team/year-promotion/apply', { method: 'POST' });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to apply next session changes');
+  return data;
+}
+
+/** History of year promotion sessions with revert info. */
+export async function getYearPromotionHistory() {
+  const res = await authFetch('/api/v1/team/year-promotion/history');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to fetch promotion history');
+  return data;
+}
+
+/** Revert the most recent active year promotion session. */
+export async function revertYearPromotion(sessionId) {
+  const res = await authFetch(`/api/v1/team/year-promotion/${encodeURIComponent(sessionId)}/revert`, {
+    method: 'POST',
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to revert promotion');
+  return data;
+}
+
 export async function getTeamMembers(department) {
   const params = new URLSearchParams();
   if (department) params.set('department', department);
