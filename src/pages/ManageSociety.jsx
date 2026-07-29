@@ -26,9 +26,10 @@ import {
   setAllPeopleList as setAllPeopleListInStore,
 } from "../redux/slices/manageSocietySlice.jsx";
 
-const EXPORT_COLS = ["name", "year", "branch", "section", "email", "contact", "non_tech_society"];
+const EXPORT_COLS = ["name", "department", "year", "branch", "section", "email", "contact", "non_tech_society"];
 const EXPORT_LABELS = {
   name: "Name",
+  department: "Department",
   year: "Year",
   branch: "Branch",
   section: "Section",
@@ -267,39 +268,125 @@ export default function ManageSociety() {
     }
   };
 
-  /** Build combined export rows for a department: roster (signup config + registered/predefined) + team members not in roster */
-  const buildDepartmentExportRows = (roster, members) => {
-    const rosterEmails = new Set((roster || []).map((r) => (r.email || "").toLowerCase()));
+  /** Build department export rows from active registered users and team members only. */
+  const buildDepartmentExportRows = (roster, members, department = "") => {
+    const activeRoster = (roster || []).filter((row) => row.registered && row.user);
+    const rosterEmails = new Set(activeRoster.map((r) => (r.email || "").toLowerCase()));
     const extraMembers = (members || []).filter(
       (m) => !rosterEmails.has((m.email || "").toLowerCase())
     );
-    const fromRoster = (roster || []).map((row) => {
+    const fromRoster = activeRoster.map((row) => {
       const u = row.user;
       const profile = u?.additionalDetails || {};
-      const pre = row.predefinedProfile || {};
-      const name = row.registered
-        ? [u?.firstName, u?.lastName].filter(Boolean).join(" ").trim() || row.email
-        : (pre?.name || row.email);
       return {
-        name,
-        year: row.registered ? (profile?.year || profile?.yearOfStudy || "") : (pre?.year || ""),
-        branch: row.registered ? (profile?.branch || "") : (pre?.branch || ""),
-        section: row.registered ? (profile?.section || "") : "",
+        name: [u?.firstName, u?.lastName].filter(Boolean).join(" ").trim() || row.email,
+        department,
+        year: profile?.year || profile?.yearOfStudy || "",
+        branch: profile?.branch || "",
+        section: profile?.section || "",
         email: row.email,
-        contact: row.registered ? (u?.contact || "") : "",
-        non_tech_society: row.registered ? (profile?.non_tech_society || "") : "",
+        contact: u?.contact || "",
+        non_tech_society: profile?.non_tech_society || "",
+        accountType: u?.accountType || "",
+        role: profile?.position || profile?.p0 || u?.accountType || "Member",
       };
     });
     const fromMembers = (extraMembers || []).map((m) => ({
       name: m.name || "",
+      department,
       year: m.year || "",
       branch: m.branch || "",
       section: m.section || "",
       email: m.email || "",
       contact: m.contact || "",
       non_tech_society: m.non_tech_society || "",
+      accountType: "",
+      role: m.position || "Member",
     }));
     return [...fromRoster, ...fromMembers];
+  };
+
+  const buildUserExportRow = (u) => {
+    const profile = u?.additionalDetails || {};
+    return {
+      name: [u?.firstName, u?.lastName].filter(Boolean).join(" ").trim() || u?.email || "",
+      department: u?.accountType || "",
+      year: profile.year || profile.yearOfStudy || "",
+      branch: profile.branch || "",
+      section: profile.section || "",
+      email: u?.email || "",
+      contact: u?.contact || "",
+      non_tech_society: profile.non_tech_society || "",
+      accountType: u?.accountType || "",
+      role: profile.position || profile.p0 || u?.accountType || "Member",
+    };
+  };
+
+  const isCoreTeamRow = (row) => {
+    const role = String(row.role || "").toLowerCase();
+    const accountType = String(row.accountType || "").toLowerCase();
+    return accountType === "chairperson" || accountType === "vice-chairperson" ||
+      accountType === "treasurer" || role === "chairperson" ||
+      role === "vice-chairperson" || role === "treasurer" || role.includes("lead");
+  };
+
+  const isDepartmentHeadRow = (row) =>
+    String(row.role || "").toLowerCase().includes("head");
+
+  const uniqueRows = (rows) => {
+    const seen = new Set();
+    return rows.filter((row) => {
+      const key = String(row.email || row.name || "").trim().toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+
+  const buildSocietyExportSections = async () => {
+    const departmentRows = {};
+    await Promise.all(
+      departments.map(async (dept) => {
+        const [rosterRes, membersRes] = await Promise.all([
+          getDepartmentRoster(dept),
+          getTeamMembers(dept),
+        ]);
+        departmentRows[dept] = buildDepartmentExportRows(
+          rosterRes.data || [],
+          membersRes.data || [],
+          dept
+        );
+      })
+    );
+
+    const allPeopleRes = await getAllPeople();
+    const activeUserRows = (allPeopleRes.data || [])
+      .filter((item) => item.type === "user")
+      .map((item) => buildUserExportRow(item.data));
+    const leadershipRows = uniqueRows([
+      ...activeUserRows,
+      ...Object.values(departmentRows).flat(),
+    ]);
+    const coreTeam = leadershipRows.filter(isCoreTeamRow);
+    const departmentHeads = leadershipRows.filter(
+      (row) => !isCoreTeamRow(row) && isDepartmentHeadRow(row)
+    );
+    const leadershipEmails = new Set(
+      [...coreTeam, ...departmentHeads]
+        .map((row) => String(row.email || "").trim().toLowerCase())
+        .filter(Boolean)
+    );
+
+    const sections = {
+      "Core Team": coreTeam,
+      "Department Heads": departmentHeads,
+    };
+    departments.forEach((dept) => {
+      sections[dept] = (departmentRows[dept] || []).filter(
+        (row) => !leadershipEmails.has(String(row.email || "").trim().toLowerCase())
+      );
+    });
+    return sections;
   };
 
   const handlePrintAllPDF = async () => {
@@ -309,18 +396,7 @@ export default function ManageSociety() {
     }
     setPrintAllLoading(true);
     try {
-      const map = {};
-      await Promise.all(
-        departments.map(async (dept) => {
-          const [rosterRes, membersRes] = await Promise.all([
-            getDepartmentRoster(dept),
-            getTeamMembers(dept),
-          ]);
-          const roster = rosterRes.data || [];
-          const members = membersRes.data || [];
-          map[dept] = buildDepartmentExportRows(roster, members);
-        })
-      );
+      const map = await buildSocietyExportSections();
       downloadAllDepartmentsPDF(
         map,
         printAllSelectedFields,
@@ -342,18 +418,7 @@ export default function ManageSociety() {
     }
     setPrintAllLoading(true);
     try {
-      const map = {};
-      await Promise.all(
-        departments.map(async (dept) => {
-          const [rosterRes, membersRes] = await Promise.all([
-            getDepartmentRoster(dept),
-            getTeamMembers(dept),
-          ]);
-          const roster = rosterRes.data || [];
-          const members = membersRes.data || [];
-          map[dept] = buildDepartmentExportRows(roster, members);
-        })
-      );
+      const map = await buildSocietyExportSections();
       downloadAllDepartmentsExcel(
         map,
         printAllSelectedFields,
@@ -377,7 +442,7 @@ export default function ManageSociety() {
       ]);
       const roster = rosterRes.data || [];
       const members = membersRes.data || [];
-      const list = buildDepartmentExportRows(roster, members);
+      const list = buildDepartmentExportRows(roster, members, dept);
       downloadTeamListPDF(
         list,
         EXPORT_COLS,

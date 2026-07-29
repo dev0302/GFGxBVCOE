@@ -22,6 +22,7 @@ const {
   SOCIETY_ROLES,
   formatPreviousRoleLabel,
 } = require("../utils/leadershipPositions");
+const { isDefaultLeadershipTransitionRole } = require("../utils/leadershipAccess");
 
 const ALL_SIGNUP_DEPARTMENTS = [
   "ADMIN",
@@ -31,13 +32,23 @@ const ALL_SIGNUP_DEPARTMENTS = [
 ];
 
 async function buildConfigResponse(config) {
-  const [users, builtinAllowedUsers] = await Promise.all([
+  const [users, defaultAccessCandidates] = await Promise.all([
     User.find({ _id: { $in: config.allowedUserIds } })
       .select("-password")
       .populate("additionalDetails")
       .lean(),
-    User.find({ accountType: { $in: SOCIETY_ROLES } }).select("-password").lean(),
+    User.find({ accountType: { $in: [...SOCIETY_ROLES, ...TEAM_DEPARTMENTS] } })
+      .select("-password")
+      .populate("additionalDetails", "position p0")
+      .lean(),
   ]);
+
+  const builtinAllowedUsers = defaultAccessCandidates.filter((user) =>
+    isDefaultLeadershipTransitionRole(
+      user.accountType,
+      user.additionalDetails?.position || user.additionalDetails?.p0 || ""
+    )
+  );
 
   builtinAllowedUsers.sort((a, b) => {
     const roleDiff =
@@ -405,12 +416,17 @@ exports.addAllowedUser = async (req, res) => {
       return res.status(400).json({ success: false, message: "userId is required." });
     }
 
-    const targetUser = await User.findById(userId).select("-password").lean();
+    const targetUser = await User.findById(userId)
+      .select("-password")
+      .populate("additionalDetails", "position p0")
+      .lean();
     if (!targetUser) {
       return res.status(404).json({ success: false, message: "User not found." });
     }
 
-    if (SOCIETY_ROLES.includes(targetUser.accountType)) {
+    const targetPosition =
+      targetUser.additionalDetails?.position || targetUser.additionalDetails?.p0 || "";
+    if (isDefaultLeadershipTransitionRole(targetUser.accountType, targetPosition)) {
       return res.status(400).json({
         success: false,
         message: "This user already has access through their role.",

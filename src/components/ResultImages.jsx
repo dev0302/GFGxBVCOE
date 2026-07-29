@@ -30,7 +30,7 @@ const ResultImages = () => {
     {
       id: 5,
       url: "/result6.webp",
-      title: "Design",
+      title: "Design and Creative",
       description: ""
     },
     {

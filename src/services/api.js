@@ -459,9 +459,9 @@ export const AUTH_DEPARTMENTS = [
   'Technical',
   'Event Management',
   'Public Relation and Outreach',
-  'Design',
+  'Design and Creative',
   'Content and Documentation',
-  'Photography and Videography',
+  'Capture The Event',
   'Sponsorship and Marketing',
   'Treasurer',
 ];
@@ -516,7 +516,15 @@ export function userCanAccessLeadershipTransition(user) {
   if (!user) return false;
   if (user.canAccessLeadershipTransition === true) return true;
   if (user.canAccessLeadershipTransition === false) return false;
-  return isSocietyRole(user.accountType);
+  const position = String(
+    user.additionalDetails?.position || user.additionalDetails?.p0 || user.position || user.p0 || ''
+  ).trim().toLowerCase();
+  const isDepartmentLead = [
+    'Social Media and Promotion', 'Technical', 'Event Management',
+    'Public Relation and Outreach', 'Design and Creative', 'Content and Documentation',
+    'Capture The Event', 'Sponsorship and Marketing', 'Treasurer',
+  ].includes(String(user.accountType || '').trim()) && position.includes('lead');
+  return isSocietyRole(user.accountType) || isDepartmentLead;
 }
 
 export async function sendOTP({ email, department }) {

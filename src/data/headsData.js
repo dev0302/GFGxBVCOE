@@ -4,8 +4,8 @@ const headsData = [
     name: "Shreyans",
     branch: "ECE",
     year: "2nd",
-    position: "Design Head",
-    p0: "Design Head",
+    position: "Design and Creative Head",
+    p0: "Design and Creative Head",
     image: "/Shreyans.webp",
     p1: "",
     p2: "",
@@ -16,7 +16,7 @@ const headsData = [
     timeline: [
       {
         year: "2025",
-        role: "Design Head, GFG BVCOE",
+        role: "Design and Creative Head, GFG BVCOE",
         description:
           "Worked on multiple designs using Canva & Figma. Basics of C++, participated in Codeforces contests. Learning web dev and created projects like a To-Do List.",
       },
@@ -31,10 +31,10 @@ const headsData = [
     name: "Pururaj Singh",
     branch: "ECE",
     year: "3rd",
-    position: "Design and Creatives Head",
-    p0: "Design and Creatives Head",
+    position: "Design and Creative Head",
+    p0: "Design and Creative Head",
     image: "/Pururaj.webp",
-    p1: "Design Executive",
+    p1: "Design and Creative Executive",
     p2: "",
     email: "pururajsingh76@gmail.com",
     instaLink: "https://www.instagram.com/pururajsinghrajput/",

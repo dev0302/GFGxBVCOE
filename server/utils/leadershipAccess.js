@@ -1,12 +1,39 @@
 const LeadershipTransitionConfig = require("../models/LeadershipTransitionConfig");
-const { SOCIETY_ROLES } = require("./leadershipPositions");
+const User = require("../models/User");
+const {
+  SOCIETY_ROLES,
+  TEAM_DEPARTMENTS,
+  getDepartmentRankFromPosition,
+} = require("./leadershipPositions");
 
-async function userCanAccessLeadershipTransition(userId, accountType) {
+function isDefaultLeadershipTransitionRole(accountType, position = "") {
   const type = String(accountType || "").trim();
-  if (SOCIETY_ROLES.includes(type)) return true;
+  return SOCIETY_ROLES.includes(type) || (
+    TEAM_DEPARTMENTS.includes(type) &&
+    getDepartmentRankFromPosition(position) === "Lead"
+  );
+}
+
+async function userCanAccessLeadershipTransition(userId, accountType, position = "") {
+  const type = String(accountType || "").trim();
+  let rolePosition = position;
+
+  // JWTs have the account type but not the profile position that identifies
+  // Department Leads, so resolve it for backend authorization checks.
+  if (!rolePosition && TEAM_DEPARTMENTS.includes(type) && userId) {
+    const user = await User.findById(userId)
+      .populate("additionalDetails", "position p0")
+      .lean();
+    rolePosition = user?.additionalDetails?.position || user?.additionalDetails?.p0 || "";
+  }
+
+  if (isDefaultLeadershipTransitionRole(type, rolePosition)) return true;
   const config = await LeadershipTransitionConfig.findOne().lean();
   const allowed = (config?.allowedUserIds || []).map((id) => String(id));
   return allowed.includes(String(userId));
 }
 
-module.exports = { userCanAccessLeadershipTransition };
+module.exports = {
+  isDefaultLeadershipTransitionRole,
+  userCanAccessLeadershipTransition,
+};

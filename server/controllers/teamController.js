@@ -15,9 +15,9 @@ const TEAM_DEPARTMENTS = [
   "Technical",
   "Event Management",
   "Public Relation and Outreach",
-  "Design",
+  "Design and Creative",
   "Content and Documentation",
-  "Photography and Videography",
+  "Capture The Event",
   "Sponsorship and Marketing",
   "Treasurer",
 ];

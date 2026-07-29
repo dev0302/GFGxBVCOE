@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 /**
  * Stores "Departments allowed" for each department dashboard.
  *
- * A dashboardKey represents a department (e.g. "Technical", "Design", ...).
+ * A dashboardKey represents a department (e.g. "Technical", "Design and Creative", ...).
  * - Core access: Society roles + that dashboardKey itself
  * - Extra access: additional departments pushed via UI
  */

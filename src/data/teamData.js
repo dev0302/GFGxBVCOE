@@ -116,7 +116,7 @@ const teamData = [
             },
             {
                 year: "2025",
-                role: "Designing Head",
+                role: "Design and Creative Head",
                 project: "Enactus",
                 description: "College Chapter, BVCOE, New Delhi"
             },

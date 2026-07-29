@@ -311,9 +311,9 @@ exports.login = async (req, res) => {
       "Social Media and Promotion",
       "Technical",
       "Public Relation and Outreach",
-      "Design",
+      "Design and Creative",
       "Content and Documentation",
-      "Photography and Videography",
+      "Capture The Event",
       "Sponsorship and Marketing",
       "Treasurer",
     ];
@@ -592,9 +592,9 @@ exports.me = async (req, res) => {
       "Social Media and Promotion",
       "Technical",
       "Public Relation and Outreach",
-      "Design",
+      "Design and Creative",
       "Content and Documentation",
-      "Photography and Videography",
+      "Capture The Event",
       "Sponsorship and Marketing",
       "Treasurer",
     ];
@@ -907,6 +907,7 @@ exports.searchPeople = async (req, res) => {
       const regex = new RegExp(escaped, "i");
       const qLower = q.toLowerCase();
       let userDocs = await User.find({
+        tenureEndedAt: null,
         $or: [
           { firstName: regex },
           { lastName: regex },
@@ -923,7 +924,7 @@ exports.searchPeople = async (req, res) => {
         const firstToken = q.split(/\s+/)[0];
         if (firstToken.length >= 1) {
           const firstRegex = new RegExp(firstToken.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-          const byFirst = await User.find({ firstName: firstRegex })
+          const byFirst = await User.find({ tenureEndedAt: null, firstName: firstRegex })
             .select("-password")
             .populate("additionalDetails")
             .limit(50)
@@ -947,30 +948,6 @@ exports.searchPeople = async (req, res) => {
       }
       users = userDocs;
 
-      // Predefined profiles that have no registered user (not signed up yet)
-      const predefinedMatching = await PredefinedProfile.find({
-        $or: [
-          { name: regex },
-          { email: regex },
-        ],
-      })
-        .limit(30)
-        .lean();
-      const preEmails = predefinedMatching.map((p) => (p.email || "").toLowerCase()).filter(Boolean);
-      const registeredFromPre = preEmails.length
-        ? await User.find({ email: { $in: preEmails } }).select("email").lean()
-        : [];
-      const registeredEmails = new Set(registeredFromPre.map((u) => (u.email || "").toLowerCase()));
-      for (const pre of predefinedMatching) {
-        const emailLower = (pre.email || "").toLowerCase();
-        if (emailLower && !registeredEmails.has(emailLower)) {
-          predefinedOnly.push({
-            ...pre,
-            registered: false,
-          });
-        }
-      }
-      predefinedOnly = predefinedOnly.slice(0, 20);
     }
 
     return res.status(200).json({
@@ -993,9 +970,9 @@ const TEAM_DEPARTMENTS = [
   "Technical",
   "Event Management",
   "Public Relation and Outreach",
-  "Design",
+  "Design and Creative",
   "Content and Documentation",
-  "Photography and Videography",
+  "Capture The Event",
   "Sponsorship and Marketing",
   "Treasurer",
 ];
@@ -1006,7 +983,7 @@ const TEAM_DEPARTMENTS = [
  */
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({})
+    const users = await User.find({ tenureEndedAt: null })
       .select("-password")
       .populate("additionalDetails")
       .sort({ createdAt: -1 })
@@ -1022,24 +999,17 @@ exports.getAllUsers = async (req, res) => {
 };
 
 /**
- * Get all people: users + predefined-only (not registered) + team members. Sorted: users, then predefinedOnly, then members.
+ * Get all people: active users and team members. Predefined profiles are not
+ * included because they are not active members.
  * Society role only. GET /api/v1/auth/all-people
  */
 exports.getAllPeople = async (req, res) => {
   try {
-    const users = await User.find({})
+    const users = await User.find({ tenureEndedAt: null })
       .select("-password")
       .populate("additionalDetails")
       .sort({ createdAt: -1 })
       .lean();
-    const userEmails = new Set(users.map((u) => (u.email || "").toLowerCase()).filter(Boolean));
-
-    const allPredefined = await PredefinedProfile.find({}).lean();
-    const predefinedOnly = allPredefined.filter((p) => {
-      const email = (p.email || "").toLowerCase();
-      return email && !userEmails.has(email);
-    });
-
     const teamMembers = [];
     for (const dept of TEAM_DEPARTMENTS) {
       const Model = getTeamMemberModel(dept);
@@ -1051,7 +1021,6 @@ exports.getAllPeople = async (req, res) => {
 
     const list = [
       ...users.map((u) => ({ type: "user", data: u })),
-      ...predefinedOnly.map((p) => ({ type: "predefinedOnly", data: p })),
       ...teamMembers,
     ];
     return res.status(200).json({ success: true, data: list });

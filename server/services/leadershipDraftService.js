@@ -210,7 +210,7 @@ async function addApproval(user) {
   }
 
   const fullUser = await User.findById(user.id).populate("additionalDetails").lean();
-  const approvalInfo = getUserApprovalInfo(fullUser || user);
+  const approvalInfo = await getUserApprovalInfo(fullUser || user);
 
   if (!approvalInfo.canApprove) {
     throw new Error("Your role is not authorized to approve leadership changes.");
