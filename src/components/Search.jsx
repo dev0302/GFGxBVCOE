@@ -378,6 +378,8 @@ const ACTION_LOG_LABELS = {
   team_member_add: "Added team member",
   team_member_update: "Updated team member",
   team_member_delete: "Removed team member",
+  team_member_restore: "Restored team member",
+  team_member_restore_all: "Restored all deleted team members",
   event_upload_link_create: "Created event upload link",
   event_upload_link_suspend: "Suspended event upload link",
   event_create: "Created event",

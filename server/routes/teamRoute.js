@@ -6,6 +6,9 @@ const {
   addMember,
   updateMember,
   deleteMember,
+  getDeletedTeamMembers,
+  restoreTeamMember,
+  restoreAllDeletedTeamMembers,
   uploadExcel,
   downloadTemplate,
   createInviteLink,
@@ -37,12 +40,15 @@ router.post("/year-promotion/:id/revert", auth, revertYearPromotion);
 router.get("/departments", auth, getDepartments);
 router.get("/roster", auth, getDepartmentRoster);
 router.get("/members", auth, getMyTeamMembers);
+router.get("/members/deleted", auth, getDeletedTeamMembers);
+router.post("/members/deleted/restore-all", auth, restoreAllDeletedTeamMembers);
 router.post("/members", auth, addMember);
 router.post("/upload-photo", auth, uploadTeamPhoto);
 router.get("/invite-link", auth, getActiveInviteLink);
 router.post("/invite-link", auth, createInviteLink);
 router.delete("/invite-link/:token", auth, suspendTeamInviteLink);
 router.put("/members/:id", auth, updateMember);
+router.post("/members/:id/restore", auth, restoreTeamMember);
 router.delete("/members/:id", auth, deleteMember);
 router.post("/members/upload-excel", auth, uploadExcel);
 router.get("/template", auth, downloadTemplate);

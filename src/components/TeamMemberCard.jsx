@@ -5,9 +5,7 @@ import { getAccountTypeLabel } from "../services/api";
 export default function TeamMemberCard({
   row,
   openEdit,
-  deleteConfirmId,
-  setDeleteConfirmId,
-  handleDelete,
+  onRequestDelete,
 }) {
   const isTeamMember = row.type === "teamMember";
   const m = isTeamMember ? row.teamMember : row;
@@ -128,30 +126,13 @@ export default function TeamMemberCard({
             >
               <Edit3 className="h-4 w-4" />
             </button>
-            {deleteConfirmId === m._id ? (
-              <div className="flex items-center justify-center py-2.5 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 text-xs gap-1">
-                <button
-                  onClick={() => handleDelete(m._id)}
-                  className="hover:text-red-300 font-bold"
-                >
-                  Y
-                </button>
-                <button
-                  onClick={() => setDeleteConfirmId(null)}
-                  className="text-gray-400 hover:text-gray-300"
-                >
-                  N
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setDeleteConfirmId(m._id)}
-                className="flex items-center justify-center py-2.5 rounded-xl text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors bg-[#252536] border border-gray-500/20"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => onRequestDelete?.(m)}
+              className="flex items-center justify-center py-2.5 rounded-xl text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors bg-[#252536] border border-gray-500/20"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
           </>
         ) : (
           <button
