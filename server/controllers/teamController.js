@@ -422,6 +422,13 @@ exports.uploadTeamPhoto = async (req, res) => {
 };
 
 // ---------- Team invite link (join by link) ----------
+async function findActiveInviteLink(department) {
+  return TeamInviteLink.findOne({
+    department,
+    expiresAt: { $gt: new Date() },
+  }).sort({ createdAt: -1 });
+}
+
 function parseExpiresInToHours(val) {
   if (!val || typeof val !== "string") return 12; // default 12h
   const clean = val.toLowerCase().trim();
@@ -438,6 +445,35 @@ function parseExpiresInToHours(val) {
   return 12;
 }
 
+exports.getActiveInviteLink = async (req, res) => {
+  try {
+    const department = resolveDepartment(req);
+    if (!department) {
+      return res.status(400).json({
+        success: false,
+        message: SOCIETY_ROLES.includes(req.user?.accountType)
+          ? "Department required."
+          : "Department not found.",
+      });
+    }
+    const link = await findActiveInviteLink(department);
+    if (!link) {
+      return res.status(200).json({ success: true, data: null });
+    }
+    return res.status(200).json({
+      success: true,
+      data: {
+        token: link.token,
+        department: link.department,
+        expiresAt: link.expiresAt,
+      },
+    });
+  } catch (error) {
+    console.error("getActiveInviteLink error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 exports.createInviteLink = async (req, res) => {
   try {
     const department = resolveDepartment(req);
@@ -449,6 +485,21 @@ exports.createInviteLink = async (req, res) => {
           : "Department not found.",
       });
     }
+
+    const existing = await findActiveInviteLink(department);
+    if (existing) {
+      return res.status(200).json({
+        success: true,
+        message: "Active invite link already exists.",
+        existing: true,
+        data: {
+          token: existing.token,
+          department: existing.department,
+          expiresAt: existing.expiresAt,
+        },
+      });
+    }
+
     const { expiresIn } = req.body;
     const hours = parseExpiresInToHours(expiresIn);
     const token = TeamInviteLink.generateToken();

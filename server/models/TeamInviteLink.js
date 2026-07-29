@@ -15,6 +15,7 @@ const teamInviteLinkSchema = new mongoose.Schema(
 
 teamInviteLinkSchema.index({ token: 1 });
 teamInviteLinkSchema.index({ expiresAt: 1 });
+teamInviteLinkSchema.index({ department: 1, expiresAt: 1 });
 
 function generateToken() {
   return crypto.randomBytes(24).toString("hex");

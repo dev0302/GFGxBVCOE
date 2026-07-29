@@ -44,12 +44,12 @@ export default function JoinTeamByLink() {
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState(COLS.reduce((acc, k) => ({ ...acc, [k]: "" }), {}));
   const [saving, setSaving] = useState(false);
-  const formDisabled = validation.status === "invalid";
   const [cropImageSrc, setCropImageSrc] = useState(null);
   const [crop, setCrop] = useState(null);
   const [photoUploading, setPhotoUploading] = useState(false);
   const imgCropRef = useRef(null);
   const cropPxRef = useRef(null);
+  const formDisabled = validation.status === "invalid";
 
   /** cropPx = crop in display pixels (as ReactCrop reports). Output is full-resolution crop. */
   const getCroppedImg = (imageEl, cropPx) => {
@@ -204,6 +204,12 @@ export default function JoinTeamByLink() {
               <Users className="h-6 w-6 text-cyan-400" />
               Join the team
             </h1>
+            {validation.status === "pending" && (
+              <p className="text-gray-500 text-xs mb-2 flex items-center gap-1.5">
+                <Spinner className="size-3.5 text-cyan-400 animate-spin" />
+                Verifying link…
+              </p>
+            )}
             <p className="text-gray-400 text-sm mb-6">
               {validation.status === "valid" ? (
                 <>
@@ -215,12 +221,18 @@ export default function JoinTeamByLink() {
               )}
             </p>
 
-            {formDisabled && (
+            {validation.status === "invalid" && (
               <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-center">
                 <p className="text-red-400 font-medium">{validation.message || "Invalid or expired link"}</p>
                 <p className="text-gray-400 text-sm mt-1">
                   This invite link may have expired or does not exist. Ask for a new link.
                 </p>
+              </div>
+            )}
+
+            {validation.status === "error" && (
+              <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-center">
+                <p className="text-amber-400 font-medium text-sm">{validation.message}</p>
               </div>
             )}
 

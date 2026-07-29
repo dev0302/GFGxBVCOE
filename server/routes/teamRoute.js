@@ -9,6 +9,7 @@ const {
   uploadExcel,
   downloadTemplate,
   createInviteLink,
+  getActiveInviteLink,
   suspendTeamInviteLink,
   validateTeamInviteLink,
   uploadTeamPhotoByInviteLink,
@@ -29,6 +30,7 @@ router.get("/roster", auth, getDepartmentRoster);
 router.get("/members", auth, getMyTeamMembers);
 router.post("/members", auth, addMember);
 router.post("/upload-photo", auth, uploadTeamPhoto);
+router.get("/invite-link", auth, getActiveInviteLink);
 router.post("/invite-link", auth, createInviteLink);
 router.delete("/invite-link/:token", auth, suspendTeamInviteLink);
 router.put("/members/:id", auth, updateMember);

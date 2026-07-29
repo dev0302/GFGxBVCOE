@@ -13,6 +13,7 @@ import {
   uploadTeamExcel,
   downloadTeamTemplate,
   createTeamInviteLink,
+  getActiveTeamInviteLink,
   suspendTeamInviteLink,
   getAccountTypeLabel,
   sendSignupInvite,
@@ -184,10 +185,10 @@ export default function ManageTeam({
   const [loading, setLoading] = useState(true);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
-  const INVITE_LINK_STORAGE_PREFIX = "gfg_team_invite_link_";
   const [inviteLinkOpen, setInviteLinkOpen] = useState(false);
   const [inviteLinkData, setInviteLinkData] = useState(null);
   const [inviteLinkLoading, setInviteLinkLoading] = useState(false);
+  const [inviteLinkFetching, setInviteLinkFetching] = useState(false);
   const [inviteLinkSuspending, setInviteLinkSuspending] = useState(false);
   const [expiresIn, setExpiresIn] = useState("12h");
   const [editMember, setEditMember] = useState(null);
@@ -594,18 +595,18 @@ export default function ManageTeam({
 
   const displayDepartment = department || user?.accountType || "";
 
-  const loadStoredInviteLink = () => {
+  const fetchActiveInviteLink = async () => {
+    setInviteLinkFetching(true);
     try {
-      const key = INVITE_LINK_STORAGE_PREFIX + displayDepartment;
-      const raw = localStorage.getItem(key);
-      if (raw) {
-        const d = JSON.parse(raw);
-        if (d?.token && d?.expiresAt && new Date(d.expiresAt) > new Date())
-          return d;
-        localStorage.removeItem(key);
-      }
-    } catch (_) {}
-    return null;
+      const payload = displayDepartment ? { department: displayDepartment } : {};
+      const res = await getActiveTeamInviteLink(payload.department);
+      setInviteLinkData(res.data || null);
+    } catch (e) {
+      toast.error(e.message || "Failed to load invite link");
+      setInviteLinkData(null);
+    } finally {
+      setInviteLinkFetching(false);
+    }
   };
 
   const handleGenerateInviteLink = async () => {
@@ -618,13 +619,11 @@ export default function ManageTeam({
       const res = await createTeamInviteLink(payload);
       if (res.success && res.data) {
         setInviteLinkData(res.data);
-        try {
-          localStorage.setItem(
-            INVITE_LINK_STORAGE_PREFIX + displayDepartment,
-            JSON.stringify(res.data),
-          );
-        } catch (_) { }
-        toast.success(`Invite link created. Valid for ${expiresIn}.`);
+        if (res.existing) {
+          toast.info("An active invite link already exists for this department.");
+        } else {
+          toast.success(`Invite link created. Valid for ${expiresIn}.`);
+        }
       }
     } catch (e) {
       toast.error(e.message || "Failed to create invite link");
@@ -648,11 +647,6 @@ export default function ManageTeam({
     suspendTeamInviteLink(inviteLinkData.token)
       .then(() => {
         setInviteLinkData(null);
-        try {
-          localStorage.removeItem(
-            INVITE_LINK_STORAGE_PREFIX + displayDepartment,
-          );
-        } catch (_) {}
         toast.success("Link suspended. It can no longer be used.");
       })
       .catch((e) => toast.error(e.message || "Failed to suspend link"))
@@ -843,9 +837,9 @@ export default function ManageTeam({
                       <button
                         type="button"
                         onClick={() => {
-                          setInviteLinkData(loadStoredInviteLink());
                           setInviteLinkOpen(true);
                           setAddMenuOpen(false);
+                          fetchActiveInviteLink();
                         }}
                         className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gray-200 hover:bg-gray-500/20"
                       >
@@ -1522,7 +1516,8 @@ export default function ManageTeam({
               <select
                 value={expiresIn}
                 onChange={(e) => setExpiresIn(e.target.value)}
-                className="w-full rounded-xl border border-gray-500/30 bg-[#1e1e2f] px-3.5 py-2.5 text-sm text-gray-200 focus:border-cyan-500 focus:outline-none"
+                disabled={!!inviteLinkData?.token || inviteLinkFetching}
+                className="w-full rounded-xl border border-gray-500/30 bg-[#1e1e2f] px-3.5 py-2.5 text-sm text-gray-200 focus:border-cyan-500 focus:outline-none disabled:opacity-50"
               >
                 <option value="12h">12 hours (Default)</option>
                 <option value="24h">24 hours</option>
@@ -1533,18 +1528,23 @@ export default function ManageTeam({
                 <option value="7d">7 days</option>
               </select>
             </div>
-            <button
-              type="button"
-              onClick={handleGenerateInviteLink}
-              disabled={inviteLinkLoading}
-              className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold text-sm disabled:opacity-50 w-full"
-            >
-              {inviteLinkLoading ? "Generating…" : "Generate invite link"}
-            </button>
+            {!inviteLinkData?.token && (
+              <button
+                type="button"
+                onClick={handleGenerateInviteLink}
+                disabled={inviteLinkLoading || inviteLinkFetching}
+                className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold text-sm disabled:opacity-50 w-full"
+              >
+                {inviteLinkLoading ? "Generating…" : inviteLinkFetching ? "Loading…" : "Generate invite link"}
+              </button>
+            )}
+            {inviteLinkFetching && !inviteLinkData?.token && (
+              <p className="mt-3 text-sm text-gray-400 text-center">Checking for an active link…</p>
+            )}
             {inviteLinkData?.token && (
               <div className="mt-4 p-4 rounded-xl bg-[#252536] border border-gray-500/20">
                 <p className="text-xs text-gray-400 mb-2">
-                  Share this link (valid for {expiresIn}):
+                  Active invite link for this department:
                 </p>
                 <p className="text-sm font-mono break-all text-cyan-300 mb-2">
                   {typeof window !== "undefined"
