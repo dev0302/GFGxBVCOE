@@ -3,6 +3,7 @@ import { Toaster } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 import { AuthProvider } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketProvider";
+import { NotificationsProvider } from "./context/NotificationsContext";
 import { GlobalModalProvider } from "./context/GlobalModalProvider";
 import { UploadTransferProvider } from "./context/UploadTransferContext";
 import Home from "./pages/Home";
@@ -71,6 +72,7 @@ function App() {
   return (
     <AuthProvider>
       <SocketProvider>
+        <NotificationsProvider>
         <GlobalModalProvider>
           <UploadTransferProvider>
             <div className="min-h-screen flex flex-col overflow-x-hidden">
@@ -131,6 +133,7 @@ function App() {
             </div>
           </UploadTransferProvider>
         </GlobalModalProvider>
+        </NotificationsProvider>
       </SocketProvider>
     </AuthProvider>
   );

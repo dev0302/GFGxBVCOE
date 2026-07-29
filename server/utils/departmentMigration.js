@@ -14,9 +14,12 @@ const RENAMES = {
 
 function renameText(value) {
   let next = String(value || "");
-  for (const [oldName, newName] of Object.entries(RENAMES)) {
-    next = next.replaceAll(oldName, newName);
-  }
+  // Normalize records affected by the former non-idempotent rename, then only
+  // rename standalone legacy department names. This can run safely on every
+  // server start without appending "and Creative" again.
+  next = next.replace(/\bDesign(?: and Creative)+\b/gi, "Design and Creative");
+  next = next.replace(/\bDesign\b(?! and Creative)/gi, "Design and Creative");
+  next = next.replace(/\bPhotography and Videography\b/gi, "Capture The Event");
   return next;
 }
 

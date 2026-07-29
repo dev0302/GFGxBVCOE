@@ -7,6 +7,7 @@ let socket = null;
 const onlineUsersSubscribers = new Set();
 const leadershipUpdateSubscribers = new Set();
 const tenureEndedSubscribers = new Set();
+const notificationSubscribers = new Set();
 let onlineUsersCache = [];
 let leadershipUpdateCache = null;
 
@@ -61,6 +62,14 @@ export function connectSocket(tokenOverride) {
 
   socket.on("tenure-ended", (payload = {}) => {
     tenureEndedSubscribers.forEach((cb) => {
+      try {
+        cb(payload);
+      } catch (_) {}
+    });
+  });
+
+  socket.on("notification", (payload = {}) => {
+    notificationSubscribers.forEach((cb) => {
       try {
         cb(payload);
       } catch (_) {}
@@ -125,6 +134,12 @@ export function subscribeTenureEnded(callback) {
   if (typeof callback !== "function") return () => {};
   tenureEndedSubscribers.add(callback);
   return () => tenureEndedSubscribers.delete(callback);
+}
+
+export function subscribeNotifications(callback) {
+  if (typeof callback !== "function") return () => {};
+  notificationSubscribers.add(callback);
+  return () => notificationSubscribers.delete(callback);
 }
 
 export function joinDashboard(payload = {}) {

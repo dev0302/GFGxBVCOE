@@ -28,7 +28,9 @@ const aiRoutes = require("./routes/aiRoutes");
 const leadershipTransitionRoutes = require("./routes/leadershipTransitionRoute");
 const memberEnrollRoutes = require("./routes/memberEnrollRoute");
 const vectorVisionAdminRoutes = require("./routes/vectorVisionAdminRoute");
+const notificationRoutes = require("./routes/notificationRoute");
 const { setIo, setEmitToUser } = require("./utils/socketBus");
+const { setNotificationEmitter } = require("./utils/notificationService");
 const { setDraftIo } = require("./utils/leadershipDraftBus");
 const {
   handleJoinLeadershipPromotions,
@@ -67,6 +69,7 @@ app.use("/api/v1/dashboards", dashboardRoutes);
 app.use("/api/v1/settings", settingsRoutes);
 app.use("/api/v1/leadership-transition", leadershipTransitionRoutes);
 app.use("/api/v1/members/enroll", memberEnrollRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/admin", vectorVisionAdminRoutes);
 app.use("/api", descriptionRouter);
 app.use("/api/v1/ai", aiRoutes);
@@ -103,6 +106,7 @@ function emitToUser(userId, eventName, payload) {
 }
 
 setEmitToUser(emitToUser);
+setNotificationEmitter(emitToUser);
 
 function getTokenFromCookieHeader(cookieHeader = "") {
   if (!cookieHeader || typeof cookieHeader !== "string") return null;
