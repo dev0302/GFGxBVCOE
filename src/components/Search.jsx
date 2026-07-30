@@ -8,6 +8,7 @@ import { Search as SearchIcon, X, Mail, Activity } from "react-feather";
 import "./Search.css";
 import { Spinner } from "./ui/spinner";
 import ProfileAvatarFlip from "./common/ProfileAvatarFlip";
+import ImageModal from "./ImageModal";
 
 
 
@@ -157,6 +158,7 @@ function profileInitials(firstName, lastName, fallback = "") {
 
 function ClickableProfilePhoto({ src, highResSrc, originalSrc, alt, className, onFallback }) {
   const [highResLoaded, setHighResLoaded] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const highResImgRef = useRef(null);
   const useProgressive = Boolean(highResSrc && highResSrc !== src);
 
@@ -176,7 +178,7 @@ function ClickableProfilePhoto({ src, highResSrc, originalSrc, alt, className, o
 
   const handleClick = () => {
     if (isClickable) {
-      window.open(originalSrc, "_blank", "noopener,noreferrer");
+      setModalOpen(true);
     }
   };
 
@@ -189,6 +191,7 @@ function ClickableProfilePhoto({ src, highResSrc, originalSrc, alt, className, o
 
   if (useProgressive) {
     return (
+      <>
       <div
         className={`relative overflow-hidden${interactiveClass} ${className}`}
         onClick={isClickable ? handleClick : undefined}
@@ -224,30 +227,35 @@ function ClickableProfilePhoto({ src, highResSrc, originalSrc, alt, className, o
           }`}
         />
       </div>
+      <ImageModal open={modalOpen} src={originalSrc} name={alt} onClose={() => setModalOpen(false)} />
+      </>
     );
   }
 
   return (
-    <img
-      src={src}
-      alt={alt}
-      className={`${className}${interactiveClass}`}
-      onClick={isClickable ? handleClick : undefined}
-      onError={handleImageError}
-      role={isClickable ? "button" : undefined}
-      tabIndex={isClickable ? 0 : undefined}
-      aria-label={isClickable ? `Open ${alt} photo in new tab` : undefined}
-      onKeyDown={
-        isClickable
-          ? (e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleClick();
+    <>
+      <img
+        src={src}
+        alt={alt}
+        className={`${className}${interactiveClass}`}
+        onClick={isClickable ? handleClick : undefined}
+        onError={handleImageError}
+        role={isClickable ? "button" : undefined}
+        tabIndex={isClickable ? 0 : undefined}
+        aria-label={isClickable ? `View ${alt} photo` : undefined}
+        onKeyDown={
+          isClickable
+            ? (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleClick();
+                }
               }
-            }
-          : undefined
-      }
-    />
+            : undefined
+        }
+      />
+      <ImageModal open={modalOpen} src={originalSrc} name={alt} onClose={() => setModalOpen(false)} />
+    </>
   );
 }
 
@@ -502,7 +510,7 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex min-h-full items-center justify-center overflow-hidden overscroll-none p-4 py-8 bg-black/60 backdrop-blur-sm"
+      className=" fixed inset-0 z-[100] flex min-h-full items-center justify-center overflow-hidden overscroll-none p-4 py-8 bg-black/60 backdrop-blur-sm"
       onClick={onClose}
       role="dialog"
       aria-modal="true"

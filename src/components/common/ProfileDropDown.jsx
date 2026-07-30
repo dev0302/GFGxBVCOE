@@ -345,7 +345,7 @@ function ProfileDropDown({
       <button
         ref={triggerRef}
         onClick={handleToggle}
-        className={`flex items-center rounded-full border shadow-sm transition-all duration-150 ${
+        className={` i-fonts flex items-center rounded-full border shadow-sm transition-all duration-150 ${
           avatarOnly && !showChevron ? "p-0.5" : "gap-1.5 p-0.5"
         } ${embedded ? embeddedButtonCls : borderCls} ${textCls}`}
         aria-label="Open profile menu"
@@ -544,7 +544,7 @@ function ProfileDropDown({
           </div>
         </div>
 
-        <div className="px-1 py-1.5">
+        <div className="px-1 py-1.5 i-fonts">
           <button
             onClick={() => {
               setOpen(false);
@@ -753,7 +753,7 @@ function ProfileDropDown({
           )}
         </div>
 
-        <div className="rounded-b-2xl border-t border-white/10 bg-transparent px-3 py-2.5">
+        <div className="rounded-b-2xl border-t border-white/10 bg-transparent px-3 py-2.5 i-fonts">
           <button
             onClick={async () => {
               setOpen(false);
@@ -818,7 +818,7 @@ function ProfileDropDown({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.22, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
                   >
-                    <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start justify-between gap-2 i-fonts">
                       <div className="min-w-0 pr-1">
                         <h2 id="last-seen-title" className="font-montserrat text-xs font-bold text-richblack-25">
                           Last activity
@@ -914,7 +914,7 @@ function ProfileDropDown({
                                   />
                                 )}
                               </div>
-                              <div className="min-w-0 flex-1">
+                              <div className="min-w-0 flex-1 i-fonts">
                                 <div className="truncate text-xs font-semibold text-gray-100">{row.name}</div>
                                 <div className="mt-0.5 truncate text-[10px] text-gray-500">
                                   {isOnline ? (

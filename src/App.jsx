@@ -43,6 +43,8 @@ import Promotions from "./pages/leadershipTransition/Promotions";
 import LeadershipPersonsAllowed from "./pages/leadershipTransition/PersonsAllowed";
 import LeadershipHistory from "./pages/leadershipTransition/History";
 import EventDashboardLayout from "./components/EventDashboard/EventDashboardLayout";
+import EventDocuments from "./pages/eventDashboard/EventDocuments";
+import PublicShareView from "./pages/eventDashboard/PublicShareView";
 import DepartmentDashboardLayout from "./components/DepartmentDashboard/DepartmentDashboardLayout";
 import LeadershipTransitionLayout from "./components/LeadershipTransition/LeadershipTransitionLayout";
 import Navbar from "./components/common/Navbar";
@@ -103,9 +105,10 @@ function App() {
                         <Route path="force-delete" element={<ForceDeletePermissions />} />
                         <Route path="manage" element={<ManageEvents />} />
                         <Route path="upcoming" element={<UpcomingEventPage />} />
+                        <Route path="documents" element={<EventDocuments />} />
                       </Route>
                     </Route>
-                    <Route path="/dashboard/:departmentKey" element={<DepartmentDashboardLayout />}><Route index element={<Navigate to="departments" replace />} /><Route path="departments" element={<DepartmentDepartmentsAllowed />} /><Route path="generate-qr" element={<GenerateQR />} /></Route>
+                    <Route path="/dashboard/:departmentKey" element={<DepartmentDashboardLayout />}><Route index element={<Navigate to="departments" replace />} /><Route path="departments" element={<DepartmentDepartmentsAllowed />} /><Route path="generate-qr" element={<GenerateQR />} /><Route path="documents" element={<EventDocuments />} /></Route>
                     <Route path="/login" element={<Login />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password/:token" element={<ResetPassword />} />
@@ -127,6 +130,7 @@ function App() {
                     <Route path="/leaderboard" element={<Leaderboard />} />
                     <Route path="/quiz/result" element={<QuizResult />} />
                     <Route path="/jam-the-web" element={<JamTheWeb />} />
+                    <Route path="/share/vault/:shareToken" element={<PublicShareView />} />
                   </Routes>
                 </motion.main>
               </AnimatePresence>

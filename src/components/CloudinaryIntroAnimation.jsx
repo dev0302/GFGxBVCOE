@@ -353,7 +353,7 @@ const pinClassName =
             <h2 className="mb-4 mt-10 text-3xl font-montserrat font-semibold tracking-tight text-richblack-200 md:text-4xl">
               Meet the Minds Behind the Community
             </h2>
-            <p className="max-w-xl text-sm leading-relaxed text-richblack-200 md:text-base">
+            <p className="max-w-xl text-sm leading-relaxed text-richblack-200 md:text-base i-fonts">
               The people who turn ideas into action. Meet our Society Heads, Core Team, and dedicated members who collaborate, create, and work together to make every initiative, event, and experience possible.
             </p>
           </motion.div>

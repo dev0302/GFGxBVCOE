@@ -29,6 +29,7 @@ const leadershipTransitionRoutes = require("./routes/leadershipTransitionRoute")
 const memberEnrollRoutes = require("./routes/memberEnrollRoute");
 const vectorVisionAdminRoutes = require("./routes/vectorVisionAdminRoute");
 const notificationRoutes = require("./routes/notificationRoute");
+const vaultRoutes = require("./routes/vaultRoute");
 const { setIo, setEmitToUser } = require("./utils/socketBus");
 const { setNotificationEmitter } = require("./utils/notificationService");
 const { setDraftIo } = require("./utils/leadershipDraftBus");
@@ -70,6 +71,7 @@ app.use("/api/v1/settings", settingsRoutes);
 app.use("/api/v1/leadership-transition", leadershipTransitionRoutes);
 app.use("/api/v1/members/enroll", memberEnrollRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
+app.use("/api/v1/vault", vaultRoutes);
 app.use("/api/admin", vectorVisionAdminRoutes);
 app.use("/api", descriptionRouter);
 app.use("/api/v1/ai", aiRoutes);

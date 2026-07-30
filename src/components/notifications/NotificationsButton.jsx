@@ -140,7 +140,7 @@ export default function NotificationsButton({
                         >
                           Notifications
                         </h2>
-                        <p className="mt-0.5 text-[9px] leading-snug text-gray-400">
+                        <p className=" i-fonts mt-0.5 text-[9px] leading-snug text-gray-400">
                           {unreadCount > 0
                             ? `${unreadCount} unread update${unreadCount === 1 ? "" : "s"}`
                             : "Updates and activity alerts"}
@@ -169,7 +169,7 @@ export default function NotificationsButton({
 
                   <div
                     data-lenis-prevent="true"
-                    className="relative z-[1] min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-1.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-green-500/30"
+                    className="i-fonts relative z-[1] min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-1.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-green-500/30"
                     style={{ WebkitOverflowScrolling: "touch" }}
                     onWheel={(e) => e.stopPropagation()}
                   >

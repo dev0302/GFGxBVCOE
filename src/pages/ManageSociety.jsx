@@ -19,6 +19,7 @@ import {
 } from "../utils/teamListExport";
 import { Spinner } from "@/components/ui/spinner";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
+import ImageModal from "../components/ImageModal";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setDepartments as setDepartmentsInStore,
@@ -104,6 +105,7 @@ export default function ManageSociety() {
   const [allPeopleLoading, setAllPeopleLoading] = useState(false);
   const [allPeopleList, setAllPeopleList] = useState(manageSociety.allPeopleList || []);
   const [selectedDetailItem, setSelectedDetailItem] = useState(null); // { type: 'user'|'predefinedOnly'|'teamMember', data }
+  const [photoModalData, setPhotoModalData] = useState(null);
   const [sendingInviteTo, setSendingInviteTo] = useState(null);
   const [activityLogUser, setActivityLogUser] = useState(null);
   const [nextSessionModalOpen, setNextSessionModalOpen] = useState(false);
@@ -500,7 +502,7 @@ export default function ManageSociety() {
 
         <div className="flex flex-col sm:flex-wrap sm:flex-row items-center gap-3 mb-6">
           <div className="flex items-center gap-2 flex-1 min-w-0 max-w-md">
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 i-fonts">
               <Search variant="manage-team" placeholder="Search members…" />
             </div>
             <button
@@ -692,7 +694,15 @@ export default function ManageSociety() {
                               <img
                                 src={src}
                                 alt=""
-                                className="h-8 w-8 rounded-full object-cover border border-gray-500/50 shrink-0"
+                                className={`h-8 w-8 rounded-full object-cover border border-gray-500/50 shrink-0 ${
+                                  u.image ? "cursor-pointer hover:scale-105 hover:border-cyan-400 transition-all" : ""
+                                }`}
+                                onClick={(e) => {
+                                  if (!u.image) return;
+                                  e.stopPropagation();
+                                  setPhotoModalData({ src: u.image, name });
+                                }}
+                                title={u.image ? `Click to view photo of ${name}` : name}
                                 onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
                               />
                               <div className="flex-1 min-w-0">
@@ -728,7 +738,15 @@ export default function ManageSociety() {
                                 <img
                                   src={src}
                                   alt=""
-                                  className="h-8 w-8 rounded-full object-cover border border-gray-500/50 shrink-0"
+                                  className={`h-8 w-8 rounded-full object-cover border border-gray-500/50 shrink-0 ${
+                                    pre.image ? "cursor-pointer hover:scale-105 hover:border-cyan-400 transition-all" : ""
+                                  }`}
+                                  onClick={(e) => {
+                                    if (!pre.image) return;
+                                    e.stopPropagation();
+                                    setPhotoModalData({ src: pre.image, name });
+                                  }}
+                                  title={pre.image ? `Click to view photo of ${name}` : name}
                                   onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
                                 />
                                 <div className="flex-1 min-w-0">
@@ -778,7 +796,15 @@ export default function ManageSociety() {
                               <img
                                 src={src}
                                 alt=""
-                                className="h-8 w-8 rounded-full object-cover border border-gray-500/50 shrink-0"
+                                className={`h-8 w-8 rounded-full object-cover border border-gray-500/50 shrink-0 ${
+                                  photoUrl ? "cursor-pointer hover:scale-105 hover:border-cyan-400 transition-all" : ""
+                                }`}
+                                onClick={(e) => {
+                                  if (!photoUrl) return;
+                                  e.stopPropagation();
+                                  setPhotoModalData({ src: photoUrl, name });
+                                }}
+                                title={photoUrl ? `Click to view photo of ${name}` : name}
                                 onError={(e) => { e.target.onerror = null; e.target.src = avatarPlaceholder(name); }}
                               />
                               <div className="flex-1 min-w-0">
@@ -1143,6 +1169,12 @@ export default function ManageSociety() {
             </div>
           </div>
         )}
+        <ImageModal
+          open={!!photoModalData}
+          src={photoModalData?.src}
+          name={photoModalData?.name}
+          onClose={() => setPhotoModalData(null)}
+        />
       </div>
     </div>
   );

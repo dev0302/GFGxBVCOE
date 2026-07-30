@@ -12,6 +12,8 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --font-figtree: "Figtree";
 }
 
 * {
@@ -33,6 +35,16 @@ body {
   padding: 0;
   box-sizing: border-box;
   overflow-x: hidden;
+}
+
+.i-fonts {
+  font-family:
+    var(--font-figtree),
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Text",
+    "Helvetica Neue",
+    sans-serif;
 }
 
 @keyframes shine {
@@ -624,5 +636,31 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+  }
+}
+
+/* ========================================================================== */
+/* Document Vault & Dashboard Phone View Media Queries (width < 640px / sm)   */
+/* ========================================================================== */
+@media (max-width: 639px) {
+  .vault-phone-stack {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .vault-modal-content {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 0.5rem auto !important;
+    padding: 0.75rem !important;
+  }
+  
+  .vault-grid-compact {
+    grid-template-cols: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.625rem !important;
+  }
+
+  .vault-touch-button {
+    min-height: 38px !important;
   }
 }

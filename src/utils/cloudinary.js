@@ -34,12 +34,12 @@ export function cloudinaryEventCardImageUrl(url) {
 
 /**
  * Transform a Cloudinary image URL specifically for standard member avatars.
- * Ensures a 64x64 cropped avatar with automatic format & quality:
- *   /upload/w_64,h_64,c_fill,f_auto,q_auto/
+ * Ensures a 128x128 cropped avatar with automatic format & quality:
+ *   /upload/w_128,h_128,c_fill,f_auto,q_auto/
  *
  * Example:
  *   https://res.cloudinary.com/<cloud_name>/image/upload/v12345/profile.jpg
- *   → https://res.cloudinary.com/<cloud_name>/image/upload/w_64,h_64,c_fill,f_auto,q_auto/v12345/profile.jpg
+ *   → https://res.cloudinary.com/<cloud_name>/image/upload/w_128,h_128,c_fill,f_auto,q_auto/v12345/profile.jpg
  *
  * Non-Cloudinary URLs and Cloudinary video URLs are returned unchanged.
  */
@@ -48,10 +48,14 @@ export function cloudinaryAvatarUrl(url) {
   if (!url.includes("cloudinary.com")) return url;
   if (url.includes("/video/upload/")) return url;
 
-  const AVATAR_TRANSFORM = "/upload/w_64,h_64,c_fill,f_auto,q_auto/";
+  const AVATAR_TRANSFORM = "/upload/w_128,h_128,c_fill,f_auto,q_auto/";
 
   // Idempotent: if the avatar transform is already present, return as-is.
   if (url.includes(AVATAR_TRANSFORM)) return url;
+
+  if (url.includes("/upload/w_64,h_64,c_fill,f_auto,q_auto/")) {
+    return url.replace("/upload/w_64,h_64,c_fill,f_auto,q_auto/", AVATAR_TRANSFORM);
+  }
 
   // Insert the avatar transform right after `/upload/`, preserving version and path.
   return url.replace("/upload/", AVATAR_TRANSFORM);
@@ -85,15 +89,15 @@ export function cloudinaryLargeAvatarUrl(url) {
 
 /**
  * Tiny avatar variant for compact online indicators.
- * Ensures a 64x64 cropped avatar with automatic format & quality:
- *   /upload/w_64,h_64,c_fill,f_auto,q_auto/
+ * Ensures a 128x128 cropped avatar with automatic format & quality:
+ *   /upload/w_128,h_128,c_fill,f_auto,q_auto/
  */
 export function cloudinaryTinyAvatarUrl(url) {
   if (!url || typeof url !== "string") return url;
   if (!url.includes("cloudinary.com")) return url;
   if (url.includes("/video/upload/")) return url;
 
-  const T = "w_64,h_64,c_fill,f_auto,q_auto";
+  const T = "w_128,h_128,c_fill,f_auto,q_auto";
   const needle = `/upload/${T}/`;
   if (url.includes(needle)) return url;
 

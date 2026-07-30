@@ -136,7 +136,7 @@ function Navbar() {
             <Search
               variant="navbar"
               placeholder="Search members…"
-              className="shrink-0l"
+              className="shrink-0l i-fonts"
             />
           )}
           <ul className="flex gap-4 text-[13px]">
@@ -168,12 +168,6 @@ function Navbar() {
               <NavLink to="/gallery" className={navLinkClass}>
                 <SaxGalleryLinear className="mr-1.5 h-4 w-4" />
                 Gallery
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/member-enrollment" className={navLinkClass}>
-                <SaxProfile2UserLinear className="mr-2" />
-                Enroll
               </NavLink>
             </li>
             <li>
@@ -432,15 +426,6 @@ function Navbar() {
   `}
       >
         <ul className="flex flex-col ml-8 mt-8 justify-center h-full gap-8">
-          <li>
-            <NavLink
-              to="/member-enrollment"
-              className={mobileNavLinkClass}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Face Enrollment
-            </NavLink>
-          </li>
           <li>
             <NavLink
               to="/"
