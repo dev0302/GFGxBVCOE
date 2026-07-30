@@ -1,5 +1,5 @@
 import { NavLink, useLocation, useParams } from "react-router-dom";
-import { Grid, Users } from "react-feather";
+import { Grid, Users, Folder } from "react-feather";
 
 export default function DepartmentSidebar() {
   const location = useLocation();
@@ -16,6 +16,11 @@ export default function DepartmentSidebar() {
       name: "Generate QR",
       path: `/dashboard/${encodedKey}/generate-qr`,
       icon: Grid,
+    },
+    {
+      name: "Document Vault",
+      path: `/dashboard/${encodedKey}/documents`,
+      icon: Folder,
     },
   ];
 

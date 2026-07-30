@@ -61,7 +61,7 @@ export function photoOriginalUrl(url) {
 /**
  * Preview URL for member photos/avatars:
  * - Google Drive links → thumbnail URL
- * - Cloudinary URLs → 64x64 avatar transform (/upload/w_64,h_64,c_fill,f_auto,q_auto/)
+ * - Cloudinary URLs → 128x128 avatar transform (/upload/w_128,h_128,c_fill,f_auto,q_auto/)
  * - Other https URLs → unchanged
  * - Plain IDs/paths → best-effort Drive thumbnail or original string
  */

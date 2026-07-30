@@ -336,7 +336,7 @@ const journeyPhotos = [
                   id="home-desc"
                   className="
                     mt-8 max-w-md
-                    font-nunito
+                    i-fonts
                     text-base leading-7
                     text-slate-300
 
@@ -494,7 +494,7 @@ const journeyPhotos = [
                 overflow-hidden rounded-3xl
                 border border-green-400/10
                 bg-green-950/30
-                font-nunito
+                i-fonts
                 shadow-lg
                 ring-1 ring-inset ring-green-400/5
 
@@ -577,7 +577,7 @@ const journeyPhotos = [
               </span>
             </h2>
 
-            <p className="max-w-lg font-nunito text-base leading-8 text-slate-300 md:text-lg">
+            <p className="max-w-lg i-fonts text-base leading-8 text-richblack-25 md:text-lg">
               GFG BVCOE is a community of tech enthusiasts dedicated to fostering a
               culture of learning, innovation, and collaboration. We organize
               workshops, hackathons, and speaker sessions to help students grow their
@@ -805,7 +805,7 @@ const journeyPhotos = [
                 Team
               </span>
             </h2>
-            <p className="text-lg md:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed font-light font-nunito mb-8">
+            <p className="text-lg md:text-xl text-richblack-25/80 max-w-4xl mx-auto leading-relaxed font-light i-fonts mb-8">
               We are a group of passionate students and faculty dedicated to
               guiding our community. Our diverse team works together to create
               impactful events and provide mentorship for all members.

@@ -64,6 +64,7 @@ import { uploadTeamPhoto } from "../services/api";
 import { Spinner } from "@/components/ui/spinner";
 import TeamMemberCard from "../components/TeamMemberCard";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
+import ImageModal from "../components/ImageModal";
 
 const DELETED_MEMBER_RETENTION_DAYS = 7;
 
@@ -200,6 +201,7 @@ export default function ManageTeam({
   const [societyListLoading, setSocietyListLoading] = useState(false);
   const [societyList, setSocietyList] = useState([]);
   const [selectedDetailItem, setSelectedDetailItem] = useState(null);
+  const [photoModalData, setPhotoModalData] = useState(null);
   const [sendingInviteTo, setSendingInviteTo] = useState(null);
   const [activityLogUser, setActivityLogUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -945,7 +947,7 @@ export default function ManageTeam({
             </div>
           </div>
           <div className="flex items-center gap-2 w-full max-w-md">
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 i-fonts">
               <Search variant="manage-team" placeholder="Search members…" />
             </div>
             <div className="flex items-center bg-[#1e1e2f] border border-gray-500/40 rounded-xl p-1 shrink-0">
@@ -1026,7 +1028,7 @@ export default function ManageTeam({
               
               if (viewMode === "grid") {
                 return (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-[#181824]">
+                  <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-1.5 sm:gap-4 p-1.5 sm:p-4 bg-[#181824]">
                     {tableRows.map((row) => {
                       const isTeamMember = row.type === "teamMember";
                       const m = isTeamMember ? row.teamMember : row;
@@ -1036,6 +1038,7 @@ export default function ManageTeam({
                           row={row}
                           openEdit={openEdit}
                           onRequestDelete={(member) => setDeleteConfirmMember(member)}
+                          onOpenPhotoModal={(photoUrl, name) => setPhotoModalData({ src: photoUrl, name })}
                         />
                       );
                     })}
@@ -1097,7 +1100,15 @@ export default function ManageTeam({
                                           : avatarPlaceholder(name)
                                       }
                                       alt={name}
-                                      className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
+                                      className={`h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0 ${
+                                        photoUrl ? "cursor-pointer hover:scale-105 hover:border-cyan-400 transition-all" : ""
+                                      }`}
+                                      onClick={(e) => {
+                                        if (!photoUrl) return;
+                                        e.stopPropagation();
+                                        setPhotoModalData({ src: photoUrl, name });
+                                      }}
+                                      title={photoUrl ? `Click to view photo of ${name}` : name}
                                       onError={(e) => {
                                         e.target.onerror = null;
                                         e.target.src = avatarPlaceholder(name);
@@ -1198,18 +1209,26 @@ export default function ManageTeam({
                                   </div>
                                 ) : k === "photo" ? (
                                   <img
-                                    src={
-                                      photoUrl
-                                        ? photoPreviewUrl(photoUrl)
-                                        : avatarPlaceholder(name)
-                                    }
-                                    alt={name}
-                                    className="h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0"
-                                    onError={(e) => {
-                                      e.target.onerror = null;
-                                      e.target.src = avatarPlaceholder(name);
-                                    }}
-                                  />
+                                     src={
+                                       photoUrl
+                                         ? photoPreviewUrl(photoUrl)
+                                         : avatarPlaceholder(name)
+                                     }
+                                     alt={name}
+                                     className={`h-10 w-10 rounded-full object-cover border border-gray-500/50 shrink-0 ${
+                                       photoUrl ? "cursor-pointer hover:scale-105 hover:border-cyan-400 transition-all" : ""
+                                     }`}
+                                     onClick={(e) => {
+                                       if (!photoUrl) return;
+                                       e.stopPropagation();
+                                       setPhotoModalData({ src: photoUrl, name });
+                                     }}
+                                     title={photoUrl ? `Click to view photo of ${name}` : name}
+                                     onError={(e) => {
+                                       e.target.onerror = null;
+                                       e.target.src = avatarPlaceholder(name);
+                                     }}
+                                   />
                                 ) : (
                                   <span className="truncate block">
                                     {cell(k) || "—"}
@@ -2416,6 +2435,12 @@ export default function ManageTeam({
           />,
           document.body,
         )}
+      <ImageModal
+        open={!!photoModalData}
+        src={photoModalData?.src}
+        name={photoModalData?.name}
+        onClose={() => setPhotoModalData(null)}
+      />
     </div>
   );
 }

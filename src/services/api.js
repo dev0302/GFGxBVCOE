@@ -1295,3 +1295,76 @@ export async function sendLeadershipPromotionEmails() {
   return data;
 }
 
+export async function getVaultItems() {
+  const res = await authFetch("/api/v1/vault/items");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch vault items");
+  return data;
+}
+
+export async function createVaultFolder({ name, parentId, color, department }) {
+  const res = await authFetch("/api/v1/vault/folders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, parentId, color, department }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to create folder");
+  return data;
+}
+
+export async function deleteVaultFolder(id) {
+  const res = await authFetch(`/api/v1/vault/folders/${id}`, {
+    method: "DELETE",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to delete folder");
+  return data;
+}
+
+export async function uploadVaultDocument(formData) {
+  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+  const res = await fetch(`${BASE}/api/v1/vault/upload`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to upload document");
+  return data;
+}
+
+export async function deleteVaultDocument(id) {
+  const res = await authFetch(`/api/v1/vault/documents/${id}`, {
+    method: "DELETE",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to delete document");
+  return data;
+}
+
+export async function getPublicVaultShareItems(shareToken) {
+  const res = await fetch(`${BASE}/api/v1/vault/share/${encodeURIComponent(shareToken)}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to fetch shared items");
+  return data;
+}
+
+export async function toggleVaultFolderLock(id) {
+  const res = await authFetch(`/api/v1/vault/folders/${id}/lock`, {
+    method: "PUT",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to toggle folder lock");
+  return data;
+}
+
+export async function toggleVaultDocumentLock(id) {
+  const res = await authFetch(`/api/v1/vault/documents/${id}/lock`, {
+    method: "PUT",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to toggle document lock");
+  return data;
+}
+

@@ -159,7 +159,7 @@ const Footer = () => {
 
           {/* Contact */}
           <div className="min-w-[250px]">
-            <h3 className="text-[#f8fafc] text-2xl font-bold relative inline-block pb-1 mb-4">
+            <h3 className="text-[#f8fafc] text-2xl font-extrabold relative inline-block pb-1 mb-4 i-fonts">
               Contact Us
               <span
                 className="absolute bottom-0 left-0 w-full h-[3px] rounded-[3px]"
@@ -171,7 +171,7 @@ const Footer = () => {
                 }}
               ></span>
             </h3>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 i-fonts">
               <a
                 href="https://discord.gg/6X7Gc7Np"
                 target="_blank"

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Upload, Link2, Users, List, Calendar, Shield, Grid, Eye, Database } from "react-feather";
+import { Upload, Link2, Users, List, Calendar, Shield, Grid, Eye, Database, UserCheck, Folder } from "react-feather";
 import { useAuth } from "../../context/AuthContext";
 import { canManageEventUploadConfig, canManageForceDeleteConfig, getVectorVisionAccess } from "../../services/api";
 
@@ -14,11 +14,12 @@ const sidebarLinks = [
   },
   { name: "Generate QR", path: "/em-dashboard/generate-qr", icon: Grid },
   { name: "Vector Vision", path: "/em-dashboard/vector-vision", icon: Eye },
+  { name: "Document Vault", path: "/em-dashboard/documents", icon: Folder },
+  { name: "Face Enrollment", path: "/member-enrollment", icon: UserCheck },
   { name: "VectorVision admin", path: "/vectorvision-admin", icon: Database, requireVectorVisionAccess: true },
   { name: "Departments allowed", path: "/em-dashboard/departments", icon: Users, requireConfig: true },
   { name: "Force delete permissions", path: "/em-dashboard/force-delete", icon: Shield, requireFacultyIncharge: true },
   { name: "Manage uploaded events", path: "/em-dashboard/manage", icon: List },
-
 ];
 
 export default function EventSidebar() {
