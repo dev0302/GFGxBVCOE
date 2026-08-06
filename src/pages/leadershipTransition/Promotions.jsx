@@ -11,6 +11,7 @@ import {
   startLeadershipDraftSession,
   getLeadershipAppliedSessions,
   finalizeLeadershipDraft,
+  undoFinalizeLeadershipDraft,
   approveLeadershipDraft,
   revokeLeadershipDraftApproval,
   discardLeadershipDraft,
@@ -30,7 +31,7 @@ import { LeadershipReportPdfViewer } from "../../components/LeadershipTransition
 import HowItWorksStepper from "../../components/LeadershipTransition/HowItWorksStepper";
 import { useAuth } from "../../context/AuthContext";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, CheckCircle, Search as SearchIcon, X, TrendingUp, LogOut, FileText, Users, Play, Eye, ArrowUpRight, Zap } from "react-feather";
+import { Check, CheckCircle, Search as SearchIcon, X, TrendingUp, LogOut, FileText, Users, Play, Eye, ArrowUpRight, Zap, RotateCcw } from "react-feather";
 
 const CORE_APPROVAL_HINT =
   "At least one person from: Faculty Incharge, Chairperson, or Vice-Chairperson.";
@@ -440,6 +441,12 @@ export default function Promotions() {
   const userHasApproved = Boolean(
     draft?.approvals?.some((approval) => approval.userId === currentUserId)
   );
+  const canUndoFinalize = Boolean(
+    draft &&
+    ["APPROVAL_PENDING", "READY_TO_APPLY"].includes(draft.status) &&
+    currentUserId &&
+    (String(draft.createdBy) === currentUserId || String(draft.finalizedBy) === currentUserId)
+  );
   const applyChangesDisabled = actionLoading || !approvalStatus?.complete;
 
   const closePersonModal = () => {
@@ -452,6 +459,7 @@ export default function Promotions() {
 
   const handleEndSession = async () => {
     if (!selectedPerson || endingSession) return;
+    const wasFinalized = ["APPROVAL_PENDING", "READY_TO_APPLY"].includes(draft?.status);
     setEndingSession(true);
     try {
       const res = await endLeadershipSession({
@@ -462,7 +470,11 @@ export default function Promotions() {
       if (res.success) {
         if (res.data) setPeople(res.data);
         if (res.draft) setDraft(res.draft);
-        toast.success(res.message || "Session end queued in draft");
+        toast.success(
+          wasFinalized
+            ? "Session end queued. Finalization was reset; finalize again when ready."
+            : (res.message || "Session end queued in draft")
+        );
         setPendingEndSession(false);
         setPersonAction(null);
         setSelectedPerson(null);
@@ -476,6 +488,7 @@ export default function Promotions() {
 
   const handlePromote = async (position) => {
     if (!selectedPerson || promoting) return;
+    const wasFinalized = ["APPROVAL_PENDING", "READY_TO_APPLY"].includes(draft?.status);
     setPromoting(true);
     try {
       const res = await promoteLeadershipPerson({
@@ -487,7 +500,11 @@ export default function Promotions() {
       if (res.success) {
         if (res.data) setPeople(res.data);
         if (res.draft) setDraft(res.draft);
-        toast.success(res.message || "Promotion queued in draft");
+        toast.success(
+          wasFinalized
+            ? "Promotion queued. Finalization was reset; finalize again when ready."
+            : (res.message || "Promotion queued in draft")
+        );
         setPendingPromotion(null);
         setSelectedPerson(null);
       }
@@ -510,6 +527,24 @@ export default function Promotions() {
       }
     } catch (err) {
       toast.error(err.message || "Failed to finalize");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleUndoFinalize = async () => {
+    setActionLoading(true);
+    try {
+      const res = await undoFinalizeLeadershipDraft();
+      if (res.success) {
+        setDraft(res.draft);
+        setApprovalStatus(res.approvalStatus);
+        setFinalizeOpen(false);
+        setApplyConfirmOpen(false);
+        toast.success(res.message || "Finalization undone.");
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to undo finalization");
     } finally {
       setActionLoading(false);
     }
@@ -836,13 +871,26 @@ export default function Promotions() {
                 </button>
               )}
               {(draft.status === "APPROVAL_PENDING" || draft.status === "READY_TO_APPLY") && (
-                <button
-                  type="button"
-                  onClick={() => setFinalizeOpen(true)}
-                  className="rounded-full bg-cyan-500/90 px-5 py-2 text-sm font-normal text-white hover:bg-cyan-400"
-                >
-                  Review & Approve
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setFinalizeOpen(true)}
+                    className="rounded-full bg-cyan-500/90 px-5 py-2 text-sm font-normal text-white hover:bg-cyan-400"
+                  >
+                    Review & Approve
+                  </button>
+                  {canUndoFinalize && (
+                    <button
+                      type="button"
+                      disabled={actionLoading}
+                      onClick={handleUndoFinalize}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 px-4 py-2 text-sm font-normal text-amber-200 hover:bg-amber-500/10 disabled:opacity-50"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      Undo finalize
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -989,7 +1037,7 @@ export default function Promotions() {
                           <p className="text-sm font-normal text-richblack-25">{change.personName}</p>
                           <p className="text-xs font-light text-gray-500">{change.personEmail}</p>
                         </div>
-                        {draft.status === "DRAFT" && (
+                        {draft.status !== "APPLIED" && (
                           <button
                             type="button"
                             onClick={async () => {
@@ -997,7 +1045,11 @@ export default function Promotions() {
                                 const res = await removeLeadershipDraftChange(change.id);
                                 if (res.draft) setDraft(res.draft);
                                 else setDraft(null);
-                                toast.success("Change removed.");
+                                toast.success(
+                                  draft.status === "DRAFT"
+                                    ? "Change removed."
+                                    : "Change removed. Finalization was reset; finalize again when ready."
+                                );
                               } catch (err) {
                                 toast.error(err.message);
                               }
