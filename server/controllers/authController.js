@@ -15,7 +15,11 @@ const { getTeamMemberModel } = require("../models/TeamMember");
 const { getEventUploadAllowedList } = require("./eventController");
 const DashboardAccessConfig = require("../models/DashboardAccessConfig");
 const { userCanAccessLeadershipTransition } = require("../utils/leadershipAccess");
-const { normalizeProfileTextFields } = require("../utils/departmentNames");
+const {
+  normalizeProfileTextFields,
+  normalizeDepartmentName,
+  departmentLookupKeys,
+} = require("../utils/departmentNames");
 const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
 const ACTIVE_TEAM_MEMBER_FILTER = {
   $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
@@ -23,9 +27,13 @@ const ACTIVE_TEAM_MEMBER_FILTER = {
 
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
 
+function escapeRegex(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function normalizeUserProfileFields(user) {
   if (!user) return user;
-  const next = { ...user };
+  const next = { ...user, accountType: normalizeDepartmentName(user.accountType) };
   if (next.additionalDetails) {
     next.additionalDetails = normalizeProfileTextFields(next.additionalDetails);
   }
@@ -1012,8 +1020,8 @@ exports.getAllUsers = async (req, res) => {
 };
 
 /**
- * Get all people: active users and team members. Predefined profiles are not
- * included because they are not active members.
+ * Get all people: active users, team members, and unregistered configured or
+ * department-role predefined profiles.
  * Society role only. GET /api/v1/auth/all-people
  */
 exports.getAllPeople = async (req, res) => {
@@ -1024,17 +1032,52 @@ exports.getAllPeople = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
     const teamMembers = [];
+    const unregisteredProfiles = [];
+    const registeredEmails = new Set(users.map((user) => (user.email || "").trim().toLowerCase()));
+    const unregisteredProfileEmails = new Set();
     for (const dept of TEAM_DEPARTMENTS) {
       const Model = getTeamMemberModel(dept);
       const members = await Model.find(ACTIVE_TEAM_MEMBER_FILTER).sort({ createdAt: -1 }).lean();
       for (const m of members) {
         teamMembers.push({ type: "teamMember", data: m, department: dept });
       }
+
+      // The clients already render `predefinedOnly`; include configured and
+      // department-role profiles so Heads and Leads remain visible before they
+      // complete registration.
+      const configs = await SignupConfig.find({ department: { $in: departmentLookupKeys(dept) } }).lean();
+      const emails = [...new Set(configs.flatMap((config) => config.allowedEmails || [])
+        .map((email) => (email || "").trim().toLowerCase())
+        .filter(Boolean))];
+      const departmentPattern = new RegExp(
+        departmentLookupKeys(dept).map(escapeRegex).join("|"),
+        "i"
+      );
+      const profiles = await PredefinedProfile.find({
+        $or: [
+          ...(emails.length ? [{ email: { $in: emails } }] : []),
+          { position: departmentPattern },
+          { p0: departmentPattern },
+          { p1: departmentPattern },
+          { p2: departmentPattern },
+        ],
+      }).lean();
+      for (const profile of profiles) {
+        const email = (profile.email || "").trim().toLowerCase();
+        if (!email || registeredEmails.has(email) || unregisteredProfileEmails.has(email)) continue;
+        unregisteredProfileEmails.add(email);
+        unregisteredProfiles.push({
+          type: "predefinedOnly",
+          data: normalizeProfileTextFields(profile),
+          department: dept,
+        });
+      }
     }
 
     const list = [
       ...users.map((u) => ({ type: "user", data: normalizeUserProfileFields(u) })),
       ...teamMembers,
+      ...unregisteredProfiles,
     ];
     return res.status(200).json({ success: true, data: list });
   } catch (error) {

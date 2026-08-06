@@ -12,6 +12,9 @@ const LEGACY_TREASURER_DEPARTMENT = "Treasurer";
 
 const RENAMES = {
   Design: "Design and Creative",
+  "Creative and Design": "Design and Creative",
+  "Creative & Design": "Design and Creative",
+  "Design & Creative": "Design and Creative",
   "Photography and Videography": "Capture The Event",
 };
 
@@ -20,7 +23,10 @@ function renameText(value) {
   // Normalize records affected by the former non-idempotent rename, then only
   // rename standalone legacy department names. This can run safely on every
   // server start without appending "and Creative" again.
+  next = next.replace(/\bDesign\s+and\s+Creative\s+and\s+Creatives?\b/gi, "Design and Creative");
   next = next.replace(/\bDesign(?: and Creative)+\b/gi, "Design and Creative");
+  next = next.replace(/\bCreative\s*(?:and|&)\s*Design\b/gi, "Design and Creative");
+  next = next.replace(/\bDesign\s*&\s*Creative\b/gi, "Design and Creative");
   next = next.replace(/\bDesign\b(?! and Creative)/gi, "Design and Creative");
   next = next.replace(/\bPhotography and Videography\b/gi, "Capture The Event");
   next = next.replace(/\bPhotography Head\b/gi, "Capture The Event Head");
