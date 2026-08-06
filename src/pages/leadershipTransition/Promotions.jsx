@@ -40,6 +40,15 @@ const DEPARTMENT_APPROVAL_HINT =
 const APPLY_CHANGES_HINT =
   "Apply is enabled once one core approver and one department approver have both added their approval.";
 
+function mergeCollaborators(saved = [], present = []) {
+  const byUserId = new Map();
+  [...saved, ...present].forEach((collaborator) => {
+    if (!collaborator?.userId) return;
+    byUserId.set(String(collaborator.userId), collaborator);
+  });
+  return [...byUserId.values()];
+}
+
 function getFirstName(name = "") {
   const trimmed = String(name || "").trim();
   if (!trimmed) return "Member";
@@ -302,7 +311,12 @@ export default function Promotions() {
       const syncCollaborators = (list) => {
         if (!Array.isArray(list)) return;
         setCollaborators(list);
-        setDraft((prev) => (prev ? { ...prev, collaborators: list } : prev));
+        // Presence is transient, whereas the draft roster is a session record.
+        // Merge visitors in, rather than dropping people who have left the page.
+        setDraft((prev) => prev ? {
+          ...prev,
+          collaborators: mergeCollaborators(prev.collaborators, list),
+        } : prev);
       };
 
       if (payload.collaborators) syncCollaborators(payload.collaborators);
@@ -348,12 +362,10 @@ export default function Promotions() {
         if (payload.session) {
           setDraft((prev) => ({
             ...payload.session,
-            collaborators:
-              (Array.isArray(payload.collaborators) && payload.collaborators.length
-                ? payload.collaborators
-                : prev?.collaborators?.length
-                  ? prev.collaborators
-                  : payload.session.collaborators) || [],
+            collaborators: mergeCollaborators(
+              prev?.collaborators,
+              payload.session.collaborators
+            ),
           }));
         } else {
           loadDraft();
@@ -429,10 +441,10 @@ export default function Promotions() {
     [draft]
   );
 
-  const liveCollaborators = useMemo(() => {
-    if (collaborators.length > 0) return collaborators;
-    return draft?.collaborators || [];
-  }, [collaborators, draft?.collaborators]);
+  // Session collaborators are retained for the complete transition session;
+  // active collaborators come from the live WebSocket presence list only.
+  const sessionCollaborators = draft?.collaborators || [];
+  const activeCollaborators = collaborators;
 
   const currentUserId = user?._id ? String(user._id) : "";
   const isSessionCreator = Boolean(
@@ -835,7 +847,7 @@ export default function Promotions() {
               </p>
               <div className="flex items-center gap-2">
                 <span className="text-gray-600">Collaborators</span>
-                <CollaboratorAvatars collaborators={liveCollaborators} maxVisible={5} />
+                <CollaboratorAvatars collaborators={sessionCollaborators} maxVisible={5} />
               </div>
             </div>
 
@@ -913,7 +925,7 @@ export default function Promotions() {
               <span className="text-xs font-light text-gray-500">Active collaborators</span>
             </div>
             <div className="mt-2">
-              <CollaboratorAvatars collaborators={liveCollaborators} />
+              <CollaboratorAvatars collaborators={activeCollaborators} />
             </div>
           </div>
         </div>
@@ -1226,7 +1238,7 @@ export default function Promotions() {
                 <div>
                   <h3 className="text-sm font-semibold text-gray-300">Collaborators</h3>
                   <p className="mt-1 text-sm text-gray-400">
-                    {liveCollaborators.map((c) => c.name).join(", ") || "—"}
+                    {sessionCollaborators.map((c) => c.name).join(", ") || "—"}
                   </p>
                   <p className="mt-2 text-xs text-gray-500">
                     Created by: {draft.createdByName}
@@ -1239,7 +1251,7 @@ export default function Promotions() {
                     hint={CORE_APPROVAL_HINT}
                     approved={Boolean(approvalStatus?.coreApproval)}
                     approval={approvalStatus?.coreApproval}
-                    collaborators={liveCollaborators}
+                    collaborators={sessionCollaborators}
                     pendingText="Awaiting Faculty Incharge, Chairperson, or Vice-Chairperson."
                   />
                   <ApprovalCard
@@ -1247,7 +1259,7 @@ export default function Promotions() {
                     hint={DEPARTMENT_APPROVAL_HINT}
                     approved={Boolean(approvalStatus?.departmentApproval)}
                     approval={approvalStatus?.departmentApproval}
-                    collaborators={liveCollaborators}
+                    collaborators={sessionCollaborators}
                     pendingText="Awaiting any Department Head or Department Lead."
                   />
 
