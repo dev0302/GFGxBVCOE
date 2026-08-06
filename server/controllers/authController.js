@@ -15,12 +15,25 @@ const { getTeamMemberModel } = require("../models/TeamMember");
 const { getEventUploadAllowedList } = require("./eventController");
 const DashboardAccessConfig = require("../models/DashboardAccessConfig");
 const { userCanAccessLeadershipTransition } = require("../utils/leadershipAccess");
+const { normalizeProfileTextFields } = require("../utils/departmentNames");
 const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
 const ACTIVE_TEAM_MEMBER_FILTER = {
   $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
 };
 
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
+
+function normalizeUserProfileFields(user) {
+  if (!user) return user;
+  const next = { ...user };
+  if (next.additionalDetails) {
+    next.additionalDetails = normalizeProfileTextFields(next.additionalDetails);
+  }
+  if (next.predefinedProfile) {
+    next.predefinedProfile = normalizeProfileTextFields(next.predefinedProfile);
+  }
+  return next;
+}
 
 /** Find PredefinedProfile by email (case-insensitive) so stored casing never causes "not found". */
 function findPredefinedByEmail(email) {
@@ -947,7 +960,7 @@ exports.searchPeople = async (req, res) => {
         const predefined = await PredefinedProfile.findOne({ email: u.email }).lean();
         u.predefinedProfile = predefined || null;
       }
-      users = userDocs;
+      users = userDocs.map(normalizeUserProfileFields);
 
     }
 
@@ -1020,7 +1033,7 @@ exports.getAllPeople = async (req, res) => {
     }
 
     const list = [
-      ...users.map((u) => ({ type: "user", data: u })),
+      ...users.map((u) => ({ type: "user", data: normalizeUserProfileFields(u) })),
       ...teamMembers,
     ];
     return res.status(200).json({ success: true, data: list });

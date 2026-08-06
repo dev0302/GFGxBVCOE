@@ -70,6 +70,7 @@ function App() {
     return location.pathname;
   })();
   const shouldAnimatePage = !isDashboardLike && dropdownBasePaths.some((base) => location.pathname === base || location.pathname.startsWith(`${base}/`));
+  const hideNavbar = location.pathname.startsWith("/share/vault/");
 
   return (
     <AuthProvider>
@@ -79,7 +80,7 @@ function App() {
           <UploadTransferProvider>
             <div className="min-h-screen flex flex-col overflow-x-hidden">
               <Toaster position="top-right" theme="dark" toastOptions={{ style: { background: "linear-gradient(to bottom right, #1e1e2f, #2c2c3e)", border: "1px solid rgba(255,255,255,0.1)", color: "#e5e5e5" }, className: "sonner-toast-darkthemebg" }} closeButton />
-              <Navbar />
+              {!hideNavbar && <Navbar />}
               <AirdropAnimationLayer />
               <IncomingUploadModal />
               <AnimatePresence mode="wait">
