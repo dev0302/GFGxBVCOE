@@ -8,7 +8,7 @@ const PredefinedProfile = require("../models/PredefinedProfile");
 const { imageUpload, deleteImageByUrl } = require("../config/cloudinary");
 const { logActivity } = require("../utils/activityLog");
 const { notifyTeamInviteSubmission } = require("../utils/notificationService");
-const { normalizeProfileTextFields } = require("../utils/departmentNames");
+const { normalizeProfileTextFields, departmentLookupKeys } = require("../utils/departmentNames");
 const XLSX = require("xlsx");
 
 const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
@@ -116,13 +116,34 @@ exports.getDepartmentRoster = async (req, res) => {
           : "Department not found.",
       });
     }
-    const config = await SignupConfig.findOne({ department }).lean();
-    const allowedEmails = (config && config.allowedEmails) ? [...config.allowedEmails] : [];
+    const departmentKeys = departmentLookupKeys(department);
+    const configs = await SignupConfig.find({ department: { $in: departmentKeys } }).lean();
+    const allowedEmails = [...new Set(
+      configs.flatMap((config) => config.allowedEmails || [])
+        .map((email) => (email || "").trim().toLowerCase())
+        .filter(Boolean)
+    )];
+    // A leadership account can predate the signup-config entry. Include those
+    // active users so a Head or Lead is never hidden from their own roster.
+    const departmentUsers = await User.find({
+      accountType: { $in: departmentKeys },
+      tenureEndedAt: null,
+    })
+      .populate("additionalDetails")
+      .select("-password")
+      .lean();
+    const userByEmail = new Map(
+      departmentUsers.map((user) => [(user.email || "").trim().toLowerCase(), user])
+    );
+    for (const email of userByEmail.keys()) {
+      if (email) allowedEmails.push(email);
+    }
+    const rosterEmails = [...new Set(allowedEmails)];
     const roster = [];
-    for (const email of allowedEmails) {
+    for (const email of rosterEmails) {
       const emailNorm = (email || "").trim().toLowerCase();
       if (!emailNorm) continue;
-      const userDoc = await User.findOne({ email: emailNorm })
+      const userDoc = userByEmail.get(emailNorm) || await User.findOne({ email: emailNorm })
         .populate("additionalDetails")
         .select("-password")
         .lean();
@@ -130,7 +151,7 @@ exports.getDepartmentRoster = async (req, res) => {
       const predefined = await PredefinedProfile.findOne({
         email: { $regex: new RegExp(`^${emailEscaped}$`, "i") },
       }).lean();
-      const registered = !!userDoc && userDoc.accountType === department;
+      const registered = !!userDoc && departmentKeys.includes(userDoc.accountType);
       const normalizedPredefined = predefined ? normalizeProfileTextFields(predefined) : null;
       const normalizedUser = userDoc
         ? {

@@ -1,6 +1,9 @@
 /** Legacy department names mapped to their current canonical values. */
 const DEPARTMENT_RENAMES = {
   Design: "Design and Creative",
+  "Creative and Design": "Design and Creative",
+  "Creative & Design": "Design and Creative",
+  "Design & Creative": "Design and Creative",
   "Photography and Videography": "Capture The Event",
 };
 
@@ -23,7 +26,10 @@ function renameText(value) {
   let next = String(value || "");
   // Collapse duplicated segments from the former non-idempotent rename:
   // "Design and Creative and Creative Head" -> "Design and Creative Head"
+  next = next.replace(/\bDesign\s+and\s+Creative\s+and\s+Creatives?\b/gi, "Design and Creative");
   next = next.replace(/\bDesign(?:\s+and\s+Creative\b)+/gi, "Design and Creative");
+  next = next.replace(/\bCreative\s*(?:and|&)\s*Design\b/gi, "Design and Creative");
+  next = next.replace(/\bDesign\s*&\s*Creative\b/gi, "Design and Creative");
   // Rename standalone legacy "Design" only when not already "Design and Creative"
   next = next.replace(/\bDesign\b(?!\s+and\s+Creative)/gi, "Design and Creative");
   next = next.replace(/\bPhotography and Videography\b/gi, "Capture The Event");
