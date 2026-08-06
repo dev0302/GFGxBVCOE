@@ -8,6 +8,7 @@ const PredefinedProfile = require("../models/PredefinedProfile");
 const { imageUpload, deleteImageByUrl } = require("../config/cloudinary");
 const { logActivity } = require("../utils/activityLog");
 const { notifyTeamInviteSubmission } = require("../utils/notificationService");
+const { normalizeProfileTextFields } = require("../utils/departmentNames");
 const XLSX = require("xlsx");
 
 const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
@@ -130,11 +131,20 @@ exports.getDepartmentRoster = async (req, res) => {
         email: { $regex: new RegExp(`^${emailEscaped}$`, "i") },
       }).lean();
       const registered = !!userDoc && userDoc.accountType === department;
+      const normalizedPredefined = predefined ? normalizeProfileTextFields(predefined) : null;
+      const normalizedUser = userDoc
+        ? {
+            ...userDoc,
+            additionalDetails: userDoc.additionalDetails
+              ? normalizeProfileTextFields(userDoc.additionalDetails)
+              : userDoc.additionalDetails,
+          }
+        : null;
       roster.push({
         email: emailNorm,
         registered,
-        user: userDoc || null,
-        predefinedProfile: predefined || null,
+        user: normalizedUser,
+        predefinedProfile: normalizedPredefined,
       });
     }
     return res.status(200).json({ success: true, data: roster });

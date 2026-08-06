@@ -23,12 +23,13 @@ function renameText(value) {
   next = next.replace(/\bDesign(?: and Creative)+\b/gi, "Design and Creative");
   next = next.replace(/\bDesign\b(?! and Creative)/gi, "Design and Creative");
   next = next.replace(/\bPhotography and Videography\b/gi, "Capture The Event");
+  next = next.replace(/\bPhotography Head\b/gi, "Capture The Event Head");
   return next;
 }
 
 async function migrateTextFields(Model, fields) {
   const docs = await Model.find({
-    $or: fields.map((field) => ({ [field]: { $regex: "Design|Photography and Videography", $options: "i" } })),
+    $or: fields.map((field) => ({ [field]: { $regex: "Design|Photography and Videography|Photography Head", $options: "i" } })),
   });
   for (const doc of docs) {
     let changed = false;
@@ -39,6 +40,32 @@ async function migrateTextFields(Model, fields) {
       if (renamed !== current) {
         doc.set(field, renamed);
         changed = true;
+      }
+    });
+    if (changed) await doc.save();
+  }
+}
+
+async function migrateTimelineFields(Model) {
+  const docs = await Model.find({
+    "timeline.role": { $regex: "Design|Photography and Videography|Photography Head", $options: "i" },
+  });
+  for (const doc of docs) {
+    let changed = false;
+    (doc.timeline || []).forEach((item, index) => {
+      if (typeof item.role === "string") {
+        const renamed = renameText(item.role);
+        if (renamed !== item.role) {
+          doc.timeline[index].role = renamed;
+          changed = true;
+        }
+      }
+      if (typeof item.description === "string") {
+        const renamed = renameText(item.description);
+        if (renamed !== item.description) {
+          doc.timeline[index].description = renamed;
+          changed = true;
+        }
       }
     });
     if (changed) await doc.save();
@@ -185,6 +212,8 @@ async function migrateDepartmentNames() {
     migrateTextFields(Profile, ["position", "p0", "p1", "p2"]),
     migrateTextFields(PredefinedProfile, ["position", "p0", "p1", "p2"]),
     migrateTextFields(Alumni, ["accountType", "department", "role", "position", "p0", "p1", "p2"]),
+    migrateTimelineFields(Profile),
+    migrateTimelineFields(PredefinedProfile),
     migrateLeadershipDrafts(),
   ]);
 }

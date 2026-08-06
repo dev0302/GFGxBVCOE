@@ -110,8 +110,8 @@ const headsData = [
     name: "Saksham Chandela",
     branch: "CSE",
     year: "2nd",
-    position: "Photography Head",
-    p0: "Photography Head",
+    position: "Capture The Event Head",
+    p0: "Capture The Event Head",
     image: "/Saksham.webp",
     p1: "",
     p2: "",
@@ -121,9 +121,9 @@ const headsData = [
     timeline: [
       {
         year: "2025",
-        role: "Photography Head",
+        role: "Capture The Event Head",
         organization: "GFG BVCOE",
-        description: "Leading the photography department for events and initiatives under GeeksforGeeks BVCOE."
+        description: "Leading the Capture The Event department for events and initiatives under GeeksforGeeks BVCOE."
       },
       {
         year: "2024",
