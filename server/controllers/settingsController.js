@@ -299,6 +299,14 @@ function numberFrom(...values) {
   return 0;
 }
 
+function getBrevoRecipient(event = {}) {
+  const value = event.email || event.recipient || event.recipientEmail || event.to;
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.find((item) => typeof item === "string") || "";
+  if (value && typeof value.email === "string") return value.email;
+  return "";
+}
+
 function normalizeBrevoReport(report = {}) {
   const requests = numberFrom(report.requests, report.sent, report.delivered);
   const delivered = numberFrom(report.delivered);
@@ -358,11 +366,16 @@ exports.getBrevoEmailAnalytics = async (req, res) => {
     const cached = req.query.refresh === "1" ? null : getCached("brevo-analytics");
     if (cached) return res.json(cached);
 
-    const today = formatDateOnly();
+    const now = new Date();
+    const today = formatDateOnly(now);
+    // Brevo permits a maximum 90-day range for transactional event reports.
+    // Request its full available history window in one page (up to 5,000 events).
+    const recentActivityStart = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    const recentActivityStartDate = formatDateOnly(recentActivityStart);
     const [account, reportData, eventsData] = await Promise.allSettled([
       brevoFetch("/account"),
       brevoFetch(`/smtp/statistics/aggregatedReport?startDate=${today}&endDate=${today}`),
-      brevoFetch(`/smtp/statistics/events?startDate=${today}&endDate=${today}&limit=10&offset=0`),
+      brevoFetch(`/smtp/statistics/events?startDate=${recentActivityStartDate}&endDate=${today}&limit=5000&offset=0`),
     ]);
 
     if (account.status === "rejected") throw account.reason;
@@ -386,12 +399,14 @@ exports.getBrevoEmailAnalytics = async (req, res) => {
         ? eventsData.value.events || eventsData.value.items || []
         : [];
     const recentActivity = (Array.isArray(rawEvents) ? rawEvents : [])
-      .slice(0, 8)
       .map((event) => ({
         subject: event.subject || event.messageSubject || "Transactional email",
+        recipient: getBrevoRecipient(event),
         status: event.event || event.status || "unknown",
         sentAt: event.date || event.ts || event.createdAt || null,
-      }));
+      }))
+      .sort((left, right) => new Date(right.sentAt).getTime() - new Date(left.sentAt).getTime())
+      .slice(0, 5000);
 
     const response = {
       success: true,
@@ -410,6 +425,7 @@ exports.getBrevoEmailAnalytics = async (req, res) => {
       },
       performance,
       recentActivity,
+      recentActivityWindowDays: 90,
       reportUnavailable: reportData.status === "rejected" ? reportData.reason.message : null,
       eventsUnavailable: eventsData.status === "rejected" ? eventsData.reason.message : null,
       updatedAt: new Date().toISOString(),
