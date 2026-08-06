@@ -1032,12 +1032,15 @@ function EmailServiceAnalyticsContent() {
             </div>
           </Panel>
 
-          <Panel title="Recent Email Activity" subtitle="Safe Brevo event metadata only. Recipient addresses and content are hidden.">
+          <Panel title="Recent Email Activity" subtitle="Safe Brevo event metadata only. Recipient addresses are shown; content remains hidden. All activity available from Brevo (up to 90 days).">
             {data.recentActivity?.length ? (
               <div className="divide-y divide-white/10 overflow-hidden rounded-lg border border-white/10">
                 {data.recentActivity.map((event, index) => (
-                  <div key={`${event.sentAt}-${index}`} className="grid gap-1 px-3 py-2.5 text-xs sm:gap-2 sm:px-4 sm:py-3 sm:text-sm md:grid-cols-[minmax(0,1fr)_140px_190px]">
+                  <div key={`${event.sentAt}-${index}`} className="grid gap-1 px-3 py-2.5 text-xs sm:gap-2 sm:px-4 sm:py-3 sm:text-sm md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_110px_190px]">
                     <span className="truncate font-semibold text-richblack-25">{event.subject}</span>
+                    <span className="truncate text-cyan-200" title={event.recipient || ""}>
+                      {event.recipient || "Recipient unavailable"}
+                    </span>
                     <span className="capitalize text-emerald-300">{event.status}</span>
                     <span className="text-gray-400">
                       {event.sentAt ? new Date(event.sentAt).toLocaleString("en-IN") : "Time unavailable"}
