@@ -52,7 +52,10 @@ async function handleJoinLeadershipPromotions(socket, io) {
   promotionsPresence.set(socket.id, presenceUser);
 
   const session = await getActiveDraftSession();
-  if (session && session.status === "DRAFT") {
+  // Opening the promotions page joins this socket room. Persist every visitor
+  // as a collaborator for any active session, including one already finalized
+  // and awaiting approvals.
+  if (session) {
     upsertCollaborator(session, presenceUser);
     await session.save();
     emitDraftUpdated(session);

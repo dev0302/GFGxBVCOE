@@ -13,6 +13,7 @@ const {
   getActiveDraft,
   startDraftSession,
   finalizeDraft,
+  undoFinalizeDraft,
   approveDraft,
   revokeApproval,
   discardDraft,
@@ -37,6 +38,7 @@ router.get("/history", auth, canAccessLeadershipTransition, getHistory);
 router.get("/draft/active", auth, canAccessLeadershipTransition, getActiveDraft);
 router.post("/draft/start", auth, canAccessLeadershipTransition, startDraftSession);
 router.post("/draft/finalize", auth, canAccessLeadershipTransition, finalizeDraft);
+router.post("/draft/undo-finalize", auth, canAccessLeadershipTransition, undoFinalizeDraft);
 router.post("/draft/approve", auth, canAccessLeadershipTransition, approveDraft);
 router.post("/draft/revoke-approval", auth, canAccessLeadershipTransition, revokeApproval);
 router.post("/draft/discard", auth, canAccessLeadershipTransition, discardDraft);

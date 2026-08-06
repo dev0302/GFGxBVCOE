@@ -10,6 +10,7 @@ const {
   addEndSessionToDraft,
   removeChangeFromDraft,
   finalizeDraft,
+  undoFinalizeDraft,
   addApproval,
   removeApproval,
   discardDraft,
@@ -177,6 +178,20 @@ exports.finalizeDraft = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Draft session moved to approval.",
+      draft: serializeSessionForClient(session),
+      approvalStatus: serializeApprovalStatus(session.approvals),
+    });
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+exports.undoFinalizeDraft = async (req, res) => {
+  try {
+    const session = await undoFinalizeDraft(req.user);
+    return res.status(200).json({
+      success: true,
+      message: "Finalization undone. Finalize again after making changes.",
       draft: serializeSessionForClient(session),
       approvalStatus: serializeApprovalStatus(session.approvals),
     });

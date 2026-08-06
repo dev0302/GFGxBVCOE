@@ -1192,6 +1192,15 @@ export async function finalizeLeadershipDraft() {
   return data;
 }
 
+export async function undoFinalizeLeadershipDraft() {
+  const res = await authFetch("/api/v1/leadership-transition/draft/undo-finalize", {
+    method: "POST",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to undo finalization");
+  return data;
+}
+
 export async function approveLeadershipDraft() {
   const res = await authFetch("/api/v1/leadership-transition/draft/approve", {
     method: "POST",

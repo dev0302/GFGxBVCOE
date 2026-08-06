@@ -96,14 +96,22 @@ function upsertCollaborator(session, collaborator) {
   }
 }
 
+/** Reopen a finalized draft before changing its queued transitions. */
+function reopenForChanges(session) {
+  if (session.status === "DRAFT") return false;
+  session.status = "DRAFT";
+  session.approvals = [];
+  session.finalizedBy = null;
+  session.finalizedByName = "";
+  return true;
+}
+
 async function addPromotionToDraft(user, payload) {
   const preview = await buildPromotionPreview(payload);
   const actor = await resolveActor(user);
   const session = await getOrCreateActiveDraft(user);
 
-  if (session.status !== "DRAFT") {
-    throw new Error("Cannot add changes while session is awaiting approval.");
-  }
+  reopenForChanges(session);
 
   const duplicate = session.pendingChanges.find(
     (c) =>
@@ -140,9 +148,7 @@ async function addEndSessionToDraft(user, payload) {
   const actor = await resolveActor(user);
   const session = await getOrCreateActiveDraft(user);
 
-  if (session.status !== "DRAFT") {
-    throw new Error("Cannot add changes while session is awaiting approval.");
-  }
+  reopenForChanges(session);
 
   const exists = session.pendingChanges.some(
     (c) => c.personType === preview.personType && c.personId === preview.personId
@@ -165,9 +171,7 @@ async function addEndSessionToDraft(user, payload) {
 async function removeChangeFromDraft(user, changeId) {
   const session = await getActiveDraftSession();
   if (!session) throw new Error("No active draft session.");
-  if (session.status !== "DRAFT") {
-    throw new Error("Cannot modify changes while session is awaiting approval.");
-  }
+  reopenForChanges(session);
 
   session.pendingChanges = session.pendingChanges.filter(
     (c) => String(c._id) !== String(changeId)
@@ -199,6 +203,27 @@ async function finalizeDraft(user) {
   session.approvals = [];
   await session.save();
   emitDraftUpdated(session, { finalized: true });
+  return session;
+}
+
+async function undoFinalizeDraft(user) {
+  const session = await getActiveDraftSession();
+  const actor = await resolveActor(user);
+  if (!session) throw new Error("No active draft session.");
+  if (session.status === "DRAFT") throw new Error("The session is already open for changes.");
+
+  const isCreator = String(session.createdBy || "") === String(actor.id || "");
+  const isFinalizer = String(session.finalizedBy || "") === String(actor.id || "");
+  if (!isCreator && !isFinalizer) {
+    throw new Error("Only the session creator or the person who finalized it can undo finalization.");
+  }
+
+  reopenForChanges(session);
+  await session.save();
+  await logActivity(actor.id, "leadership_draft_reopened", "leadership_transition", {
+    sessionId: session.sessionId,
+  }, session._id, "LeadershipDraftSession");
+  emitDraftUpdated(session, { finalized: false, reopened: true });
   return session;
 }
 
@@ -458,6 +483,7 @@ module.exports = {
   addEndSessionToDraft,
   removeChangeFromDraft,
   finalizeDraft,
+  undoFinalizeDraft,
   addApproval,
   removeApproval,
   discardDraft,
