@@ -882,7 +882,12 @@ function ProfileDropDown({
                         animate="show"
                       >
                         {lastSeenRows.map((row) => {
-                          const isOnline = onlineIdSet.has(String(row.id));
+                          // Feed row IDs are namespaced so a User and a department
+                          // member with the same Mongo ID cannot collide. Socket
+                          // presence uses the underlying document ID.
+                          const isOnline =
+                            onlineIdSet.has(String(row.id)) ||
+                            onlineIdSet.has(String(row.presenceId));
                           const av = row.image ? cloudinaryTinyAvatarUrl(row.image) : "";
                           const initials = String(row.name || "U")
                             .split(/\s+/)
