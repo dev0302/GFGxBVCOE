@@ -24,6 +24,70 @@ const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
 const ACTIVE_TEAM_MEMBER_FILTER = {
   $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
 };
+async function findDepartmentMember(email, department) {
+  const emailNorm = (email || "").trim().toLowerCase();
+  if (!emailNorm || !department) return null;
+  const emailEscaped = emailNorm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const member = await getTeamMemberModel(department).findOne({
+    email: { $regex: new RegExp(`^${emailEscaped}$`, "i") },
+    ...ACTIVE_TEAM_MEMBER_FILTER,
+  });
+  return member ? { member, department } : null;
+}
+
+async function findDepartmentMemberByEmail(email) {
+  for (const department of TEAM_DEPARTMENTS) {
+    const found = await findDepartmentMember(email, department);
+    if (found) return found;
+  }
+  return null;
+}
+
+async function currentDepartmentMember(req) {
+  if (!req.user?.isDepartmentMember || !req.user.memberDepartment) return null;
+  const member = await getTeamMemberModel(req.user.memberDepartment).findById(req.user.id);
+  if (!member || member.email !== req.user.email) return null;
+  return { member, department: req.user.memberDepartment };
+}
+
+function memberAsUser(memberDoc, department) {
+  const member = memberDoc.toObject ? memberDoc.toObject() : memberDoc;
+  const parts = String(member.name || "").trim().split(/\s+/).filter(Boolean);
+  const profile = member.profile || {};
+  return {
+    _id: member._id,
+    firstName: parts[0] || member.email || "Member",
+    lastName: parts.slice(1).join(" "),
+    email: member.email,
+    createdAt: member.createdAt || null,
+    contact: member.contact || "",
+    image: member.photo || "",
+    accountType: department,
+    isDepartmentMember: true,
+    signedIn: !!member.signedIn,
+    additionalDetails: {
+      ...profile,
+      phoneNumber: profile.phoneNumber || member.contact || "",
+      yearOfStudy: profile.yearOfStudy || member.year || "",
+      year: profile.year || member.year || "",
+      branch: profile.branch || member.branch || "",
+      section: profile.section || member.section || "",
+      non_tech_society: profile.non_tech_society || member.non_tech_society || "",
+    },
+    dashboardAccess: [],
+    canManageEvents: false,
+    canAccessLeadershipTransition: false,
+  };
+}
+
+function memberToken(member, department) {
+  return jwt.sign({ email: member.email, id: member._id, accountType: department, isDepartmentMember: true, memberDepartment: department }, process.env.JWT_SECRET, { expiresIn: "1y" });
+}
+
+function authCookieOptions() {
+  const isProduction = process.env.NODE_ENV === "production";
+  return { expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), httpOnly: true, secure: isProduction, sameSite: isProduction ? "none" : "lax", path: "/" };
+}
 
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
 
@@ -69,7 +133,10 @@ exports.sendOTP = async (req, res) => {
       department: deptTrim,
       allowedEmails: emailNorm,
     });
-    if (!config) {
+    // Check both sources. A member may also be on the legacy dashboard list,
+    // but their department document must still remain their auth source.
+    const departmentMember = await findDepartmentMember(emailNorm, deptTrim);
+    if (!config && !departmentMember) {
       return res.status(403).json({
         success: false,
         message: "This email is not allowed to sign up for the selected department.",
@@ -77,7 +144,7 @@ exports.sendOTP = async (req, res) => {
     }
 
     const checkUserPresent = await User.findOne({ email: emailNorm });
-    if (checkUserPresent) {
+    if (checkUserPresent || departmentMember?.member.password) {
       return res.status(401).json({
         success: false,
         message: "User already registered.",
@@ -219,7 +286,8 @@ exports.signup = async (req, res) => {
       department: accountType.trim(),
       allowedEmails: emailNorm,
     });
-    if (!config) {
+    const departmentMember = await findDepartmentMember(emailNorm, accountType.trim());
+    if (!config && !departmentMember) {
       return res.status(403).json({
         success: false,
         message: "This email is not allowed to sign up for the selected department.",
@@ -235,6 +303,23 @@ exports.signup = async (req, res) => {
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
+
+    // A department-member record is the source of truth. Never duplicate it
+    // into `users` or create a separate Profile document.
+    if (departmentMember) {
+      const member = departmentMember.member;
+      member.password = hashPassword;
+      member.signedIn = true;
+      if (!member.name?.trim()) member.name = `${firstName.trim()} ${lastName.trim()}`.trim();
+      await member.save();
+      const token = memberToken(member, departmentMember.department);
+      return res.cookie("Token", token, authCookieOptions()).status(201).json({
+        success: true,
+        message: "Department member registered successfully.",
+        token,
+        user: memberAsUser(member, departmentMember.department),
+      });
+    }
 
     const profileDetails = await Profile.create({
       gender: null,
@@ -300,11 +385,25 @@ exports.login = async (req, res) => {
       });
     }
 
-    let user = await User.findOne({ email: email.trim().toLowerCase() }).populate("additionalDetails");
+    const emailNorm = email.trim().toLowerCase();
+    let user = await User.findOne({ email: emailNorm }).populate("additionalDetails");
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "User not registered.",
+      const departmentMember = await findDepartmentMemberByEmail(emailNorm);
+      if (!departmentMember || !departmentMember.member.password) {
+        return res.status(401).json({ success: false, message: "User not registered." });
+      }
+      if (!(await bcrypt.compare(password, departmentMember.member.password))) {
+        return res.status(403).json({ success: false, message: "Password incorrect." });
+      }
+      departmentMember.member.signedIn = true;
+      departmentMember.member.lastSeen = new Date();
+      await departmentMember.member.save();
+      const token = memberToken(departmentMember.member, departmentMember.department);
+      return res.cookie("Token", token, authCookieOptions()).status(200).json({
+        success: true,
+        token,
+        user: memberAsUser(departmentMember.member, departmentMember.department),
+        message: "User logged in successfully.",
       });
     }
 
@@ -406,8 +505,10 @@ exports.forgotPassword = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email: emailNorm });
-    if (!user) {
+    const existingUser = await User.findOne({ email: emailNorm });
+    const departmentMember = existingUser ? null : await findDepartmentMemberByEmail(emailNorm);
+    const user = existingUser || departmentMember?.member;
+    if (!user || (departmentMember && !user.password)) {
       return res.status(200).json({
         success: true,
         message: "If an account exists with this email, you will receive a password reset link.",
@@ -475,7 +576,9 @@ exports.resetPassword = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email: resetDoc.email });
+    const existingUser = await User.findOne({ email: resetDoc.email });
+    const departmentMember = existingUser ? null : await findDepartmentMemberByEmail(resetDoc.email);
+    const user = existingUser || departmentMember?.member;
     if (!user) {
       await PasswordReset.deleteOne({ token });
       return res.status(400).json({
@@ -520,6 +623,15 @@ exports.changePassword = async (req, res) => {
       });
     }
 
+    const currentMember = await currentDepartmentMember(req);
+    if (currentMember) {
+      if (!(await bcrypt.compare(oldPassword, currentMember.member.password))) {
+        return res.status(401).json({ success: false, message: "Old password is incorrect." });
+      }
+      currentMember.member.password = await bcrypt.hash(newPassword, 10);
+      await currentMember.member.save();
+      return res.status(200).json({ success: true, message: "Password updated successfully." });
+    }
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -561,6 +673,12 @@ exports.changePassword = async (req, res) => {
 /** POST — bump lastSeen for current user (throttle on client; cheap on server). */
 exports.presenceHeartbeat = async (req, res) => {
   try {
+    const currentMember = await currentDepartmentMember(req);
+    if (currentMember) {
+      currentMember.member.lastSeen = new Date();
+      await currentMember.member.save();
+      return res.status(200).json({ success: true });
+    }
     await User.updateOne({ _id: req.user.id }, { $set: { lastSeen: new Date() } });
     return res.status(200).json({ success: true });
   } catch (error) {
@@ -599,6 +717,11 @@ exports.getLastSeenFeed = async (req, res) => {
 
 exports.me = async (req, res) => {
   try {
+    const currentMember = await currentDepartmentMember(req);
+    if (currentMember) {
+      const user = memberAsUser(currentMember.member, currentMember.department);
+      return res.status(200).json({ success: true, user, token: memberToken(currentMember.member, currentMember.department) });
+    }
     const userDoc = await User.findById(req.user.id).populate("additionalDetails").select("-password");
     if (!userDoc) {
       return res.status(404).json({ success: false, message: "User not found." });
@@ -696,6 +819,27 @@ exports.updateProfile = async (req, res) => {
       github,
     } = req.body;
 
+    const currentMember = await currentDepartmentMember(req);
+    if (currentMember) {
+      const member = currentMember.member;
+      const profile = member.profile || {};
+      const nextFirst = firstName !== undefined ? firstName.trim() : String(member.name || "").trim().split(/\s+/)[0] || "";
+      const nextLast = lastName !== undefined ? lastName.trim() : String(member.name || "").trim().split(/\s+/).slice(1).join(" ");
+      member.name = `${nextFirst} ${nextLast}`.trim() || member.name;
+      if (contact !== undefined) member.contact = (contact || "").trim();
+      ["gender", "dob", "about", "yearOfStudy", "section", "non_tech_society", "position"].forEach((key) => {
+        if (req.body[key] !== undefined) profile[key] = req.body[key] || "";
+      });
+      if (contact !== undefined) profile.phoneNumber = (contact || "").trim();
+      profile.socials = profile.socials || {};
+      ["instagram", "linkedin", "github"].forEach((key) => {
+        if (req.body[key] !== undefined) profile.socials[key] = req.body[key] || "";
+      });
+      member.profile = profile;
+      await member.save();
+      return res.status(200).json({ success: true, message: "Profile updated.", data: memberAsUser(member, currentMember.department) });
+    }
+
     const user = await User.findById(userId).populate("additionalDetails");
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found." });
@@ -762,6 +906,12 @@ exports.updateAvatar = async (req, res) => {
     }
     const file = req.files.avatar;
     const result = await imageUpload(file, "gfg-avatars");
+    const currentMember = await currentDepartmentMember(req);
+    if (currentMember) {
+      currentMember.member.photo = result.secure_url;
+      await currentMember.member.save();
+      return res.status(200).json({ success: true, message: "Display picture updated.", data: memberAsUser(currentMember.member, currentMember.department) });
+    }
     const user = await User.findByIdAndUpdate(
       userId,
       { image: result.secure_url },
@@ -1187,6 +1337,9 @@ exports.deleteAccount = async (req, res) => {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ success: false, message: "Not authenticated." });
+    }
+    if (req.user?.isDepartmentMember) {
+      return res.status(403).json({ success: false, message: "Department-member records are managed by the department and cannot be deleted here." });
     }
 
     const userDoc = await User.findById(userId).select("additionalDetails").lean();

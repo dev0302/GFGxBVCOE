@@ -24,6 +24,10 @@ exports.auth = async (req, res, next) => {
       });
     }
 
+    // Department-member accounts are stored in their department collection,
+    // not in `users`, so the user-tenure lookup does not apply to them.
+    if (req.user.isDepartmentMember) return next();
+
     const tenureStatus = await checkAndFinalizeExpiredSession(req.user.id);
     if (tenureStatus.expired) {
       const isProduction = process.env.NODE_ENV === "production";
@@ -143,4 +147,20 @@ exports.canAccessDashboard = (req, res, next) => {
       error: err.message,
     });
   }
+};
+
+/** Department members may view their team but cannot mutate its roster. */
+exports.requireTeamManagement = (req, res, next) => {
+  if (req.user?.isDepartmentMember) {
+    return res.status(403).json({ success: false, message: "Department members have view-only team access." });
+  }
+  next();
+};
+
+/** Settings are available only to accounts stored in the users collection. */
+exports.requireRegisteredUser = (req, res, next) => {
+  if (req.user?.isDepartmentMember) {
+    return res.status(403).json({ success: false, message: "Settings are not available for department-member accounts." });
+  }
+  next();
 };

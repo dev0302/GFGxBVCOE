@@ -27,6 +27,8 @@ import {
   fetchBroadcastEmailAudience,
   fetchEmailServiceAnalytics,
   sendBroadcastEmail,
+  fetchMemberBroadcastEmailAudience,
+  sendMemberBroadcastEmail,
   fetchTargetedEmailRecipients,
   sendTargetedEmail,
 } from "../services/api";
@@ -46,7 +48,8 @@ const personalItems = [
 ];
 
 const otherItems = [
-  { id: "send-email", label: "Send Email To All", icon: Mail },
+  { id: "send-email", label: "Send Email To All Heads/Leads/Core", icon: Mail },
+  { id: "send-email-members", label: "Send Email To All Members", icon: Users },
   { id: "send-email-person", label: "Send Email To Person", icon: User },
   { id: "team-roles", label: "Team Roles", icon: Users },
   { id: "manage-members", label: "Manage Members", icon: Users },
@@ -178,11 +181,19 @@ const personalCards = [
 const otherCards = [
   {
     id: "send-email",
-    title: "Send Email To All",
-    desc: "Broadcast an announcement to every registered user.",
+    title: "Send Email To All Heads/Leads/Core",
+    desc: "Broadcast an announcement to every registered head, lead, or core user.",
     icon: Mail,
     color: "text-cyan-300",
     bg: "bg-cyan-500/10",
+  },
+  {
+    id: "send-email-members",
+    title: "Send Email To All Members",
+    desc: "Broadcast an announcement to all department members.",
+    icon: Users,
+    color: "text-fuchsia-300",
+    bg: "bg-fuchsia-500/10",
   },
   {
     id: "team-roles",
@@ -1065,12 +1076,13 @@ function EmailServiceAnalyticsContent() {
   );
 }
 
-function SendEmailToAllContent() {
+function SendEmailToAllContent({ memberOnly = false }) {
   const [audience, setAudience] = useState(null);
   const [loadingAudience, setLoadingAudience] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showRecipients, setShowRecipients] = useState(false);
   const [form, setForm] = useState({
     title: "",
     subject: "",
@@ -1083,7 +1095,7 @@ function SendEmailToAllContent() {
     try {
       setLoadingAudience(true);
       setError("");
-      setAudience(await fetchBroadcastEmailAudience());
+      setAudience(await (memberOnly ? fetchMemberBroadcastEmailAudience() : fetchBroadcastEmailAudience()));
     } catch (err) {
       setError(err?.message || "Failed to load recipient count");
     } finally {
@@ -1093,7 +1105,7 @@ function SendEmailToAllContent() {
 
   useEffect(() => {
     loadAudience();
-  }, []);
+  }, [memberOnly]);
 
   const updateField = (field) => (event) => {
     setForm((prev) => ({ ...prev, [field]: event.target.value }));
@@ -1104,7 +1116,7 @@ function SendEmailToAllContent() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const confirmed = window.confirm(
-      `Send this email to ${audience?.count ?? 0} registered users?`,
+      `Send this email to ${audience?.count ?? 0} ${memberOnly ? "members" : "heads, leads, and core users"}?`,
     );
     if (!confirmed) return;
 
@@ -1112,7 +1124,7 @@ function SendEmailToAllContent() {
       setSending(true);
       setError("");
       setSuccess("");
-      const result = await sendBroadcastEmail(form);
+      const result = await (memberOnly ? sendMemberBroadcastEmail(form) : sendBroadcastEmail(form));
       setSuccess(result.message || "Email broadcast sent.");
       setAudience((prev) => ({ ...(prev || {}), count: result.total ?? prev?.count ?? 0 }));
     } catch (err) {
@@ -1136,8 +1148,8 @@ function SendEmailToAllContent() {
   return (
     <div className="space-y-3 sm:space-y-4">
       <Panel
-        title="Send Email To All"
-        subtitle="Send one announcement to every registered user in the platform database."
+        title={memberOnly ? "Send Email To All Members" : "Send Email To All Heads/Leads/Core"}
+        subtitle={memberOnly ? "Send one announcement to every active department member." : "Send one announcement to every registered head, lead, and core user."}
       >
         <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <AnalyticsCard
@@ -1145,8 +1157,16 @@ function SendEmailToAllContent() {
             value={loadingAudience ? "Checking..." : formatNumber(recipientCount)}
             icon={Users}
             tone="text-cyan-300"
-            subtext="Registered users with email"
+            subtext={memberOnly ? "Department members with email" : "Heads, leads & core with email"}
           />
+          {memberOnly && (
+            <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-lg shadow-black/10 sm:p-4">
+              <p className="text-[11px] font-semibold text-gray-400 sm:text-sm">Recipient details</p>
+              <button type="button" onClick={() => setShowRecipients(true)} disabled={loadingAudience} className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:opacity-60">
+                <Info className="h-4 w-4 text-cyan-300" /> View member list
+              </button>
+            </div>
+          )}
           <AnalyticsCard
             label="Delivery"
             value="Brevo"
@@ -1246,7 +1266,7 @@ function SendEmailToAllContent() {
             <p className="text-xs leading-5 text-gray-400 sm:text-sm">
               This email will be sent to{" "}
               <span className="font-bold text-cyan-300">{formatNumber(recipientCount)}</span>{" "}
-              registered users.
+              {memberOnly ? "department members." : "heads, leads, and core users."}
             </p>
             <button
               type="submit"
@@ -1259,6 +1279,20 @@ function SendEmailToAllContent() {
           </div>
         </form>
       </Panel>
+      {memberOnly && showRecipients && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="member-recipients-title">
+          <div className="flex max-h-[80vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-cyan-300/20 bg-[#202237] shadow-2xl shadow-black/50">
+            <div className="flex items-center justify-between border-b border-white/10 p-5">
+              <div><h2 id="member-recipients-title" className="text-lg font-bold text-richblack-25">Member email recipients</h2><p className="mt-1 text-xs text-gray-400">{formatNumber(recipientCount)} members will receive this email.</p></div>
+              <button type="button" onClick={() => setShowRecipients(false)} className="rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:bg-white/[0.06]">Close</button>
+            </div>
+            <div className="overflow-y-auto p-3">
+              {(audience?.recipients || []).map((member) => <div key={member.email} className="flex items-center justify-between gap-3 border-b border-white/5 px-2 py-2.5 last:border-0"><div className="min-w-0"><p className="truncate text-sm font-medium text-richblack-25">{member.name}</p><p className="truncate text-xs text-gray-400">{member.email}</p></div><span className="shrink-0 text-right text-[11px] text-cyan-300">{member.department}</span></div>)}
+              {!loadingAudience && !(audience?.recipients || []).length && <p className="p-5 text-center text-sm text-gray-400">No members with email addresses found.</p>}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1485,6 +1519,7 @@ function Settings() {
   }
 
   if (!user) return <Navigate to="/login" replace />;
+  if (user.isDepartmentMember) return <Navigate to="/profile" replace />;
 
   return (
     <main className="h-screen w-full overflow-hidden bg-gradient-to-br from-[#181829] via-[#1d1e31] to-[#151a2a] px-2 pt-20 text-richblack-25 sm:px-4 sm:pt-20 lg:px-10 lg:pt-24">
@@ -1541,6 +1576,8 @@ function Settings() {
                 <EmailServiceAnalyticsContent />
               ) : activeTab === "send-email" ? (
                 <SendEmailToAllContent />
+              ) : activeTab === "send-email-members" ? (
+                <SendEmailToAllContent memberOnly />
               ) : activeTab === "send-email-person" ? (
                 <SendEmailToPersonContent />
               ) : (

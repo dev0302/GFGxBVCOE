@@ -193,7 +193,7 @@ function Navbar() {
                   : "border-green-300/20 bg-green-300/5 text-green-100"
               }`}
             >
-              <NavLink
+              {!user.isDepartmentMember && <NavLink
                 to="/settings"
                 aria-label="Open settings"
                 title="Settings"
@@ -204,7 +204,7 @@ function Navbar() {
                 }`}
               >
                 <Settings className="h-[18px] w-[18px]" />
-              </NavLink>
+              </NavLink>}
               <NotificationsButton
                 className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-150 ${
                   isDarkNavbar
@@ -249,7 +249,7 @@ function Navbar() {
       "
     >
       {/* SETTINGS */}
-      <NavLink
+      {!user.isDepartmentMember && <NavLink
         to="/settings"
         aria-label="Open settings"
         title="Settings"
@@ -268,7 +268,7 @@ function Navbar() {
         "
       >
         <Settings className="h-[17px] w-[17px]" />
-      </NavLink>
+      </NavLink>}
 
       {/* NOTIFICATIONS */}
       <NotificationsButton

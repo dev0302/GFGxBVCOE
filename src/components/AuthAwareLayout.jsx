@@ -13,7 +13,7 @@ function isProtectedRoute(pathname) {
   if (path.startsWith("/forgot-password") || path.startsWith("/reset-password/")) return false;
   if (path.startsWith("/em-dashboard/link/")) return false;
   // Protected
-  if (path.startsWith("/profile") || path.startsWith("/manage-team") || path.startsWith("/manage-society")) return true;
+  if (path.startsWith("/profile") || path.startsWith("/manage-team") || path.startsWith("/view-team") || path.startsWith("/manage-society")) return true;
   if (path.startsWith("/dashboard") || path === "/admin") return true;
   if (path.startsWith("/em-dashboard")) return true; // upload, manage, etc. (except link/ above)
   return false;

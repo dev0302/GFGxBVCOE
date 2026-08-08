@@ -46,6 +46,7 @@ import EventDashboardLayout from "./components/EventDashboard/EventDashboardLayo
 import EventDocuments from "./pages/eventDashboard/EventDocuments";
 import PublicShareView from "./pages/eventDashboard/PublicShareView";
 import DepartmentDashboardLayout from "./components/DepartmentDashboard/DepartmentDashboardLayout";
+import MemberDashboard from "./pages/MemberDashboard";
 import LeadershipTransitionLayout from "./components/LeadershipTransition/LeadershipTransitionLayout";
 import Navbar from "./components/common/Navbar";
 import NotFound from "./components/NotFound";
@@ -55,7 +56,7 @@ import AirdropAnimationLayer from "./components/AirdropAnimationLayer";
 
 function App() {
   const location = useLocation();
-  const dropdownBasePaths = ["/dashboard", "/profile", "/manage-team", "/manage-society", "/settings", "/jam-the-web"];
+  const dropdownBasePaths = ["/dashboard", "/profile", "/manage-team", "/view-team", "/manage-society", "/settings", "/jam-the-web"];
   const isDashboardLike =
     location.pathname.startsWith("/em-dashboard") ||
     location.pathname.startsWith("/vectorvision-admin") ||
@@ -109,6 +110,7 @@ function App() {
                         <Route path="documents" element={<EventDocuments />} />
                       </Route>
                     </Route>
+                    <Route path="/dashboard/member/:department" element={<MemberDashboard />} />
                     <Route path="/dashboard/:departmentKey" element={<DepartmentDashboardLayout />}><Route index element={<Navigate to="departments" replace />} /><Route path="departments" element={<DepartmentDepartmentsAllowed />} /><Route path="generate-qr" element={<GenerateQR />} /><Route path="documents" element={<EventDocuments />} /></Route>
                     <Route path="/login" element={<Login />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -120,6 +122,7 @@ function App() {
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/manage-team" element={<ManageTeam />} />
+                    <Route path="/view-team" element={<ManageTeam readOnly />} />
                     <Route path="/manage-society" element={<ManageSociety />} />
                     <Route path="/join-team/:token" element={<JoinTeamByLink />} />
                     <Route path="/notfound" element={<NotFound />} />

@@ -10,6 +10,12 @@ const teamMemberSchema = new mongoose.Schema(
     contact: { type: String, default: "" },
     photo: { type: String, default: "" },
     non_tech_society: { type: String, default: "" },
+    // Department members can use the site without being copied to `users`.
+    // These fields deliberately live on the department collection document.
+    password: { type: String, default: "" },
+    signedIn: { type: Boolean, default: false },
+    lastSeen: { type: Date, default: null },
+    profile: { type: mongoose.Schema.Types.Mixed, default: () => ({}) },
     addedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     /** When set, hidden from team list; purged permanently after retention window. */
     deletedAt: { type: Date, default: null },
