@@ -413,6 +413,23 @@ export async function sendBroadcastEmail(payload) {
   return data;
 }
 
+export async function fetchMemberBroadcastEmailAudience() {
+  const res = await authFetch('/api/v1/settings/member-broadcast-email/audience');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load member email audience');
+  return data;
+}
+
+export async function sendMemberBroadcastEmail(payload) {
+  const res = await authFetch('/api/v1/settings/member-broadcast-email/send', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to send member email');
+  return data;
+}
+
 export async function fetchTargetedEmailRecipients() {
   const res = await authFetch('/api/v1/settings/targeted-email/recipients');
   const data = await res.json().catch(() => ({}));

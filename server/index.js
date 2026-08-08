@@ -13,6 +13,7 @@ const fileUpload = require("express-fileupload");
 const jwt = require("jsonwebtoken");
 const { Server } = require("socket.io");
 const User = require("./models/User");
+const { getTeamMemberModel } = require("./models/TeamMember");
 const { cleanupExpiredTenureUsers } = require("./utils/tenureSession");
 const { migrateDepartmentNames } = require("./utils/departmentMigration");
 
@@ -93,6 +94,15 @@ setDraftIo(io);
 
 const onlineUsers = new Map();
 const socketIdToUserId = new Map();
+const TEAM_DEPARTMENTS = [
+  "Social Media and Promotion",
+  "Technical",
+  "Event Management",
+  "Design and Creative",
+  "Content and Documentation",
+  "Capture The Event",
+  "Sponsorship and Marketing",
+];
 
 function emitOnlineUsers() {
   const users = Array.from(onlineUsers.values())
@@ -136,19 +146,32 @@ io.use(async (socket, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id)
-      .select("firstName lastName image")
-      .lean();
-
-    if (!user) {
-      return next(new Error("User not found"));
+    if (decoded.isDepartmentMember) {
+      const department = String(decoded.memberDepartment || "").trim();
+      if (!TEAM_DEPARTMENTS.includes(department)) return next(new Error("Unauthorized"));
+      const member = await getTeamMemberModel(department)
+        .findOne({ _id: decoded.id, email: decoded.email, $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] })
+        .select("name email photo")
+        .lean();
+      if (!member) return next(new Error("User not found"));
+      socket.user = {
+        id: String(member._id),
+        name: member.name || member.email || "Member",
+        image: member.photo || "",
+        isDepartmentMember: true,
+        department,
+      };
+    } else {
+      const user = await User.findById(decoded.id)
+        .select("firstName lastName image")
+        .lean();
+      if (!user) return next(new Error("User not found"));
+      socket.user = {
+        id: String(user._id),
+        name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User",
+        image: user.image || "",
+      };
     }
-
-    socket.user = {
-      id: String(user._id),
-      name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User",
-      image: user.image || "",
-    };
 
     next();
   } catch (err) {
@@ -170,7 +193,13 @@ io.on("connection", (socket) => {
   }
   socketIdToUserId.set(socket.id, id);
 
-  User.updateOne({ _id: id }, { $set: { lastSeen: new Date() } }).catch(() => {});
+  if (socket.user.isDepartmentMember) {
+    getTeamMemberModel(socket.user.department)
+      .updateOne({ _id: id }, { $set: { lastSeen: new Date(), signedIn: true } })
+      .catch(() => {});
+  } else {
+    User.updateOne({ _id: id }, { $set: { lastSeen: new Date() } }).catch(() => {});
+  }
 
   emitOnlineUsers();
 

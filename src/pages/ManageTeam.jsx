@@ -191,8 +191,10 @@ export default function ManageTeam({
   department: propDepartment,
   isSociety,
   onBack,
+  readOnly = false,
 }) {
   const { user, loading: authLoading } = useAuth();
+  const isReadOnly = readOnly || !!user?.isDepartmentMember;
   const [viewMode, setViewMode] = useState(window.innerWidth > 640 ? "list" : "grid");
   const [roster, setRoster] = useState([]);
   const [members, setMembers] = useState([]);
@@ -358,7 +360,7 @@ export default function ManageTeam({
       ]);
       setRoster(rosterRes.data || []);
       setMembers(membersRes.data || []);
-      await loadDeletedMembers();
+      if (!isReadOnly) await loadDeletedMembers();
     } catch (e) {
       toast.error(e.message || "Failed to load team");
     } finally {
@@ -847,7 +849,7 @@ export default function ManageTeam({
                 <Users className="h-10 w-10 text-cyan-400" />
                 {isSociety
                   ? `Manage society › ${displayDepartment}`
-                  : "Manage your team"}
+                  : isReadOnly ? "View your team" : "Manage your team"}
               </h1>
               <p className="text-gray-400 text-sm mt-1">
                 Department:{" "}
@@ -883,15 +885,15 @@ export default function ManageTeam({
                 <Printer className="h-4 w-4" />
                 Print / Export list
               </button>
-              <button
+              {!isReadOnly && <button
                 type="button"
                 onClick={handleDownloadTemplate}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-600/40 border border-gray-500/40 text-gray-200 hover:bg-gray-500/40 transition-colors text-sm font-medium"
               >
                 <Download className="h-4 w-4" />
                 Download template
-              </button>
-              <div className="relative">
+              </button>}
+              {!isReadOnly && <div className="relative">
                 <button
                   type="button"
                   onClick={() => setAddMenuOpen((v) => !v)}
@@ -945,7 +947,7 @@ export default function ManageTeam({
                     </div>
                   </>
                 )}
-              </div>
+              </div>}
             </div>
           </div>
           <div className="flex items-center gap-2 w-full max-w-md">
@@ -1041,6 +1043,7 @@ export default function ManageTeam({
                           openEdit={openEdit}
                           onRequestDelete={(member) => setDeleteConfirmMember(member)}
                           onOpenPhotoModal={(photoUrl, name) => setPhotoModalData({ src: photoUrl, name })}
+                          readOnly={isReadOnly}
                         />
                       );
                     })}
@@ -1061,9 +1064,9 @@ export default function ManageTeam({
                             {LABELS[k] || k}
                           </th>
                         ))}
-                        <th className="px-4 py-3 text-gray-300 font-semibold whitespace-nowrap">
+                        {!isReadOnly && <th className="px-4 py-3 text-gray-300 font-semibold whitespace-nowrap">
                           Actions
-                        </th>
+                        </th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -1121,7 +1124,7 @@ export default function ManageTeam({
                                   )}
                                 </td>
                               ))}
-                              <td className="px-4 py-3 align-middle">
+                              {!isReadOnly && <td className="px-4 py-3 align-middle">
                                 <span className="inline-flex items-center gap-2">
                                   <button
                                     type="button"
@@ -1140,7 +1143,7 @@ export default function ManageTeam({
                                     <Trash2 className="h-4 w-4" />
                                   </button>
                                 </span>
-                              </td>
+                              </td>}
                             </tr>
                           );
                         }
@@ -1252,7 +1255,7 @@ export default function ManageTeam({
           )}
         </div>
 
-        <section className="mt-8 rounded-2xl border border-gray-500/30 bg-[#1e1e2f]/80 overflow-hidden">
+        {!isReadOnly && <section className="mt-8 rounded-2xl border border-gray-500/30 bg-[#1e1e2f]/80 overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border-b border-gray-500/30">
             <div>
               <h2 className="text-sm font-semibold text-richblack-25 flex items-center gap-2">
@@ -1321,7 +1324,7 @@ export default function ManageTeam({
               </ul>
             )}
           </div>
-        </section>
+        </section>}
       </div>
 
       <ConfirmDeleteModal

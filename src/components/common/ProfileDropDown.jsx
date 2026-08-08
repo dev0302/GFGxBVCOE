@@ -614,7 +614,7 @@ function ProfileDropDown({
               navigate(
                 isSocietyRole(user.accountType)
                   ? "/manage-society"
-                  : "/manage-team",
+                  : user?.isDepartmentMember ? "/view-team" : "/manage-team",
               );
             }}
             className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
@@ -626,12 +626,12 @@ function ProfileDropDown({
               <span className="block text-xs font-medium">
                 {isSocietyRole(user.accountType)
                   ? "Manage society"
-                  : "Manage your team"}
+                  : user?.isDepartmentMember ? "View your team" : "Manage your team"}
               </span>
               <span className="block text-[10px] text-gray-500">
                 {isSocietyRole(user.accountType)
                   ? "All departments & members"
-                  : "Add members & upload Excel"}
+                  : user?.isDepartmentMember ? "View department members" : "Add members & upload Excel"}
               </span>
             </span>
           </button>
@@ -723,7 +723,9 @@ function ProfileDropDown({
             </>
           ) : (
             uniqueDashboardKeys.map((key) => {
-              const to = key === "Event Management" ? "/em-dashboard" : `/dashboard/${encodeURIComponent(key)}`;
+              const to = user?.isDepartmentMember
+                ? `/dashboard/member/${encodeURIComponent(key)}`
+                : key === "Event Management" ? "/em-dashboard" : `/dashboard/${encodeURIComponent(key)}`;
               const isEm = key === "Event Management";
               const Icon = isEm ? Calendar : Layout;
               const title = isEm ? "EM Dashboard" : `${getAccountTypeLabel(key) || key} Dashboard`;

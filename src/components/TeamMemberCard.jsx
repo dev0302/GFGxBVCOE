@@ -7,6 +7,7 @@ export default function TeamMemberCard({
   openEdit,
   onRequestDelete,
   onOpenPhotoModal,
+  readOnly = false,
 }) {
   const isTeamMember = row.type === "teamMember";
   const m = isTeamMember ? row.teamMember : row;
@@ -109,7 +110,7 @@ export default function TeamMemberCard({
         </div>
       </div>
 
-      {isTeamMember && (
+      {isTeamMember && !readOnly && (
         <div className="grid grid-cols-2 gap-1 sm:gap-2 mt-1.5 sm:mt-3 pt-1.5 sm:pt-3 border-t border-gray-500/10 w-full">
           <button
             type="button"
