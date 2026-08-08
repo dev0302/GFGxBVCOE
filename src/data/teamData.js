@@ -96,63 +96,6 @@ const teamData = [
         timeline: []
     },
     {
-        name: "Piyush Kumar Singh",
-        branch: "CSE",
-        year: "2nd",
-        position: "Public Relations & Outreach",
-        p0: "Public Relations & Outreach",
-        image: "/Piyush.webp",
-        p1: "Executive Technical",
-        p2: "",
-        email: "piyushksbvp@gmail.com",
-        instaLink: "https://www.instagram.com/thepiyushks/",
-        linkedinLink: "https://in.linkedin.com/in/piyush-kumar-singh1",
-        timeline: [
-            {
-                year: "2025",
-                role: "Public Relations and Outreach Lead",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, New Delhi"
-            },
-            {
-                year: "2025",
-                role: "Design and Creative Head",
-                project: "Enactus",
-                description: "College Chapter, BVCOE, New Delhi"
-            },
-            {
-                year: "2024",
-                role: "Technical Executive",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, New Delhi"
-            },
-            {
-                year: "2023",
-                role: "Citizen Space Scientist",
-                project: "IASC",
-                description: "NASA, United States"
-            },
-            {
-                year: "2024",
-                role: "Co-Founder",
-                project: "SLOOT",
-                description: ""
-            },
-            {
-                year: "2022",
-                role: "Top 10 innovators of India",
-                project: "YI2022",
-                description: "MEPSC Niti Aayog, New Delhi "
-            },
-            {
-                year: "2022",
-                role: "Sports Secratary ",
-                project: "Bbpsmv, New Delhi",
-                description: ""
-            }
-        ]
-    },
-    {
         name: "Archita",
         branch: "Information Technology",
         year: "3rd",

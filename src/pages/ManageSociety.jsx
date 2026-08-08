@@ -6,7 +6,7 @@ import { getTeamDepartments, getTeamMembers, getDepartmentRoster, getAllPeople, 
 import { isSocietyRole } from "../services/api";
 import { toast } from "sonner";
 import { Users, ChevronRight, Printer, FileText, X, Download, List, Mail, RefreshCw, RotateCcw, Clock } from "react-feather";
-import { avatarPlaceholder, photoPreviewUrl } from "../utils/teamMemberUtils";
+import { avatarPlaceholder, photoPreviewUrl, resolvePredefinedImageUrl } from "../utils/teamMemberUtils";
 import ManageTeam from "./ManageTeam";
 import Search from "../components/Search";
 import { motion, AnimatePresence } from "framer-motion";
@@ -291,6 +291,11 @@ export default function ManageSociety() {
         non_tech_society: profile?.non_tech_society || "",
         accountType: u?.accountType || "",
         role: profile?.position || profile?.p0 || u?.accountType || "Member",
+        photo:
+          u?.image ||
+          (row.predefinedProfile?.image
+            ? resolvePredefinedImageUrl(row.predefinedProfile.image)
+            : ""),
       };
     });
     const fromMembers = (extraMembers || []).map((m) => ({
@@ -304,6 +309,7 @@ export default function ManageSociety() {
       non_tech_society: m.non_tech_society || "",
       accountType: "",
       role: m.position || "Member",
+      photo: m.photo || m.image_drive_link || "",
     }));
     return [...fromRoster, ...fromMembers];
   };
@@ -321,6 +327,7 @@ export default function ManageSociety() {
       non_tech_society: profile.non_tech_society || "",
       accountType: u?.accountType || "",
       role: profile.position || profile.p0 || u?.accountType || "Member",
+      photo: u?.image || "",
     };
   };
 
@@ -399,11 +406,12 @@ export default function ManageSociety() {
     setPrintAllLoading(true);
     try {
       const map = await buildSocietyExportSections();
-      downloadAllDepartmentsPDF(
+      await downloadAllDepartmentsPDF(
         map,
         printAllSelectedFields,
         EXPORT_LABELS,
-        `${ORG_NAME} - Society Member List (All Departments)`
+        `${ORG_NAME} - Society Member List (All Departments)`,
+        { includePhotos: true }
       );
       toast.success("PDF downloaded");
     } catch (e) {

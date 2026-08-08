@@ -476,7 +476,6 @@ export const AUTH_DEPARTMENTS = [
   'Social Media and Promotion',
   'Technical',
   'Event Management',
-  'Public Relation and Outreach',
   'Design and Creative',
   'Content and Documentation',
   'Capture The Event',
@@ -539,7 +538,7 @@ export function userCanAccessLeadershipTransition(user) {
   ).trim().toLowerCase();
   const isDepartmentLead = [
     'Social Media and Promotion', 'Technical', 'Event Management',
-    'Public Relation and Outreach', 'Design and Creative', 'Content and Documentation',
+    'Design and Creative', 'Content and Documentation',
     'Capture The Event', 'Sponsorship and Marketing',
   ].includes(String(user.accountType || '').trim()) && position.includes('lead');
   return isSocietyRole(user.accountType) || isDepartmentLead;
@@ -750,9 +749,10 @@ export async function updateAvatar(file) {
 }
 
 // Search people (team members + users with profile and predefinedProfile)
-export async function getSearchPeople(q) {
+export async function getSearchPeople(q, department) {
   const params = new URLSearchParams();
   if (q != null && String(q).trim()) params.set('q', String(q).trim());
+  if (department) params.set('department', department);
   const res = await authFetch(`/api/v1/auth/search-people?${params.toString()}`);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Search failed');
@@ -958,7 +958,12 @@ export async function addTeamMemberByInviteLink(token, payload) {
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to join team');
+  if (!res.ok) {
+    const err = new Error(data.message || 'Failed to join team');
+    if (data.code) err.code = data.code;
+    if (data.department) err.department = data.department;
+    throw err;
+  }
   return data;
 }
 
@@ -1332,10 +1337,13 @@ export async function deleteVaultFolder(id) {
 }
 
 export async function uploadVaultDocument(formData) {
-  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+  const token = getAuthToken();
+  const headers = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/vault/upload`, {
     method: "POST",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    credentials: "include",
+    headers,
     body: formData,
   });
   const data = await res.json().catch(() => ({}));

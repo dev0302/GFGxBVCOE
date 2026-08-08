@@ -664,7 +664,7 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
   );
 }
 
-export default function Search({ variant = "navbar", isDarkNavbar = true, placeholder = "Search members…", className = "" }) {
+export default function Search({ variant = "navbar", isDarkNavbar = true, placeholder = "Search members…", className = "", department = null }) {
   const { user } = useAuth();
   const [results, setResults] = useState({ teamMembers: [], users: [], predefinedOnly: [] });
   const [loading, setLoading] = useState(false);
@@ -682,7 +682,7 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setLoading(true);
-      getSearchPeople(q)
+      getSearchPeople(q, department || undefined)
         .then((res) => setResults({
           teamMembers: res.teamMembers || [],
           users: res.users || [],
@@ -694,7 +694,7 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [user, query]);
+  }, [user, query, department]);
 
   useEffect(() => {
     const onClick = (e) => {
@@ -730,24 +730,10 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
   }, [selectedItem]);
 
   const { teamMembers, users, predefinedOnly } = results;
-  const q = query.trim().toLowerCase();
-  const filteredTeamMembers = q
-    ? teamMembers.filter((m) => (m.name || "").toLowerCase().startsWith(q))
-    : [];
-  const filteredUsers = q
-    ? users.filter((u) => {
-      const name = [u.firstName, u.lastName].filter(Boolean).join(" ").toLowerCase();
-      const email = (u.email || "").toLowerCase();
-      return name.startsWith(q) || email.startsWith(q);
-    })
-    : [];
-  const filteredPredefinedOnly = q
-    ? predefinedOnly.filter((p) => {
-      const name = (p.name || "").toLowerCase();
-      const email = (p.email || "").toLowerCase();
-      return name.startsWith(q) || email.startsWith(q);
-    })
-    : [];
+  const q = query.trim();
+  const filteredTeamMembers = q ? teamMembers : [];
+  const filteredUsers = q ? users : [];
+  const filteredPredefinedOnly = q ? predefinedOnly : [];
   const totalCount = filteredTeamMembers.length + filteredUsers.length + filteredPredefinedOnly.length;
   const hasQuery = query.trim().length > 0;
   const showDropdown = dropdownOpen && hasQuery;
@@ -821,9 +807,10 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
                     const src = (m.photo || m.image_drive_link)
                       ? photoPreviewUrl(m.photo || m.image_drive_link)
                       : avatarPlaceholder(m.name);
+                    const deptLabel = m.department ? getAccountTypeLabel(m.department) || m.department : "Team";
                     return (
                       <button
-                        key={`tm-${m._id}`}
+                        key={`tm-${m.department || "dept"}-${m._id}`}
                         type="button"
                         role="option"
                         className="search-member-row"
@@ -846,7 +833,7 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
                           </div>
                           <span className="name">{m.name || "—"}</span>
                         </div>
-                        <span className="role-badge team">Team</span>
+                        <span className="role-badge team">{deptLabel}</span>
                       </button>
                     );
                   })}

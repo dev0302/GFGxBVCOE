@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { addTeamMemberByInviteLink, uploadTeamPhotoByInviteLink } from "../services/api";
 import { useTeamInviteValidation } from "../hooks/useTeamInviteValidation";
 import { toast } from "sonner";
-import { Users } from "react-feather";
+import { Users, AlertCircle } from "react-feather";
 import { photoPreviewUrl, avatarPlaceholder } from "../utils/teamMemberUtils";
 import loadImage from "blueimp-load-image";
 import ReactCrop, { centerCrop, makeAspectCrop } from "react-image-crop";
@@ -44,6 +44,7 @@ export default function JoinTeamByLink() {
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState(COLS.reduce((acc, k) => ({ ...acc, [k]: "" }), {}));
   const [saving, setSaving] = useState(false);
+  const [alreadyEnrolledModal, setAlreadyEnrolledModal] = useState(null);
   const [cropImageSrc, setCropImageSrc] = useState(null);
   const [crop, setCrop] = useState(null);
   const [photoUploading, setPhotoUploading] = useState(false);
@@ -184,7 +185,14 @@ export default function JoinTeamByLink() {
       setSubmitted(true);
       setForm(COLS.reduce((acc, k) => ({ ...acc, [k]: "" }), {}));
     } catch (e) {
-      toast.error(e.message || "Failed to submit");
+      if (e.code === "TEAM_INVITE_ALREADY_ENROLLED") {
+        setAlreadyEnrolledModal({
+          department: e.department || "another",
+          message: e.message,
+        });
+      } else {
+        toast.error(e.message || "Failed to submit");
+      }
     } finally {
       setSaving(false);
     }
@@ -332,6 +340,46 @@ export default function JoinTeamByLink() {
           </div>
         )}
       </div>
+
+      {alreadyEnrolledModal && (
+        <div
+          className="fixed inset-0 z-[65] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="already-enrolled-title"
+          onClick={() => setAlreadyEnrolledModal(null)}
+        >
+          <div
+            className="bg-[#1e1e2f] rounded-2xl border border-amber-500/30 p-6 max-w-md w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-400">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <h3 id="already-enrolled-title" className="text-lg font-semibold text-richblack-25">
+                  Form already submitted
+                </h3>
+                <p className="text-sm text-gray-400 mt-2 leading-relaxed">
+                  You have already submitted this form earlier and cannot re-submit.
+                </p>
+                <p className="text-sm text-gray-300 mt-3">
+                  You are already enrolled in the{" "}
+                  <span className="text-cyan-300 font-medium">{alreadyEnrolledModal.department}</span> department.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setAlreadyEnrolledModal(null)}
+              className="w-full py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
 
       {cropImageSrc && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80" onClick={() => { URL.revokeObjectURL(cropImageSrc); setCropImageSrc(null); setCrop(null); }}>

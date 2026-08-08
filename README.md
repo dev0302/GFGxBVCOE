@@ -76,7 +76,6 @@ The codebase is split into:
   - Content and Documentation
   - Photography and Videography
   - Sponsorship and Marketing
-  - Public Relation and Outreach
   - Social Media and Promotion
 
 ### Event Management
