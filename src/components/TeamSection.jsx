@@ -79,19 +79,6 @@ const TeamSection = () => {
       email: "archita770@gmail.com",
       instaLink: "https://www.instagram.com/archiitta.r?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
       linkedinLink: "https://www.linkedin.com/in/archita-337521376"
-    },
-    {
-      name: "Piyush Kumar Singh",
-      branch: "CSE",
-      year: "2nd",
-      position: "Public Relations & Outreach",
-      p0: "Public Relations & Outreach",
-      image: "/Piyush.webp",
-      p1: "Executive Technical",
-      p2: "",
-      email: "piyushksbvp@gmail.com",
-      instaLink: "https://www.instagram.com/thepiyushks/",
-      linkedinLink: "https://in.linkedin.com/in/piyush-kumar-singh1"
     }
   ];
 

@@ -7,7 +7,6 @@ const DASHBOARD_KEYS = [
   "Social Media and Promotion",
   "Technical",
   "Event Management",
-  "Public Relation and Outreach",
   "Design and Creative",
   "Content and Documentation",
   "Capture The Event",

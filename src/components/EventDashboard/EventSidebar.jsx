@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Upload, Link2, Users, List, Calendar, Shield, Grid, Eye, Database, UserCheck, Folder } from "react-feather";
+import { Upload, Link2, Users, List, Calendar, Grid, Eye, Database, UserCheck, Folder } from "react-feather";
 import { useAuth } from "../../context/AuthContext";
-import { canManageEventUploadConfig, canManageForceDeleteConfig, getVectorVisionAccess } from "../../services/api";
+import { canManageEventUploadConfig, getVectorVisionAccess } from "../../services/api";
 
 const sidebarLinks = [
   { name: "Upload new event", path: "/em-dashboard/upload", icon: Upload },
   { name: "Upcoming event", path: "/em-dashboard/upcoming", icon: Calendar },
+  { name: "Manage uploaded events", path: "/em-dashboard/manage", icon: List },
+  { name: "Departments allowed", path: "/em-dashboard/departments", icon: Users, requireConfig: true },
+  { name: "Document Vault", path: "/em-dashboard/documents", icon: Folder },
   {
     name: "Generate upload link",
     path: "/em-dashboard/generate-link",
@@ -14,12 +17,8 @@ const sidebarLinks = [
   },
   { name: "Generate QR", path: "/em-dashboard/generate-qr", icon: Grid },
   { name: "Vector Vision", path: "/em-dashboard/vector-vision", icon: Eye },
-  { name: "Document Vault", path: "/em-dashboard/documents", icon: Folder },
   { name: "Face Enrollment", path: "/member-enrollment", icon: UserCheck },
   { name: "VectorVision admin", path: "/vectorvision-admin", icon: Database, requireVectorVisionAccess: true },
-  { name: "Departments allowed", path: "/em-dashboard/departments", icon: Users, requireConfig: true },
-  { name: "Force delete permissions", path: "/em-dashboard/force-delete", icon: Shield, requireFacultyIncharge: true },
-  { name: "Manage uploaded events", path: "/em-dashboard/manage", icon: List },
 ];
 
 export default function EventSidebar() {
@@ -50,7 +49,6 @@ export default function EventSidebar() {
       <div className="flex flex-col gap-0.5 px-2 md:px-4">
         {sidebarLinks.map((link) => {
           if (link.requireConfig && !canManageEventUploadConfig(user?.accountType)) return null;
-          if (link.requireFacultyIncharge && !canManageForceDeleteConfig(user?.accountType)) return null;
           if (link.requireVectorVisionAccess && !hasVectorVisionAccess) return null;
           const Icon = link.icon;
           const isActive = matchRoute(link.path);

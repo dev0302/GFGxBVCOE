@@ -6,6 +6,7 @@
 import { jsPDF } from "jspdf";
 import { applyPlugin } from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import { avatarPlaceholder, photoPreviewLargeAvatarUrl } from "./teamMemberUtils";
 
 applyPlugin(jsPDF);
 
@@ -99,7 +100,9 @@ export function downloadTeamListExcel(members, columns, labels, title) {
  * Export multiple departments (for Manage Society "print whole list").
  * PDF: section per department with subheadings; Excel: one sheet per department or one sheet with department column.
  */
-export function downloadAllDepartmentsPDF(departmentMembersMap, columns, labels, title) {
+export async function downloadAllDepartmentsPDF(departmentMembersMap, columns, labels, title, options = {}) {
+  const includePhotos = options.includePhotos === true;
+  const nameColIndex = columns.indexOf("name");
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   let startY = 18;
 
@@ -130,9 +133,9 @@ export function downloadAllDepartmentsPDF(departmentMembersMap, columns, labels,
   doc.text(`Total persons in society: ${totalPeople}`, 14, startY);
   startY += 8;
 
-  deptNames.forEach((dept) => {
+  for (const dept of deptNames) {
     const members = departmentMembersMap[dept] || [];
-    if (members.length === 0) return;
+    if (members.length === 0) continue;
 
     if (startY > 250) {
       doc.addPage();
@@ -145,13 +148,24 @@ export function downloadAllDepartmentsPDF(departmentMembersMap, columns, labels,
     doc.setTextColor(0, 0, 0);
     startY += 6;
 
-    const rows = members.map((m) =>
+    const membersForTable =
+      includePhotos && nameColIndex >= 0 ? await attachPdfPhotoData(members) : members;
+
+    const rows = membersForTable.map((m) =>
       columns.map((k) => {
         const raw = k === "photo" ? m.photo || m.image_drive_link : m[k];
         const v = raw != null && String(raw).trim() !== "" ? String(raw).trim() : "—";
         return String(v).substring(0, 80);
       })
     );
+
+    const columnStyles = {};
+    if (includePhotos && nameColIndex >= 0) {
+      columnStyles[nameColIndex] = {
+        cellPadding: { top: 2, right: 2, bottom: 2, left: PDF_MEMBER_PHOTO_MM + 4 },
+        minCellHeight: PDF_MEMBER_PHOTO_CELL_HEIGHT,
+      };
+    }
 
     doc.autoTable({
       head: [head],
@@ -161,9 +175,21 @@ export function downloadAllDepartmentsPDF(departmentMembersMap, columns, labels,
       headStyles: { fillColor: [58, 58, 58], textColor: [245, 245, 245] },
       alternateRowStyles: { fillColor: [248, 248, 248] },
       margin: { left: 14, right: 14 },
+      columnStyles,
+      didDrawCell: (data) => {
+        if (!includePhotos || nameColIndex < 0 || data.section !== "body") return;
+        if (data.column.index !== nameColIndex) return;
+        const member = membersForTable[data.row.index];
+        const dataUrl = member?._pdfPhotoDataUrl;
+        if (!dataUrl) return;
+        const pad = 1.5;
+        const size = PDF_MEMBER_PHOTO_MM;
+        const y = data.cell.y + Math.max(pad, (data.cell.height - size) / 2);
+        doc.addImage(dataUrl, "JPEG", data.cell.x + pad, y, size, size);
+      },
     });
     startY = doc.lastAutoTable.finalY + 14;
-  });
+  }
 
   doc.save(sanitizeFilename(`${title || "society-member-list"}.pdf`));
 }
@@ -207,4 +233,81 @@ export function downloadAllDepartmentsExcel(departmentMembersMap, columns, label
 
 function sanitizeFilename(name) {
   return name.replace(/[\\/*?:"<>|]/g, "-").trim() || "export";
+}
+
+const PDF_MEMBER_PHOTO_MM = 10;
+const PDF_MEMBER_PHOTO_CELL_HEIGHT = 12;
+
+function memberPhotoSource(member) {
+  const raw = (member?.photo || member?.image_drive_link || member?.image || "").trim();
+  if (raw) return photoPreviewLargeAvatarUrl(raw);
+  return avatarPlaceholder(member?.name || "Member");
+}
+
+/** Draw image as a centered circle (cover crop) on canvas. */
+function drawCircularImage(ctx, img, size) {
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, size, size);
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.clip();
+
+  const nw = img.naturalWidth || size;
+  const nh = img.naturalHeight || size;
+  const scale = Math.max(size / nw, size / nh);
+  const drawW = nw * scale;
+  const drawH = nh * scale;
+  const offsetX = (size - drawW) / 2;
+  const offsetY = (size - drawH) / 2;
+  ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+  ctx.restore();
+}
+
+/** Load remote avatar as JPEG data URL for jsPDF (colour preserved via canvas). */
+function imageUrlToJpegDataUrl(url, options = {}) {
+  const { circular = false } = options;
+  if (!url) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try {
+        const maxSide = 256;
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(null);
+          return;
+        }
+        if (circular) {
+          canvas.width = maxSide;
+          canvas.height = maxSide;
+          drawCircularImage(ctx, img, maxSide);
+        } else {
+          const nw = img.naturalWidth || maxSide;
+          const nh = img.naturalHeight || maxSide;
+          const scale = Math.min(1, maxSide / Math.max(nw, nh, 1));
+          canvas.width = Math.max(1, Math.round(nw * scale));
+          canvas.height = Math.max(1, Math.round(nh * scale));
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        }
+        resolve(canvas.toDataURL("image/jpeg", 0.92));
+      } catch {
+        resolve(null);
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+async function attachPdfPhotoData(members) {
+  return Promise.all(
+    members.map(async (member) => ({
+      ...member,
+      _pdfPhotoDataUrl: await imageUrlToJpegDataUrl(memberPhotoSource(member), { circular: true }),
+    }))
+  );
 }

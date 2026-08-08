@@ -16,7 +16,6 @@ const TEAM_DEPARTMENTS = [
   "Social Media and Promotion",
   "Technical",
   "Event Management",
-  "Public Relation and Outreach",
   "Design and Creative",
   "Content and Documentation",
   "Capture The Event",
@@ -54,6 +53,17 @@ async function purgeExpiredDeletedTeamMembers(Model) {
       deletedAt: { $ne: null, $lte: cutoff },
     });
   }
+}
+
+/** First department (if any) with an active team row for this email. Ignores soft-deleted members. */
+async function findActiveTeamMemberDepartmentByEmail(emailNorm) {
+  if (!emailNorm) return null;
+  for (const dept of TEAM_DEPARTMENTS) {
+    const Model = getTeamMemberModel(dept);
+    const existing = await Model.findOne({ email: emailNorm, ...activeTeamMemberFilter }).lean();
+    if (existing) return dept;
+  }
+  return null;
 }
 
 function resolveDepartment(req) {
@@ -784,10 +794,14 @@ exports.addMemberByInviteLink = async (req, res) => {
         return res.status(400).json({ success: false, message: "You are already registered as a Core/Head member. This form is only for Executive applications." });
       }
 
-      const Model = getTeamMemberModel(link.department);
-      const existingMember = await Model.findOne({ email: emailNorm, ...activeTeamMemberFilter });
-      if (existingMember) {
-        return res.status(400).json({ success: false, message: "You are already registered in this department." });
+      const enrolledDepartment = await findActiveTeamMemberDepartmentByEmail(emailNorm);
+      if (enrolledDepartment) {
+        return res.status(409).json({
+          success: false,
+          code: "TEAM_INVITE_ALREADY_ENROLLED",
+          department: enrolledDepartment,
+          message: `You have already submitted the form earlier and cannot re-submit. You are already enrolled in the ${enrolledDepartment} department.`,
+        });
       }
     }
 

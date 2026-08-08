@@ -334,7 +334,6 @@ exports.login = async (req, res) => {
     const nonEmDashboardKeys = [
       "Social Media and Promotion",
       "Technical",
-      "Public Relation and Outreach",
       "Design and Creative",
       "Content and Documentation",
       "Capture The Event",
@@ -614,7 +613,6 @@ exports.me = async (req, res) => {
     const nonEmDashboardKeys = [
       "Social Media and Promotion",
       "Technical",
-      "Public Relation and Outreach",
       "Design and Creative",
       "Content and Documentation",
       "Capture The Event",
@@ -891,37 +889,86 @@ exports.enrichProfile = async (req, res) => {
   }
 };
 
+const TEAM_DEPARTMENTS = [
+  "Social Media and Promotion",
+  "Technical",
+  "Event Management",
+  "Design and Creative",
+  "Content and Documentation",
+  "Capture The Event",
+  "Sponsorship and Marketing",
+];
+
+function filterTeamMembersByQuery(members, q) {
+  if (q.length >= 2) {
+    const lower = q.toLowerCase();
+    return members.filter(
+      (m) =>
+        (m.name && m.name.toLowerCase().includes(lower)) ||
+        (m.email && m.email.toLowerCase().includes(lower)) ||
+        (m.branch && m.branch.toLowerCase().includes(lower)) ||
+        (m.year && String(m.year).toLowerCase().includes(lower)) ||
+        (m.section && m.section.toLowerCase().includes(lower)) ||
+        (m.non_tech_society && m.non_tech_society.toLowerCase().includes(lower)) ||
+        (m.contact && String(m.contact).includes(q))
+    );
+  }
+  if (q.length === 1) {
+    const lower = q.toLowerCase();
+    return members.filter((m) => (m.name || "").toLowerCase().startsWith(lower));
+  }
+  return members;
+}
+
+function resolveSearchDepartments(req) {
+  const accountType = normalizeDepartmentName(req.user?.accountType);
+  if (!accountType) return [];
+  const isSociety = SOCIETY_ROLES.includes(accountType);
+  const scopeDepartment = normalizeDepartmentName(req.query?.department);
+
+  if (scopeDepartment) {
+    if (!TEAM_DEPARTMENTS.includes(scopeDepartment)) return [];
+    if (isSociety) return [scopeDepartment];
+    if (scopeDepartment === accountType) return [scopeDepartment];
+    return [];
+  }
+
+  if (isSociety) return TEAM_DEPARTMENTS;
+  if (TEAM_DEPARTMENTS.includes(accountType)) return [accountType];
+  return [];
+}
+
+async function searchTeamMembersInDepartments(departments, q) {
+  if (!departments.length) return [];
+  if (departments.length > 1 && q.length < 2) return [];
+
+  let combined = [];
+  for (const dept of departments) {
+    const TeamModel = getTeamMemberModel(dept);
+    const all = await TeamModel.find(ACTIVE_TEAM_MEMBER_FILTER).sort({ createdAt: -1 }).lean();
+    const filtered = filterTeamMembersByQuery(all, q);
+    for (const m of filtered) {
+      combined.push(departments.length > 1 ? { ...m, department: dept } : m);
+    }
+  }
+  return combined.slice(0, 20);
+}
+
 /**
  * Search people: team members (department-scoped) + users (with profile and predefinedProfile).
- * GET /api/v1/auth/search-people?q=...
+ * GET /api/v1/auth/search-people?q=...&department=...
  */
 exports.searchPeople = async (req, res) => {
   try {
     const q = (req.query.q || "").trim();
-    const department = req.user?.accountType;
+    const scopeDepartment = normalizeDepartmentName(req.query?.department);
     let teamMembers = [];
     let users = [];
     let predefinedOnly = [];
 
-    if (department && !SOCIETY_ROLES.includes(department)) {
-      const TeamModel = getTeamMemberModel(department);
-      const all = await TeamModel.find(ACTIVE_TEAM_MEMBER_FILTER).sort({ createdAt: -1 }).lean();
-      if (q.length >= 2) {
-        const lower = q.toLowerCase();
-        teamMembers = all.filter(
-          (m) =>
-            (m.name && m.name.toLowerCase().includes(lower)) ||
-            (m.email && m.email.toLowerCase().includes(lower)) ||
-            (m.branch && m.branch.toLowerCase().includes(lower)) ||
-            (m.year && String(m.year).toLowerCase().includes(lower)) ||
-            (m.section && m.section.toLowerCase().includes(lower)) ||
-            (m.non_tech_society && m.non_tech_society.toLowerCase().includes(lower)) ||
-            (m.contact && String(m.contact).includes(q))
-        );
-      } else {
-        teamMembers = all;
-      }
-      teamMembers = teamMembers.slice(0, 20);
+    const searchDepartments = resolveSearchDepartments(req);
+    if (searchDepartments.length) {
+      teamMembers = await searchTeamMembersInDepartments(searchDepartments, q);
     }
 
     if (q.length >= 2) {
@@ -969,7 +1016,11 @@ exports.searchPeople = async (req, res) => {
         u.predefinedProfile = predefined || null;
       }
       users = userDocs.map(normalizeUserProfileFields);
-
+      if (scopeDepartment) {
+        users = users.filter(
+          (u) => normalizeDepartmentName(u.accountType) === scopeDepartment
+        );
+      }
     }
 
     return res.status(200).json({
@@ -986,17 +1037,6 @@ exports.searchPeople = async (req, res) => {
     });
   }
 };
-
-const TEAM_DEPARTMENTS = [
-  "Social Media and Promotion",
-  "Technical",
-  "Event Management",
-  "Public Relation and Outreach",
-  "Design and Creative",
-  "Content and Documentation",
-  "Capture The Event",
-  "Sponsorship and Marketing",
-];
 
 /**
  * Get all users (society role only). For Manage Society "Show list".

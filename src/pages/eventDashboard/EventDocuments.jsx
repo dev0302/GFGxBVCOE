@@ -1190,7 +1190,7 @@ export default function EventDocuments() {
                   <img
                     src={getCloudinaryAvatarUrl(
                       previewDoc.createdByAvatar,
-                      previewDoc.createdBy || previewDoc.uploadedBy || "Event Management Member"
+                      previewDoc.createdBy || previewDoc.uploadedBy || "User"
                     )}
                     alt={previewDoc.createdBy || "Uploader"}
                     className="w-5 h-5 rounded-full border border-cyan-400/40 object-cover shadow-sm shrink-0"
@@ -1421,27 +1421,28 @@ export default function EventDocuments() {
 
                 <div className="space-y-2.5 text-xs text-gray-300 i-fonts">
                   <div className="flex items-center justify-between py-1.5 border-b border-white/5">
-                    <span className="text-gray-400">Uploaded / Created By</span>
-                    <div className="flex items-center gap-2">
+                    <span className="text-gray-400 shrink-0">Uploaded / Created By</span>
+                    <div className="flex items-center gap-2 min-w-0">
                       <img
                         src={getCloudinaryAvatarUrl(
                           infoTarget.item.createdByAvatar,
-                          infoTarget.item.createdBy || infoTarget.item.uploadedBy || "Event Management Member"
+                          infoTarget.item.createdBy || infoTarget.item.uploadedBy || "User"
                         )}
                         alt={infoTarget.item.createdBy || "Uploader"}
-                        className="w-5 h-5 rounded-full border border-cyan-400/40 object-cover shadow-sm"
+                        className="w-8 h-8 rounded-full border border-cyan-400/40 object-cover shadow-sm shrink-0"
                       />
-                      <span className="font-semibold text-cyan-300">
-                        {infoTarget.item.createdBy || infoTarget.item.uploadedBy || "Event Management Member"}
-                      </span>
+                      <div className="min-w-0 text-right">
+                        <span className="font-semibold text-cyan-300 block truncate">
+                          {infoTarget.item.createdBy || infoTarget.item.uploadedBy || "Unknown User"}
+                        </span>
+                        {infoTarget.item.createdByEmail && (
+                          <span className="font-mono text-cyan-200/70 text-[10px] block truncate">
+                            {infoTarget.item.createdByEmail}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  {infoTarget.item.createdByEmail && (
-                    <div className="flex justify-between py-1.5 border-b border-white/5">
-                      <span className="text-gray-400">Uploader Email</span>
-                      <span className="font-mono text-cyan-200/90 text-[11px]">{infoTarget.item.createdByEmail}</span>
-                    </div>
-                  )}
                   <div className="flex justify-between py-1.5 border-b border-white/5">
                     <span className="text-gray-400">Date & Timestamp</span>
                     <span className="font-mono text-gray-200">

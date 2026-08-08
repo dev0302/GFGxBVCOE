@@ -261,25 +261,6 @@ const headsData = [
 
   // 📱 Social Media & Promotion
   {
-    name: "Radhika Trivedi",
-    branch: "CSE",
-    year: "3rd Year",
-    position: "PR & Outreach Head",
-    image: "Radhika.webp",
-    email: "radhikatriv0712@gmail.com",
-    instaLink: "https://www.instagram.com/radhika_trivedi_",
-    linkedinLink: "https://www.linkedin.com/in/radhika-trivedi-44a453256",
-    timeline: [
-      {
-        year: 2025,
-        role: "Head",
-        organization: "GFG, BVCOE",
-        description: "Led GeeksforGeeks BVCOE chapter as Head."
-      }
-    ]
-  },
-
-  {
     name: "Muskan",
     branch: "CSE 1",
     year: "3rd",
@@ -312,33 +293,6 @@ const headsData = [
     email: "uneebhasanlm10@gmail.com",
     instaLink: "https://www.instagram.com/uneeb_hasan18",
     linkedinLink: "https://www.linkedin.com/in/uneeb-hasan-424a97322/",
-  },
-
-  // 📢 PR & Outreach
-  {
-    name: "Krishna Bansal",
-    branch: "CSE",
-    year: "2nd",
-    position: "PR & Outreach Head",
-    p0: "PR & Outreach Head",
-    image: "/Krishna.webp",
-    p1: "Marketing Executive",
-    p2: "Marketing Executive",
-    email: "bansalkrishnaa835@gmail.com",
-    instaLink: "https://www.instagram.com/krishnaa.ww",
-    linkedinLink: "https://www.linkedin.com/in/krishna-bansal-814252317/",
-    timeline: [
-      {
-        year: "2025",
-        role: "PR & Outreach Head, GFG BVCOE",
-        description: "Managing outreach and public relations.",
-      },
-      {
-        year: "2024",
-        role: "Marketing Executive, GFG BVCOE",
-        description: "Worked in marketing & promotional activities.",
-      },
-    ],
   },
 
   // 📰 Content & Documentation

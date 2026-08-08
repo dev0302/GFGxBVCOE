@@ -22,12 +22,6 @@ const ResultImages = () => {
       description: ""
     },
     {
-      id: 4,
-      url: "/result5.webp",
-      title: "Public Relation and Outreach",
-      description: ""
-    },
-    {
       id: 5,
       url: "/result6.webp",
       title: "Design and Creative",

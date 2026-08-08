@@ -92,6 +92,8 @@ const COLS = [
   "non_tech_society",
 ];
 
+const LIST_COLS = ["photo", ...COLS.filter((k) => k !== "photo")];
+
 const LABELS = {
   name: "Name",
   year: "Year",
@@ -948,7 +950,7 @@ export default function ManageTeam({
           </div>
           <div className="flex items-center gap-2 w-full max-w-md">
             <div className="flex-1 min-w-0 i-fonts">
-              <Search variant="manage-team" placeholder="Search members…" />
+              <Search variant="manage-team" placeholder="Search members…" department={department} />
             </div>
             <div className="flex items-center bg-[#1e1e2f] border border-gray-500/40 rounded-xl p-1 shrink-0">
               <button
@@ -1051,7 +1053,7 @@ export default function ManageTeam({
                   <table className="w-full text-left text-sm">
                     <thead>
                       <tr className="border-b border-gray-500/30 bg-[#252536]/80">
-                        {COLS.map((k) => (
+                        {LIST_COLS.map((k) => (
                           <th
                             key={k}
                             className="px-4 py-3 text-gray-300 font-semibold whitespace-nowrap"
@@ -1075,7 +1077,7 @@ export default function ManageTeam({
                               key={`tm-${m._id}`}
                               className="border-b border-gray-500/20 hover:bg-gray-500/10"
                             >
-                              {COLS.map((k) => (
+                              {LIST_COLS.map((k) => (
                                 <td
                                   key={k}
                                   className="px-4 py-3 text-gray-200 max-w-[200px] truncate align-middle"
@@ -1184,7 +1186,7 @@ export default function ManageTeam({
                             key={`roster-${row.email}`}
                             className="border-b border-gray-500/20 hover:bg-gray-500/10"
                           >
-                            {COLS.map((k) => (
+                            {LIST_COLS.map((k) => (
                               <td
                                 key={k}
                                 className="px-4 py-3 text-gray-200 max-w-[200px] align-middle"
