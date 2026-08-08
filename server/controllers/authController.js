@@ -695,17 +695,46 @@ exports.getLastSeenFeed = async (req, res) => {
       .limit(600)
       .lean();
 
-    users.sort((a, b) => {
+    const memberGroups = await Promise.all(
+      TEAM_DEPARTMENTS.map(async (department) => {
+        const members = await getTeamMemberModel(department)
+          .find({ ...ACTIVE_TEAM_MEMBER_FILTER })
+          .select("name email photo lastSeen")
+          .limit(600)
+          .lean();
+        return members.map((member) => ({ ...member, department }));
+      })
+    );
+
+    const activityRows = [
+      ...users.map((user) => ({
+        id: `user:${user._id}`,
+        presenceId: String(user._id),
+        type: "user",
+        name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User",
+        image: user.image || "",
+        lastSeen: user.lastSeen || null,
+      })),
+      ...memberGroups.flat().map((member) => ({
+        id: `member:${member.department}:${member._id}`,
+        presenceId: String(member._id),
+        type: "member",
+        department: member.department,
+        name: member.name || member.email || "Member",
+        image: member.photo || "",
+        lastSeen: member.lastSeen || null,
+      })),
+    ];
+
+    activityRows.sort((a, b) => {
       const ta = a.lastSeen ? new Date(a.lastSeen).getTime() : -Infinity;
       const tb = b.lastSeen ? new Date(b.lastSeen).getTime() : -Infinity;
       return tb - ta;
     });
 
-    const rows = users.map((u) => ({
-      id: String(u._id),
-      name: `${u.firstName || ""} ${u.lastName || ""}`.trim() || "User",
-      image: u.image || "",
-      lastSeen: u.lastSeen ? new Date(u.lastSeen).toISOString() : null,
+    const rows = activityRows.slice(0, 600).map((row) => ({
+      ...row,
+      lastSeen: row.lastSeen ? new Date(row.lastSeen).toISOString() : null,
     }));
 
     return res.status(200).json({ success: true, users: rows });
