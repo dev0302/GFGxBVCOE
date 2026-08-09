@@ -783,10 +783,11 @@ export async function updateAvatar(file) {
 }
 
 // Search people (team members + users with profile and predefinedProfile)
-export async function getSearchPeople(q, department) {
+export async function getSearchPeople(q, department, allDepartments = false) {
   const params = new URLSearchParams();
   if (q != null && String(q).trim()) params.set('q', String(q).trim());
   if (department) params.set('department', department);
+  if (allDepartments && !department) params.set('allDepartments', 'true');
   const res = await authFetch(`/api/v1/auth/search-people?${params.toString()}`);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Search failed');

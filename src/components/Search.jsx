@@ -682,7 +682,9 @@ export default function Search({ variant = "navbar", isDarkNavbar = true, placeh
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setLoading(true);
-      getSearchPeople(q, department || undefined)
+      // When no specific department is scoped (e.g. navbar), fetch from all departments
+      const allDepts = !department;
+      getSearchPeople(q, department || undefined, allDepts)
         .then((res) => setResults({
           teamMembers: res.teamMembers || [],
           users: res.users || [],
