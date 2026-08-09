@@ -29,6 +29,8 @@ import {
   sendBroadcastEmail,
   fetchMemberBroadcastEmailAudience,
   sendMemberBroadcastEmail,
+  fetchUnsignedMemberBroadcastEmailAudience,
+  sendUnsignedMemberBroadcastEmail,
   fetchTargetedEmailRecipients,
   sendTargetedEmail,
 } from "../services/api";
@@ -1083,6 +1085,8 @@ function SendEmailToAllContent({ memberOnly = false }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showRecipients, setShowRecipients] = useState(false);
+  // "all" = every department member; "unsigned" = members without signedIn: true
+  const [audienceFilter, setAudienceFilter] = useState("all");
   const [form, setForm] = useState({
     title: "",
     subject: "",
@@ -1095,7 +1099,13 @@ function SendEmailToAllContent({ memberOnly = false }) {
     try {
       setLoadingAudience(true);
       setError("");
-      setAudience(await (memberOnly ? fetchMemberBroadcastEmailAudience() : fetchBroadcastEmailAudience()));
+      if (!memberOnly) {
+        setAudience(await fetchBroadcastEmailAudience());
+      } else if (audienceFilter === "unsigned") {
+        setAudience(await fetchUnsignedMemberBroadcastEmailAudience());
+      } else {
+        setAudience(await fetchMemberBroadcastEmailAudience());
+      }
     } catch (err) {
       setError(err?.message || "Failed to load recipient count");
     } finally {
@@ -1105,7 +1115,7 @@ function SendEmailToAllContent({ memberOnly = false }) {
 
   useEffect(() => {
     loadAudience();
-  }, [memberOnly]);
+  }, [memberOnly, audienceFilter]);
 
   const updateField = (field) => (event) => {
     setForm((prev) => ({ ...prev, [field]: event.target.value }));
@@ -1115,8 +1125,9 @@ function SendEmailToAllContent({ memberOnly = false }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const filterLabel = memberOnly && audienceFilter === "unsigned" ? "unsigned members (not yet signed up)" : memberOnly ? "members" : "heads, leads, and core users";
     const confirmed = window.confirm(
-      `Send this email to ${audience?.count ?? 0} ${memberOnly ? "members" : "heads, leads, and core users"}?`,
+      `Send this email to ${audience?.count ?? 0} ${filterLabel}?`,
     );
     if (!confirmed) return;
 
@@ -1124,7 +1135,14 @@ function SendEmailToAllContent({ memberOnly = false }) {
       setSending(true);
       setError("");
       setSuccess("");
-      const result = await (memberOnly ? sendMemberBroadcastEmail(form) : sendBroadcastEmail(form));
+      let result;
+      if (!memberOnly) {
+        result = await sendBroadcastEmail(form);
+      } else if (audienceFilter === "unsigned") {
+        result = await sendUnsignedMemberBroadcastEmail(form);
+      } else {
+        result = await sendMemberBroadcastEmail(form);
+      }
       setSuccess(result.message || "Email broadcast sent.");
       setAudience((prev) => ({ ...(prev || {}), count: result.total ?? prev?.count ?? 0 }));
     } catch (err) {
@@ -1145,25 +1163,74 @@ function SendEmailToAllContent({ memberOnly = false }) {
     "w-full rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm text-richblack-25 outline-none transition placeholder:text-gray-500 focus:border-cyan-300/50 focus:bg-white/[0.055]";
   const labelClass = "mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400";
 
+  const audienceLabel = !memberOnly
+    ? "heads, leads, and core users"
+    : audienceFilter === "unsigned"
+      ? "members not yet signed up"
+      : "department members";
+
   return (
     <div className="space-y-3 sm:space-y-4">
       <Panel
         title={memberOnly ? "Send Email To All Members" : "Send Email To All Heads/Leads/Core"}
         subtitle={memberOnly ? "Send one announcement to every active department member." : "Send one announcement to every registered head, lead, and core user."}
       >
+        {/* Audience filter toggle — only in memberOnly mode */}
+        {memberOnly && (
+          <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-gray-400">Send to</p>
+            <div className="flex overflow-hidden rounded-lg border border-white/10">
+              <button
+                type="button"
+                onClick={() => setAudienceFilter("all")}
+                className={`flex-1 px-4 py-2 text-xs font-semibold transition sm:px-5 ${
+                  audienceFilter === "all"
+                    ? "bg-cyan-500/20 text-cyan-200"
+                    : "bg-white/[0.025] text-gray-400 hover:bg-white/[0.05] hover:text-gray-200"
+                }`}
+              >
+                All Members
+              </button>
+              <button
+                type="button"
+                onClick={() => setAudienceFilter("unsigned")}
+                className={`flex-1 border-l border-white/10 px-4 py-2 text-xs font-semibold transition sm:px-5 ${
+                  audienceFilter === "unsigned"
+                    ? "bg-amber-500/20 text-amber-200"
+                    : "bg-white/[0.025] text-gray-400 hover:bg-white/[0.05] hover:text-gray-200"
+                }`}
+              >
+                Not Yet Signed Up
+              </button>
+            </div>
+            {audienceFilter === "unsigned" && (
+              <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-300 border border-amber-500/20">
+                Only members without an account
+              </span>
+            )}
+          </div>
+        )}
+
         <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <AnalyticsCard
             label="Recipients"
             value={loadingAudience ? "Checking..." : formatNumber(recipientCount)}
             icon={Users}
-            tone="text-cyan-300"
-            subtext={memberOnly ? "Department members with email" : "Heads, leads & core with email"}
+            tone={audienceFilter === "unsigned" ? "text-amber-300" : "text-cyan-300"}
+            subtext={
+              !memberOnly
+                ? "Heads, leads & core with email"
+                : audienceFilter === "unsigned"
+                  ? "Members not yet signed up"
+                  : "Department members with email"
+            }
           />
           {memberOnly && (
             <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-lg shadow-black/10 sm:p-4">
               <p className="text-[11px] font-semibold text-gray-400 sm:text-sm">Recipient details</p>
               <button type="button" onClick={() => setShowRecipients(true)} disabled={loadingAudience} className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:opacity-60">
-                <Info className="h-4 w-4 text-cyan-300" /> View member list
+                <Info className="h-4 w-4 text-cyan-300" />
+                {audienceFilter === "unsigned" ? "View unsigned list" : "View member list"}
               </button>
             </div>
           )}
@@ -1265,13 +1332,17 @@ function SendEmailToAllContent({ memberOnly = false }) {
           <div className="flex flex-col gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
             <p className="text-xs leading-5 text-gray-400 sm:text-sm">
               This email will be sent to{" "}
-              <span className="font-bold text-cyan-300">{formatNumber(recipientCount)}</span>{" "}
-              {memberOnly ? "department members." : "heads, leads, and core users."}
+              <span className={`font-bold ${audienceFilter === "unsigned" && memberOnly ? "text-amber-300" : "text-cyan-300"}`}>{formatNumber(recipientCount)}</span>{" "}
+              {audienceLabel}.
             </p>
             <button
               type="submit"
               disabled={!canSend}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-cyan-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                audienceFilter === "unsigned" && memberOnly
+                  ? "bg-amber-500 hover:bg-amber-400"
+                  : "bg-cyan-500 hover:bg-cyan-400"
+              }`}
             >
               <Mail className="h-4 w-4" />
               {sending ? "Sending..." : "Send Email"}
@@ -1283,12 +1354,47 @@ function SendEmailToAllContent({ memberOnly = false }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="member-recipients-title">
           <div className="flex max-h-[80vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-cyan-300/20 bg-[#202237] shadow-2xl shadow-black/50">
             <div className="flex items-center justify-between border-b border-white/10 p-5">
-              <div><h2 id="member-recipients-title" className="text-lg font-bold text-richblack-25">Member email recipients</h2><p className="mt-1 text-xs text-gray-400">{formatNumber(recipientCount)} members will receive this email.</p></div>
+              <div>
+                <h2 id="member-recipients-title" className="text-lg font-bold text-richblack-25">
+                  {audienceFilter === "unsigned" ? "Members not yet signed up" : "Member email recipients"}
+                </h2>
+                <p className="mt-1 text-xs text-gray-400">
+                  {formatNumber(recipientCount)}{" "}
+                  {audienceFilter === "unsigned"
+                    ? "members will receive this email (they haven't created an account yet)."
+                    : "members will receive this email."}
+                </p>
+              </div>
               <button type="button" onClick={() => setShowRecipients(false)} className="rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:bg-white/[0.06]">Close</button>
             </div>
+            {audienceFilter === "unsigned" && (
+              <div className="border-b border-white/10 bg-amber-500/5 px-5 py-2.5 flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-amber-400 shrink-0" />
+                <p className="text-[11px] text-amber-300">These members have filled the invite form but have not created a website account yet.</p>
+              </div>
+            )}
             <div className="overflow-y-auto p-3">
-              {(audience?.recipients || []).map((member) => <div key={member.email} className="flex items-center justify-between gap-3 border-b border-white/5 px-2 py-2.5 last:border-0"><div className="min-w-0"><p className="truncate text-sm font-medium text-richblack-25">{member.name}</p><p className="truncate text-xs text-gray-400">{member.email}</p></div><span className="shrink-0 text-right text-[11px] text-cyan-300">{member.department}</span></div>)}
-              {!loadingAudience && !(audience?.recipients || []).length && <p className="p-5 text-center text-sm text-gray-400">No members with email addresses found.</p>}
+              {(audience?.recipients || []).map((member) => (
+                <div key={member.email} className="flex items-center justify-between gap-3 border-b border-white/5 px-2 py-2.5 last:border-0">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-richblack-25">{member.name}</p>
+                    <p className="truncate text-xs text-gray-400">{member.email}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-right text-[11px] text-cyan-300">{member.department}</span>
+                    {audienceFilter === "unsigned" && (
+                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-300 border border-amber-500/20">not signed up</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {!loadingAudience && !(audience?.recipients || []).length && (
+                <p className="p-5 text-center text-sm text-gray-400">
+                  {audienceFilter === "unsigned"
+                    ? "All members have already signed up! No emails to send."
+                    : "No members with email addresses found."}
+                </p>
+              )}
             </div>
           </div>
         </div>

@@ -8,6 +8,8 @@ const {
   sendBroadcastEmail,
   getMemberBroadcastEmailAudience,
   sendMemberBroadcastEmail,
+  getUnsignedMemberBroadcastEmailAudience,
+  sendUnsignedMemberBroadcastEmail,
   getTargetedEmailRecipients,
   sendTargetedEmail,
 } = require("../controllers/settingsController");
@@ -21,6 +23,8 @@ router.get("/broadcast-email/audience", auth, requireRegisteredUser, getBroadcas
 router.post("/broadcast-email/send", auth, requireRegisteredUser, sendBroadcastEmail);
 router.get("/member-broadcast-email/audience", auth, requireRegisteredUser, getMemberBroadcastEmailAudience);
 router.post("/member-broadcast-email/send", auth, requireRegisteredUser, sendMemberBroadcastEmail);
+router.get("/member-broadcast-email/unsigned-audience", auth, requireRegisteredUser, getUnsignedMemberBroadcastEmailAudience);
+router.post("/member-broadcast-email/unsigned-send", auth, requireRegisteredUser, sendUnsignedMemberBroadcastEmail);
 router.get("/targeted-email/recipients", auth, requireRegisteredUser, getTargetedEmailRecipients);
 router.post("/targeted-email/send", auth, requireRegisteredUser, sendTargetedEmail);
 

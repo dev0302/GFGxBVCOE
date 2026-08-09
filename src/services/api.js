@@ -430,6 +430,23 @@ export async function sendMemberBroadcastEmail(payload) {
   return data;
 }
 
+export async function fetchUnsignedMemberBroadcastEmailAudience() {
+  const res = await authFetch('/api/v1/settings/member-broadcast-email/unsigned-audience');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to load unsigned member email audience');
+  return data;
+}
+
+export async function sendUnsignedMemberBroadcastEmail(payload) {
+  const res = await authFetch('/api/v1/settings/member-broadcast-email/unsigned-send', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to send email to unsigned members');
+  return data;
+}
+
 export async function fetchTargetedEmailRecipients() {
   const res = await authFetch('/api/v1/settings/targeted-email/recipients');
   const data = await res.json().catch(() => ({}));
@@ -842,6 +859,39 @@ export async function markAllNotificationsRead() {
   const res = await authFetch('/api/v1/notifications/read-all', { method: 'PATCH' });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || 'Failed to mark all as read');
+  return data;
+}
+
+/** Broadcast a notification to all registered users (heads/leads/core). */
+export async function broadcastNotificationToUsers(payload) {
+  const res = await authFetch('/api/v1/notifications/broadcast-users', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to broadcast notification to users');
+  return data;
+}
+
+/** Broadcast a notification to all department members who have signed up. */
+export async function broadcastNotificationToMembers(payload) {
+  const res = await authFetch('/api/v1/notifications/broadcast-members', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to broadcast notification to members');
+  return data;
+}
+
+/** Broadcast a notification to members of a specific department who have signed up. */
+export async function broadcastNotificationToDepartment(payload) {
+  const res = await authFetch('/api/v1/notifications/broadcast-department', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to broadcast notification to department members');
   return data;
 }
 
