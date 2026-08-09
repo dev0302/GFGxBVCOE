@@ -164,3 +164,18 @@ exports.requireRegisteredUser = (req, res, next) => {
   }
   next();
 };
+
+/**
+ * Broadcast notifications — only society core roles (Chairperson, Vice-Chairperson,
+ * Treasurer, ADMIN) can send society-wide or all-members broadcasts.
+ */
+exports.requireSocietyRole = (req, res, next) => {
+  if (req.user?.isDepartmentMember) {
+    return res.status(403).json({ success: false, message: "Action not permitted for department-member accounts." });
+  }
+  const allowed = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
+  if (!allowed.includes(String(req.user?.accountType || "").trim())) {
+    return res.status(403).json({ success: false, message: "This action is restricted to society core roles." });
+  }
+  next();
+};

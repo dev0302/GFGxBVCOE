@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, UserPlus, Radio } from "react-feather";
@@ -27,7 +27,11 @@ function notifColor(n) {
 }
 
 function isBroadcast(n) {
-  return n?.type === "broadcast_users" || n?.type === "broadcast_members";
+  return (
+    n?.type === "broadcast_users" ||
+    n?.type === "broadcast_members" ||
+    n?.type === "broadcast_department"
+  );
 }
 
 /** Badge colour is pink if the latest unread notification is a broadcast, otherwise green */
@@ -45,9 +49,13 @@ export default function NotificationsButton({
   const [open, setOpen] = useState(false);
   const [placement, setPlacement] = useState(null);
   const [bubblePlacement, setBubblePlacement] = useState(null);
+  const [isMounted, setIsMounted] = useState(false);
   const buttonRef = useRef(null);
   const { notifications, unreadCount, loading, refresh, markRead, markAllRead, bubble, dismissBubble } =
     useNotifications();
+
+  // Gate all portals until after first mount (avoids SSR / hydration mismatch)
+  useEffect(() => { setIsMounted(true); }, []);
 
   const bColor = badgeColor(notifications);
 
@@ -60,7 +68,7 @@ export default function NotificationsButton({
   };
 
   // Panel placement
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!open) {
       setPlacement(null);
       return;
@@ -95,8 +103,8 @@ export default function NotificationsButton({
     };
   }, [open]);
 
-  // Bubble placement — position it above/near the bell
-  useLayoutEffect(() => {
+  // Bubble placement — position it below/near the bell
+  useEffect(() => {
     if (!bubble?.show) {
       setBubblePlacement(null);
       return;
@@ -104,7 +112,6 @@ export default function NotificationsButton({
     const el = buttonRef.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
-    // Place bubble below the bell, aligned to its right edge
     const bubbleW = 220;
     let left = r.right - bubbleW;
     left = Math.min(Math.max(8, left), window.innerWidth - bubbleW - 8);
@@ -136,7 +143,7 @@ export default function NotificationsButton({
       </button>
 
       {/* Animated notification bubble — appears near bell on login / real-time arrival */}
-      {typeof document !== "undefined" &&
+      {isMounted &&
         createPortal(
           <AnimatePresence>
             {bubble?.show && bubblePlacement && (
@@ -185,7 +192,7 @@ export default function NotificationsButton({
         )}
 
       {/* Notification panel */}
-      {typeof document !== "undefined" &&
+      {isMounted &&
         createPortal(
           <AnimatePresence>
             {open && placement && (
