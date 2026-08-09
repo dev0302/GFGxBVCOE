@@ -1104,6 +1104,7 @@ function resolveSearchDepartments(req) {
   if (!accountType) return [];
   const isSociety = SOCIETY_ROLES.includes(accountType);
   const scopeDepartment = normalizeDepartmentName(req.query?.department);
+  const allDepartments = req.query?.allDepartments === "true";
 
   if (scopeDepartment) {
     if (!TEAM_DEPARTMENTS.includes(scopeDepartment)) return [];
@@ -1112,6 +1113,8 @@ function resolveSearchDepartments(req) {
     return [];
   }
 
+  // When allDepartments flag is set (e.g. from navbar search), return all depts for any logged-in user
+  if (allDepartments) return TEAM_DEPARTMENTS;
   if (isSociety) return TEAM_DEPARTMENTS;
   if (TEAM_DEPARTMENTS.includes(accountType)) return [accountType];
   return [];
