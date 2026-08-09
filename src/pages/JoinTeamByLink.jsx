@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { addTeamMemberByInviteLink, uploadTeamPhotoByInviteLink } from "../services/api";
 import { useTeamInviteValidation } from "../hooks/useTeamInviteValidation";
 import { toast } from "sonner";
@@ -42,6 +42,7 @@ export default function JoinTeamByLink() {
   const { token } = useParams();
   const validation = useTeamInviteValidation(token);
   const [submitted, setSubmitted] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState("");
   const [form, setForm] = useState(COLS.reduce((acc, k) => ({ ...acc, [k]: "" }), {}));
   const [saving, setSaving] = useState(false);
   const [alreadyEnrolledModal, setAlreadyEnrolledModal] = useState(null);
@@ -182,6 +183,7 @@ export default function JoinTeamByLink() {
     try {
       await addTeamMemberByInviteLink(token, form);
       toast.success("You have been added to the team.");
+      setSubmittedEmail(form.email?.trim() || "");
       setSubmitted(true);
       setForm(COLS.reduce((acc, k) => ({ ...acc, [k]: "" }), {}));
     } catch (e) {
@@ -202,9 +204,42 @@ export default function JoinTeamByLink() {
     <div className="min-h-screen darkthemebg pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-lg">
         {submitted ? (
-          <div className="rounded-2xl border border-gray-500/30 bg-[#1e1e2f]/80 p-8 text-center">
-            <p className="text-cyan-400 font-medium">You’re in!</p>
-            <p className="text-gray-400 text-sm mt-2">Your details have been added to the team. You can close this page.</p>
+          <div className="rounded-2xl border border-gray-500/30 bg-[#1e1e2f]/80 p-8 text-center flex flex-col items-center gap-4">
+            {/* Success icon */}
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8"><polyline points="20 6 9 17 4 12" /></svg>
+            </div>
+
+            <div>
+              <p className="text-cyan-400 font-semibold text-lg">You're in!</p>
+              <p className="text-gray-400 text-sm mt-2 leading-relaxed">
+                Your form has been submitted. You are now a member of the{" "}
+                <span className="text-cyan-300 font-medium">
+                  {validation.department || "team"}
+                </span>{" "}
+                department.
+              </p>
+            </div>
+
+            <div className="w-full rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-4">
+              <p className="text-gray-300 text-sm leading-relaxed">
+                Sign up on our website to stay updated with events, announcements, and everything happening in the society!
+              </p>
+              <Link
+                to={`/signup?email=${encodeURIComponent(submittedEmail)}&department=${encodeURIComponent(validation.department || "")}`}
+                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 py-2.5 text-sm font-semibold text-richblack-25 hover:from-cyan-500 hover:to-cyan-400 transition-all"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                Sign Up
+              </Link>
+            </div>
+
+            <p className="text-gray-500 text-xs">
+              Already have an account?{" "}
+              <Link to="/login" className="text-cyan-400 hover:text-cyan-300 font-medium">
+                Sign in
+              </Link>
+            </p>
           </div>
         ) : (
           <div className="rounded-2xl border border-gray-500/30 bg-[#1e1e2f]/80 p-6">

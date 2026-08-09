@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { getTeamDepartments, getTeamMembers, getDepartmentRoster, getAllPeople, getAccountTypeLabel, sendSignupInvite, applyNextSessionYearPromotion, getYearPromotionHistory, revertYearPromotion } from "../services/api";
+import { getTeamDepartments, getTeamMembers, getDepartmentRoster, getAllPeople, getAccountTypeLabel, sendSignupInvite, applyNextSessionYearPromotion, getYearPromotionHistory, revertYearPromotion, broadcastNotificationToUsers, broadcastNotificationToMembers } from "../services/api";
 import { isSocietyRole } from "../services/api";
 import { toast } from "sonner";
-import { Users, ChevronRight, Printer, FileText, X, Download, List, Mail, RefreshCw, RotateCcw, Clock } from "react-feather";
+import { Users, ChevronRight, Printer, FileText, X, Download, List, Mail, RefreshCw, RotateCcw, Clock, Bell } from "react-feather";
 import { avatarPlaceholder, photoPreviewUrl, resolvePredefinedImageUrl } from "../utils/teamMemberUtils";
 import ManageTeam from "./ManageTeam";
 import Search from "../components/Search";
@@ -117,6 +117,14 @@ export default function ManageSociety() {
   const [revertTargetId, setRevertTargetId] = useState(null);
   const [revertConfirmOpen, setRevertConfirmOpen] = useState(false);
   const [revertingPromotion, setRevertingPromotion] = useState(false);
+
+  // Broadcast notification compose modal
+  const [notifModalOpen, setNotifModalOpen] = useState(false);
+  const [notifTarget, setNotifTarget] = useState("users"); // "users" | "members"
+  const [notifSending, setNotifSending] = useState(false);
+  const [notifError, setNotifError] = useState("");
+  const [notifSuccess, setNotifSuccess] = useState("");
+  const [notifForm, setNotifForm] = useState({ title: "", body: "" });
 
   // Initial departments load: if Redux has nothing, show spinner; otherwise hydrate from Redux and refresh in background.
   useEffect(() => {
@@ -508,8 +516,8 @@ export default function ManageSociety() {
           )}
         </p>
 
-        <div className="flex flex-col sm:flex-wrap sm:flex-row items-center gap-3 mb-6">
-          <div className="flex items-center gap-2 flex-1 min-w-0 max-w-md">
+        <div className="flex flex-wrap sm:flex-row items-center gap-3 mb-6">
+          <div className="flex items-center gap-2 w-full sm:w-[200px] lg:w-[350px] shrink-0">
             <div className="flex-1 min-w-0 i-fonts">
               <Search variant="manage-team" placeholder="Search members…" />
             </div>
@@ -534,11 +542,39 @@ export default function ManageSociety() {
           <button
             type="button"
             onClick={() => setNextSessionModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-600/40 border border-gray-500/40 text-gray-200 hover:bg-cyan-500/20 hover:border-cyan-500/40 hover:text-cyan-300 transition-colors text-sm font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-600/40 border border-gray-500/40 text-gray-200 hover:bg-cyan-500/20 hover:border-cyan-500/40 hover:text-cyan-300 transition-colors text-[10px] sm:text-sm font-medium"
           >
             <RefreshCw className="h-4 w-4" />
             Apply next session
           </button>
+          <button
+  type="button"
+  onClick={() => {
+    setNotifTarget("users");
+    setNotifForm({ title: "", body: "" });
+    setNotifError("");
+    setNotifSuccess("");
+    setNotifModalOpen(true);
+  }}
+  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-200 hover:bg-sky-500/25 hover:border-sky-400/50 transition-colors text-[10px] sm:text-sm font-medium"
+>
+  <Bell className="h-4 w-4" />
+  Heads/Leads/Core
+</button>
+          <button
+  type="button"
+  onClick={() => {
+    setNotifTarget("members");
+    setNotifForm({ title: "", body: "" });
+    setNotifError("");
+    setNotifSuccess("");
+    setNotifModalOpen(true);
+  }}
+  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-200 hover:bg-sky-500/25 hover:border-sky-400/50 transition-colors text-[10px] sm:text-sm  font-medium"
+>
+  <Bell className="h-4 w-4" />
+  All Members
+</button>
         </div>
 
         {loading ? (
@@ -603,6 +639,153 @@ export default function ManageSociety() {
             ))}
           </div>
         )}
+
+        {/* Broadcast Notification Compose Modal */}
+        <AnimatePresence>
+          {notifModalOpen && (
+            <motion.div
+              key="notif-modal-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.22 }}
+              className="fixed inset-0 z-[200] flex items-center justify-center bg-black/65 backdrop-blur-sm p-4"
+              onClick={() => { if (!notifSending) setNotifModalOpen(false); }}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="notif-modal-title"
+            >
+              <motion.div
+                key="notif-modal-panel"
+                initial={{ opacity: 0, scale: 0.94, y: -16 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -8 }}
+                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-pink-400/25 bg-gradient-to-br from-[#18101c] via-[#1e1e2f] to-[#150d1e] shadow-2xl shadow-black/60"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Decorative glows */}
+                <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-pink-500/15 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-10 -left-10 h-28 w-28 rounded-full bg-purple-500/10 blur-2xl" />
+
+                {/* Header */}
+                <div className="relative flex items-center justify-between border-b border-white/10 px-5 py-4">
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-500/20 text-pink-300">
+                      <Bell className="h-4 w-4" />
+                    </span>
+                    <div>
+                      <h2 id="notif-modal-title" className="text-sm font-bold text-richblack-25">
+                        Send Notification
+                      </h2>
+                      <p className="text-[10px] text-pink-300 font-medium">
+                        {notifTarget === "users" ? "→ All Heads / Leads / Core users" : "→ All Department Members (with account)"}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setNotifModalOpen(false)}
+                    disabled={notifSending}
+                    className="rounded-full p-1.5 text-gray-400 transition hover:bg-white/10 hover:text-gray-200 disabled:opacity-40"
+                    aria-label="Close"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* Body */}
+                <div className="relative px-5 py-4 space-y-4">
+                  {notifError && (
+                    <div className="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+                      {notifError}
+                    </div>
+                  )}
+                  {notifSuccess && (
+                    <div className="rounded-lg border border-pink-400/20 bg-pink-500/10 px-3 py-2 text-xs text-pink-200 font-medium">
+                      🎉 {notifSuccess}
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-gray-400">
+                      Notification Title
+                    </label>
+                    <input
+                      type="text"
+                      value={notifForm.title}
+                      onChange={(e) => setNotifForm((p) => ({ ...p, title: e.target.value }))}
+                      maxLength={120}
+                      placeholder="e.g. Important Announcement"
+                      className="w-full rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm text-richblack-25 outline-none transition placeholder:text-gray-500 focus:border-pink-400/40 focus:bg-white/[0.055]"
+                      disabled={notifSending}
+                    />
+                    <p className="mt-1 text-right text-[10px] text-gray-500">{notifForm.title.length}/120</p>
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-gray-400">
+                      Message
+                    </label>
+                    <textarea
+                      value={notifForm.body}
+                      onChange={(e) => setNotifForm((p) => ({ ...p, body: e.target.value }))}
+                      maxLength={500}
+                      rows={4}
+                      placeholder="Write your notification message…"
+                      className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm leading-6 text-richblack-25 outline-none transition placeholder:text-gray-500 focus:border-pink-400/40 focus:bg-white/[0.055]"
+                      disabled={notifSending}
+                    />
+                    <p className="mt-1 text-right text-[10px] text-gray-500">{notifForm.body.length}/500</p>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="relative flex items-center justify-between border-t border-white/10 px-5 py-3.5">
+                  <p className="text-[10px] text-gray-500 leading-snug max-w-[200px]">
+                    Recipients will see a{" "}
+                    <span className="text-pink-300 font-semibold">pink</span> notification in their bell.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNotifModalOpen(false)}
+                      disabled={notifSending}
+                      className="rounded-full border border-white/10 px-4 py-1.5 text-xs font-semibold text-gray-300 transition hover:bg-white/10 disabled:opacity-40"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      disabled={notifSending || !notifForm.title.trim() || !notifForm.body.trim()}
+                      onClick={async () => {
+                        setNotifSending(true);
+                        setNotifError("");
+                        setNotifSuccess("");
+                        try {
+                          const fn = notifTarget === "users" ? broadcastNotificationToUsers : broadcastNotificationToMembers;
+                          const result = await fn({ title: notifForm.title.trim(), body: notifForm.body.trim() });
+                          setNotifSuccess(result.message || "Notification sent!");
+                          setNotifForm({ title: "", body: "" });
+                          toast.success(result.message || "Notification sent!");
+                          setTimeout(() => setNotifModalOpen(false), 1800);
+                        } catch (err) {
+                          setNotifError(err?.message || "Failed to send notification");
+                        } finally {
+                          setNotifSending(false);
+                        }
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-pink-500 px-4 py-1.5 text-xs font-bold text-white transition hover:bg-pink-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <Bell className="h-3.5 w-3.5" />
+                      {notifSending ? "Sending…" : "Send Notification"}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Show all people modal: users (position/accountType tag) + predefined-only + members, sorted */}
         <AnimatePresence>
@@ -1047,7 +1230,7 @@ export default function ManageSociety() {
             aria-modal="true"
           >
             <div
-              className="darkthemebg rounded-2xl border border-gray-500/30 w-full max-w-md overflow-hidden"
+              className="darkthemebg rounded-2xl border border-gray-500/30 w-full max-w-lg overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between p-4 border-b border-gray-500/30">

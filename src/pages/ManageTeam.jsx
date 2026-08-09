@@ -20,6 +20,7 @@ import {
   suspendTeamInviteLink,
   getAccountTypeLabel,
   sendSignupInvite,
+  broadcastNotificationToDepartment,
 } from "../services/api";
 import { toast } from "sonner";
 import {
@@ -38,6 +39,7 @@ import {
   Grid,
   Phone,
   RotateCcw,
+  Bell,
 } from "react-feather";
 import {
   driveLinkToImageUrl,
@@ -240,6 +242,13 @@ export default function ManageTeam({
   const [isPrinting, setIsPrinting] = useState(false);
   const imgCropRef = useRef(null);
   const cropPxRef = useRef(null);
+
+  // Department notification broadcast state
+  const [deptNotifModalOpen, setDeptNotifModalOpen] = useState(false);
+  const [deptNotifSending, setDeptNotifSending] = useState(false);
+  const [deptNotifError, setDeptNotifError] = useState("");
+  const [deptNotifSuccess, setDeptNotifSuccess] = useState("");
+  const [deptNotifForm, setDeptNotifForm] = useState({ title: "", body: "" });
 
   const department = isSociety ? propDepartment : user?.accountType;
   // console.log(department);
@@ -885,6 +894,21 @@ export default function ManageTeam({
                 <Printer className="h-4 w-4" />
                 Print / Export list
               </button>
+              {(isSociety || !isReadOnly) && (
+                <button
+  type="button"
+  onClick={() => {
+    setDeptNotifForm({ title: "", body: "" });
+    setDeptNotifError("");
+    setDeptNotifSuccess("");
+    setDeptNotifModalOpen(true);
+  }}
+  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-200 hover:bg-sky-500/25 hover:border-sky-400/50 transition-colors text-sm font-medium"
+>
+  <Bell className="h-4 w-4" />
+  Notify {displayDepartment} Members
+</button>
+              )}
               {!isReadOnly && <button
                 type="button"
                 onClick={handleDownloadTemplate}
@@ -2446,6 +2470,156 @@ export default function ManageTeam({
         name={photoModalData?.name}
         onClose={() => setPhotoModalData(null)}
       />
+
+      {/* Department notification compose modal */}
+      <AnimatePresence>
+        {deptNotifModalOpen && (
+          <motion.div
+            key="dept-notif-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/65 backdrop-blur-sm p-4"
+            onClick={() => { if (!deptNotifSending) setDeptNotifModalOpen(false); }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="dept-notif-modal-title"
+          >
+            <motion.div
+              key="dept-notif-panel"
+              initial={{ opacity: 0, scale: 0.94, y: -16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: -8 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-pink-400/25 bg-gradient-to-br from-[#18101c] via-[#1e1e2f] to-[#150d1e] shadow-2xl shadow-black/60"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Decorative glows */}
+              <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-pink-500/15 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-10 -left-10 h-28 w-28 rounded-full bg-purple-500/10 blur-2xl" />
+
+              {/* Header */}
+              <div className="relative flex items-center justify-between border-b border-white/10 px-5 py-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-500/20 text-pink-300">
+                    <Bell className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <h2 id="dept-notif-modal-title" className="text-sm font-bold text-richblack-25">
+                      Notify Department Members
+                    </h2>
+                    <p className="text-[10px] text-pink-300 font-medium">
+                      → {displayDepartment} members with a website account
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDeptNotifModalOpen(false)}
+                  disabled={deptNotifSending}
+                  className="rounded-full p-1.5 text-gray-400 transition hover:bg-white/10 hover:text-gray-200 disabled:opacity-40"
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="relative px-5 py-4 space-y-4">
+                {deptNotifError && (
+                  <div className="rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+                    {deptNotifError}
+                  </div>
+                )}
+                {deptNotifSuccess && (
+                  <div className="rounded-lg border border-pink-400/20 bg-pink-500/10 px-3 py-2 text-xs text-pink-200 font-medium">
+                    🎉 {deptNotifSuccess}
+                  </div>
+                )}
+
+                <div>
+                  <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-gray-400">
+                    Notification Title
+                  </label>
+                  <input
+                    type="text"
+                    value={deptNotifForm.title}
+                    onChange={(e) => setDeptNotifForm((p) => ({ ...p, title: e.target.value }))}
+                    maxLength={120}
+                    placeholder="e.g. Department Meeting"
+                    className="w-full rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm text-richblack-25 outline-none transition placeholder:text-gray-500 focus:border-pink-400/40 focus:bg-white/[0.055]"
+                    disabled={deptNotifSending}
+                  />
+                  <p className="mt-1 text-right text-[10px] text-gray-500">{deptNotifForm.title.length}/120</p>
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-gray-400">
+                    Message
+                  </label>
+                  <textarea
+                    value={deptNotifForm.body}
+                    onChange={(e) => setDeptNotifForm((p) => ({ ...p, body: e.target.value }))}
+                    maxLength={500}
+                    rows={4}
+                    placeholder="Write your notification message…"
+                    className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm leading-6 text-richblack-25 outline-none transition placeholder:text-gray-500 focus:border-pink-400/40 focus:bg-white/[0.055]"
+                    disabled={deptNotifSending}
+                  />
+                  <p className="mt-1 text-right text-[10px] text-gray-500">{deptNotifForm.body.length}/500</p>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="relative flex items-center justify-between border-t border-white/10 px-5 py-3.5">
+                {/* <p className="text-[10px] text-gray-500 leading-snug max-w-[200px]">
+                  Only members with a{" "}
+                  <span className="text-pink-300 font-semibold">website account</span> will receive this.
+                </p> */}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setDeptNotifModalOpen(false)}
+                    disabled={deptNotifSending}
+                    className="rounded-full border border-white/10 px-4 py-1.5 text-xs font-semibold text-gray-300 transition hover:bg-white/10 disabled:opacity-40"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={deptNotifSending || !deptNotifForm.title.trim() || !deptNotifForm.body.trim()}
+                    onClick={async () => {
+                      setDeptNotifSending(true);
+                      setDeptNotifError("");
+                      setDeptNotifSuccess("");
+                      try {
+                        const result = await broadcastNotificationToDepartment({
+                          department: displayDepartment,
+                          title: deptNotifForm.title.trim(),
+                          body: deptNotifForm.body.trim(),
+                        });
+                        setDeptNotifSuccess(result.message || "Notification sent!");
+                        setDeptNotifForm({ title: "", body: "" });
+                        toast.success(result.message || "Notification sent!");
+                        setTimeout(() => setDeptNotifModalOpen(false), 1800);
+                      } catch (err) {
+                        setDeptNotifError(err?.message || "Failed to send notification");
+                      } finally {
+                        setDeptNotifSending(false);
+                      }
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-pink-500 px-4 py-1.5 text-xs font-bold text-white transition hover:bg-pink-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Bell className="h-3.5 w-3.5" />
+                    {deptNotifSending ? "Sending…" : "Send Notification"}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

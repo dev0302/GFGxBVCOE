@@ -58,6 +58,30 @@ async function getDepartmentMemberEmailRecipients() {
   ).sort((a, b) => a.name.localeCompare(b.name));
 }
 
+async function getDepartmentMemberUnsignedEmailRecipients() {
+  const groups = await Promise.all(
+    TEAM_DEPARTMENTS.map(async (department) => {
+      const members = await getTeamMemberModel(department).find({
+        email: { $exists: true, $ne: "" },
+        $or: [{ signedIn: { $ne: true } }, { signedIn: { $exists: false } }],
+        $and: [
+          { $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] },
+        ],
+      }).select("name email signedIn").lean();
+      return members.map((member) => ({
+        _id: member._id,
+        name: member.name || member.email,
+        email: String(member.email || "").trim().toLowerCase(),
+        department,
+        signedIn: member.signedIn === true,
+      }));
+    })
+  );
+  return Array.from(
+    new Map(groups.flat().filter((member) => isValidEmail(member.email)).map((member) => [member.email, member])).values()
+  ).sort((a, b) => a.name.localeCompare(b.name));
+}
+
 function bytesToGb(bytes) {
   return Number((Number(bytes || 0) / 1024 ** 3).toFixed(2));
 }
@@ -612,6 +636,48 @@ exports.sendMemberBroadcastEmail = async (req, res) => {
   } catch (error) {
     console.error("Member broadcast email error:", error);
     res.status(500).json({ success: false, message: error?.message || "Failed to send member email." });
+  }
+};
+
+exports.getUnsignedMemberBroadcastEmailAudience = async (_req, res) => {
+  try {
+    const recipients = await getDepartmentMemberUnsignedEmailRecipients();
+    res.json({ success: true, count: recipients.length, recipients });
+  } catch (error) {
+    console.error("Unsigned member broadcast audience error:", error);
+    res.status(500).json({ success: false, message: error?.message || "Failed to load unsigned member email audience." });
+  }
+};
+
+exports.sendUnsignedMemberBroadcastEmail = async (req, res) => {
+  try {
+    const title = normalizeText(req.body?.title);
+    const subject = normalizeText(req.body?.subject);
+    const description = normalizeText(req.body?.description);
+    const linkUrl = normalizeText(req.body?.linkUrl);
+    const linkLabel = normalizeText(req.body?.linkLabel) || "Open link";
+    if (!title || !subject || !description) return res.status(400).json({ success: false, message: "Title, subject and description are required." });
+    if (title.length > 120 || subject.length > 160 || description.length > 5000) return res.status(400).json({ success: false, message: "One or more email fields are too long." });
+    if (!isValidHttpUrl(linkUrl)) return res.status(400).json({ success: false, message: "Link must start with http:// or https://." });
+
+    const recipients = await getDepartmentMemberUnsignedEmailRecipients();
+    if (!recipients.length) return res.status(400).json({ success: false, message: "No unsigned department members with email addresses were found." });
+    const html = broadcastEmailTemplate({ title, description, linkUrl, linkLabel, senderName: "GFG BVCOE Team" });
+    const results = await Promise.allSettled(recipients.map((member) => mailSender(member.email, subject, html)));
+    const failedEmails = [];
+    let sent = 0;
+    results.forEach((result, index) => {
+      if (result.status === "fulfilled" && result.value) sent += 1;
+      else failedEmails.push(recipients[index].email);
+    });
+    res.json({
+      success: sent > 0,
+      message: sent > 0 ? `Email sent to ${sent} of ${recipients.length} unsigned members.` : "Email could not be sent to any unsigned members.",
+      total: recipients.length, sent, failed: failedEmails.length, failedEmails: failedEmails.slice(0, 10), updatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Unsigned member broadcast email error:", error);
+    res.status(500).json({ success: false, message: error?.message || "Failed to send unsigned member email." });
   }
 };
 

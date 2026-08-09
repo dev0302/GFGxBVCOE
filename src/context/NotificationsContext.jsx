@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "./AuthContext";
 import {
   getNotifications,
@@ -15,25 +15,61 @@ export function NotificationsProvider({ children }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  /**
+   * bubble: { show: boolean, senderRole: string, color: "pink" | "green" } | null
+   * Shown for 2.5 s when a new notification arrives or on first load after login.
+   */
+  const [bubble, setBubble] = useState(null);
+  const bubbleTimerRef = useRef(null);
+  // Tracks whether we already showed the login bubble in this session
+  const loginBubbleShownRef = useRef(false);
+
+  const showBubble = useCallback((notif) => {
+    if (!notif) return;
+    const senderRole = notif.metadata?.senderRole || "";
+    const color = notif.metadata?.color === "pink" ? "pink" : "green";
+    if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
+    setBubble({ show: true, senderRole, color });
+    bubbleTimerRef.current = setTimeout(() => {
+      setBubble(null);
+      bubbleTimerRef.current = null;
+    }, 2500);
+  }, []);
+
+  const dismissBubble = useCallback(() => {
+    if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
+    setBubble(null);
+  }, []);
+
   const refresh = useCallback(async () => {
     if (!user?._id) {
       setNotifications([]);
       setUnreadCount(0);
+      loginBubbleShownRef.current = false;
       return;
     }
     setLoading(true);
     try {
       const res = await getNotifications();
       if (res.success) {
-        setNotifications(Array.isArray(res.data) ? res.data : []);
-        setUnreadCount(typeof res.unreadCount === "number" ? res.unreadCount : 0);
+        const list = Array.isArray(res.data) ? res.data : [];
+        setNotifications(list);
+        const count = typeof res.unreadCount === "number" ? res.unreadCount : 0;
+        setUnreadCount(count);
+
+        // Show login bubble once per session if there are unread notifications
+        if (count > 0 && !loginBubbleShownRef.current) {
+          loginBubbleShownRef.current = true;
+          const latestUnread = list.find((n) => !n.readAt);
+          if (latestUnread) showBubble(latestUnread);
+        }
       }
     } catch (err) {
       console.error("Failed to fetch notifications:", err);
     } finally {
       setLoading(false);
     }
-  }, [user?._id]);
+  }, [user?._id, showBubble]);
 
   useEffect(() => {
     refresh();
@@ -50,9 +86,23 @@ export function NotificationsProvider({ children }) {
       });
       if (!payload.readAt) {
         setUnreadCount((c) => c + 1);
+        // Show bubble for every real-time notification
+        showBubble(payload);
       }
     });
+  }, [user?._id, showBubble]);
+
+  // Reset login-bubble flag when user changes
+  useEffect(() => {
+    loginBubbleShownRef.current = false;
   }, [user?._id]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
+    };
+  }, []);
 
   const markRead = useCallback(async (id) => {
     try {
@@ -85,8 +135,10 @@ export function NotificationsProvider({ children }) {
       refresh,
       markRead,
       markAllRead,
+      bubble,
+      dismissBubble,
     }),
-    [notifications, unreadCount, loading, refresh, markRead, markAllRead]
+    [notifications, unreadCount, loading, refresh, markRead, markAllRead, bubble, dismissBubble]
   );
 
   return (

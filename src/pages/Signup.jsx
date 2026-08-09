@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { sendOTP, getOtpForAutofill, signup, AUTH_DEPARTMENTS, getAccountTypeLabel, enrichProfileSSE, getMe } from "../services/api";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
@@ -15,8 +15,11 @@ const AUTOFILL_POLL_INTERVAL_MS = 1000;
 
 const Signup = () => {
   const [step, setStep] = useState(1);
-  const [email, setEmail] = useState("");
-  const [department, setDepartment] = useState("");
+  const [searchParams] = useSearchParams();
+  const prefillEmail = searchParams.get("email") || "";
+  const prefillDepartment = searchParams.get("department") || "";
+  const [email, setEmail] = useState(prefillEmail);
+  const [department, setDepartment] = useState(prefillDepartment);
   const [otp, setOtp] = useState("");
   const [pollToken, setPollToken] = useState(null);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -194,31 +197,55 @@ const Signup = () => {
         {step === 1 ? (
           <form onSubmit={handleSendOTP} className="space-y-4">
             <div>
-              <label className={labelClass}>Email *</label>
+              <label className={labelClass}>
+                Email *
+                {prefillEmail && (
+                  <span className="ml-2 text-[10px] font-normal text-cyan-400 bg-cyan-400/10 px-1.5 py-0.5 rounded-full">
+                    pre-filled
+                  </span>
+                )}
+              </label>
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={inputClass}
+                onChange={(e) => !prefillEmail && setEmail(e.target.value)}
+                className={inputClass + (prefillEmail ? " opacity-80 cursor-default" : "")}
                 placeholder="you@example.com"
+                readOnly={!!prefillEmail}
                 required
               />
             </div>
             <div>
-              <label className={labelClass}>Department *</label>
-              <select
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-                className={inputClass}
-                required
-              >
-                <option value="">Select department</option>
-                {AUTH_DEPARTMENTS.map((d) => (
-                  <option key={d} value={d}>
-                    {getAccountTypeLabel(d) || d}
-                  </option>
-                ))}
-              </select>
+              <label className={labelClass}>
+                Department *
+                {prefillDepartment && (
+                  <span className="ml-2 text-[10px] font-normal text-cyan-400 bg-cyan-400/10 px-1.5 py-0.5 rounded-full">
+                    pre-filled
+                  </span>
+                )}
+              </label>
+              {prefillDepartment ? (
+                <input
+                  type="text"
+                  value={getAccountTypeLabel(prefillDepartment) || prefillDepartment}
+                  className={inputClass + " opacity-80 cursor-default"}
+                  readOnly
+                />
+              ) : (
+                <select
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                  className={inputClass}
+                  required
+                >
+                  <option value="">Select department</option>
+                  {AUTH_DEPARTMENTS.map((d) => (
+                    <option key={d} value={d}>
+                      {getAccountTypeLabel(d) || d}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
             <button
               type="submit"
