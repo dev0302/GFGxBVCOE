@@ -4,17 +4,11 @@ const { getTeamMemberModel } = require("../models/TeamMember");
 const {
   SOCIETY_ROLES,
   getDepartmentRankFromPosition,
+  TEAM_DEPARTMENTS,
 } = require("./leadershipPositions");
 
-const BROADCAST_TEAM_DEPARTMENTS = [
-  "Social Media and Promotion",
-  "Technical",
-  "Event Management",
-  "Design and Creative",
-  "Content and Documentation",
-  "Capture The Event",
-  "Sponsorship and Marketing",
-];
+// Use the single authoritative department list from leadershipPositions
+const BROADCAST_TEAM_DEPARTMENTS = TEAM_DEPARTMENTS;
 
 let emitToUserFn = null;
 
@@ -24,7 +18,9 @@ function setNotificationEmitter(fn) {
 
 function emitNotification(userId, notification) {
   if (!emitToUserFn || !userId) return;
-  emitToUserFn(String(userId), "notification", notification);
+  try {
+    emitToUserFn(String(userId), "notification", notification);
+  } catch (_) {}
 }
 
 async function getInviteSubmissionRecipients(department) {
@@ -64,43 +60,44 @@ async function notifyTeamInviteSubmission({ department, memberName, memberId }) 
 
   const created = [];
   for (const recipientId of recipientIds) {
-    const notification = await Notification.create({
-      recipientId,
-      type: "team_invite_submission",
-      title,
-      body,
-      metadata: {
-        department: dept,
-        memberName: name,
-        memberId: memberId ? String(memberId) : "",
-      },
-    });
+    try {
+      const notification = await Notification.create({
+        recipientId,
+        type: "team_invite_submission",
+        title,
+        body,
+        metadata: {
+          department: dept,
+          memberName: name,
+          memberId: memberId ? String(memberId) : "",
+        },
+      });
 
-    const payload = {
-      _id: notification._id,
-      type: notification.type,
-      title: notification.title,
-      body: notification.body,
-      metadata: notification.metadata,
-      readAt: notification.readAt,
-      createdAt: notification.createdAt,
-    };
+      const payload = {
+        _id: notification._id,
+        type: notification.type,
+        title: notification.title,
+        body: notification.body,
+        metadata: notification.metadata,
+        readAt: notification.readAt,
+        createdAt: notification.createdAt,
+      };
 
-    emitNotification(recipientId, payload);
-    created.push(payload);
+      emitNotification(recipientId, payload);
+      created.push(payload);
+    } catch (_) {}
   }
 
   return created;
 }
 
 /**
- * Broadcast a notification to ALL registered users (User collection).
- * Recipients receive a pink-coloured notification.
+ * Broadcast to ALL registered users (User collection).
+ * Batched 100 at a time to keep memory low on production.
  */
 async function sendBroadcastToAllUsers({ senderRole, title, body, metadata = {} }) {
-  const users = await User.find({}).select("_id").lean();
-  if (!users.length) return { sent: 0, total: 0 };
-
+  const titleStr = String(title || "").trim();
+  const bodyStr = String(body || "").trim();
   const baseMetadata = {
     ...metadata,
     senderRole: String(senderRole || ""),
@@ -108,61 +105,54 @@ async function sendBroadcastToAllUsers({ senderRole, title, body, metadata = {} 
     broadcastType: "users",
   };
 
-  let sent = 0;
-  for (const user of users) {
-    try {
-      const notification = await Notification.create({
-        recipientId: user._id,
-        type: "broadcast_users",
-        title: String(title || "").trim(),
-        body: String(body || "").trim(),
-        metadata: baseMetadata,
-      });
-      const payload = {
-        _id: notification._id,
-        type: notification.type,
-        title: notification.title,
-        body: notification.body,
-        metadata: notification.metadata,
-        readAt: notification.readAt,
-        createdAt: notification.createdAt,
-      };
-      emitNotification(String(user._id), payload);
-      sent++;
-    } catch (_) {}
-  }
-  return { sent, total: users.length };
-}
+  const total = await User.countDocuments({});
+  if (!total) return { sent: 0, total: 0 };
 
-/**
- * Broadcast a notification to ALL department members who have a website account.
- * Recipients receive a pink-coloured notification.
- */
-async function sendBroadcastToAllMembers({ senderRole, title, body, metadata = {} }) {
-  // Collect unique emails across all team-member collections
-  const emailSet = new Set();
-  for (const dept of BROADCAST_TEAM_DEPARTMENTS) {
-    const members = await getTeamMemberModel(dept)
-      .find({
-        email: { $exists: true, $ne: "" },
-        $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
-      })
-      .select("email")
-      .lean();
-    for (const m of members) {
-      const email = String(m.email || "").trim().toLowerCase();
-      if (email) emailSet.add(email);
+  const BATCH = 100;
+  let skip = 0;
+  let sent = 0;
+
+  while (skip < total) {
+    const users = await User.find({}).select("_id").skip(skip).limit(BATCH).lean();
+    skip += BATCH;
+    for (const user of users) {
+      try {
+        const notification = await Notification.create({
+          recipientId: user._id,
+          type: "broadcast_users",
+          title: titleStr,
+          body: bodyStr,
+          metadata: baseMetadata,
+        });
+        emitNotification(String(user._id), {
+          _id: notification._id,
+          type: notification.type,
+          title: notification.title,
+          body: notification.body,
+          metadata: notification.metadata,
+          readAt: notification.readAt,
+          createdAt: notification.createdAt,
+        });
+        sent++;
+      } catch (_) {}
     }
   }
 
-  // Find User accounts whose email matches
-  const emails = Array.from(emailSet);
-  const matchedUsers = emails.length
-    ? await User.find({ email: { $in: emails } }).select("_id").lean()
-    : [];
+  return { sent, total };
+}
 
-  if (!matchedUsers.length) return { sent: 0, total: 0 };
-
+/**
+ * Broadcast to ALL members in ALL department collections.
+ *
+ * KEY FIX: Uses the member's own _id (from the dept collection) as recipientId
+ * instead of looking up matching User accounts by email.
+ * Department members are NOT in the users collection — they're in {dept}members.
+ * The Notification recipientId stores their dept _id so getNotifications()
+ * (which queries { recipientId: req.user.id }) still works for dept member logins.
+ */
+async function sendBroadcastToAllMembers({ senderRole, title, body, metadata = {} }) {
+  const titleStr = String(title || "").trim();
+  const bodyStr = String(body || "").trim();
   const baseMetadata = {
     ...metadata,
     senderRole: String(senderRole || ""),
@@ -170,17 +160,35 @@ async function sendBroadcastToAllMembers({ senderRole, title, body, metadata = {
     broadcastType: "members",
   };
 
+  // Collect all member _ids from every dept collection
+  const memberIds = [];
+  for (const dept of BROADCAST_TEAM_DEPARTMENTS) {
+    try {
+      const members = await getTeamMemberModel(dept)
+        .find({ deletedAt: null })
+        .select("_id")
+        .lean();
+      for (const m of members) {
+        memberIds.push(String(m._id));
+      }
+    } catch (err) {
+      console.error(`sendBroadcastToAllMembers: failed to read ${dept}:`, err.message);
+    }
+  }
+
+  if (!memberIds.length) return { sent: 0, total: 0 };
+
   let sent = 0;
-  for (const user of matchedUsers) {
+  for (const memberId of memberIds) {
     try {
       const notification = await Notification.create({
-        recipientId: user._id,
+        recipientId: memberId,
         type: "broadcast_members",
-        title: String(title || "").trim(),
-        body: String(body || "").trim(),
+        title: titleStr,
+        body: bodyStr,
         metadata: baseMetadata,
       });
-      const payload = {
+      emitNotification(memberId, {
         _id: notification._id,
         type: notification.type,
         title: notification.title,
@@ -188,44 +196,39 @@ async function sendBroadcastToAllMembers({ senderRole, title, body, metadata = {
         metadata: notification.metadata,
         readAt: notification.readAt,
         createdAt: notification.createdAt,
-      };
-      emitNotification(String(user._id), payload);
+      });
       sent++;
     } catch (_) {}
   }
-  return { sent, total: matchedUsers.length };
+
+  return { sent, total: memberIds.length };
 }
 
 /**
- * Broadcast a notification to members of ONE specific department who have a website account.
- * @param {object} opts
- * @param {string} opts.department  - e.g. "Technical"
- * @param {string} opts.senderRole
- * @param {string} opts.title
- * @param {string} opts.body
- * @param {object} [opts.metadata]
+ * Broadcast to members of ONE specific department.
+ *
+ * KEY FIX: Same as sendBroadcastToAllMembers — uses dept member _ids directly,
+ * not email-to-User matching.
  */
 async function sendBroadcastToDepartmentMembers({ department, senderRole, title, body, metadata = {} }) {
   const dept = String(department || "").trim();
   if (!dept) return { sent: 0, total: 0 };
 
-  const members = await getTeamMemberModel(dept)
-    .find({
-      email: { $exists: true, $ne: "" },
-      $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
-    })
-    .select("email")
-    .lean();
+  const titleStr = String(title || "").trim();
+  const bodyStr = String(body || "").trim();
 
-  const emails = [
-    ...new Set(members.map((m) => String(m.email || "").trim().toLowerCase()).filter(Boolean)),
-  ];
+  let members = [];
+  try {
+    members = await getTeamMemberModel(dept)
+      .find({ deletedAt: null })
+      .select("_id")
+      .lean();
+  } catch (err) {
+    console.error(`sendBroadcastToDepartmentMembers: failed to read ${dept}:`, err.message);
+    return { sent: 0, total: 0 };
+  }
 
-  const matchedUsers = emails.length
-    ? await User.find({ email: { $in: emails } }).select("_id").lean()
-    : [];
-
-  if (!matchedUsers.length) return { sent: 0, total: 0 };
+  if (!members.length) return { sent: 0, total: 0 };
 
   const baseMetadata = {
     ...metadata,
@@ -236,16 +239,17 @@ async function sendBroadcastToDepartmentMembers({ department, senderRole, title,
   };
 
   let sent = 0;
-  for (const user of matchedUsers) {
+  for (const member of members) {
     try {
+      const memberId = String(member._id);
       const notification = await Notification.create({
-        recipientId: user._id,
+        recipientId: memberId,
         type: "broadcast_department",
-        title: String(title || "").trim(),
-        body: String(body || "").trim(),
+        title: titleStr,
+        body: bodyStr,
         metadata: baseMetadata,
       });
-      const payload = {
+      emitNotification(memberId, {
         _id: notification._id,
         type: notification.type,
         title: notification.title,
@@ -253,12 +257,12 @@ async function sendBroadcastToDepartmentMembers({ department, senderRole, title,
         metadata: notification.metadata,
         readAt: notification.readAt,
         createdAt: notification.createdAt,
-      };
-      emitNotification(String(user._id), payload);
+      });
       sent++;
     } catch (_) {}
   }
-  return { sent, total: matchedUsers.length };
+
+  return { sent, total: members.length };
 }
 
 module.exports = {
