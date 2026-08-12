@@ -49,7 +49,7 @@ async function getInviteSubmissionRecipients(department) {
   return Array.from(recipientIds);
 }
 
-async function notifyTeamInviteSubmission({ department, memberName, memberId }) {
+async function notifyTeamInviteSubmission({ department, memberName, memberId, senderId = "", senderName = "", senderRole = "System" }) {
   const name = String(memberName || "Someone").trim();
   const dept = String(department || "").trim();
   const title = "New team member";
@@ -66,6 +66,9 @@ async function notifyTeamInviteSubmission({ department, memberName, memberId }) 
         type: "team_invite_submission",
         title,
         body,
+        senderId,
+        senderName,
+        senderRole,
         metadata: {
           department: dept,
           memberName: name,
@@ -79,8 +82,12 @@ async function notifyTeamInviteSubmission({ department, memberName, memberId }) 
         title: notification.title,
         body: notification.body,
         metadata: notification.metadata,
+        senderId: notification.senderId,
+        senderName: notification.senderName,
+        senderRole: notification.senderRole,
         readAt: notification.readAt,
         createdAt: notification.createdAt,
+        replies: [],
       };
 
       emitNotification(recipientId, payload);
@@ -95,9 +102,9 @@ async function notifyTeamInviteSubmission({ department, memberName, memberId }) 
  * Broadcast to ALL registered users (User collection).
  * Batched 100 at a time to keep memory low on production.
  */
-async function sendBroadcastToAllUsers({ senderRole, title, body, metadata = {} }) {
+async function sendBroadcastToAllUsers({ senderId = "", senderName = "", senderRole, title, body, metadata = {} }) {
   const titleStr = String(title || "").trim();
-  const bodyStr = String(body || "").trim();
+  const bodyStr  = String(body || "").trim();
   const baseMetadata = {
     ...metadata,
     senderRole: String(senderRole || ""),
@@ -123,6 +130,9 @@ async function sendBroadcastToAllUsers({ senderRole, title, body, metadata = {} 
           title: titleStr,
           body: bodyStr,
           metadata: baseMetadata,
+          senderId,
+          senderName,
+          senderRole,
         });
         emitNotification(String(user._id), {
           _id: notification._id,
@@ -130,8 +140,12 @@ async function sendBroadcastToAllUsers({ senderRole, title, body, metadata = {} 
           title: notification.title,
           body: notification.body,
           metadata: notification.metadata,
+          senderId: notification.senderId,
+          senderName: notification.senderName,
+          senderRole: notification.senderRole,
           readAt: notification.readAt,
           createdAt: notification.createdAt,
+          replies: [],
         });
         sent++;
       } catch (_) {}
@@ -150,9 +164,9 @@ async function sendBroadcastToAllUsers({ senderRole, title, body, metadata = {} 
  * The Notification recipientId stores their dept _id so getNotifications()
  * (which queries { recipientId: req.user.id }) still works for dept member logins.
  */
-async function sendBroadcastToAllMembers({ senderRole, title, body, metadata = {} }) {
+async function sendBroadcastToAllMembers({ senderId = "", senderName = "", senderRole, title, body, metadata = {} }) {
   const titleStr = String(title || "").trim();
-  const bodyStr = String(body || "").trim();
+  const bodyStr  = String(body || "").trim();
   const baseMetadata = {
     ...metadata,
     senderRole: String(senderRole || ""),
@@ -187,6 +201,9 @@ async function sendBroadcastToAllMembers({ senderRole, title, body, metadata = {
         title: titleStr,
         body: bodyStr,
         metadata: baseMetadata,
+        senderId,
+        senderName,
+        senderRole,
       });
       emitNotification(memberId, {
         _id: notification._id,
@@ -194,8 +211,12 @@ async function sendBroadcastToAllMembers({ senderRole, title, body, metadata = {
         title: notification.title,
         body: notification.body,
         metadata: notification.metadata,
+        senderId: notification.senderId,
+        senderName: notification.senderName,
+        senderRole: notification.senderRole,
         readAt: notification.readAt,
         createdAt: notification.createdAt,
+        replies: [],
       });
       sent++;
     } catch (_) {}
@@ -210,12 +231,12 @@ async function sendBroadcastToAllMembers({ senderRole, title, body, metadata = {
  * KEY FIX: Same as sendBroadcastToAllMembers — uses dept member _ids directly,
  * not email-to-User matching.
  */
-async function sendBroadcastToDepartmentMembers({ department, senderRole, title, body, metadata = {} }) {
+async function sendBroadcastToDepartmentMembers({ department, senderId = "", senderName = "", senderRole, title, body, metadata = {} }) {
   const dept = String(department || "").trim();
   if (!dept) return { sent: 0, total: 0 };
 
   const titleStr = String(title || "").trim();
-  const bodyStr = String(body || "").trim();
+  const bodyStr  = String(body || "").trim();
 
   let members = [];
   try {
@@ -248,6 +269,9 @@ async function sendBroadcastToDepartmentMembers({ department, senderRole, title,
         title: titleStr,
         body: bodyStr,
         metadata: baseMetadata,
+        senderId,
+        senderName,
+        senderRole,
       });
       emitNotification(memberId, {
         _id: notification._id,
@@ -255,8 +279,12 @@ async function sendBroadcastToDepartmentMembers({ department, senderRole, title,
         title: notification.title,
         body: notification.body,
         metadata: notification.metadata,
+        senderId: notification.senderId,
+        senderName: notification.senderName,
+        senderRole: notification.senderRole,
         readAt: notification.readAt,
         createdAt: notification.createdAt,
+        replies: [],
       });
       sent++;
     } catch (_) {}
