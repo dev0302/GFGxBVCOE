@@ -917,6 +917,16 @@ export async function replyToNotification(id, body) {
   return data;
 }
 
+/** Delete a reply — only the original sender is allowed to do this. */
+export async function deleteNotificationReply(replyId) {
+  const res = await authFetch(`/api/v1/notifications/replies/${encodeURIComponent(replyId)}`, {
+    method: 'DELETE',
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to delete reply');
+  return data;
+}
+
 
 // Team (manage your department members; society roles pass department)
 export async function getTeamDepartments() {

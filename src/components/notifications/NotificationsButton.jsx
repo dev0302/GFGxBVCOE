@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, UserPlus, Radio, CornerUpLeft, Send, ChevronDown, ChevronUp, MessageCircle } from "react-feather";
+import { Bell, UserPlus, Radio, CornerUpLeft, Send, ChevronDown, ChevronUp, MessageCircle, Trash2 } from "react-feather";
 import { useNotifications } from "../../context/NotificationsContext";
+import { useAuth } from "../../context/AuthContext";
 
 function formatRelativeTime(dateStr) {
   if (!dateStr) return "";
@@ -141,13 +142,44 @@ function ReplyBox({ notificationId, color, onSend, onCancel }) {
 }
 
 /** Collapsible replies thread under a notification */
-function RepliesThread({ replies, color }) {
+function RepliesThread({ replies, color, notificationId, currentUserId, onDeleteReply }) {
   const [expanded, setExpanded] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null); // replyId pending confirmation
+  const [deletingId, setDeletingId] = useState(null);
+  const prevCountRef = useRef(replies?.length ?? 0);
+
+  // Auto-expand when a new reply arrives via real-time socket
+  useEffect(() => {
+    const newCount = replies?.length ?? 0;
+    if (newCount > prevCountRef.current) {
+      setExpanded(true);
+    }
+    prevCountRef.current = newCount;
+  }, [replies?.length]);
+
   if (!replies || replies.length === 0) return null;
 
   const accent = color === "pink" ? "pink" : "green";
   const threadBorder = accent === "pink" ? "border-pink-400/15" : "border-green-400/15";
   const labelColor = accent === "pink" ? "text-blue-300" : "text-green-400";
+
+  const handleDelete = async (replyId) => {
+    if (confirmDeleteId !== replyId) {
+      // First click — ask for confirmation
+      setConfirmDeleteId(replyId);
+      // Auto-cancel confirmation after 3 s
+      setTimeout(() => setConfirmDeleteId((prev) => (prev === replyId ? null : prev)), 3000);
+      return;
+    }
+    // Second click — confirmed
+    setConfirmDeleteId(null);
+    setDeletingId(replyId);
+    try {
+      await onDeleteReply(notificationId, replyId);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <div className="mt-1.5">
@@ -171,20 +203,58 @@ function RepliesThread({ replies, color }) {
             className="overflow-hidden"
           >
             <div className={`mt-1 ml-1 border-l-2 pl-2 ${threadBorder} space-y-1.5`}>
-              {replies.map((r, i) => (
-                <div key={r._id || i} className="group">
-                  <div className="flex items-baseline justify-between gap-1">
-                    <span className={`text-[9px] font-semibold ${accent === "pink" ? "text-pink-300" : "text-green-300"}`}>
-                      {r.senderName || "Member"}
-                      {r.senderRole ? <span className="ml-1 font-normal text-gray-500">· {r.senderRole}</span> : null}
-                    </span>
-                    <span className="text-[9px] text-gray-600 shrink-0">{formatRelativeTime(r.createdAt)}</span>
-                  </div>
-                  <p className="text-[10px] text-gray-300 leading-snug mt-0.5" style={{ whiteSpace: "pre-wrap" }}>
-                    {r.body}
-                  </p>
-                </div>
-              ))}
+              <AnimatePresence initial={false}>
+                {replies.map((r, i) => {
+                  const isOwn = currentUserId && String(r.senderId) === String(currentUserId);
+                  const isPendingConfirm = confirmDeleteId === String(r._id);
+                  const isDeleting = deletingId === String(r._id);
+                  return (
+                    <motion.div
+                      key={r._id || i}
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: isDeleting ? 0.4 : 1, y: 0 }}
+                      exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                      transition={{ duration: 0.16 }}
+                      className="group relative"
+                    >
+                      <div className="flex items-start justify-between gap-1">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-baseline gap-1">
+                            <span className={`text-[9px] font-semibold ${accent === "pink" ? "text-pink-300" : "text-green-300"}`}>
+                              {r.senderName || "Member"}
+                              {r.senderRole ? <span className="ml-1 font-normal text-gray-500">· {r.senderRole}</span> : null}
+                            </span>
+                            <span className="text-[9px] text-gray-600 shrink-0">{formatRelativeTime(r.createdAt)}</span>
+                          </div>
+                          <p className="text-[10px] text-gray-300 leading-snug mt-0.5" style={{ whiteSpace: "pre-wrap" }}>
+                            {r.body}
+                          </p>
+                        </div>
+
+                        {/* Delete button — always visible to reply's own sender, soft pink default */}
+                        {isOwn && (
+                          <button
+                            type="button"
+                            disabled={isDeleting}
+                            onClick={() => handleDelete(String(r._id))}
+                            title={isPendingConfirm ? "Click again to confirm delete" : "Delete your reply"}
+                            className={`shrink-0 flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[8px] font-semibold transition-all
+                              ${
+                                isPendingConfirm
+                                  ? "bg-red-500/25 text-red-400 border border-red-400/50 scale-105"
+                                  : "bg-rose-500/10 text-rose-400/70 border border-rose-400/20 hover:bg-red-500/20 hover:text-red-400 hover:border-red-400/40"
+                              }
+                            `}
+                          >
+                            <Trash2 className="h-2 w-2" />
+                            {isPendingConfirm ? "Confirm" : ""}
+                          </button>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
             </div>
           </motion.div>
         )}
@@ -205,8 +275,9 @@ export default function NotificationsButton({
   // Track which notification has the reply box open (by _id)
   const [replyingTo, setReplyingTo] = useState(null);
   const buttonRef = useRef(null);
-  const { notifications, unreadCount, loading, refresh, markRead, markAllRead, bubble, dismissBubble, replyToNotification } =
+  const { notifications, unreadCount, loading, refresh, markRead, markAllRead, bubble, dismissBubble, replyToNotification, deleteReplyFromNotification } =
     useNotifications();
+  const { user } = useAuth();
 
   // Gate all portals until after first mount (avoids SSR / hydration mismatch)
   useEffect(() => { setIsMounted(true); }, []);
@@ -561,6 +632,9 @@ export default function NotificationsButton({
                                     <RepliesThread
                                       replies={n.replies || []}
                                       color={color}
+                                      notificationId={String(n._id)}
+                                      currentUserId={user?._id}
+                                      onDeleteReply={deleteReplyFromNotification}
                                     />
                                   </div>
 

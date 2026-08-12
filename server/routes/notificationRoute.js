@@ -8,6 +8,7 @@ const {
   broadcastToMembers,
   broadcastToDepartment,
   replyToNotification,
+  deleteReply,
 } = require("../controllers/notificationController");
 const { auth, requireRegisteredUser, requireSocietyRole } = require("../middlewares/AuthZ");
 
@@ -20,6 +21,9 @@ router.patch("/:id/read", auth, markAsRead);
 
 // Reply to a specific notification (recipient replies back to sender)
 router.post("/:id/reply", auth, replyToNotification);
+
+// Delete a reply — only the sender can delete their own reply
+router.delete("/replies/:replyId", auth, deleteReply);
 
 // Society-wide broadcasts — restricted to Chairperson / Vice-Chairperson / Treasurer / ADMIN
 router.post("/broadcast-users", auth, requireSocietyRole, broadcastToUsers);
