@@ -464,6 +464,16 @@ export async function sendTargetedEmail(payload) {
   return data;
 }
 
+export async function generateEmailContent(prompt) {
+  const res = await authFetch('/api/v1/ai/generate-email', {
+    method: 'POST',
+    body: JSON.stringify({ prompt }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to generate email content');
+  return data;
+}
+
 const authFetch = (url, options = {}) => {
   const token = getAuthToken();
   const headers = {

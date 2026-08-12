@@ -20,6 +20,7 @@ import {
   User,
 } from "react-feather";
 import { FiSettings } from "react-icons/fi";
+import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import {
   fetchCloudinaryStorageUsage,
@@ -33,6 +34,7 @@ import {
   sendUnsignedMemberBroadcastEmail,
   fetchTargetedEmailRecipients,
   sendTargetedEmail,
+  generateEmailContent,
 } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
@@ -1078,6 +1080,72 @@ function EmailServiceAnalyticsContent() {
   );
 }
 
+function EmailAiAssist({ setForm, disabled = false, inputClass, labelClass }) {
+  const [prompt, setPrompt] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [aiError, setAiError] = useState("");
+
+  const handleGenerate = async () => {
+    const trimmed = prompt.trim();
+    if (!trimmed || generating || disabled) return;
+
+    try {
+      setGenerating(true);
+      setAiError("");
+      const result = await generateEmailContent(trimmed);
+      const { title, subject, description } = result.data || {};
+      setForm((prev) => ({
+        ...prev,
+        title: title || prev.title,
+        subject: subject || prev.subject,
+        description: description || prev.description,
+      }));
+      toast.success("Email fields filled from your prompt.");
+    } catch (err) {
+      setAiError(err?.message || "Failed to generate email content");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3 rounded-lg border border-violet-400/20 bg-violet-500/[0.06] p-4">
+      <div className="flex items-center gap-2">
+        <Sparkles className="h-4 w-4 text-violet-300" />
+        <p className="text-sm font-semibold text-violet-200">AI Assist (Groq)</p>
+      </div>
+      <p className="text-xs leading-5 text-gray-400">
+        Describe what you want to announce in plain language. AI will fill Email Title, Subject, and Description. You can edit everything before sending.
+      </p>
+      <div>
+        <label className={labelClass}>Raw Prompt</label>
+        <textarea
+          value={prompt}
+          onChange={(event) => {
+            setPrompt(event.target.value);
+            setAiError("");
+          }}
+          className={`${inputClass} min-h-24 resize-y leading-6`}
+          placeholder="e.g. Remind all heads about the weekly sync on Friday at 5 PM in the seminar hall..."
+          disabled={disabled || generating}
+        />
+      </div>
+      {aiError && (
+        <p className="text-xs text-red-300">{aiError}</p>
+      )}
+      <button
+        type="button"
+        onClick={handleGenerate}
+        disabled={disabled || generating || !prompt.trim()}
+        className="inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-500/20 px-4 py-2 text-xs font-semibold text-violet-100 transition hover:bg-violet-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <Sparkles className={`h-4 w-4 ${generating ? "animate-pulse" : ""}`} />
+        {generating ? "Generating..." : "Generate Email Content"}
+      </button>
+    </div>
+  );
+}
+
 function SendEmailToAllContent({ memberOnly = false }) {
   const [audience, setAudience] = useState(null);
   const [loadingAudience, setLoadingAudience] = useState(true);
@@ -1267,6 +1335,13 @@ function SendEmailToAllContent({ memberOnly = false }) {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <EmailAiAssist
+            setForm={setForm}
+            disabled={sending}
+            inputClass={inputClass}
+            labelClass={labelClass}
+          />
+
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label className={labelClass}>Email Title</label>
@@ -1569,6 +1644,13 @@ function SendEmailToPersonContent() {
               />
             </div>
           </div>
+
+          <EmailAiAssist
+            setForm={setForm}
+            disabled={sending}
+            inputClass={inputClass}
+            labelClass={labelClass}
+          />
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div><label className={labelClass}>Email Title</label><input value={form.title} onChange={updateField("title")} className={inputClass} maxLength={120} required /></div>
