@@ -896,6 +896,18 @@ export async function broadcastNotificationToDepartment(payload) {
   return data;
 }
 
+/** Reply to a notification (recipient sends a reply back to the original sender). */
+export async function replyToNotification(id, body) {
+  const res = await authFetch(`/api/v1/notifications/${encodeURIComponent(id)}/reply`, {
+    method: 'POST',
+    body: JSON.stringify({ body }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || 'Failed to send reply');
+  return data;
+}
+
+
 // Team (manage your department members; society roles pass department)
 export async function getTeamDepartments() {
   const res = await authFetch('/api/v1/team/departments');

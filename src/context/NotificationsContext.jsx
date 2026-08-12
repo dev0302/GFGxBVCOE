@@ -4,6 +4,7 @@ import {
   getNotifications,
   markAllNotificationsRead,
   markNotificationRead,
+  replyToNotification as apiReplyToNotification,
 } from "../services/api";
 import { subscribeNotifications } from "../services/socket";
 
@@ -26,7 +27,7 @@ export function NotificationsProvider({ children }) {
 
   const showBubble = useCallback((notif) => {
     if (!notif) return;
-    const senderRole = notif.metadata?.senderRole || "";
+    const senderRole = notif.metadata?.senderRole || notif.senderRole || "";
     const color = notif.metadata?.color === "pink" ? "pink" : "green";
     if (bubbleTimerRef.current) clearTimeout(bubbleTimerRef.current);
     setBubble({ show: true, senderRole, color });
@@ -79,14 +80,31 @@ export function NotificationsProvider({ children }) {
     if (!user?._id) return undefined;
 
     return subscribeNotifications((payload) => {
-      if (!payload?._id) return;
+      if (!payload) return;
+
+      // Handle reply ack — append reply to the notification's replies array
+      if (payload.type === "notification_reply_ack") {
+        const { notificationId, reply } = payload;
+        if (notificationId && reply) {
+          setNotifications((prev) =>
+            prev.map((n) =>
+              String(n._id) === String(notificationId)
+                ? { ...n, replies: [...(n.replies || []), reply] }
+                : n
+            )
+          );
+        }
+        return;
+      }
+
+      // Regular notification
+      if (!payload._id) return;
       setNotifications((prev) => {
         if (prev.some((n) => n._id === payload._id)) return prev;
-        return [payload, ...prev];
+        return [{ ...payload, replies: payload.replies || [] }, ...prev];
       });
       if (!payload.readAt) {
         setUnreadCount((c) => c + 1);
-        // Show bubble for every real-time notification
         showBubble(payload);
       }
     });
@@ -127,6 +145,24 @@ export function NotificationsProvider({ children }) {
     }
   }, []);
 
+  /**
+   * Send a reply to a notification. Optimistically appends the reply
+   * to the local notification's replies array.
+   */
+  const replyToNotification = useCallback(async (id, body) => {
+    const res = await apiReplyToNotification(id, body); // throws on failure
+    if (res.success && res.reply) {
+      setNotifications((prev) =>
+        prev.map((n) =>
+          String(n._id) === String(id)
+            ? { ...n, replies: [...(n.replies || []), res.reply] }
+            : n
+        )
+      );
+    }
+    return res;
+  }, []);
+
   const value = useMemo(
     () => ({
       notifications,
@@ -137,8 +173,9 @@ export function NotificationsProvider({ children }) {
       markAllRead,
       bubble,
       dismissBubble,
+      replyToNotification,
     }),
-    [notifications, unreadCount, loading, refresh, markRead, markAllRead, bubble, dismissBubble]
+    [notifications, unreadCount, loading, refresh, markRead, markAllRead, bubble, dismissBubble, replyToNotification]
   );
 
   return (

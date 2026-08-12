@@ -7,6 +7,7 @@ const {
   broadcastToUsers,
   broadcastToMembers,
   broadcastToDepartment,
+  replyToNotification,
 } = require("../controllers/notificationController");
 const { auth, requireRegisteredUser, requireSocietyRole } = require("../middlewares/AuthZ");
 
@@ -16,6 +17,9 @@ router.get("/", auth, getNotifications);
 router.get("/unread-count", auth, getUnreadCount);
 router.patch("/read-all", auth, markAllAsRead);
 router.patch("/:id/read", auth, markAsRead);
+
+// Reply to a specific notification (recipient replies back to sender)
+router.post("/:id/reply", auth, replyToNotification);
 
 // Society-wide broadcasts — restricted to Chairperson / Vice-Chairperson / Treasurer / ADMIN
 router.post("/broadcast-users", auth, requireSocietyRole, broadcastToUsers);
