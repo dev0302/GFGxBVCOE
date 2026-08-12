@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const Notification = require("../models/Notification");
 const User = require("../models/User");
 const { getTeamMemberModel } = require("../models/TeamMember");
@@ -105,11 +106,13 @@ async function notifyTeamInviteSubmission({ department, memberName, memberId, se
 async function sendBroadcastToAllUsers({ senderId = "", senderName = "", senderRole, title, body, metadata = {} }) {
   const titleStr = String(title || "").trim();
   const bodyStr  = String(body || "").trim();
+  const broadcastGroupId = crypto.randomUUID();
   const baseMetadata = {
     ...metadata,
     senderRole: String(senderRole || ""),
     color: "pink",
     broadcastType: "users",
+    broadcastGroupId,
   };
 
   const total = await User.countDocuments({});
@@ -167,11 +170,13 @@ async function sendBroadcastToAllUsers({ senderId = "", senderName = "", senderR
 async function sendBroadcastToAllMembers({ senderId = "", senderName = "", senderRole, title, body, metadata = {} }) {
   const titleStr = String(title || "").trim();
   const bodyStr  = String(body || "").trim();
+  const broadcastGroupId = crypto.randomUUID();
   const baseMetadata = {
     ...metadata,
     senderRole: String(senderRole || ""),
     color: "pink",
     broadcastType: "members",
+    broadcastGroupId,
   };
 
   // Collect all member _ids from every dept collection
@@ -251,12 +256,14 @@ async function sendBroadcastToDepartmentMembers({ department, senderId = "", sen
 
   if (!members.length) return { sent: 0, total: 0 };
 
+  const broadcastGroupId = crypto.randomUUID();
   const baseMetadata = {
     ...metadata,
     senderRole: String(senderRole || ""),
     color: "pink",
     broadcastType: "department",
     department: dept,
+    broadcastGroupId,
   };
 
   let sent = 0;

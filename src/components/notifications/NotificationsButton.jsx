@@ -523,8 +523,8 @@ export default function NotificationsButton({
                                         </p>
                                       </div>
 
-                                      {/* Reply button — only on replyable notification types */}
-                                      {!isReply && (
+                                      {/* Reply button — only on pink (broadcast) notifications */}
+                                      {color === "pink" && !isReply && (
   <button
     type="button"
     title="Reply to this notification"

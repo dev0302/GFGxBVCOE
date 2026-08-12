@@ -152,54 +152,52 @@ exports.replyToNotification = async (req, res) => {
     notification.replies.push(reply._id);
     await notification.save();
 
-    // If the original notification has a known sender, notify them in real-time
-    const originalSenderId = notification.senderId;
-    if (originalSenderId && originalSenderId !== replierId) {
-      // Create a new notification for the original sender
-      const replyNotif = await Notification.create({
-        recipientId: originalSenderId,
-        type: "notification_reply",
-        title: `↩ Reply from ${replierName}`,
-        body,
-        senderId: replierId,
-        senderName: replierName,
-        senderRole: replierRole,
-        metadata: {
-          senderRole: replierRole,
-          color: "green",
-          originalNotificationId: String(notification._id),
-          originalTitle: notification.title,
-        },
-      });
+    // Build the reply payload shared across all acks
+    const replyPayload = {
+      _id: reply._id,
+      senderId: reply.senderId,
+      senderName: reply.senderName,
+      senderRole: reply.senderRole,
+      body: reply.body,
+      createdAt: reply.createdAt,
+    };
 
-      emitNotification(originalSenderId, {
-        _id: replyNotif._id,
-        type: replyNotif.type,
-        title: replyNotif.title,
-        body: replyNotif.body,
-        metadata: replyNotif.metadata,
-        senderId: replyNotif.senderId,
-        senderName: replyNotif.senderName,
-        senderRole: replyNotif.senderRole,
-        readAt: replyNotif.readAt,
-        createdAt: replyNotif.createdAt,
-        replies: [],
+    const broadcastGroupId = notification.metadata?.broadcastGroupId;
+
+    if (broadcastGroupId) {
+      // ── Broadcast reply: fan out to ALL sibling notifications ──────────────
+      // Find every notification that belongs to the same broadcast group
+      const siblings = await Notification.find({
+        "metadata.broadcastGroupId": broadcastGroupId,
+      }).select("_id recipientId").lean();
+
+      // Push reply ref onto every sibling (skip if already pushed)
+      const siblingIds = siblings.map((s) => s._id);
+      await Notification.updateMany(
+        { _id: { $in: siblingIds }, replies: { $ne: reply._id } },
+        { $push: { replies: reply._id } }
+      );
+
+      // Emit ack to every unique recipient with their own notificationId
+      const seen = new Set();
+      for (const sibling of siblings) {
+        const recipientId = String(sibling.recipientId);
+        if (seen.has(recipientId)) continue;
+        seen.add(recipientId);
+        emitNotification(recipientId, {
+          type: "notification_reply_ack",
+          notificationId: String(sibling._id),
+          reply: replyPayload,
+        });
+      }
+    } else {
+      // ── Non-broadcast reply: only ack the replier ──────────────────────────
+      emitNotification(replierId, {
+        type: "notification_reply_ack",
+        notificationId: String(notification._id),
+        reply: replyPayload,
       });
     }
-
-    // Also emit a socket event to the replier so their own panel updates with the reply
-    emitNotification(replierId, {
-      type: "notification_reply_ack",
-      notificationId: String(notification._id),
-      reply: {
-        _id: reply._id,
-        senderId: reply.senderId,
-        senderName: reply.senderName,
-        senderRole: reply.senderRole,
-        body: reply.body,
-        createdAt: reply.createdAt,
-      },
-    });
 
     return res.status(201).json({
       success: true,
