@@ -4,14 +4,137 @@ const User = require("../models/User");
 const { getTeamMemberModel } = require("../models/TeamMember");
 const { sendBroadcastToAllUsers, sendBroadcastToAllMembers, sendBroadcastToDepartmentMembers, emitNotification } = require("../utils/notificationService");
 
+const BROADCAST_TYPES = ["broadcast_users", "broadcast_members", "broadcast_department"];
+
 exports.getNotifications = async (req, res) => {
   try {
     const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 50, 1), 100);
+
+    // Fetch notifications WITHOUT populating replies — we'll attach them manually below
     const notifications = await Notification.find({ recipientId: req.user.id })
       .sort({ createdAt: -1 })
       .limit(limit)
-      .populate({ path: "replies", options: { sort: { createdAt: 1 } } })
       .lean();
+
+    // ── Attach replies intelligently ──────────────────────────────────────────
+    //
+    // Strategy A — Broadcast notifications with a broadcastGroupId:
+    //   Look up ALL NotificationReply docs tagged with that broadcastGroupId.
+    //   This is the canonical cross-user reply lookup and is immune to the
+    //   per-notification replies[] array being stale or missing entries.
+    //
+    // Strategy B — Broadcast notifications WITHOUT broadcastGroupId (legacy data):
+    //   Find all sibling notification _ids (same type+title+body+senderId),
+    //   then look up NotificationReply by those notificationIds.
+    //
+    // Strategy C — Non-broadcast notifications:
+    //   Look up NotificationReply by this notification's own _id (normal behaviour).
+
+    // Collect distinct broadcastGroupIds (Strategy A)
+    const groupIds = [
+      ...new Set(
+        notifications
+          .filter((n) => BROADCAST_TYPES.includes(n.type) && n.metadata?.broadcastGroupId)
+          .map((n) => n.metadata.broadcastGroupId)
+      ),
+    ];
+
+    // Fetch all Strategy-A replies in one shot
+    const groupRepliesMap = {}; // broadcastGroupId → reply[]
+    if (groupIds.length > 0) {
+      const groupReplies = await NotificationReply.find({
+        broadcastGroupId: { $in: groupIds },
+      })
+        .sort({ createdAt: 1 })
+        .lean();
+      for (const r of groupReplies) {
+        const gid = r.broadcastGroupId;
+        if (!groupRepliesMap[gid]) groupRepliesMap[gid] = [];
+        groupRepliesMap[gid].push(r);
+      }
+    }
+
+    // Identify legacy broadcast notifications (Strategy B)
+    const legacyBroadcasts = notifications.filter(
+      (n) => BROADCAST_TYPES.includes(n.type) && !n.metadata?.broadcastGroupId
+    );
+
+    // For each legacy broadcast, find sibling notification _ids then fetch their replies
+    const legacyRepliesMap = {}; // notification._id (string) → reply[]
+    if (legacyBroadcasts.length > 0) {
+      // One query per unique (type+title+body+senderId) combination
+      const seen = new Set();
+      for (const n of legacyBroadcasts) {
+        const key = `${n.type}||${n.title}||${n.body}||${n.senderId}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+
+        const siblingQuery = {
+          type: n.type,
+          title: n.title,
+          body: n.body,
+        };
+        if (n.senderId) siblingQuery.senderId = n.senderId;
+
+        const siblingIds = await Notification.find(siblingQuery)
+          .select("_id")
+          .lean()
+          .then((docs) => docs.map((d) => d._id));
+
+        if (siblingIds.length === 0) continue;
+
+        const replies = await NotificationReply.find({
+          notificationId: { $in: siblingIds },
+        })
+          .sort({ createdAt: 1 })
+          .lean();
+
+        // Map onto every sibling notification that belongs to this user
+        for (const notif of legacyBroadcasts) {
+          if (
+            notif.type === n.type &&
+            notif.title === n.title &&
+            notif.body === n.body &&
+            (notif.senderId || "") === (n.senderId || "")
+          ) {
+            legacyRepliesMap[String(notif._id)] = replies;
+          }
+        }
+      }
+    }
+
+    // Identify non-broadcast notification ids (Strategy C)
+    const nonBroadcastIds = notifications
+      .filter((n) => !BROADCAST_TYPES.includes(n.type))
+      .map((n) => n._id);
+
+    const nonBroadcastRepliesMap = {}; // notificationId (string) → reply[]
+    if (nonBroadcastIds.length > 0) {
+      const replies = await NotificationReply.find({
+        notificationId: { $in: nonBroadcastIds },
+      })
+        .sort({ createdAt: 1 })
+        .lean();
+      for (const r of replies) {
+        const nid = String(r.notificationId);
+        if (!nonBroadcastRepliesMap[nid]) nonBroadcastRepliesMap[nid] = [];
+        nonBroadcastRepliesMap[nid].push(r);
+      }
+    }
+
+    // Attach replies to each notification
+    const enrichedNotifications = notifications.map((n) => {
+      if (BROADCAST_TYPES.includes(n.type)) {
+        if (n.metadata?.broadcastGroupId) {
+          // Strategy A
+          return { ...n, replies: groupRepliesMap[n.metadata.broadcastGroupId] || [] };
+        }
+        // Strategy B
+        return { ...n, replies: legacyRepliesMap[String(n._id)] || [] };
+      }
+      // Strategy C
+      return { ...n, replies: nonBroadcastRepliesMap[String(n._id)] || [] };
+    });
 
     const unreadCount = await Notification.countDocuments({
       recipientId: req.user.id,
@@ -20,7 +143,7 @@ exports.getNotifications = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: notifications,
+      data: enrichedNotifications,
       unreadCount,
     });
   } catch (error) {
@@ -139,16 +262,23 @@ exports.replyToNotification = async (req, res) => {
 
     if (!replierName) replierName = req.user?.email || "Member";
 
-    // Save the reply document
+    // Resolve the broadcastGroupId from the notification's metadata
+    const broadcastGroupId = String(notification.metadata?.broadcastGroupId || "").trim();
+
+    // Save the reply document — store broadcastGroupId so getNotifications can
+    // look up ALL replies for the group without relying on the per-notification
+    // replies[] array being perfectly in sync across all recipient documents.
     const reply = await NotificationReply.create({
       notificationId: notification._id,
+      broadcastGroupId,
       senderId: replierId,
       senderName: replierName,
       senderRole: replierRole,
       body,
     });
 
-    // Push reply ref onto the original notification
+    // Also push reply ref onto the replier's own notification doc (keeps the
+    // replies[] array consistent for the replier and legacy code paths).
     notification.replies.push(reply._id);
     await notification.save();
 
@@ -162,24 +292,40 @@ exports.replyToNotification = async (req, res) => {
       createdAt: reply.createdAt,
     };
 
-    const broadcastGroupId = notification.metadata?.broadcastGroupId;
+    const isBroadcastNotif = BROADCAST_TYPES.includes(notification.type);
 
-    if (broadcastGroupId) {
+    if (isBroadcastNotif) {
       // ── Broadcast reply: fan out to ALL sibling notifications ──────────────
-      // Find every notification that belongs to the same broadcast group
-      const siblings = await Notification.find({
-        "metadata.broadcastGroupId": broadcastGroupId,
-      }).select("_id recipientId").lean();
+      // Build sibling query: prefer broadcastGroupId (exact, new data),
+      // fall back to content-match for legacy notifications without it.
+      let siblingQuery;
+      if (broadcastGroupId) {
+        siblingQuery = { "metadata.broadcastGroupId": broadcastGroupId };
+      } else {
+        siblingQuery = {
+          type: notification.type,
+          title: notification.title,
+          body: notification.body,
+        };
+        if (notification.senderId) siblingQuery.senderId = notification.senderId;
+      }
 
-      // Push reply ref onto every sibling (skip if already pushed)
+      const siblings = await Notification.find(siblingQuery)
+        .select("_id recipientId")
+        .lean();
+
+      // Push reply _id onto every sibling notification doc (for consistency)
       const siblingIds = siblings.map((s) => s._id);
-      await Notification.updateMany(
-        { _id: { $in: siblingIds }, replies: { $ne: reply._id } },
-        { $push: { replies: reply._id } }
-      );
+      if (siblingIds.length > 1) {
+        await Notification.updateMany(
+          { _id: { $in: siblingIds }, replies: { $ne: reply._id } },
+          { $push: { replies: reply._id } }
+        );
+      }
 
-      // Emit ack to every unique recipient with their own notificationId
-      const seen = new Set();
+      // Emit real-time ack to every online recipient (skip replier — they
+      // already got the reply via the REST optimistic update in the context).
+      const seen = new Set([replierId]);
       for (const sibling of siblings) {
         const recipientId = String(sibling.recipientId);
         if (seen.has(recipientId)) continue;
@@ -191,13 +337,14 @@ exports.replyToNotification = async (req, res) => {
         });
       }
     } else {
-      // ── Non-broadcast reply: only ack the replier ──────────────────────────
+      // ── Non-broadcast: only ack the replier ───────────────────────────────
       emitNotification(replierId, {
         type: "notification_reply_ack",
         notificationId: String(notification._id),
         reply: replyPayload,
       });
     }
+
 
     return res.status(201).json({
       success: true,
@@ -304,6 +451,88 @@ exports.broadcastToDepartment = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message || "Failed to broadcast notification to department members.",
+    });
+  }
+};
+
+/**
+ * DELETE /api/v1/notifications/replies/:replyId
+ * Only the original sender of the reply can delete it.
+ * On success, removes the reply from DB and emits notification_reply_delete_ack
+ * to all broadcast group recipients so their UI updates in real-time.
+ */
+exports.deleteReply = async (req, res) => {
+  try {
+    const { replyId } = req.params;
+    const deleterId = String(req.user.id);
+
+    // Find reply — verify ownership
+    const reply = await NotificationReply.findById(replyId).lean();
+    if (!reply) {
+      return res.status(404).json({ success: false, message: "Reply not found." });
+    }
+    if (String(reply.senderId) !== deleterId) {
+      return res.status(403).json({ success: false, message: "You can only delete your own replies." });
+    }
+
+    // Delete the reply document
+    await NotificationReply.deleteOne({ _id: replyId });
+
+    // Pull reply _id from ALL notification documents that reference it
+    await Notification.updateMany(
+      { replies: reply._id },
+      { $pull: { replies: reply._id } }
+    );
+
+    // ── Broadcast delete ack to all affected recipients ──────────────────────
+    // Strategy: find sibling notifications by broadcastGroupId (new) or content (legacy)
+    const broadcastGroupId = reply.broadcastGroupId;
+    const broadcastType = reply.broadcastGroupId ? "group" : "content";
+
+    // First, look up the original notification to get type/title/body for legacy fallback
+    const originalNotif = await Notification.findById(reply.notificationId)
+      .select("type title body senderId metadata")
+      .lean();
+
+    let siblings = [];
+    if (broadcastGroupId) {
+      siblings = await Notification.find({ "metadata.broadcastGroupId": broadcastGroupId })
+        .select("_id recipientId")
+        .lean();
+    } else if (originalNotif && BROADCAST_TYPES.includes(originalNotif.type)) {
+      const siblingQuery = {
+        type: originalNotif.type,
+        title: originalNotif.title,
+        body: originalNotif.body,
+      };
+      if (originalNotif.senderId) siblingQuery.senderId = originalNotif.senderId;
+      siblings = await Notification.find(siblingQuery)
+        .select("_id recipientId")
+        .lean();
+    } else if (originalNotif) {
+      // Non-broadcast: only notify the owner of the original notification
+      siblings = [{ _id: originalNotif._id, recipientId: originalNotif.recipientId || reply.notificationId }];
+    }
+
+    // Emit delete ack to every unique recipient
+    const seen = new Set();
+    for (const sibling of siblings) {
+      const recipientId = String(sibling.recipientId);
+      if (seen.has(recipientId)) continue;
+      seen.add(recipientId);
+      emitNotification(recipientId, {
+        type: "notification_reply_delete_ack",
+        notificationId: String(sibling._id),
+        replyId: String(reply._id),
+      });
+    }
+
+    return res.status(200).json({ success: true, message: "Reply deleted." });
+  } catch (error) {
+    console.error("deleteReply error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to delete reply.",
     });
   }
 };

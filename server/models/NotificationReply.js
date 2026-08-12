@@ -8,6 +8,14 @@ const notificationReplySchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    // Shared ID across all notifications from the same broadcast batch.
+    // Allows getNotifications to look up ALL replies for the group, not just
+    // replies tied to one recipient's notification _id.
+    broadcastGroupId: {
+      type: String,
+      default: "",
+      index: true,
+    },
     senderId: {
       type: String,
       required: true,
@@ -20,5 +28,7 @@ const notificationReplySchema = new mongoose.Schema(
 );
 
 notificationReplySchema.index({ notificationId: 1, createdAt: 1 });
+notificationReplySchema.index({ broadcastGroupId: 1, createdAt: 1 });
 
 module.exports = mongoose.model("NotificationReply", notificationReplySchema);
+

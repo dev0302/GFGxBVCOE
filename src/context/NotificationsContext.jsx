@@ -5,6 +5,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
   replyToNotification as apiReplyToNotification,
+  deleteNotificationReply as apiDeleteReply,
 } from "../services/api";
 import { subscribeNotifications } from "../services/socket";
 
@@ -87,11 +88,34 @@ export function NotificationsProvider({ children }) {
         const { notificationId, reply } = payload;
         if (notificationId && reply) {
           setNotifications((prev) =>
-            prev.map((n) =>
-              String(n._id) === String(notificationId)
-                ? { ...n, replies: [...(n.replies || []), reply] }
-                : n
-            )
+            prev.map((n) => {
+              if (String(n._id) !== String(notificationId)) return n;
+              // Deduplicate — skip if this reply is already in the list
+              const alreadyPresent = (n.replies || []).some(
+                (r) => String(r._id) === String(reply._id)
+              );
+              if (alreadyPresent) return n;
+              return { ...n, replies: [...(n.replies || []), reply] };
+            })
+          );
+        }
+        return;
+      }
+
+      // Handle reply delete ack — remove the reply from the notification's replies array
+      if (payload.type === "notification_reply_delete_ack") {
+        const { notificationId, replyId } = payload;
+        if (notificationId && replyId) {
+          setNotifications((prev) =>
+            prev.map((n) => {
+              if (String(n._id) !== String(notificationId)) return n;
+              return {
+                ...n,
+                replies: (n.replies || []).filter(
+                  (r) => String(r._id) !== String(replyId)
+                ),
+              };
+            })
           );
         }
         return;
@@ -163,6 +187,28 @@ export function NotificationsProvider({ children }) {
     return res;
   }, []);
 
+  /**
+   * Delete a reply the current user sent. Optimistically removes it from
+   * local state; the server emits delete_ack to sync all other users.
+   */
+  const deleteReplyFromNotification = useCallback(async (notificationId, replyId) => {
+    // Optimistic removal for the sender
+    setNotifications((prev) =>
+      prev.map((n) =>
+        String(n._id) === String(notificationId)
+          ? { ...n, replies: (n.replies || []).filter((r) => String(r._id) !== String(replyId)) }
+          : n
+      )
+    );
+    try {
+      await apiDeleteReply(replyId);
+    } catch (err) {
+      console.error("Failed to delete reply:", err);
+      // Roll back optimistic removal on error by refreshing
+      refresh();
+    }
+  }, [refresh]);
+
   const value = useMemo(
     () => ({
       notifications,
@@ -174,8 +220,9 @@ export function NotificationsProvider({ children }) {
       bubble,
       dismissBubble,
       replyToNotification,
+      deleteReplyFromNotification,
     }),
-    [notifications, unreadCount, loading, refresh, markRead, markAllRead, bubble, dismissBubble, replyToNotification]
+    [notifications, unreadCount, loading, refresh, markRead, markAllRead, bubble, dismissBubble, replyToNotification, deleteReplyFromNotification]
   );
 
   return (
