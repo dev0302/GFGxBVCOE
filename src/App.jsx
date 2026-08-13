@@ -20,6 +20,7 @@ import Contact from "./pages/Contact";
 import Gallery from "./pages/Gallery";
 import Team2 from "./pages/Team2";
 import ResultPage from "./pages/ResultPage";
+import ResultPage2026 from "./pages/ResultPage2026";
 import Quiz from "./pages/Quiz";
 import Leaderboard from "./pages/Leaderboard";
 import QuizResult from "./pages/QuizResult";
@@ -130,6 +131,7 @@ function App() {
                     <Route path="/gallery" element={<Gallery />} />
                     <Route path="/bentogrid" element={<GFGBentoGrid />} />
                     <Route path="/results" element={<ResultPage />} />
+                    <Route path="/results2026" element={<ResultPage2026 />} />
                     <Route path="/quiz" element={<Quiz />} />
                     <Route path="/leaderboard" element={<Leaderboard />} />
                     <Route path="/quiz/result" element={<QuizResult />} />
