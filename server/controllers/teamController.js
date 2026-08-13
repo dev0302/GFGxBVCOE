@@ -298,6 +298,22 @@ exports.updateMember = async (req, res) => {
     if (!member) {
       return res.status(404).json({ success: false, message: "Member not found." });
     }
+    // Sync the same fields into the embedded profile sub-document so that when
+    // a member opens their /profile page it reflects the admin's edits to the
+    // team list (profile.yearOfStudy / year / branch / section / non_tech_society).
+    const profilePatch = {};
+    if (year !== undefined) {
+      const yearVal = (year || "").toString().trim();
+      profilePatch["profile.yearOfStudy"] = yearVal;
+      profilePatch["profile.year"] = yearVal;
+    }
+    if (branch !== undefined) profilePatch["profile.branch"] = (branch || "").trim();
+    if (section !== undefined) profilePatch["profile.section"] = (section || "").trim();
+    if (non_tech_society !== undefined) profilePatch["profile.non_tech_society"] = (non_tech_society || "").trim();
+    if (contact !== undefined) profilePatch["profile.phoneNumber"] = (contact || "").toString().trim();
+    if (Object.keys(profilePatch).length > 0) {
+      await Model.updateOne({ _id: id }, { $set: profilePatch });
+    }
     if (req.user?.id) {
       await logActivity(req.user.id, "team_member_update", "team", { department, memberId: id }, id, "TeamMember");
     }

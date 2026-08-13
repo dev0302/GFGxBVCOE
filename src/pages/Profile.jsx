@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Navigate, useNavigate, useLocation } from "react-router-dom";
+import { createPortal } from "react-dom";
 import { useAuth } from "../context/AuthContext";
 import { getMe, updateProfile, updateAvatar, changePassword, deleteAccount } from "../services/api";
 import { toast } from "sonner";
@@ -24,6 +25,7 @@ const Profile = () => {
     about: "",
     contact: "",
     yearOfStudy: "",
+    branch: "",
     section: "",
     non_tech_society: "",
     position: "",
@@ -44,6 +46,9 @@ const Profile = () => {
   const [avatarFile, setAvatarFile] = useState(null);
   const [passwordForm, setPasswordForm] = useState({ oldPassword: "", newPassword: "", confirmPassword: "" });
   const [savingPassword, setSavingPassword] = useState(false);
+  // Snapshot of formData at last save/load — used to detect unsaved changes.
+  const savedSnapshot = useRef(null);
+  const [isDirty, setIsDirty] = useState(false);
 
   // Populate profile UI from Redux-backed auth user whenever we land on /profile.
   useEffect(() => {
@@ -57,6 +62,7 @@ const Profile = () => {
       about: profile.about || "",
       contact: profile.phoneNumber || user.contact || "",
       yearOfStudy: profile.yearOfStudy || "",
+      branch: profile.branch || "",
       section: profile.section || "",
       non_tech_society: profile.non_tech_society || "",
       position: profile.position || "",
@@ -74,6 +80,24 @@ const Profile = () => {
       timeline: Array.isArray(profile.timeline) ? profile.timeline : [],
     });
     setAvatarPreview(user.image || "");
+    // Take a snapshot so we can detect changes later.
+    savedSnapshot.current = {
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      gender: profile.gender || "",
+      dob: profile.dob ? profile.dob.substring(0, 10) : "",
+      about: profile.about || "",
+      contact: profile.phoneNumber || user.contact || "",
+      yearOfStudy: profile.yearOfStudy || "",
+      branch: profile.branch || "",
+      section: profile.section || "",
+      non_tech_society: profile.non_tech_society || "",
+      position: profile.position || "",
+      instagram: profile.socials?.instagram || "",
+      linkedin: profile.socials?.linkedin || "",
+      github: profile.socials?.github || "",
+    };
+    setIsDirty(false);
   }, [user, location.pathname]);
 
   // When /profile is opened from any route, perform a background freshness check with backend.
@@ -99,7 +123,14 @@ const Profile = () => {
   }, [location.pathname]);
 
   const handleChange = (field) => (e) => {
-    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+    const next = { ...formData, [field]: e.target.value };
+    setFormData(next);
+    if (savedSnapshot.current) {
+      const changed = Object.keys(next).some(
+        (k) => (next[k] || "") !== (savedSnapshot.current[k] || "")
+      );
+      setIsDirty(changed);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -121,11 +152,14 @@ const Profile = () => {
         payload.position = formData.position || undefined;
       } else {
         payload.yearOfStudy = formData.yearOfStudy || undefined;
+        payload.branch = formData.branch || undefined;
         payload.section = formData.section || undefined;
         payload.non_tech_society = formData.non_tech_society || undefined;
       }
       const res = await updateProfile(payload);
       if (res.data) setUser(res.data);
+      savedSnapshot.current = { ...formData };
+      setIsDirty(false);
       toast.success("Profile updated");
     } catch (err) {
       toast.error(err.message || "Failed to update profile");
@@ -206,10 +240,17 @@ const Profile = () => {
 
   const isFacultyIncharge = user.accountType === "ADMIN";
 
+  // Count changed fields for the floating bar badge
+  const changedFieldCount = savedSnapshot.current
+    ? Object.keys(formData).filter(
+        (k) => (formData[k] || "") !== (savedSnapshot.current[k] || "")
+      ).length
+    : 0;
+
   // profile bar
   const completionPercent = (() => {
     let score = 0;
-    const total = isFacultyIncharge ? 10 : 12;
+    const total = isFacultyIncharge ? 10 : 14;
     if (formData.firstName && formData.lastName) score++;
     if (avatarPreview) score++;
     if (formData.gender) score++;
@@ -220,6 +261,7 @@ const Profile = () => {
       if (formData.position) score++;
     } else {
       if (formData.yearOfStudy) score++;
+      if (formData.branch) score++;
       if (formData.section) score++;
       if (formData.non_tech_society) score++;
     }
@@ -247,6 +289,7 @@ const Profile = () => {
     : "";
 
   return (
+    <>
     <div className="min-h-screen darkthemebg pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-2xl">
         <div className="mb-8">
@@ -361,6 +404,11 @@ const Profile = () => {
                             Year of study
                           </span>
                         )}
+                        {!formData.branch && (
+                          <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
+                            Branch
+                          </span>
+                        )}
                         {!formData.section && (
                           <span className="text-[10px] px-2 py-1 bg-white/5 text-gray-400 rounded-md border border-white/5">
                             Section
@@ -393,18 +441,18 @@ const Profile = () => {
               </div>
 
             {/* Branch, Year, Position & Roles (p0, p1, p2) - Faculty Incharge only shows position */}
-            {((isFacultyIncharge && profileDetails.position) || (!isFacultyIncharge && (profileDetails.branch || profileDetails.year || profileDetails.position || profileDetails.p0 || profileDetails.p1 || profileDetails.p2))) && (
+            {((isFacultyIncharge && (profileDetails.position || formData.position)) || (!isFacultyIncharge && (formData.branch || formData.yearOfStudy || profileDetails.position || profileDetails.p0 || profileDetails.p1 || profileDetails.p2))) && (
               <div className="rounded-xl bg-[#252536]/60 border border-gray-500/30 p-5">
                 <h2 className="text-sm font-semibold text-cyan-400/90 uppercase tracking-wider mb-4">Role & details</h2>
                 <div className="flex flex-wrap gap-2">
-                  {!isFacultyIncharge && profileDetails.branch && (
+                  {!isFacultyIncharge && formData.branch && (
                     <span className="inline-flex items-center px-3 py-1 rounded-lg bg-cyan-500/15 text-cyan-300 text-sm font-medium border border-cyan-500/30">
-                      {profileDetails.branch}
+                      {formData.branch}
                     </span>
                   )}
-                  {!isFacultyIncharge && profileDetails.year && (
+                  {!isFacultyIncharge && formData.yearOfStudy && (
                     <span className="inline-flex items-center px-3 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 text-sm font-medium border border-emerald-500/30">
-                      {profileDetails.year} year
+                      {formData.yearOfStudy} year
                     </span>
                   )}
                   {profileDetails.position && (
@@ -537,12 +585,33 @@ const Profile = () => {
                 <>
                   <div>
                     <label className={labelClass}>Year of study</label>
-                    <input
+                    <select
                       value={formData.yearOfStudy}
                       onChange={handleChange("yearOfStudy")}
                       className={inputClass}
-                      placeholder="e.g. 2nd year"
-                    />
+                    >
+                      <option value="">Select year</option>
+                      <option value="1st">1st year</option>
+                      <option value="2nd">2nd year</option>
+                      <option value="3rd">3rd year</option>
+                      <option value="4th">4th year</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Branch</label>
+                    <select
+                      value={formData.branch}
+                      onChange={handleChange("branch")}
+                      className={inputClass}
+                    >
+                      <option value="">Select branch</option>
+                      <option value="CSE">CSE</option>
+                      <option value="AIML">AIML</option>
+                      <option value="IT">IT</option>
+                      <option value="EEE">EEE</option>
+                      <option value="ECE">ECE</option>
+                      <option value="ICE">ICE</option>
+                    </select>
                   </div>
                   <div>
                     <label className={labelClass}>Section</label>
@@ -652,13 +721,17 @@ const Profile = () => {
                 </div>
               </div>
               <div className="sm:col-span-2 flex justify-end">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-6 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold disabled:opacity-50"
-                >
-                  {saving ? "Saving…" : "Save changes"}
-                </button>
+                {/* Hidden submit trigger for floating bar */}
+                <button id="profile-form-submit" type="submit" className="hidden" aria-hidden="true" tabIndex={-1} />
+                {!isDirty && (
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="px-6 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-richblack-25 font-semibold disabled:opacity-50"
+                  >
+                    {saving ? "Saving…" : "Save changes"}
+                  </button>
+                )}
               </div>
             </form>
 
@@ -782,6 +855,107 @@ const Profile = () => {
         )}
       </div>
     </div>
+
+    {/* ── Floating save bar ─────────────────────────────────────── */}
+    {isDirty && createPortal(
+      <div
+        className="profile-float-bar fixed bottom-0 left-0 right-0 z-[9999] px-4 pb-4"
+        style={{ pointerEvents: "none" }}
+      >
+        <div
+          className="relative mx-auto max-w-2xl rounded-2xl overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, rgba(14,14,28,0.97) 0%, rgba(30,30,50,0.97) 100%)",
+            border: "1px solid rgba(6,182,212,0.35)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            boxShadow: "0 -4px 40px rgba(6,182,212,0.12), 0 8px 32px rgba(0,0,0,0.5)",
+            pointerEvents: "auto",
+          }}
+        >
+          {/* Sweeping light line across the top border */}
+          <div className="absolute top-0 left-0 right-0 h-px overflow-hidden" style={{ zIndex: 2 }}>
+            <div
+              className="profile-float-sweep absolute top-0 h-px w-[60%] rounded-full"
+              style={{
+                background: "linear-gradient(90deg, transparent 0%, rgba(6,182,212,0.9) 40%, rgba(165,243,252,1) 50%, rgba(6,182,212,0.9) 60%, transparent 100%)",
+                filter: "blur(0.5px)",
+              }}
+            />
+          </div>
+
+          {/* Pulsing top border line */}
+          <div
+            className="profile-float-border-pulse absolute top-0 left-0 right-0 h-px text-cyan-400"
+            style={{ borderTop: "1px solid", zIndex: 1 }}
+          />
+
+          {/* Bar content */}
+          <div className="flex items-center justify-between gap-4 px-5 py-4">
+            <div className="flex items-center gap-3 min-w-0">
+              {/* Animated dot */}
+              <span className="relative flex h-2.5 w-2.5 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-richblack-25 leading-tight">
+                  Unsaved changes
+                </p>
+                <p className="text-xs text-gray-400 leading-tight mt-0.5">
+                  {changedFieldCount} field{changedFieldCount !== 1 ? "s" : ""} modified
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Discard */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (savedSnapshot.current) {
+                    setFormData({ ...savedSnapshot.current });
+                    setIsDirty(false);
+                  }
+                }}
+                className="px-4 py-2 rounded-xl text-sm font-medium text-gray-300 hover:text-richblack-25 border border-gray-500/40 hover:border-gray-400/60 hover:bg-gray-500/20 transition-all"
+              >
+                Discard
+              </button>
+
+              {/* Save — glowing pulse button */}
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => {
+                  // Trigger the form's submit handler by finding and clicking the hidden submit button
+                  document.getElementById("profile-form-submit").click();
+                }}
+                className="profile-float-save-btn relative px-5 py-2 rounded-xl text-sm font-semibold text-richblack-25 overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{
+                  background: "linear-gradient(135deg, #0891b2 0%, #06b6d4 50%, #22d3ee 100%)",
+                  border: "1px solid rgba(6,182,212,0.6)",
+                }}
+              >
+                <span className="relative z-10">
+                  {saving ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                      </svg>
+                      Saving…
+                    </span>
+                  ) : "Save changes"}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>,
+      document.body
+    )}
+    </>
   );
 };
 
