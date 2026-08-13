@@ -676,3 +676,73 @@ body {
     border-color: transparent;
   }
 }
+
+/* ── Floating profile save bar ───────────────────────────────── */
+@keyframes floatBarIn {
+  from {
+    opacity: 0;
+    transform: translateY(100%) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes floatBarOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(100%) scale(0.97);
+  }
+}
+
+/* The sweeping light line that travels across the top border */
+@keyframes lineSweep {
+  0% {
+    left: -60%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    left: 110%;
+    opacity: 0;
+  }
+}
+
+@keyframes saveGlow {
+  0%, 100% {
+    box-shadow: 0 0 0px rgba(6, 182, 212, 0);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(6, 182, 212, 0.55), 0 0 36px rgba(6, 182, 212, 0.2);
+  }
+}
+
+.profile-float-bar {
+  animation: floatBarIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.profile-float-bar.hiding {
+  animation: floatBarOut 0.22s ease-in both;
+}
+
+.profile-float-sweep {
+  animation: lineSweep 2.4s ease-in-out infinite;
+}
+
+.profile-float-save-btn {
+  animation: saveGlow 2s ease-in-out infinite;
+}
+
+.profile-float-border-pulse {
+  animation: borderPulse 2s ease-in-out infinite;
+}

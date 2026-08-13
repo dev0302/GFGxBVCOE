@@ -840,6 +840,7 @@ exports.updateProfile = async (req, res) => {
       about,
       contact,
       yearOfStudy,
+      branch,
       section,
       non_tech_society,
       position,
@@ -856,7 +857,7 @@ exports.updateProfile = async (req, res) => {
       const nextLast = lastName !== undefined ? lastName.trim() : String(member.name || "").trim().split(/\s+/).slice(1).join(" ");
       member.name = `${nextFirst} ${nextLast}`.trim() || member.name;
       if (contact !== undefined) member.contact = (contact || "").trim();
-      ["gender", "dob", "about", "yearOfStudy", "section", "non_tech_society", "position"].forEach((key) => {
+      ["gender", "dob", "about", "yearOfStudy", "branch", "section", "non_tech_society", "position"].forEach((key) => {
         if (req.body[key] !== undefined) profile[key] = req.body[key] || "";
       });
       if (contact !== undefined) profile.phoneNumber = (contact || "").trim();
@@ -865,6 +866,13 @@ exports.updateProfile = async (req, res) => {
         if (req.body[key] !== undefined) profile.socials[key] = req.body[key] || "";
       });
       member.profile = profile;
+      // Sync profile fields back to top-level TeamMember fields so the team
+      // list table (which reads m.year / m.branch / m.section / m.non_tech_society)
+      // stays current when a member updates their /profile page.
+      if (yearOfStudy !== undefined) member.year = (yearOfStudy || "").trim();
+      if (branch !== undefined) member.branch = (branch || "").trim();
+      if (section !== undefined) member.section = (section || "").trim();
+      if (non_tech_society !== undefined) member.non_tech_society = (non_tech_society || "").trim();
       await member.save();
       return res.status(200).json({ success: true, message: "Profile updated.", data: memberAsUser(member, currentMember.department) });
     }
@@ -887,6 +895,8 @@ exports.updateProfile = async (req, res) => {
         about: about || null,
         phoneNumber: contact || null,
         yearOfStudy: yearOfStudy || null,
+        year: yearOfStudy || null,
+        branch: branch || null,
         section: section || null,
         non_tech_society: non_tech_society || null,
         position: position || null,
@@ -903,7 +913,14 @@ exports.updateProfile = async (req, res) => {
       if (dob !== undefined) profile.dob = dob || null;
       if (about !== undefined) profile.about = about || null;
       if (contact !== undefined) profile.phoneNumber = (contact || "").trim() || null;
-      if (yearOfStudy !== undefined) profile.yearOfStudy = yearOfStudy || null;
+      if (yearOfStudy !== undefined) {
+        profile.yearOfStudy = yearOfStudy || null;
+        // Also keep profile.year in sync — the team list reads
+        // `profile.year || profile.yearOfStudy`, so if year is stale
+        // (set from PredefinedProfile) it would shadow the user's choice.
+        profile.year = yearOfStudy || null;
+      }
+      if (branch !== undefined) profile.branch = branch || null;
       if (section !== undefined) profile.section = section || null;
       if (non_tech_society !== undefined) profile.non_tech_society = non_tech_society || null;
       if (position !== undefined) profile.position = position || null;
