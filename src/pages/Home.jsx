@@ -77,7 +77,7 @@ function Home() {
 
   const handleRecruitmentResultClick = () => {
     triggerResultConfetti();
-    window.setTimeout(() => navigate("/results"), 650);
+    window.setTimeout(() => navigate("/results2026"), 650);
   };
 
   useEffect(() => {
@@ -422,7 +422,7 @@ const journeyPhotos = [
                       sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
                     "
                   >
-                    2025 Recruitment Result
+                    2026 Heads Result
 
                     <Trophy className="h-4 w-4 transition group-hover:rotate-6 group-hover:scale-110" />
                   </button>
