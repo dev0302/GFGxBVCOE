@@ -79,6 +79,10 @@ function Home() {
     triggerResultConfetti();
     window.setTimeout(() => navigate("/results2026"), 650);
   };
+   const handleRecruitmentResultClick2025 = () => {
+    triggerResultConfetti();
+    window.setTimeout(() => navigate("/results"), 650);
+  };
 
   useEffect(() => {
     const lenis = new Lenis({
@@ -402,7 +406,29 @@ const journeyPhotos = [
 
                     <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                   </button>
+                  <button
+                    id="btn-recruitment-result"
+                    type="button"
+                    onClick={handleRecruitmentResultClick2025}
+                    className="
+                      group inline-flex items-center gap-3
+                      rounded-full
+                      border border-white/10
+                      bg-white/[0.03]
+                      px-6 py-3.5
+                      text-xs font-semibold text-richblack-25
+                      backdrop-blur
+                      transition
+                      hover:-translate-y-1
+                      hover:border-green-300/40
+                      hover:bg-green-300/10
+                      sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
+                    "
+                  >
+                    2025 Heads Result
 
+                    <Trophy className="h-4 w-4 transition group-hover:rotate-6 group-hover:scale-110" />
+                  </button>
                   <button
                     id="btn-recruitment-result"
                     type="button"
