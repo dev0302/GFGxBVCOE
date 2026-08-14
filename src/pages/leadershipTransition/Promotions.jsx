@@ -795,7 +795,10 @@ export default function Promotions() {
               <p className="text-[10px] sm:text-[12px] font-normal uppercase tracking-[0.16em] text-emerald-300/90">
                 Leadership Change Session Active
               </p>
-              <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 font-mono text-[11px] font-normal text-gray-400">
+              <span
+                className="truncate max-w-[120px] sm:max-w-none rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 font-mono text-[11px] font-normal text-gray-400"
+                title={draft.sessionId}
+              >
                 {draft.sessionId}
               </span>
               <span className="ml-auto rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-0.5 text-[11px] font-normal text-cyan-300">
@@ -804,7 +807,7 @@ export default function Promotions() {
             </div>
           </div>
 
-          <div className="grid gap-3 p-4 sm:p-6 grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 p-4 sm:p-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <SessionStatCard
               label="Pending promotions"
               value={changeCounts.promotions + changeCounts.transfers}

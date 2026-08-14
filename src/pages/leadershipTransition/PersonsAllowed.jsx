@@ -54,35 +54,38 @@ function AllowedUserRow({ user, removable, removingId, onRemove }) {
   const name = userDisplayName(user);
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-gray-500/20 bg-[#151525]/60 px-4 py-3">
-      <UserAvatar user={user} name={name} />
-
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium text-richblack-25">
-          {name || user.email}
+    <div className="flex flex-col gap-3 rounded-xl border border-gray-500/20 bg-[#151525]/60 p-4 sm:flex-row sm:items-center sm:gap-3 sm:px-4 sm:py-3">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <UserAvatar user={user} name={name} />
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-medium text-richblack-25">
+            {name || user.email}
+          </div>
+          <div className="truncate text-xs text-gray-500">{user.email}</div>
         </div>
-        <div className="truncate text-xs text-gray-500">{user.email}</div>
       </div>
 
-      <span className="hidden shrink-0 rounded-full bg-cyan-500/15 px-2 py-0.5 text-[10px] font-medium text-cyan-300 sm:inline-flex">
-        {userRoleLabel(user)}
-      </span>
-
-      {removable ? (
-        <button
-          type="button"
-          disabled={removingId === user._id}
-          onClick={() => onRemove(user._id)}
-          className="shrink-0 rounded-lg bg-red-500/15 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/25 disabled:opacity-50"
-        >
-          {removingId === user._id ? "Removing…" : "Remove"}
-        </button>
-      ) : (
-        <span className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-white/5 px-2.5 py-1.5 text-[10px] font-medium text-gray-400">
-          <Lock className="h-3 w-3" />
-          Always allowed
+      <div className="flex items-center gap-2 sm:shrink-0 self-end sm:self-auto">
+        <span className="rounded-full bg-cyan-500/15 px-2 py-0.5 text-[10px] font-medium text-cyan-300 sm:inline-flex">
+          {userRoleLabel(user)}
         </span>
-      )}
+
+        {removable ? (
+          <button
+            type="button"
+            disabled={removingId === user._id}
+            onClick={() => onRemove(user._id)}
+            className="rounded-lg bg-red-500/15 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/25 disabled:opacity-50"
+          >
+            {removingId === user._id ? "Removing…" : "Remove"}
+          </button>
+        ) : (
+          <span className="inline-flex items-center gap-1 rounded-lg bg-white/5 px-2.5 py-1.5 text-[10px] font-medium text-gray-400">
+            <Lock className="h-3 w-3" />
+            Always allowed
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -210,7 +213,7 @@ export default function PersonsAllowed() {
           </p>
         </div>
 
-        <section className="rounded-2xl border border-gray-500/20 bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 p-6 shadow-xl md:p-8">
+        <section className="rounded-2xl border border-gray-500/20 bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 p-4 sm:p-6 shadow-xl md:p-8">
           <SectionTitle icon="👤">Allowed users</SectionTitle>
 
           <div className="mt-4 space-y-6">
@@ -256,7 +259,7 @@ export default function PersonsAllowed() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-gray-500/20 bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 p-6 shadow-xl md:p-8">
+        <section className="rounded-2xl border border-gray-500/20 bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 p-4 sm:p-6 shadow-xl md:p-8">
           <SectionTitle icon="➕">Add from registered users</SectionTitle>
           <p className="mt-2 text-xs text-gray-500">
             Default-authorized roles, including Department Leads, are excluded because
@@ -284,16 +287,18 @@ export default function PersonsAllowed() {
                       key={u._id}
                       type="button"
                       onClick={() => setPickerValue(String(u._id))}
-                      className={`flex w-full items-center gap-3 border-b border-gray-500/10 px-4 py-3 text-left transition last:border-0 ${
+                      className={`flex flex-col gap-2 border-b border-gray-500/10 p-4 text-left transition last:border-0 sm:flex-row sm:items-center sm:gap-3 sm:px-4 sm:py-3 ${
                         selected ? "bg-cyan-500/15" : "hover:bg-gray-500/10"
                       }`}
                     >
-                      <UserAvatar user={u} name={name} />
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm text-richblack-25">{name}</div>
-                        <div className="truncate text-xs text-gray-500">{u.email}</div>
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <UserAvatar user={u} name={name} />
+                        <div className="min-w-0 flex-1">
+                          <div className="truncate text-sm text-richblack-25">{name}</div>
+                          <div className="truncate text-xs text-gray-500">{u.email}</div>
+                        </div>
                       </div>
-                      <span className="text-[10px] text-gray-400">
+                      <span className="text-[10px] text-gray-400 sm:shrink-0 self-end sm:self-auto">
                         {userRoleLabel(u)}
                       </span>
                     </button>
