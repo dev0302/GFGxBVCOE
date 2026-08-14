@@ -16,7 +16,7 @@ export default function DepartmentDashboardLayout() {
     <RequireDashboardAccess dashboardKey={departmentKey}>
       <div className="relative flex min-h-screen w-full overflow-hidden bg-[#1e1e2f]">
         <DepartmentSidebar />
-        <main className="flex-1 h-screen overflow-y-auto overflow-x-hidden pt-16 sm:pt-20">
+        <main className="flex-1 min-w-0 h-screen overflow-y-auto overflow-x-hidden pt-16 sm:pt-20">
           <div className="h-full w-full overflow-x-hidden">
             <motion.div
               key={location.pathname}
