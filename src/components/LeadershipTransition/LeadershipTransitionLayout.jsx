@@ -15,7 +15,6 @@ export default function LeadershipTransitionLayout() {
       </div>
     );
   }
-
   if (!user) {
     return (
       <div className="flex min-h-[calc(100vh-5rem)] w-full items-center justify-center bg-[#1e1e2f]">
@@ -35,7 +34,7 @@ export default function LeadershipTransitionLayout() {
   return (
     <div className="relative flex min-h-screen w-full overflow-hidden bg-[#1e1e2f]">
       <LeadershipTransitionSidebar />
-      <main className="flex-1 h-screen overflow-y-auto overflow-x-hidden pt-16 sm:pt-20">
+      <main className="flex-1 min-w-0 h-screen overflow-y-auto overflow-x-hidden pt-16 sm:pt-20">
         <div className="h-full w-full overflow-x-hidden">
           <motion.div
             key={location.pathname}
