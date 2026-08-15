@@ -339,7 +339,19 @@ export default function ManageSociety() {
     };
   };
 
+  const TESTING_ACCOUNT_EMAIL = "geeksforgeeksbvp@gmail.com";
+
+  const isTestingAccountRow = (row) =>
+    String(row.email || "").trim().toLowerCase() === TESTING_ACCOUNT_EMAIL;
+
+  const isFacultyInchargeRow = (row) => {
+    const role = String(row.role || "").toLowerCase();
+    const accountType = String(row.accountType || "").toLowerCase();
+    return accountType === "admin" || role.includes("faculty incharge");
+  };
+
   const isCoreTeamRow = (row) => {
+    if (isTestingAccountRow(row) || isFacultyInchargeRow(row)) return false;
     const role = String(row.role || "").toLowerCase();
     const accountType = String(row.accountType || "").toLowerCase();
     return accountType === "chairperson" || accountType === "vice-chairperson" ||
@@ -348,6 +360,7 @@ export default function ManageSociety() {
   };
 
   const isDepartmentHeadRow = (row) =>
+    !isFacultyInchargeRow(row) &&
     String(row.role || "").toLowerCase().includes("head");
 
   const uniqueRows = (rows) => {
@@ -384,25 +397,32 @@ export default function ManageSociety() {
       ...activeUserRows,
       ...Object.values(departmentRows).flat(),
     ]);
+    const facultyIncharge = leadershipRows.filter(isFacultyInchargeRow);
+    const testingAccounts = leadershipRows.filter(isTestingAccountRow);
     const coreTeam = leadershipRows.filter(isCoreTeamRow);
     const departmentHeads = leadershipRows.filter(
-      (row) => !isCoreTeamRow(row) && isDepartmentHeadRow(row)
+      (row) => !isCoreTeamRow(row) && !isTestingAccountRow(row) && isDepartmentHeadRow(row)
     );
     const leadershipEmails = new Set(
-      [...coreTeam, ...departmentHeads]
+      [...facultyIncharge, ...testingAccounts, ...coreTeam, ...departmentHeads]
         .map((row) => String(row.email || "").trim().toLowerCase())
         .filter(Boolean)
     );
 
-    const sections = {
-      "Core Team": coreTeam,
-      "Department Heads": departmentHeads,
-    };
+    const sections = {};
+    if (facultyIncharge.length > 0) {
+      sections["Faculty Incharge"] = facultyIncharge;
+    }
+    sections["Core Team"] = coreTeam;
+    sections["Department Heads"] = departmentHeads;
     departments.forEach((dept) => {
       sections[dept] = (departmentRows[dept] || []).filter(
         (row) => !leadershipEmails.has(String(row.email || "").trim().toLowerCase())
       );
     });
+    if (testingAccounts.length > 0) {
+      sections["Testing Accounts"] = testingAccounts;
+    }
     return sections;
   };
 
