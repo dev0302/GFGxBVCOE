@@ -123,7 +123,7 @@ function PersonAvatar({ image, name, size = "md" }) {
     .slice(0, 2)
     .map((s) => s[0]?.toUpperCase())
     .join("");
-  const sizeClass = size === "sm" ? "h-8 w-8 text-[10px]" : "h-10 w-10 text-xs";
+  const sizeClass = size === "sm" ? "h-8 w-8 text-[10px] shrink-0" : "h-10 w-10 text-xs shrink-0";
 
   if (src) {
     return (
@@ -795,7 +795,10 @@ export default function Promotions() {
               <p className="text-[10px] sm:text-[12px] font-normal uppercase tracking-[0.16em] text-emerald-300/90">
                 Leadership Change Session Active
               </p>
-              <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 font-mono text-[11px] font-normal text-gray-400">
+              <span
+                className="truncate max-w-[120px] sm:max-w-none rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-0.5 font-mono text-[11px] font-normal text-gray-400"
+                title={draft.sessionId}
+              >
                 {draft.sessionId}
               </span>
               <span className="ml-auto rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-0.5 text-[11px] font-normal text-cyan-300">
@@ -804,7 +807,7 @@ export default function Promotions() {
             </div>
           </div>
 
-          <div className="grid gap-3 p-4 sm:p-6 grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 p-4 sm:p-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <SessionStatCard
               label="Pending promotions"
               value={changeCounts.promotions + changeCounts.transfers}
@@ -969,7 +972,7 @@ export default function Promotions() {
                   key={`${person.type}-${person.id}`}
                   type="button"
                   onClick={() => setSelectedPerson(person)}
-                  className="group relative flex w-full items-center gap-3 rounded-xl border border-gray-500/20 bg-[#151525]/60 px-4 py-3 text-left transition hover:border-cyan-500/50 hover:bg-cyan-500/10"
+                  className="group relative flex w-full min-w-0 items-center gap-3 rounded-xl border border-gray-500/20 bg-[#151525]/60 px-4 py-3 text-left transition hover:border-cyan-500/50 hover:bg-cyan-500/10"
                 >
                   <PersonAvatar image={person.image} name={person.name} />
                   <div className="min-w-0 flex-1">
@@ -977,6 +980,14 @@ export default function Promotions() {
                       {person.name || person.email}
                     </div>
                     <div className="truncate text-xs text-gray-500">{person.email}</div>
+                    <div className="mt-1 sm:hidden">
+                      <span className="inline-block rounded-full bg-cyan-500/15 px-2 py-0.5 text-[9px] font-medium text-cyan-300">
+                        {person.position ||
+                          getAccountTypeLabel(person.accountType) ||
+                          person.accountType ||
+                          "Member"}
+                      </span>
+                    </div>
                   </div>
                   <div className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
                     <span className="rounded-full bg-cyan-500/15 px-2 py-0.5 text-[10px] font-medium text-cyan-300">
