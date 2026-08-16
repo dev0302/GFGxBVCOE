@@ -425,7 +425,7 @@ const journeyPhotos = [
                       sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
                     "
                   >
-                    2025 Heads Result
+                    2025 Recruitment Results
 
                     <Trophy className="h-4 w-4 transition group-hover:rotate-6 group-hover:scale-110" />
                   </button>
