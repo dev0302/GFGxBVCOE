@@ -1,0 +1,220 @@
+const teamData = [
+    {
+        name: "Toshika Goswami",
+        branch: "CSE",
+        year: "4th",
+        position: "Chair Person",
+        p0: "Chair Person",
+        image: "/Toshika.webp",
+        email: "toshikagoswami4@gmail.com",
+        instaLink: "nil",
+        linkedinLink: "https://www.linkedin.com/in/toshika-goswami-39791022a",
+        timeline: [
+            {
+                year: "2025",
+                role: "Chairperson",
+                project: "Geeks For Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
+                year: "2025",
+                role: "Intern",
+                project: "Front End Development at Surefy.AI",
+                description: "Developed and maintained user-facing features."
+            },
+            {
+                year: "2025",
+                role: "Intern",
+                project: "Web Development at The Wise Tortoise",
+                description: "Built responsive web pages and components."
+            },
+            {
+                year: "2023",
+                role: "Social Media Lead",
+                project: "Geeks For Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
+                year: "2021",
+                role: "Intern",
+                project: "EduIITians",
+                description: "Assisted with content creation and platform testing."
+            }
+        ]
+    },
+    {
+        name: "Kartik Bhattacharya",
+        branch: "CSE",
+        year: "3rd",
+        position: "Vice-Chairperson",
+        p0: "Vice-Chairperson",
+        image: "/Kartik.webp",
+        p1: "Technical Executive",
+        p2: "",
+        email: "kartikbhattacharya10@gmail.com",
+        instaLink: "https://www.instagram.com/_kafiltafish_21_/",
+        linkedinLink: "https://linkedin.com/in/kafiltafish21",
+        timeline: [
+            {
+                year: "2025",
+                role: "Intern",
+                project: "Gurugram Cyber Police",
+                description: "CyberSecurity and Digital Forensics"
+            },
+            {
+                year: "2025",
+                role: "Vice-Chairperson",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
+                year: "2024",
+                role: "Cyber Security Trainer",
+                project: "The Techunique Academy",
+                description: "Trained Cyber Security"
+            },
+            {
+                year: "2024",
+                role: "Technical executive",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            }
+        ]
+    },
+    {
+        name: "Siddhant Mahapatra",
+        branch: "IT",
+        year: "3rd",
+        position: "Tech Core",
+        p0: "Tech Core",
+        image: "/Siddhant.webp",
+        p1: "NA",
+        p2: "NA",
+        email: "siddhantofficialmax@gmail.com",
+        instaLink: "https://www.instagram.com/siddhazntx?igsh=MWE2emVxZ3MwczF5aw==",
+        linkedinLink: "https://www.linkedin.com/in/siddhantmahapatra23?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+        timeline: []
+    },
+    {
+        name: "Archita",
+        branch: "Information Technology",
+        year: "3rd",
+        position: "Design and Creative Lead",
+        p0: "Design and Creative Lead",
+        image: "/Archita.webp",
+        p1: "Design + Marketing Executive",
+        p2: "",
+        email: "archita770@gmail.com",
+        instaLink: "https://www.instagram.com/archiitta.r?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+        linkedinLink: "https://www.linkedin.com/in/archita-337521376",
+        timeline: [
+            {
+                year: "2025",
+                role: "Design and Creative Lead",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
+                year: "2024",
+                role: "Design & Marketing Executive",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            }
+        ]
+    },
+    {
+        name: "Gaurav Karakoti",
+        branch: "CSE",
+        year: "2nd",
+        position: "Event & Operations Head",
+        p0: "Event & Operations Head",
+        image: "/Gaurav.webp",
+        p1: "Technical Executive",
+        p2: "",
+        email: "karakotigaurav12@gmail.com",
+        instaLink: "https://instagram.com/gaurav._.karakoti",
+        linkedinLink: "https://linkedin.com/in/gaurav-karakoti",
+        timeline: [
+            {
+                year: "2025",
+                role: "Content Writer",
+                project: "CoinDCX, AscendEx, Okto",
+                description: "Crypto Exchanges and DEX Wallet"
+            },
+            {
+                year: "2025",
+                role: "Event & Operations Lead",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, Delhi"
+            },
+            {
+                year: "2024",
+                role: "Technical Executive",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, Delhi"
+            }
+        ]
+    },
+    {
+        name: "Aarti Singh",
+        branch: "CSE",
+        year: "2nd",
+        position: "Social Media and Promotion Lead",
+        p0: "Social Media and Promotion Lead",
+        image: "/Aarti.webp",
+        p1: "Social Media Executive",
+        p2: "",
+        email: "37aartisingh121212@gmail.com",
+        instaLink: "https://www.instagram.com/aartiii.60?utm_source=qr&igsh=bWsyajFvMjh2NWli",
+        linkedinLink: "https://www.linkedin.com/in/aarti-singh-b7700b333",
+        timeline: [
+            {
+                year: "2025",
+                role: "Social Media and Promotion Lead",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            },
+            {
+                year: "2024",
+                role: "Social Media Executive",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, New Delhi"
+            }
+        ]
+    },
+    {
+        name: "Harsh Bhardwaj",
+        branch: "CSE",
+        year: "",
+        position: "Marketing Lead",
+        p0: "Marketing Lead",
+        image: "/Harsh.webp",
+        p1: "Marketing Head",
+        p2: "Marketing Head",
+        email: "itzharsh045@gmail.com",
+        instaLink: "https://www.instagram.com/mystic_harsh_45?igsh=d2Q3ZWdqd3FhazNu",
+        linkedinLink: "https://www.linkedin.com/in/harsh-bhardwaj-255357292",
+        timeline: [
+            {
+                year: "2025",
+                role: "SDE Intern",
+                project: "Bluestock Fintech",
+                description: "IPO Web Application and REST API Development"
+            },
+            {
+                year: "2025",
+                role: "Marketing Lead",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, Delhi"
+            },
+            {
+                year: "2024",
+                role: "Marketing Head",
+                project: "Geeks for Geeks",
+                description: "College Chapter, BVCOE, Delhi"
+            }
+        ]
+    }
+];
+
+export default teamData;
