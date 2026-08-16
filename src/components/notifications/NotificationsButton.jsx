@@ -583,9 +583,9 @@ export default function NotificationsButton({
                                             </p>
                                           )
                                         ) : (
-                                          (n.senderName || n.metadata?.senderRole) && (
+                                          n.metadata?.senderRole && (
                                             <p className={`text-[10px] font-medium ${color === "pink" ? "text-pink-300" : "text-green-400"}`}>
-                                              from {n.senderName || n.metadata?.senderRole}
+                                              from {n.metadata.senderRole}
                                             </p>
                                           )
                                         )}
