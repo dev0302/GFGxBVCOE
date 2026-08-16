@@ -9,7 +9,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-function Team2() {
+function Team2526() {
   const [activeTab, setActiveTab] = useState("core");
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -272,4 +272,4 @@ function Team2() {
   );
 }
 
-export default Team2;
+export default Team2526;
