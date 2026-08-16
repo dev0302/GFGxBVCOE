@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import notfoundimg from "../images/result.png";
 import { NavLink } from "react-router-dom";
-import { Instagram } from "react-feather";
 import ResultImages2026 from "../components/ResultImages2026";
 
 // Loader Component (using Tailwind CSS)
@@ -56,18 +55,6 @@ const ResultPage2026 = () => {
           {/* Description */}
           <p className="text-base text-[#aaa] text-center">
             Checkout here....
-            <a
-              className="text-blue-400 text-base flex items-center justify-center gap-2 mt-2"
-              href="https://www.instagram.com/stories/gfg_bvcoe/?hl=en"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Click here to see results on
-              <Instagram
-                className="text-green-500 hover:text-blue-400 transition-colors"
-                size={16}
-              />
-            </a>
           </p>
 
           <p className="text-base text-[#aaa] mb-6 text-center mt-2">
