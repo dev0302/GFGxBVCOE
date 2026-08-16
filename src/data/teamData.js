@@ -1,220 +1,194 @@
 const teamData = [
-    {
-        name: "Toshika Goswami",
-        branch: "CSE",
-        year: "4th",
-        position: "Chair Person",
-        p0: "Chair Person",
-        image: "/Toshika.webp",
-        email: "toshikagoswami4@gmail.com",
-        instaLink: "nil",
-        linkedinLink: "https://www.linkedin.com/in/toshika-goswami-39791022a",
-        timeline: [
-            {
-                year: "2025",
-                role: "Chairperson",
-                project: "Geeks For Geeks",
-                description: "College Chapter, BVCOE, New Delhi"
-            },
-            {
-                year: "2025",
-                role: "Intern",
-                project: "Front End Development at Surefy.AI",
-                description: "Developed and maintained user-facing features."
-            },
-            {
-                year: "2025",
-                role: "Intern",
-                project: "Web Development at The Wise Tortoise",
-                description: "Built responsive web pages and components."
-            },
-            {
-                year: "2023",
-                role: "Social Media Lead",
-                project: "Geeks For Geeks",
-                description: "College Chapter, BVCOE, New Delhi"
-            },
-            {
-                year: "2021",
-                role: "Intern",
-                project: "EduIITians",
-                description: "Assisted with content creation and platform testing."
-            }
-        ]
-    },
-    {
-        name: "Kartik Bhattacharya",
-        branch: "CSE",
-        year: "3rd",
-        position: "Vice-Chairperson",
-        p0: "Vice-Chairperson",
-        image: "/Kartik.webp",
-        p1: "Technical Executive",
-        p2: "",
-        email: "kartikbhattacharya10@gmail.com",
-        instaLink: "https://www.instagram.com/_kafiltafish_21_/",
-        linkedinLink: "https://linkedin.com/in/kafiltafish21",
-        timeline: [
-            {
-                year: "2025",
-                role: "Intern",
-                project: "Gurugram Cyber Police",
-                description: "CyberSecurity and Digital Forensics"
-            },
-            {
-                year: "2025",
-                role: "Vice-Chairperson",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, New Delhi"
-            },
-            {
-                year: "2024",
-                role: "Cyber Security Trainer",
-                project: "The Techunique Academy",
-                description: "Trained Cyber Security"
-            },
-            {
-                year: "2024",
-                role: "Technical executive",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, New Delhi"
-            }
-        ]
-    },
-    {
-        name: "Siddhant Mahapatra",
-        branch: "IT",
-        year: "3rd",
-        position: "Tech Core",
-        p0: "Tech Core",
-        image: "/Siddhant.webp",
-        p1: "NA",
-        p2: "NA",
-        email: "siddhantofficialmax@gmail.com",
-        instaLink: "https://www.instagram.com/siddhazntx?igsh=MWE2emVxZ3MwczF5aw==",
-        linkedinLink: "https://www.linkedin.com/in/siddhantmahapatra23?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
-        timeline: []
-    },
-    {
-        name: "Archita",
-        branch: "Information Technology",
-        year: "3rd",
-        position: "Design and Creative Lead",
-        p0: "Design and Creative Lead",
-        image: "/Archita.webp",
-        p1: "Design + Marketing Executive",
-        p2: "",
-        email: "archita770@gmail.com",
-        instaLink: "https://www.instagram.com/archiitta.r?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
-        linkedinLink: "https://www.linkedin.com/in/archita-337521376",
-        timeline: [
-            {
-                year: "2025",
-                role: "Design and Creative Lead",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, New Delhi"
-            },
-            {
-                year: "2024",
-                role: "Design & Marketing Executive",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, New Delhi"
-            }
-        ]
-    },
-    {
-        name: "Gaurav Karakoti",
-        branch: "CSE",
-        year: "2nd",
-        position: "Event & Operations Head",
-        p0: "Event & Operations Head",
-        image: "/Gaurav.webp",
-        p1: "Technical Executive",
-        p2: "",
-        email: "karakotigaurav12@gmail.com",
-        instaLink: "https://instagram.com/gaurav._.karakoti",
-        linkedinLink: "https://linkedin.com/in/gaurav-karakoti",
-        timeline: [
-            {
-                year: "2025",
-                role: "Content Writer",
-                project: "CoinDCX, AscendEx, Okto",
-                description: "Crypto Exchanges and DEX Wallet"
-            },
-            {
-                year: "2025",
-                role: "Event & Operations Lead",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, Delhi"
-            },
-            {
-                year: "2024",
-                role: "Technical Executive",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, Delhi"
-            }
-        ]
-    },
-    {
-        name: "Aarti Singh",
-        branch: "CSE",
-        year: "2nd",
-        position: "Social Media and Promotion Lead",
-        p0: "Social Media and Promotion Lead",
-        image: "/Aarti.webp",
-        p1: "Social Media Executive",
-        p2: "",
-        email: "37aartisingh121212@gmail.com",
-        instaLink: "https://www.instagram.com/aartiii.60?utm_source=qr&igsh=bWsyajFvMjh2NWli",
-        linkedinLink: "https://www.linkedin.com/in/aarti-singh-b7700b333",
-        timeline: [
-            {
-                year: "2025",
-                role: "Social Media and Promotion Lead",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, New Delhi"
-            },
-            {
-                year: "2024",
-                role: "Social Media Executive",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, New Delhi"
-            }
-        ]
-    },
-    {
-        name: "Harsh Bhardwaj",
-        branch: "CSE",
-        year: "",
-        position: "Marketing Lead",
-        p0: "Marketing Lead",
-        image: "/Harsh.webp",
-        p1: "Marketing Head",
-        p2: "Marketing Head",
-        email: "itzharsh045@gmail.com",
-        instaLink: "https://www.instagram.com/mystic_harsh_45?igsh=d2Q3ZWdqd3FhazNu",
-        linkedinLink: "https://www.linkedin.com/in/harsh-bhardwaj-255357292",
-        timeline: [
-            {
-                year: "2025",
-                role: "SDE Intern",
-                project: "Bluestock Fintech",
-                description: "IPO Web Application and REST API Development"
-            },
-            {
-                year: "2025",
-                role: "Marketing Lead",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, Delhi"
-            },
-            {
-                year: "2024",
-                role: "Marketing Head",
-                project: "Geeks for Geeks",
-                description: "College Chapter, BVCOE, Delhi"
-            }
-        ]
-    }
+  {
+    name: "Piyush Kumar Singh",
+    branch: "CSE",
+    year: "3rd",
+    position: "Chairperson",
+    p0: "Chairperson",
+    p1: "PR and Outreach Lead",
+    p2: "Technical Executive",
+    email: "piyushksbvp@gmail.com",
+    instaLink: "https://www.instagram.com/thepiyushks/",
+    linkedinLink: "https://in.linkedin.com/in/piyush-kumar-singh1",
+    image: "https://res.cloudinary.com/duwmby01d/image/upload/v1786861921/IMG-20260816-WA0010_uamsv6.jpg",
+    tenureTimeline: [
+      { year: "2022", position: "Top 10 Innovators India", project: "YI2022 List", description: "" },
+      { year: "2022", position: "Co-founder", project: "SLOOT", description: "" },
+      { year: "2023", position: "Citizen Space Scientist", project: "AIASC", description: "" },
+      { year: "2024", position: "Technical Executive", project: "GFG", description: "" },
+      { year: "2025", position: "PR and Outreach Lead", project: "GFG", description: "" },
+      { year: "2025", position: "SM and Design Head", project: "Enactus", description: "" },
+      { year: "2026", position: "Design Head", project: "Alumni Cell", description: "" },
+      { year: "2026", position: "Chairperson", project: "GFG", description: "" }
+    ]
+  },
+
+  {
+    name: "Dhruv Kapoor",
+    branch: "ECE-2",
+    year: "3rd Year",
+    position: "Vice Chairperson",
+    p0: "Vice Chairperson",
+    p1: "Video Editing Head",
+    p2: "",
+    email: "kapoordhruv014@gmail.com",
+    instaLink: "https://www.instagram.com/dhrruuvvv",
+    linkedinLink: "https://www.linkedin.com/in/dhruv-kapoor-3391b0358",
+    image: "https://res.cloudinary.com/duwmby01d/image/upload/v1786864148/gfg_pfp_mt5sut.jpg",
+    tenureTimeline: [
+      { year: "2026-27", position: "Vice Chairperson", project: "GFG", description: "" },
+      { year: "2026-27", position: "Executive", project: "Eduminerva", description: "" },
+      { year: "2025-26", position: "Video Editing Head", project: "GFG", description: "" },
+      { year: "2024-2025", position: "Executive", project: "Optica BVP", description: "" }
+    ]
+  },
+
+  {
+    name: "Aarti Singh",
+    branch: "CSE-3",
+    year: "3rd",
+    position: "Vice President",
+    p0: "Vice President",
+    p1: "Social Media Lead",
+    p2: "Social Media Executive",
+    email: "aartii.py@gmail.com",
+    instaLink: "https://www.instagram.com/aartiii.py",
+    linkedinLink: "https://www.linkedin.com/in/aarti-singh-b7700b333",
+    image: "https://res.cloudinary.com/duwmby01d/image/upload/v1786861922/IMG-20260815-WA0083_rsyobh.jpg",
+    tenureTimeline: [
+      { year: "2026-27", position: "Vice Chairperson", project: "GFG", description: "" },
+      { year: "2026-27", position: "Executive", project: "Enactus", description: "" },
+      { year: "2025-26", position: "SM Lead", project: "GFG", description: "" },
+      { year: "2024-25", position: "Executive", project: "CSI", description: "" }
+    ]
+  },
+
+  {
+    name: "Niharika Arora",
+    branch: "CSE 4",
+    year: "3rd",
+    position: "Creative and Design Lead",
+    p0: "Creative and Design Lead",
+    p1: "Videography Head",
+    p2: "",
+    email: "Niharikaarora224@gmail.com",
+    instaLink: "https://instagram.com/_nihar1ka_",
+    linkedinLink: "https://linkedin.com/in/niharika-arora-22n442/",
+    image: "https://res.cloudinary.com/duwmby01d/image/upload/v1786861921/IMG-20260816-WA0006_m60ksy.jpg",
+    tenureTimeline: [
+      { year: "2026-27", position: "Design and Creative Lead", project: "GFG", description: "" },
+      { year: "2026-27", position: "Social Media Head", project: "Aagaaz", description: "" },
+      { year: "2026-27", position: "Coverage Head", project: "NSS", description: "" },
+      { year: "2026-27", position: "Vice President", project: "Eureka", description: "" },
+      { year: "2025-26", position: "Videography Head", project: "GFG", description: "" },
+      { year: "2025-26", position: "Content and Documentation Head", project: "Aagaaz", description: "" },
+      { year: "2025-26", position: "Content and Documentation Lead", project: "Incubation Cell", description: "" }
+    ]
+  },
+
+  {
+    name: "Gaurav Karakoti",
+    branch: "CSE-3",
+    year: "3rd",
+    position: "Event Management Lead",
+    p0: "Event Management Lead",
+    p1: "Event Management Lead",
+    p2: "Technical Executive",
+    email: "karakotigaurav12@gmail.com",
+    instaLink: "https://instagram.com/gaurav._.karakoti",
+    linkedinLink: "https://linkedin.com/in/gaurav-karakoti",
+    image: "https://res.cloudinary.com/duwmby01d/image/upload/v1786861929/IMG-20260815-WA0035_ywupzq.jpg",
+    tenureTimeline: [
+      { year: "2024-2025", position: "Technical Executive", project: "GFG", description: "" },
+      { year: "2024-2025", position: "Publicity Executive", project: "Horizon", description: "" },
+      { year: "2025-2027", position: "Event Management Lead", project: "GFG", description: "" },
+      { year: "2025-2026", position: "Event Management Executive", project: "BVPINC", description: "" }
+    ]
+  },
+
+  {
+    name: "Radhika Trivedi",
+    branch: "ECE-3",
+    year: "3rd Year",
+    position: "SM Lead",
+    p0: "SM Lead",
+    p1: "SM Head",
+    p2: "",
+    email: "radhikatriv0712@gmail.com",
+    instaLink: "https://www.instagram.com/radhika_triv_07",
+    linkedinLink: "https://www.linkedin.com/in/radhika-trivedi-078703327",
+    image: "https://res.cloudinary.com/duwmby01d/image/upload/v1786864049/SAVE_20260816_123617_o8prwz.jpg",
+    tenureTimeline: [
+      { year: "2024-25", position: "Technical Member", project: "Tech Shuttle", description: "" },
+      { year: "2025-26", position: "SM Head", project: "GFG BVCOE", description: "" },
+      { year: "2025-26", position: "Executive", project: "Qafila", description: "" },
+      { year: "2026-27", position: "SM Lead", project: "GFG BVCOE", description: "" }
+    ]
+  },
+
+  {
+    name: "Avika Singh",
+    branch: "CSE - 3",
+    year: "3rd",
+    position: "Social Media and Publicity Head",
+    p0: "Social Media and Publicity Head",
+    p1: "",
+    p2: "",
+    email: "Avikasingh2332@gmail.com",
+    instaLink: "https://www.instagram.com/avika._.1303",
+    linkedinLink: "https://www.linkedin.com/in/avikasingh23",
+    image: "https://res.cloudinary.com/duwmby01d/image/upload/v1786861938/IMG-20260815-WA0021_j2fjcc.jpg",
+    tenureTimeline: [
+      { year: "2024-25", position: "Member", project: "IOSC", description: "" },
+      { year: "2024-25", position: "Volunteer", project: "NSS", description: "" },
+      { year: "2025-2026", position: "Design Team (Member)", project: "TEDXBVCOE", description: "" },
+      { year: "2025-2026", position: "Member", project: "IOSC", description: "" },
+      { year: "2026-2027", position: "SM and Publicity Head", project: "GFG", description: "" }
+    ]
+  },
+
+  {
+    name: "Dev Malik",
+    branch: "CSE-4",
+    year: "3rd Year",
+    position: "Technical Lead",
+    p0: "Technical Lead",
+    p1: "Technical Head",
+    p2: "Technical Member",
+    email: "devmalik9953@gmail.com",
+    instaLink: "https://www.instagram.com/devmalik.0302",
+    linkedinLink: "https://www.linkedin.com/in/dev-malik-976230311",
+    image: "https://res.cloudinary.com/duwmby01d/image/upload/v1786862697/2026-02-20-17-05-37-741_ql5czn.jpg",
+    tenureTimeline: [
+      { year: "2024-25", position: "Technical Member", project: "GFG BVCOE", description: "" },
+      { year: "2024-25", position: "Video Editing Head", project: "Horizon", description: "" },
+      { year: "2025-26", position: "Technical Head", project: "GFG BVCOE", description: "" },
+      { year: "2025-26", position: "Volunteer", project: "NSS BVCOE", description: "" },
+      { year: "2025-26", position: "General Sec", project: "Horizon", description: "" },
+      { year: "2026-27", position: "Technical Lead", project: "GFG BVCOE", description: "" },
+      { year: "2026-27", position: "Tech Team - Core", project: "NSS", description: "" }
+    ]
+  },
+
+  {
+    name: "Prashray Kumar",
+    branch: "CSE-I",
+    year: "3rd",
+    position: "Treasurer",
+    p0: "Treasurer",
+    p1: "Social Media Executive",
+    p2: "",
+    email: "",
+    instaLink: "https://www.instagram.com/prashrizzzz",
+    linkedinLink: "https://www.linkedin.com/in/prashray-kumar",
+    image: "https://res.cloudinary.com/duwmby01d/image/upload/v1786861927/IMG-20260815-WA0038_m2i8a2.jpg",
+    tenureTimeline: [
+      { year: "2025-2026", position: "Social Media Executive", project: "GFG", description: "" },
+      { year: "2026-2027", position: "Treasurer", project: "GFG", description: "" },
+      { year: "2025-2026", position: "Publicity & Outreach", project: "ZAAHiR", description: "" },
+      { year: "2026-2027", position: "CnD & PR Head", project: "ZAAHiR", description: "" }
+    ]
+  }
 ];
 
 export default teamData;

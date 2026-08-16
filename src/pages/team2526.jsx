@@ -1,8 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import teamData from "../data/teamData";
+import teamData from "../data/teamData2526";
 import NewCard from "../components/NewCard";
-import headsData from "../data/headsData";
+import headsData from "../data/headsData2526";
 import Lenis from "lenis";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
@@ -35,63 +34,65 @@ function Team2() {
   useGSAP(
     () => {
       // Set initial states
-      gsap.set([heroRef.current, teamGridRef.current, facultycardref.current], {
-        opacity: 0,
-        y: 50,
-      });
+          gsap.set([heroRef.current, teamGridRef.current, facultycardref.current], {
+            opacity: 0,
+            y: 50
+          });
       // Hero: smooth fade + lift on page enter
-      gsap.fromTo(
-        heroRef.current,
-        { opacity: 0, y: 100 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: heroRef.current,
-            start: "top 80%",
-            end: "bottom 20%",
-            toggleActions: "play none none none",
-          },
-        },
-      );
+      gsap.fromTo(heroRef.current, 
+      { opacity: 0, y: 100 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1.2, 
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none none",
+           
+        }
+      }
+    );
 
-      gsap.fromTo(
-        teamGridRef.current,
-        { opacity: 0, y: 60 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: teamGridRef.current,
-            start: "top 80%",
-            end: "bottom 20%",
-            toggleActions: "play none none none",
-          },
-        },
-      );
+      gsap.fromTo(teamGridRef.current, 
+      { opacity: 0, y: 60 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1, 
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: teamGridRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none none",
+           
+        }
+      }
+    );
 
-      gsap.fromTo(
-        facultycardref.current,
-        { opacity: 0, y: 60 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: facultycardref.current,
-            start: "top 80%",
-            end: "bottom 20%",
-            toggleActions: "play none none none",
-          },
-        },
-      );
+    gsap.fromTo(facultycardref.current, 
+      { opacity: 0, y: 60 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1, 
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: facultycardref.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none none",
+           
+        }
+      }
+    );
+
+
     },
-    { scope: containerRef, dependencies: [activeTab] },
+    { scope: containerRef, dependencies: [activeTab] }
   );
 
   // useGSAP(
@@ -141,15 +142,15 @@ function Team2() {
   const displayedData = activeTab === "core" ? teamData : headsData;
 
   const handleViewHeads = () => {
-    setActiveTab("heads");
+  setActiveTab("heads");
 
-    setTimeout(() => {
-      teamGridRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 100);
-  };
+  setTimeout(() => {
+    teamGridRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, 100);
+};
 
   return (
     <div
@@ -160,7 +161,7 @@ function Team2() {
       <section ref={heroRef} className="pb-10 px-6">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="font-audiowide text-4xl md:text-6xl font-bold text-richblack-25 mb-8 leading-tight tracking-tight">
-            Meet Our{" "}
+            Meet Our Batch 25-26{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400">
               Team
             </span>
@@ -173,10 +174,7 @@ function Team2() {
       </section>
 
       {/* Faculty Card */}
-      <div
-        ref={facultycardref}
-        className="darkthemebg2 rounded-2xl px-8 py-6 max-w-4xl mx-auto border-2 border-gray-300 border-opacity-20 transition-shadow duration-300 hover:shadow-xl w-10/12 md:py-10 md:px-12"
-      >
+      <div ref={facultycardref} className="darkthemebg2 rounded-2xl px-8 py-6 max-w-4xl mx-auto border-2 border-gray-300 border-opacity-20 transition-shadow duration-300 hover:shadow-xl w-10/12 md:py-10 md:px-12">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
           <div className="relative shrink-0">
             <img
@@ -238,44 +236,38 @@ function Team2() {
       </div>
 
       {/* Cards */}
-      <div ref={teamGridRef} className="TEAM_SECTION mt-16 scroll-mt-28">
-        <div className="flex w-10/12 mx-auto flex-wrap items-center justify-center gap-16 pb-12 md:gap-y-20">
-          {displayedData && displayedData.length > 0 ? (
-            displayedData.map((person, index) => (
-              <NewCard key={`${activeTab}-${index}`} person={person} />
-            ))
-          ) : (
-            <div className="w-full text-center text-gray-300">
-              Heads data coming soon.
-            </div>
-          )}
-        </div>
-
-        {/* Show only at the end of Core */}
-        {activeTab === "core" && (
-          <div className="flex justify-center pb-16">
-            <button
-              type="button"
-              onClick={handleViewHeads}
-              className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-6 py-3 font-nunito text-sm font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/20"
-            >
-              View Heads →
-            </button>
-          </div>
-        )}
-
-        <div className="flex justify-center pb-20">
-          <Link
-            to="/team2526"
-            className="group inline-flex items-center gap-2.5 rounded-full border border-cyan-400/40 bg-gradient-to-r from-cyan-500/15 via-emerald-500/15 to-teal-500/15 px-6 py-3 text-sm font-semibold text-cyan-200 shadow-[0_0_0_1px_rgba(34,211,238,0.12)] transition-all duration-300 hover:scale-[1.02] hover:border-cyan-300/60 hover:shadow-[0_0_25px_rgba(34,211,238,0.18)] hover:text-richblack-25"
-          >
-            Visit Batch 25-26 Team
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/5 text-base transition-transform duration-300 group-hover:translate-x-1">
-              →
-            </span>
-          </Link>
-        </div>
+<div
+  ref={teamGridRef}
+  className="TEAM_SECTION mt-16 scroll-mt-28"
+>
+  <div className="flex w-10/12 mx-auto flex-wrap items-center justify-center gap-16 pb-12 md:gap-y-20">
+    {displayedData && displayedData.length > 0 ? (
+      displayedData.map((person, index) => (
+        <NewCard
+          key={`${activeTab}-${index}`}
+          person={person}
+        />
+      ))
+    ) : (
+      <div className="w-full text-center text-gray-300">
+        Heads data coming soon.
       </div>
+    )}
+  </div>
+
+  {/* Show only at the end of Core */}
+  {activeTab === "core" && (
+    <div className="flex justify-center pb-16">
+      <button
+        type="button"
+        onClick={handleViewHeads}
+        className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-6 py-3 font-nunito text-sm font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/20"
+      >
+        View Heads →
+      </button>
+    </div>
+  )}
+</div>
     </div>
   );
 }
