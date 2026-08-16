@@ -51,7 +51,7 @@ const ResultImages2026 = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] py-12 px-4">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-xl md:text-4xl font-bold text-center text-blue-100 mb-4 font-alfa tracking-wide">
-          ------ Executives Selected ------
+          ------ Head Selected 2026-27 ------
         </h1>
         <p className="text-center text-gray-300 mb-10 font-nunito">
           Congratulations to all
