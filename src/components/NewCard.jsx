@@ -84,12 +84,13 @@ function NewCard({ person }) {
             "
           >
             <div className="relative w-full overflow-hidden rounded-t-3xl bg-slate-800/80">
-              <div className="aspect-[4/5] w-full">
+              <div className="aspect-[4/5] w-full overflow-hidden rounded-t-3xl">
                 <img
                   src={image}
                   loading="eager"
                   alt={name}
-                  className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                  className="block h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  style={{ objectPosition: "center 50%" }}
                 />
               </div>
             </div>

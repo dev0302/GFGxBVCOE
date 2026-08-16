@@ -19,7 +19,7 @@ import Profile from "./pages/Profile";
 import Contact from "./pages/Contact";
 import Gallery from "./pages/Gallery";
 import Team2 from "./pages/Team2";
-import Team2526 from "./pages/Team2526";
+import Team2526 from "./pages/team2526";
 import ResultPage from "./pages/ResultPage";
 import ResultPage2026 from "./pages/ResultPage2026";
 import Quiz from "./pages/Quiz";
