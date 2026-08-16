@@ -68,7 +68,7 @@ async function downloadSvgAsPng(svgElement, fileName, size) {
 
 
 export default function GenerateQR() {
-  
+
   const stored = getStoredGenerated();
   const [aiDescription, setAiDescription] = useState(() => stored?.description || "");
   const [processingFlow, setProcessingFlow] = useState(false);
@@ -146,7 +146,7 @@ export default function GenerateQR() {
       setGenerated(payload);
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-      } catch (_) {}
+      } catch (_) { }
 
       setProgressMessage("QR codes generated successfully.");
       toast.success("QR generated");
@@ -190,7 +190,7 @@ export default function GenerateQR() {
       setGenerated(payload);
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-      } catch (_) {}
+      } catch (_) { }
       setTitleDirty(false);
       setProgressMessage("QR codes generated successfully.");
       toast.success("Title updated");
@@ -269,7 +269,7 @@ export default function GenerateQR() {
                             JSON.stringify({ ...prev, description: "" }),
                           );
                         }
-                      } catch (_) {}
+                      } catch (_) { }
                     }
                   }}
                   placeholder="https://example.com"
@@ -419,18 +419,25 @@ export default function GenerateQR() {
 
                   <div className="relative rounded-[32px] bg-gradient-to-br from-[#2f8d46]/30 to-transparent p-1 shadow-2xl">
                     <div className="relative flex flex-col items-center gap-6 rounded-[30px] border border-white/10 bg-[#1a1a1a]/90 p-7 backdrop-blur-xl">
-                      <div className="absolute left-7 top-7 h-10 w-10 rounded-tl-xl border-l-2 border-t-2 border-[#2f8d46] opacity-60" />
-                      <div className="absolute right-7 top-7 h-10 w-10 rounded-tr-xl border-r-2 border-t-2 border-[#2f8d46] opacity-60" />
+                      {/* Cyber Scanner Wrapper */}
+                      <div className="relative p-2">
+                        {/* 4 Corner Brackets Hugging the QR */}
+                        <div className="absolute left-0 top-0 h-8 w-8 rounded-tl-xl border-l-2 border-t-2 border-[#2f8d46] opacity-70" />
+                        <div className="absolute right-0 top-0 h-8 w-8 rounded-tr-xl border-r-2 border-t-2 border-[#2f8d46] opacity-70" />
+                        <div className="absolute left-0 bottom-0 h-8 w-8 rounded-bl-xl border-l-2 border-b-2 border-[#2f8d46] opacity-70" />
+                        <div className="absolute right-0 bottom-0 h-8 w-8 rounded-br-xl border-r-2 border-b-2 border-[#2f8d46] opacity-70" />
 
-                      <div className="rounded-2xl bg-[#2f8d46] p-4 shadow-[0_0_20px_rgba(47,141,70,0.4)]">
-                        <QRCodeSVG
-                          value={qrValue}
-                          size={200}
-                          bgColor="#2f8d46"
-                          fgColor="#121212"
-                          level="H"
-                          includeMargin={false}
-                        />
+                        {/* The Glass QR Code */}
+                        <div className="rounded-2xl border border-[#2f8d46]/30 bg-[#2f8d46]/15 p-4 shadow-[0_0_20px_rgba(47,141,70,0.2)]">
+                          <QRCodeSVG
+                            value={qrValue}
+                            size={200}
+                            bgColor="transparent"
+                            fgColor="#ccefd5"
+                            level="H"
+                            includeMargin={false}
+                          />
+                        </div>
                       </div>
 
                       <div className="text-center">
@@ -440,7 +447,7 @@ export default function GenerateQR() {
                         <div className="mt-2 flex items-center justify-center gap-2 text-[#2f8d46]">
                           <span className="font-mono text-xs">&lt;/&gt;</span>
                           <div className="h-[1px] w-12 bg-[#2f8d46]/40" />
-                          <span className="text-[10px] uppercase tracking-tight opacity-70">Connect Tech</span>
+                          <span className="text-[10px] tracking-tight opacity-70">GeeksForGeeks BVCOE</span>
                         </div>
                       </div>
                     </div>
