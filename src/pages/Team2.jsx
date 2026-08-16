@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import teamData from "../data/teamData";
 import NewCard from "../components/NewCard";
 import headsData from "../data/headsData";
@@ -11,6 +11,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 function Team2() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("core");
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -151,6 +152,14 @@ function Team2() {
     }, 100);
   };
 
+  const handleVisitBatch2526 = () => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+
+    setTimeout(() => {
+      navigate("/team2526");
+    }, 10);
+  };
+
   return (
     <div
       ref={containerRef}
@@ -265,15 +274,16 @@ function Team2() {
         )}
 
         <div className="flex justify-center pb-20">
-          <Link
-            to="/team2526"
+          <button
+            type="button"
+            onClick={handleVisitBatch2526}
             className="group inline-flex items-center gap-2.5 rounded-full border border-cyan-400/40 bg-gradient-to-r from-cyan-500/15 via-emerald-500/15 to-teal-500/15 px-6 py-3 text-sm font-semibold text-cyan-200 shadow-[0_0_0_1px_rgba(34,211,238,0.12)] transition-all duration-300 hover:scale-[1.02] hover:border-cyan-300/60 hover:shadow-[0_0_25px_rgba(34,211,238,0.18)] hover:text-richblack-25"
           >
             Visit Batch 25-26 Team
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/5 text-base transition-transform duration-300 group-hover:translate-x-1">
               →
             </span>
-          </Link>
+          </button>
         </div>
       </div>
     </div>
