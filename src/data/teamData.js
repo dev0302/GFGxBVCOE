@@ -121,26 +121,6 @@ const teamData = [
     ]
   },
   {
-    name: "Avika Singh",
-    branch: "CSE - 3",
-    year: "3rd",
-    position: "Social Media and Publicity Head",
-    p0: "Social Media and Publicity Head",
-    p1: "",
-    p2: "",
-    email: "Avikasingh2332@gmail.com",
-    instaLink: "https://www.instagram.com/avika._.1303",
-    linkedinLink: "https://www.linkedin.com/in/avikasingh23",
-    image: "https://res.cloudinary.com/duwmby01d/image/upload/c_fit,w_512,h_512/v1786861938/IMG-20260815-WA0021_j2fjcc.jpg",
-    timeline: [
-      { year: "2024-25", position: "Member", project: "IOSC", description: "" },
-      { year: "2024-25", position: "Volunteer", project: "NSS", description: "" },
-      { year: "2025-2026", position: "Design Team (Member)", project: "TEDXBVCOE", description: "" },
-      { year: "2025-2026", position: "Member", project: "IOSC", description: "" },
-      { year: "2026-2027", position: "SM and Publicity Head", project: "GFG", description: "" }
-    ]
-  },
-  {
     name: "Dev Malik",
     branch: "CSE-4",
     year: "3rd Year",
