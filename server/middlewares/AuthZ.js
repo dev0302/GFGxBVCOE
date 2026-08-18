@@ -179,3 +179,33 @@ exports.requireSocietyRole = (req, res, next) => {
   }
   next();
 };
+
+/** Verify user is a Lead or Head for blog editorial actions, or an ADMIN */
+exports.isLeadOrHead = async (req, res, next) => {
+  try {
+    const User = require("../models/User");
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    if (user.role !== "lead" && user.role !== "head" && user.accountType !== "ADMIN") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Requires Lead, Head, or Admin role.",
+      });
+    }
+
+    next();
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Role verification failed.",
+      error: err.message,
+    });
+  }
+};
+
