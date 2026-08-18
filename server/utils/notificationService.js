@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const Notification = require("../models/Notification");
 const User = require("../models/User");
 const { getTeamMemberModel } = require("../models/TeamMember");
+const mailSender = require("./mailSender");
 const {
   SOCIETY_ROLES,
   getDepartmentRankFromPosition,
@@ -300,6 +301,127 @@ async function sendBroadcastToDepartmentMembers({ department, senderId = "", sen
   return { sent, total: members.length };
 }
 
+async function notifyBlogSubmission({ post, author }) {
+  try {
+    const reviewers = await User.find({
+      $or: [
+        { role: { $in: ["lead", "head"] } },
+        { accountType: "ADMIN" }
+      ]
+    }).select("_id email firstName lastName").lean();
+
+    const title = "New Blog Post Pending Approval";
+    const body = `${author.firstName} ${author.lastName} submitted a new blog post: "${post.title}".`;
+
+    for (const reviewer of reviewers) {
+      const notification = await Notification.create({
+        recipientId: reviewer._id,
+        type: "blog_pending_approval",
+        title,
+        body,
+        senderId: author._id.toString(),
+        senderName: `${author.firstName} ${author.lastName}`,
+        senderRole: "author",
+        metadata: {
+          postId: post._id.toString(),
+          title: post.title,
+        },
+      });
+
+      const payload = {
+        _id: notification._id,
+        type: notification.type,
+        title: notification.title,
+        body: notification.body,
+        metadata: notification.metadata,
+        senderId: notification.senderId,
+        senderName: notification.senderName,
+        senderRole: notification.senderRole,
+        readAt: notification.readAt,
+        createdAt: notification.createdAt,
+        replies: [],
+      };
+      emitNotification(reviewer._id, payload);
+
+      const emailHtml = `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #0f766e;">Hello ${reviewer.firstName},</h2>
+          <p>A new blog post has been submitted and is pending your review.</p>
+          <hr style="border: 0; border-top: 1px solid #eee;" />
+          <p><strong>Title:</strong> ${post.title}</p>
+          <p><strong>Author:</strong> ${author.firstName} ${author.lastName}</p>
+          <p><strong>Category:</strong> ${post.category || "N/A"}</p>
+          <hr style="border: 0; border-top: 1px solid #eee;" />
+          <p>Please log in to the GFG-BVCOE Dashboard to approve or reject this submission.</p>
+          <br />
+          <p>Regards,<br /><strong>GFG-BVCOE Platform</strong></p>
+        </div>
+      `;
+      await mailSender(reviewer.email, title, emailHtml);
+    }
+  } catch (error) {
+    console.error("notifyBlogSubmission error:", error);
+  }
+}
+
+async function notifyBlogStatusChange({ post, author, reviewer, action, feedback }) {
+  try {
+    const isApproved = action === "approve";
+    const statusText = isApproved ? "approved" : "rejected";
+    const title = `Blog Post ${isApproved ? "Approved" : "Rejected"}`;
+    const body = `Your blog post "${post.title}" has been ${statusText} by ${reviewer.firstName} ${reviewer.lastName}.${feedback ? ` Feedback: "${feedback}"` : ""}`;
+
+    const notification = await Notification.create({
+      recipientId: author._id,
+      type: `blog_${statusText}`,
+      title,
+      body,
+      senderId: reviewer._id.toString(),
+      senderName: `${reviewer.firstName} ${reviewer.lastName}`,
+      senderRole: reviewer.role || "reviewer",
+      metadata: {
+        postId: post._id.toString(),
+        title: post.title,
+        status: statusText,
+        feedback: feedback || "",
+      },
+    });
+
+    const payload = {
+      _id: notification._id,
+      type: notification.type,
+      title: notification.title,
+      body: notification.body,
+      metadata: notification.metadata,
+      senderId: notification.senderId,
+      senderName: notification.senderName,
+      senderRole: notification.senderRole,
+      readAt: notification.readAt,
+      createdAt: notification.createdAt,
+      replies: [],
+    };
+    emitNotification(author._id, payload);
+
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <h2 style="color: ${isApproved ? '#0f766e' : '#be123c'};">Hello ${author.firstName},</h2>
+        <p>Your blog post submission has been reviewed.</p>
+        <hr style="border: 0; border-top: 1px solid #eee;" />
+        <p><strong>Title:</strong> ${post.title}</p>
+        <p><strong>Status:</strong> <span style="color: ${isApproved ? '#0f766e' : '#be123c'}; font-weight: bold; text-transform: uppercase;">${statusText}</span></p>
+        ${feedback ? `<p><strong>Feedback from Reviewer:</strong> "${feedback}"</p>` : ""}
+        <hr style="border: 0; border-top: 1px solid #eee;" />
+        <p>${isApproved ? "Congratulations! Your post is now live on the public blog feed." : "You can edit your post based on the feedback and submit it again for approval."}</p>
+        <br />
+        <p>Regards,<br /><strong>GFG-BVCOE Platform</strong></p>
+      </div>
+    `;
+    await mailSender(author.email, title, emailHtml);
+  } catch (error) {
+    console.error("notifyBlogStatusChange error:", error);
+  }
+}
+
 module.exports = {
   setNotificationEmitter,
   emitNotification,
@@ -308,4 +430,7 @@ module.exports = {
   sendBroadcastToAllUsers,
   sendBroadcastToAllMembers,
   sendBroadcastToDepartmentMembers,
+  notifyBlogSubmission,
+  notifyBlogStatusChange,
 };
+
