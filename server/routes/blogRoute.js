@@ -6,6 +6,8 @@ const {
   approvePost,
   getPublicPosts,
   getPostBySlug,
+  editPost,
+  deletePost,
 } = require("../controllers/blogController");
 
 const router = express.Router();
@@ -25,9 +27,11 @@ router.get("/public", getPublicPosts);
 // Public route: fetch specific blog post details by its SEO slug (public)
 router.get("/post/:slug", getPostBySlug);
 
+// Author edits their own post (requires authentication)
+router.put("/edit/:postId", auth, editPost);
 
-
-
+// Author, Leads, Heads or Admins can delete a post (requires authentication)
+router.delete("/delete/:postId", auth, deletePost);
 
 module.exports = router;
 
