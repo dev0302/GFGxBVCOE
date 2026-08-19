@@ -336,6 +336,16 @@ exports.replyToNotification = async (req, res) => {
           reply: replyPayload,
         });
       }
+
+      const originalSenderId = String(notification.senderId || "").trim();
+      if (originalSenderId && !seen.has(originalSenderId)) {
+        seen.add(originalSenderId);
+        emitNotification(originalSenderId, {
+          type: "notification_reply_ack",
+          notificationId: String(notification._id),
+          reply: replyPayload,
+        });
+      }
     } else {
       // ── Non-broadcast: only ack the replier ───────────────────────────────
       emitNotification(replierId, {
