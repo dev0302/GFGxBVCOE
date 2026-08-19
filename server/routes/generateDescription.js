@@ -104,7 +104,7 @@ Content: ${scraped.paragraphs.join(" ").slice(0, 1200)}
 
     // 🔥 3. Generate BOTH title + description
     const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-20b",
       messages: [
         {
           role: "system",
@@ -135,8 +135,7 @@ Return JSON ONLY in this format:
       max_tokens: 150,
     });
 
-    let raw =
-      completion.choices[0]?.message?.content?.trim() || "{}";
+    let raw = completion.choices[0]?.message?.content?.trim() || "{}";
 
     // 🧠 Safe JSON parse
     let parsed;
