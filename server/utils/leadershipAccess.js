@@ -8,13 +8,18 @@ const {
 
 function isDefaultLeadershipTransitionRole(accountType, position = "") {
   const type = String(accountType || "").trim();
-  return SOCIETY_ROLES.includes(type) || (
-    TEAM_DEPARTMENTS.includes(type) &&
-    getDepartmentRankFromPosition(position) === "Lead"
+  return (
+    SOCIETY_ROLES.includes(type) ||
+    (TEAM_DEPARTMENTS.includes(type) &&
+      getDepartmentRankFromPosition(position) === "Lead")
   );
 }
 
-async function userCanAccessLeadershipTransition(userId, accountType, position = "") {
+async function userCanAccessLeadershipTransition(
+  userId,
+  accountType,
+  position = "",
+) {
   const type = String(accountType || "").trim();
   let rolePosition = position;
 
@@ -24,7 +29,8 @@ async function userCanAccessLeadershipTransition(userId, accountType, position =
     const user = await User.findById(userId)
       .populate("additionalDetails", "position p0")
       .lean();
-    rolePosition = user?.additionalDetails?.position || user?.additionalDetails?.p0 || "";
+    rolePosition =
+      user?.additionalDetails?.position || user?.additionalDetails?.p0 || "";
   }
 
   if (isDefaultLeadershipTransitionRole(type, rolePosition)) return true;
@@ -33,7 +39,22 @@ async function userCanAccessLeadershipTransition(userId, accountType, position =
   return allowed.includes(String(userId));
 }
 
+async function userCanReviewBlog(userId) {
+  const user = await User.findById(userId)
+    .populate("additionalDetails", "position p0")
+    .lean();
+  if (!user) return false;
+  if (SOCIETY_ROLES.includes(String(user.accountType || "").trim())) {
+    return true;
+  }
+
+  const position =
+    user.additionalDetails?.position || user.additionalDetails?.p0 || "";
+  return ["Lead", "Head"].includes(getDepartmentRankFromPosition(position));
+}
+
 module.exports = {
   isDefaultLeadershipTransitionRole,
   userCanAccessLeadershipTransition,
+  userCanReviewBlog,
 };

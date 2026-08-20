@@ -41,7 +41,8 @@ async function getInviteSubmissionRecipients(department) {
     .lean();
 
   for (const u of deptUsers) {
-    const position = u.additionalDetails?.position || u.additionalDetails?.p0 || "";
+    const position =
+      u.additionalDetails?.position || u.additionalDetails?.p0 || "";
     const rank = getDepartmentRankFromPosition(position);
     if (rank === "Lead" || rank === "Head") {
       recipientIds.add(String(u._id));
@@ -51,7 +52,14 @@ async function getInviteSubmissionRecipients(department) {
   return Array.from(recipientIds);
 }
 
-async function notifyTeamInviteSubmission({ department, memberName, memberId, senderId = "", senderName = "", senderRole = "System" }) {
+async function notifyTeamInviteSubmission({
+  department,
+  memberName,
+  memberId,
+  senderId = "",
+  senderName = "",
+  senderRole = "System",
+}) {
   const name = String(memberName || "Someone").trim();
   const dept = String(department || "").trim();
   const title = "New team member";
@@ -104,9 +112,16 @@ async function notifyTeamInviteSubmission({ department, memberName, memberId, se
  * Broadcast to ALL registered users (User collection).
  * Batched 100 at a time to keep memory low on production.
  */
-async function sendBroadcastToAllUsers({ senderId = "", senderName = "", senderRole, title, body, metadata = {} }) {
+async function sendBroadcastToAllUsers({
+  senderId = "",
+  senderName = "",
+  senderRole,
+  title,
+  body,
+  metadata = {},
+}) {
   const titleStr = String(title || "").trim();
-  const bodyStr  = String(body || "").trim();
+  const bodyStr = String(body || "").trim();
   const broadcastGroupId = crypto.randomUUID();
   const baseMetadata = {
     ...metadata,
@@ -124,7 +139,11 @@ async function sendBroadcastToAllUsers({ senderId = "", senderName = "", senderR
   let sent = 0;
 
   while (skip < total) {
-    const users = await User.find({}).select("_id").skip(skip).limit(BATCH).lean();
+    const users = await User.find({})
+      .select("_id")
+      .skip(skip)
+      .limit(BATCH)
+      .lean();
     skip += BATCH;
     for (const user of users) {
       try {
@@ -168,9 +187,16 @@ async function sendBroadcastToAllUsers({ senderId = "", senderName = "", senderR
  * The Notification recipientId stores their dept _id so getNotifications()
  * (which queries { recipientId: req.user.id }) still works for dept member logins.
  */
-async function sendBroadcastToAllMembers({ senderId = "", senderName = "", senderRole, title, body, metadata = {} }) {
+async function sendBroadcastToAllMembers({
+  senderId = "",
+  senderName = "",
+  senderRole,
+  title,
+  body,
+  metadata = {},
+}) {
   const titleStr = String(title || "").trim();
-  const bodyStr  = String(body || "").trim();
+  const bodyStr = String(body || "").trim();
   const broadcastGroupId = crypto.randomUUID();
   const baseMetadata = {
     ...metadata,
@@ -192,7 +218,10 @@ async function sendBroadcastToAllMembers({ senderId = "", senderName = "", sende
         memberIds.push(String(m._id));
       }
     } catch (err) {
-      console.error(`sendBroadcastToAllMembers: failed to read ${dept}:`, err.message);
+      console.error(
+        `sendBroadcastToAllMembers: failed to read ${dept}:`,
+        err.message,
+      );
     }
   }
 
@@ -237,12 +266,20 @@ async function sendBroadcastToAllMembers({ senderId = "", senderName = "", sende
  * KEY FIX: Same as sendBroadcastToAllMembers — uses dept member _ids directly,
  * not email-to-User matching.
  */
-async function sendBroadcastToDepartmentMembers({ department, senderId = "", senderName = "", senderRole, title, body, metadata = {} }) {
+async function sendBroadcastToDepartmentMembers({
+  department,
+  senderId = "",
+  senderName = "",
+  senderRole,
+  title,
+  body,
+  metadata = {},
+}) {
   const dept = String(department || "").trim();
   if (!dept) return { sent: 0, total: 0 };
 
   const titleStr = String(title || "").trim();
-  const bodyStr  = String(body || "").trim();
+  const bodyStr = String(body || "").trim();
 
   let members = [];
   try {
@@ -251,7 +288,10 @@ async function sendBroadcastToDepartmentMembers({ department, senderId = "", sen
       .select("_id")
       .lean();
   } catch (err) {
-    console.error(`sendBroadcastToDepartmentMembers: failed to read ${dept}:`, err.message);
+    console.error(
+      `sendBroadcastToDepartmentMembers: failed to read ${dept}:`,
+      err.message,
+    );
     return { sent: 0, total: 0 };
   }
 
@@ -303,12 +343,24 @@ async function sendBroadcastToDepartmentMembers({ department, senderId = "", sen
 
 async function notifyBlogSubmission({ post, author }) {
   try {
-    const reviewers = await User.find({
-      $or: [
-        { role: { $in: ["lead", "head"] } },
-        { accountType: "ADMIN" }
-      ]
-    }).select("_id email firstName lastName").lean();
+    const reviewers = (
+      await User.find({
+        $or: [
+          { accountType: { $in: SOCIETY_ROLES } },
+          { accountType: { $in: TEAM_DEPARTMENTS } },
+        ],
+      })
+        .populate("additionalDetails", "position p0")
+        .select("_id email firstName lastName accountType additionalDetails")
+        .lean()
+    ).filter((reviewer) => {
+      if (SOCIETY_ROLES.includes(reviewer.accountType)) return true;
+      const position =
+        reviewer.additionalDetails?.position ||
+        reviewer.additionalDetails?.p0 ||
+        "";
+      return ["Lead", "Head"].includes(getDepartmentRankFromPosition(position));
+    });
 
     const title = "New Blog Post Pending Approval";
     const body = `${author.firstName} ${author.lastName} submitted a new blog post: "${post.title}".`;
@@ -364,7 +416,13 @@ async function notifyBlogSubmission({ post, author }) {
   }
 }
 
-async function notifyBlogStatusChange({ post, author, reviewer, action, feedback }) {
+async function notifyBlogStatusChange({
+  post,
+  author,
+  reviewer,
+  action,
+  feedback,
+}) {
   try {
     const isApproved = action === "approve";
     const statusText = isApproved ? "approved" : "rejected";
@@ -378,7 +436,7 @@ async function notifyBlogStatusChange({ post, author, reviewer, action, feedback
       body,
       senderId: reviewer._id.toString(),
       senderName: `${reviewer.firstName} ${reviewer.lastName}`,
-      senderRole: reviewer.role || "reviewer",
+      senderRole: reviewer.accountType || "reviewer",
       metadata: {
         postId: post._id.toString(),
         title: post.title,
@@ -404,11 +462,11 @@ async function notifyBlogStatusChange({ post, author, reviewer, action, feedback
 
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <h2 style="color: ${isApproved ? '#0f766e' : '#be123c'};">Hello ${author.firstName},</h2>
+        <h2 style="color: ${isApproved ? "#0f766e" : "#be123c"};">Hello ${author.firstName},</h2>
         <p>Your blog post submission has been reviewed.</p>
         <hr style="border: 0; border-top: 1px solid #eee;" />
         <p><strong>Title:</strong> ${post.title}</p>
-        <p><strong>Status:</strong> <span style="color: ${isApproved ? '#0f766e' : '#be123c'}; font-weight: bold; text-transform: uppercase;">${statusText}</span></p>
+        <p><strong>Status:</strong> <span style="color: ${isApproved ? "#0f766e" : "#be123c"}; font-weight: bold; text-transform: uppercase;">${statusText}</span></p>
         ${feedback ? `<p><strong>Feedback from Reviewer:</strong> "${feedback}"</p>` : ""}
         <hr style="border: 0; border-top: 1px solid #eee;" />
         <p>${isApproved ? "Congratulations! Your post is now live on the public blog feed." : "You can edit your post based on the feedback and submit it again for approval."}</p>
@@ -433,4 +491,3 @@ module.exports = {
   notifyBlogSubmission,
   notifyBlogStatusChange,
 };
-

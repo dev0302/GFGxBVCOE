@@ -1,8 +1,16 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
-const { notifyBlogSubmission, notifyBlogStatusChange } = require("../utils/notificationService");
-const { containsProfanity, sanitizeHtml, calculateQualityAudit } = require("../utils/moderation");
+const {
+  notifyBlogSubmission,
+  notifyBlogStatusChange,
+} = require("../utils/notificationService");
+const {
+  containsProfanity,
+  sanitizeHtml,
+  calculateQualityAudit,
+} = require("../utils/moderation");
 const { imageUpload } = require("../config/cloudinary");
+const { userCanReviewBlog } = require("../utils/leadershipAccess");
 
 const slugify = (text) => {
   return text
@@ -25,9 +33,20 @@ const generateUniqueSlug = async (title) => {
   return uniqueSlug;
 };
 
+const normalizeTags = (tags) => {
+  if (typeof tags !== "string") return tags;
+  try {
+    const parsedTags = JSON.parse(tags);
+    return parsedTags;
+  } catch {
+    return tags;
+  }
+};
+
 exports.submitPost = async (req, res) => {
   try {
-    const { title, content, summary, coverImage, category, tags } = req.body;
+    const { title, content, summary, coverImage, category } = req.body;
+    const tags = normalizeTags(req.body.tags);
     if (!title || !content) {
       return res.status(400).json({
         success: false,
@@ -63,7 +82,11 @@ exports.submitPost = async (req, res) => {
 
     let coverImageUrl = "";
     if (req.files && req.files.coverImage) {
-      const uploadResult = await imageUpload(req.files.coverImage, "blogImages", 80);
+      const uploadResult = await imageUpload(
+        req.files.coverImage,
+        "blogImages",
+        80,
+      );
       coverImageUrl = uploadResult.secure_url;
     } else if (coverImage) {
       if (typeof coverImage !== "string") {
@@ -76,10 +99,15 @@ exports.submitPost = async (req, res) => {
     }
 
     // Content Moderation: Reject vulgar/profanity words
-    if (containsProfanity(title) || containsProfanity(content) || containsProfanity(summary || "")) {
+    if (
+      containsProfanity(title) ||
+      containsProfanity(content) ||
+      containsProfanity(summary || "")
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Submission blocked: Content contains inappropriate or vulgar language.",
+        message:
+          "Submission blocked: Content contains inappropriate or vulgar language.",
       });
     }
 
@@ -104,10 +132,12 @@ exports.submitPost = async (req, res) => {
       qualityAudit,
     });
 
-    const author = await User.findById(req.user.id).select("firstName lastName email");
+    const author = await User.findById(req.user.id).select(
+      "firstName lastName email",
+    );
 
     notifyBlogSubmission({ post, author }).catch((err) =>
-      console.error("notifyBlogSubmission background error:", err)
+      console.error("notifyBlogSubmission background error:", err),
     );
 
     return res.status(201).json({
@@ -124,7 +154,6 @@ exports.submitPost = async (req, res) => {
     });
   }
 };
-
 
 exports.getPendingPosts = async (req, res) => {
   try {
@@ -194,7 +223,7 @@ exports.approvePost = async (req, res) => {
         action,
         feedback: post.feedback,
       }).catch((err) =>
-        console.error("notifyBlogStatusChange background error:", err)
+        console.error("notifyBlogStatusChange background error:", err),
       );
     }
 
@@ -236,8 +265,10 @@ exports.getPublicPosts = async (req, res) => {
 exports.getPostBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    const post = await Post.findOne({ slug, status: "published" })
-      .populate("author", "firstName lastName image role");
+    const post = await Post.findOne({ slug, status: "published" }).populate(
+      "author",
+      "firstName lastName image role",
+    );
 
     if (!post) {
       return res.status(404).json({
@@ -263,7 +294,8 @@ exports.getPostBySlug = async (req, res) => {
 exports.editPost = async (req, res) => {
   try {
     const { postId } = req.params;
-    const { title, content, summary, coverImage, category, tags } = req.body;
+    const { title, content, summary, coverImage, category } = req.body;
+    const tags = normalizeTags(req.body.tags);
 
     const post = await Post.findById(postId);
     if (!post) {
@@ -318,10 +350,15 @@ exports.editPost = async (req, res) => {
     const checkContent = content || post.content;
     const checkSummary = summary || post.summary || "";
 
-    if (containsProfanity(checkTitle) || containsProfanity(checkContent) || containsProfanity(checkSummary)) {
+    if (
+      containsProfanity(checkTitle) ||
+      containsProfanity(checkContent) ||
+      containsProfanity(checkSummary)
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Update blocked: Content contains inappropriate or vulgar language.",
+        message:
+          "Update blocked: Content contains inappropriate or vulgar language.",
       });
     }
 
@@ -350,7 +387,11 @@ exports.editPost = async (req, res) => {
 
     // Handle cover image upload or URL string
     if (req.files && req.files.coverImage) {
-      const uploadResult = await imageUpload(req.files.coverImage, "blogImages", 80);
+      const uploadResult = await imageUpload(
+        req.files.coverImage,
+        "blogImages",
+        80,
+      );
       post.coverImage = uploadResult.secure_url;
     } else if (coverImage !== undefined) {
       if (coverImage && typeof coverImage !== "string") {
@@ -403,14 +444,15 @@ exports.deletePost = async (req, res) => {
       });
     }
 
-    // Delete access belongs to the author of the post, or users with role lead/head/ADMIN
+    // Delete access belongs to the author, or editorial leads, heads, and admins.
     const isAuthor = post.author.toString() === req.user.id;
-    const isLeadOrHeadOrAdmin = user.role === "lead" || user.role === "head" || user.accountType === "ADMIN";
+    const isLeadOrHeadOrAdmin = await userCanReviewBlog(req.user.id);
 
     if (!isAuthor && !isLeadOrHeadOrAdmin) {
       return res.status(403).json({
         success: false,
-        message: "Access denied. You do not have permission to delete this post.",
+        message:
+          "Access denied. You do not have permission to delete this post.",
       });
     }
 
@@ -429,4 +471,3 @@ exports.deletePost = async (req, res) => {
     });
   }
 };
-
