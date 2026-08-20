@@ -18,7 +18,6 @@ import AdminSignupConfig from "./pages/AdminSignupConfig";
 import Profile from "./pages/Profile";
 import Contact from "./pages/Contact";
 import Gallery from "./pages/Gallery";
-import WifiEventCollage from "./pages/wifi_event";
 import Team2 from "./pages/Team2";
 import Team2526 from "./pages/team2526";
 import ResultPage from "./pages/ResultPage";
@@ -56,6 +55,7 @@ import NotFound from "./components/NotFound";
 import GFGBentoGrid from "./components/GFGBentoGrid";
 import IncomingUploadModal from "./components/IncomingUploadModal";
 import AirdropAnimationLayer from "./components/AirdropAnimationLayer";
+import BlogSite from "./pages/blog/blogSite";
 
 function App() {
   const location = useLocation();
@@ -273,14 +273,7 @@ function App() {
                       <Route path="/notfound" element={<NotFound />} />
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/gallery" element={<Gallery />} />
-                      <Route
-                        path="/wifi-event"
-                        element={<WifiEventCollage />}
-                      />
-                      <Route
-                        path="/wifi_event"
-                        element={<WifiEventCollage />}
-                      />
+                      <Route path="/blog" element={<BlogSite />} />
                       <Route path="/bentogrid" element={<GFGBentoGrid />} />
                       <Route path="/results" element={<ResultPage />} />
                       <Route path="/results2026" element={<ResultPage2026 />} />
