@@ -25,7 +25,7 @@ export function setAuthToken(token) {
       localStorage.removeItem(AUTH_TOKEN_KEY);
       sessionStorage.removeItem(AUTH_TOKEN_KEY);
     }
-  } catch (_) { }
+  } catch (_) {}
 }
 
 /** Clear stored token on logout. */
@@ -35,49 +35,49 @@ export function clearAuthToken() {
 
 export async function verifyTeam(teamId) {
   const res = await fetch(`${BASE}/api/auth/team/verify`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ teamId })
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ teamId }),
   });
-  if (!res.ok) throw new Error('Team not found');
+  if (!res.ok) throw new Error("Team not found");
   return res.json();
 }
 
 export async function getQuestions() {
   const res = await fetch(`${BASE}/api/quiz/questions`);
-  if (!res.ok) throw new Error('Failed to fetch questions');
+  if (!res.ok) throw new Error("Failed to fetch questions");
   return res.json(); // { questions }
 }
 
 export async function submitQuiz({ teamId, answers, timeMs }) {
   const res = await fetch(`${BASE}/api/quiz/submit`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ teamId, answers, timeMs })
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ teamId, answers, timeMs }),
   });
-  if (!res.ok) throw new Error('Submit failed');
+  if (!res.ok) throw new Error("Submit failed");
   return res.json(); // { score, timeMs, teamId, teamName, teamLead }
 }
 
 export async function getLeaderboard() {
   const res = await fetch(`${BASE}/api/leaderboard`);
-  if (!res.ok) throw new Error('Failed to fetch leaderboard');
+  if (!res.ok) throw new Error("Failed to fetch leaderboard");
   return res.json(); // { entries }
 }
 
 export async function getSettings() {
   const res = await fetch(`${BASE}/api/settings`);
-  if (!res.ok) throw new Error('Failed to fetch settings');
+  if (!res.ok) throw new Error("Failed to fetch settings");
   return res.json(); // { leaderboardEnabled }
 }
 
 export async function setLeaderboardEnabled(enabled) {
   const res = await fetch(`${BASE}/api/settings/leaderboard`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ enabled })
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ enabled }),
   });
-  if (!res.ok) throw new Error('Failed to update settings');
+  if (!res.ok) throw new Error("Failed to update settings");
   return res.json(); // { leaderboardEnabled }
 }
 
@@ -85,7 +85,7 @@ export async function setLeaderboardEnabled(enabled) {
 /** Public Events page: only visible events (not scheduled for deletion). */
 export async function getEvents() {
   const res = await fetch(`${BASE}/api/v1/events`);
-  if (!res.ok) throw new Error('Failed to fetch events');
+  if (!res.ok) throw new Error("Failed to fetch events");
   return res.json(); // { success, data }
 }
 
@@ -93,7 +93,27 @@ export async function getEvents() {
 export async function getUpcomingEvents() {
   const res = await fetch(`${BASE}/api/v1/events/upcoming`);
   const data = await res.json().catch(() => ({ success: false, data: [] }));
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch upcoming events');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to fetch upcoming events");
+  return data;
+}
+
+/** Fetch all image URLs inside a Cloudinary folder. */
+export async function getImagesFromCloudinaryFolder(folder) {
+  if (!folder || typeof folder !== "string" || !folder.trim()) {
+    throw new Error("Cloudinary folder name is required");
+  }
+
+  const url = `${BASE}/api/v1/cloudinary/images?folder=${encodeURIComponent(folder.trim())}`;
+  const res = await fetch(url, { credentials: "include" });
+  const data = await res.json().catch(() => ({ success: false, images: [] }));
+
+  if (!res.ok) {
+    throw new Error(
+      data.message || "Failed to fetch images from Cloudinary folder",
+    );
+  }
+
   return data;
 }
 
@@ -101,7 +121,10 @@ export async function getUpcomingEvents() {
 export async function getUpcomingEventsForImport() {
   const res = await authFetch("/api/v1/events/upcoming/import-pool");
   const data = await res.json().catch(() => ({ success: false, data: [] }));
-  if (!res.ok) throw new Error(data.message || "Failed to fetch upcoming events for import");
+  if (!res.ok)
+    throw new Error(
+      data.message || "Failed to fetch upcoming events for import",
+    );
   return data;
 }
 
@@ -109,15 +132,16 @@ export async function getUpcomingEventsForImport() {
 export async function createUpcomingEvent(formData) {
   const token = getAuthToken();
   const headers = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/events/upcoming`, {
-    method: 'POST',
-    credentials: 'include',
+    method: "POST",
+    credentials: "include",
     headers,
     body: formData,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to create upcoming event');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to create upcoming event");
   return data;
 }
 
@@ -125,23 +149,27 @@ export async function createUpcomingEvent(formData) {
 export async function updateUpcomingEvent(id, formData) {
   const token = getAuthToken();
   const headers = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/events/upcoming/${id}`, {
-    method: 'PUT',
-    credentials: 'include',
+    method: "PUT",
+    credentials: "include",
     headers,
     body: formData,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to update upcoming event');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to update upcoming event");
   return data;
 }
 
 /** Delete upcoming event (auth + event upload). */
 export async function deleteUpcomingEvent(id) {
-  const res = await authFetch(`/api/v1/events/upcoming/${id}`, { method: 'DELETE' });
+  const res = await authFetch(`/api/v1/events/upcoming/${id}`, {
+    method: "DELETE",
+  });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to delete upcoming event');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to delete upcoming event");
   return data;
 }
 export async function getEventById(id) {
@@ -152,12 +180,10 @@ export async function getEventById(id) {
   return data;
 }
 
-
-
 /** Manage page: includes events scheduled for deletion (so admin can cancel). */
 export async function getEventsForManage() {
   const res = await fetch(`${BASE}/api/v1/events?manage=1`);
-  if (!res.ok) throw new Error('Failed to fetch events');
+  if (!res.ok) throw new Error("Failed to fetch events");
   return res.json(); // { success, data }
 }
 
@@ -165,16 +191,16 @@ export async function getEventsForManage() {
 export async function createEvent(formData) {
   const token = getAuthToken();
   const headers = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/events`, {
-    method: 'POST',
+    method: "POST",
     body: formData,
-    credentials: 'include',
+    credentials: "include",
     headers,
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'Failed to upload event');
+    throw new Error(err.message || "Failed to upload event");
   }
   return res.json();
 }
@@ -183,15 +209,15 @@ export async function createEvent(formData) {
 export async function deleteEvent(id) {
   const token = getAuthToken();
   const headers = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/events/${id}`, {
-    method: 'DELETE',
-    credentials: 'include',
+    method: "DELETE",
+    credentials: "include",
     headers,
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'Failed to schedule deletion');
+    throw new Error(err.message || "Failed to schedule deletion");
   }
   return res.json();
 }
@@ -200,24 +226,26 @@ export async function deleteEvent(id) {
 export async function cancelScheduledDelete(id) {
   const token = getAuthToken();
   const headers = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/events/${id}/cancel-delete`, {
-    method: 'PATCH',
-    credentials: 'include',
+    method: "PATCH",
+    credentials: "include",
     headers,
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'Failed to cancel deletion');
+    throw new Error(err.message || "Failed to cancel deletion");
   }
   return res.json();
 }
 
 /** Force-delete event immediately (no 10-day delay). Allowed only for Faculty Incharge and departments they allow. */
 export async function forceDeleteEvent(id) {
-  const res = await authFetch(`/api/v1/events/${id}/force`, { method: 'DELETE' });
+  const res = await authFetch(`/api/v1/events/${id}/force`, {
+    method: "DELETE",
+  });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to force-delete event');
+  if (!res.ok) throw new Error(data.message || "Failed to force-delete event");
   return data;
 }
 
@@ -225,33 +253,35 @@ export async function forceDeleteEvent(id) {
 export async function updateEvent(id, formData) {
   const token = getAuthToken();
   const headers = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/events/${id}`, {
-    method: 'PUT',
+    method: "PUT",
     body: formData,
-    credentials: 'include',
+    credentials: "include",
     headers,
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'Failed to update event');
+    throw new Error(err.message || "Failed to update event");
   }
   return res.json();
 }
 
 /** Generate a one-time upload link (12h expiry). Requires auth + event upload access. */
 export async function createUploadLink() {
-  const res = await authFetch('/api/v1/events/upload-link', { method: 'POST' });
+  const res = await authFetch("/api/v1/events/upload-link", { method: "POST" });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to create link');
+  if (!res.ok) throw new Error(data.message || "Failed to create link");
   return data;
 }
 
 /** Suspend (turn off) an upload link immediately. Requires auth + event upload access. */
 export async function suspendUploadLink(token) {
-  const res = await authFetch(`/api/v1/events/upload-link/${token}`, { method: 'DELETE' });
+  const res = await authFetch(`/api/v1/events/upload-link/${token}`, {
+    method: "DELETE",
+  });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to suspend link');
+  if (!res.ok) throw new Error(data.message || "Failed to suspend link");
   return data;
 }
 
@@ -264,21 +294,22 @@ export async function validateUploadLink(token) {
 /** Submit event via upload link (public, no auth). */
 export async function createEventByLink(token, formData) {
   const res = await fetch(`${BASE}/api/v1/events/upload-by-link/${token}`, {
-    method: 'POST',
+    method: "POST",
     body: formData,
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'Failed to upload event');
+    throw new Error(err.message || "Failed to upload event");
   }
   return res.json();
 }
 
 /** Get departments allowed to access /uploadevent (core + extra). Requires auth + event upload access. */
 export async function getEventUploadAllowed() {
-  const res = await authFetch('/api/v1/events/upload-allowed');
+  const res = await authFetch("/api/v1/events/upload-allowed");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch allowed departments');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to fetch allowed departments");
   return data;
 }
 
@@ -286,9 +317,12 @@ export async function getEventUploadAllowed() {
 export async function getDashboardAllowed(departmentKey) {
   const key = String(departmentKey || "").trim();
   if (!key) throw new Error("dashboardKey required");
-  const res = await authFetch(`/api/v1/dashboards/${encodeURIComponent(key)}/allowed`);
+  const res = await authFetch(
+    `/api/v1/dashboards/${encodeURIComponent(key)}/allowed`,
+  );
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to fetch allowed departments");
+  if (!res.ok)
+    throw new Error(data.message || "Failed to fetch allowed departments");
   return data;
 }
 
@@ -298,267 +332,312 @@ export async function addDashboardAllowedDepartment(departmentKey, department) {
   const dept = String(department || "").trim();
   if (!key) throw new Error("dashboardKey required");
   if (!dept) throw new Error("department required");
-  const res = await authFetch(`/api/v1/dashboards/${encodeURIComponent(key)}/allowed/add`, {
-    method: "POST",
-    body: JSON.stringify({ department: dept }),
-  });
+  const res = await authFetch(
+    `/api/v1/dashboards/${encodeURIComponent(key)}/allowed/add`,
+    {
+      method: "POST",
+      body: JSON.stringify({ department: dept }),
+    },
+  );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to add department");
   return data;
 }
 
 /** Remove a department from allowed list for a generic dashboard (non-EM department dashboards). */
-export async function removeDashboardAllowedDepartment(departmentKey, department) {
+export async function removeDashboardAllowedDepartment(
+  departmentKey,
+  department,
+) {
   const key = String(departmentKey || "").trim();
   const dept = String(department || "").trim();
   if (!key) throw new Error("dashboardKey required");
   if (!dept) throw new Error("department required");
-  const res = await authFetch(`/api/v1/dashboards/${encodeURIComponent(key)}/allowed/remove`, {
-    method: "POST",
-    body: JSON.stringify({ department: dept }),
-  });
+  const res = await authFetch(
+    `/api/v1/dashboards/${encodeURIComponent(key)}/allowed/remove`,
+    {
+      method: "POST",
+      body: JSON.stringify({ department: dept }),
+    },
+  );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to remove department");
   return data;
 }
 
 export async function addEventUploadDepartment(department) {
-  const res = await authFetch('/api/v1/events/upload-allowed/add', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/events/upload-allowed/add", {
+    method: "POST",
     body: JSON.stringify({ department }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to add department');
+  if (!res.ok) throw new Error(data.message || "Failed to add department");
   return data;
 }
 
 export async function removeEventUploadDepartment(department) {
-  const res = await authFetch('/api/v1/events/upload-allowed/remove', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/events/upload-allowed/remove", {
+    method: "POST",
     body: JSON.stringify({ department }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to remove department');
+  if (!res.ok) throw new Error(data.message || "Failed to remove department");
   return data;
 }
 
 /** Force-delete permissions: { allowed, canManage, data? }. Only Faculty Incharge can manage (canManage). */
 export async function getForceDeleteAllowed() {
-  const res = await authFetch('/api/v1/events/force-delete-allowed');
+  const res = await authFetch("/api/v1/events/force-delete-allowed");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch force-delete permissions');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to fetch force-delete permissions");
   return data;
 }
 
 export async function addForceDeleteDepartment(department) {
-  const res = await authFetch('/api/v1/events/force-delete-allowed/add', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/events/force-delete-allowed/add", {
+    method: "POST",
     body: JSON.stringify({ department }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to add');
+  if (!res.ok) throw new Error(data.message || "Failed to add");
   return data;
 }
 
 export async function removeForceDeleteDepartment(department) {
-  const res = await authFetch('/api/v1/events/force-delete-allowed/remove', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/events/force-delete-allowed/remove", {
+    method: "POST",
     body: JSON.stringify({ department }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to remove');
+  if (!res.ok) throw new Error(data.message || "Failed to remove");
   return data;
 }
 
 /** Society core roles can see the Force delete permissions sidebar and page. */
 export function canManageForceDeleteConfig(accountType) {
-  return accountType === 'ADMIN' || accountType === 'Chairperson' || accountType === 'Vice-Chairperson';
+  return (
+    accountType === "ADMIN" ||
+    accountType === "Chairperson" ||
+    accountType === "Vice-Chairperson"
+  );
 }
 
 export async function fetchCloudinaryStorageUsage() {
-  const res = await authFetch('/api/v1/settings/cloudinary-storage');
+  const res = await authFetch("/api/v1/settings/cloudinary-storage");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to load Cloudinary storage usage');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to load Cloudinary storage usage");
   return data;
 }
 
 export async function fetchDatabaseAnalytics() {
-  const res = await authFetch('/api/v1/settings/database');
+  const res = await authFetch("/api/v1/settings/database");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to load database analytics');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to load database analytics");
   return data;
 }
 
 export async function fetchEmailServiceAnalytics({ refresh = false } = {}) {
-  const res = await authFetch(`/api/v1/settings/email-service${refresh ? '?refresh=1' : ''}`);
+  const res = await authFetch(
+    `/api/v1/settings/email-service${refresh ? "?refresh=1" : ""}`,
+  );
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to load email service analytics');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to load email service analytics");
   return data;
 }
 
 export async function fetchBroadcastEmailAudience() {
-  const res = await authFetch('/api/v1/settings/broadcast-email/audience');
+  const res = await authFetch("/api/v1/settings/broadcast-email/audience");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to load email audience');
+  if (!res.ok) throw new Error(data.message || "Failed to load email audience");
   return data;
 }
 
 export async function sendBroadcastEmail(payload) {
-  const res = await authFetch('/api/v1/settings/broadcast-email/send', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/settings/broadcast-email/send", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to send email');
+  if (!res.ok) throw new Error(data.message || "Failed to send email");
   return data;
 }
 
 export async function fetchMemberBroadcastEmailAudience() {
-  const res = await authFetch('/api/v1/settings/member-broadcast-email/audience');
+  const res = await authFetch(
+    "/api/v1/settings/member-broadcast-email/audience",
+  );
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to load member email audience');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to load member email audience");
   return data;
 }
 
 export async function sendMemberBroadcastEmail(payload) {
-  const res = await authFetch('/api/v1/settings/member-broadcast-email/send', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/settings/member-broadcast-email/send", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to send member email');
+  if (!res.ok) throw new Error(data.message || "Failed to send member email");
   return data;
 }
 
 export async function fetchUnsignedMemberBroadcastEmailAudience() {
-  const res = await authFetch('/api/v1/settings/member-broadcast-email/unsigned-audience');
+  const res = await authFetch(
+    "/api/v1/settings/member-broadcast-email/unsigned-audience",
+  );
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to load unsigned member email audience');
+  if (!res.ok)
+    throw new Error(
+      data.message || "Failed to load unsigned member email audience",
+    );
   return data;
 }
 
 export async function sendUnsignedMemberBroadcastEmail(payload) {
-  const res = await authFetch('/api/v1/settings/member-broadcast-email/unsigned-send', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  });
+  const res = await authFetch(
+    "/api/v1/settings/member-broadcast-email/unsigned-send",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to send email to unsigned members');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to send email to unsigned members");
   return data;
 }
 
 export async function fetchTargetedEmailRecipients() {
-  const res = await authFetch('/api/v1/settings/targeted-email/recipients');
+  const res = await authFetch("/api/v1/settings/targeted-email/recipients");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to load society members');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to load society members");
   return data;
 }
 
 export async function sendTargetedEmail(payload) {
-  const res = await authFetch('/api/v1/settings/targeted-email/send', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/settings/targeted-email/send", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to send email');
+  if (!res.ok) throw new Error(data.message || "Failed to send email");
   return data;
 }
 
 export async function generateEmailContent(prompt) {
-  const res = await authFetch('/api/v1/ai/generate-email', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/ai/generate-email", {
+    method: "POST",
     body: JSON.stringify({ prompt }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to generate email content');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to generate email content");
   return data;
 }
 
 const authFetch = (url, options = {}) => {
   const token = getAuthToken();
   const headers = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...options.headers,
   };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   return fetch(`${BASE}${url}`, {
     ...options,
-    credentials: 'include',
+    credentials: "include",
     headers,
   });
 };
 
 /** VectorVision admin data. The server independently verifies per-user access. */
 export async function getVectorVisionAccess() {
-  const res = await authFetch('/api/admin/access');
+  const res = await authFetch("/api/admin/access");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to verify VectorVision access');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to verify VectorVision access");
   return Boolean(data.allowed);
 }
 
 export async function getPendingVectorVisionMembers() {
-  const res = await authFetch('/api/admin/members/pending');
+  const res = await authFetch("/api/admin/members/pending");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to load pending registrations');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to load pending registrations");
   return data;
 }
 
 /** Starts the configured GitHub Actions ingestion workflow; credentials never reach the browser. */
 export async function triggerVectorVisionIngestion() {
-  const res = await authFetch('/api/admin/trigger-ingestion', { method: 'POST' });
+  const res = await authFetch("/api/admin/trigger-ingestion", {
+    method: "POST",
+  });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to trigger ingestion');
+  if (!res.ok) throw new Error(data.message || "Failed to trigger ingestion");
   return data;
 }
 
 // Auth
 export const AUTH_DEPARTMENTS = [
-  'ADMIN',
-  'Chairperson',
-  'Vice-Chairperson',
-  'Treasurer',
-  'Social Media and Promotion',
-  'Technical',
-  'Event Management',
-  'Design and Creative',
-  'Content and Documentation',
-  'Capture The Event',
-  'Sponsorship and Marketing',
+  "ADMIN",
+  "Chairperson",
+  "Vice-Chairperson",
+  "Treasurer",
+  "Social Media and Promotion",
+  "Technical",
+  "Event Management",
+  "Design and Creative",
+  "Content and Documentation",
+  "Capture The Event",
+  "Sponsorship and Marketing",
 ];
 
 /** Display label for account type (e.g. ADMIN → "Faculty Incharge") */
 export const ACCOUNT_TYPE_LABELS = {
-  ADMIN: 'Faculty Incharge',
-  Chairperson: 'Chairperson',
-  'Vice-Chairperson': 'Vice-Chairperson',
-  Treasurer: 'Treasurer',
+  ADMIN: "Faculty Incharge",
+  Chairperson: "Chairperson",
+  "Vice-Chairperson": "Vice-Chairperson",
+  Treasurer: "Treasurer",
 };
 export function getAccountTypeLabel(accountType) {
-  return ACCOUNT_TYPE_LABELS[accountType] ?? accountType ?? '';
+  return ACCOUNT_TYPE_LABELS[accountType] ?? accountType ?? "";
 }
 
 /** Full role label for history/emails — e.g. Technical → Technical Member */
 export function formatLeadershipRoleLabel(value) {
-  if (!value) return 'Member';
+  if (!value) return "Member";
   const trimmed = String(value).trim();
-  if (!trimmed) return 'Member';
+  if (!trimmed) return "Member";
   if (/\b(Member|Lead|Head)$/i.test(trimmed)) return trimmed;
-  if (SOCIETY_ROLES.includes(trimmed)) return getAccountTypeLabel(trimmed) || trimmed;
-  const teamDepartments = AUTH_DEPARTMENTS.filter((d) => !SOCIETY_ROLES.includes(d));
+  if (SOCIETY_ROLES.includes(trimmed))
+    return getAccountTypeLabel(trimmed) || trimmed;
+  const teamDepartments = AUTH_DEPARTMENTS.filter(
+    (d) => !SOCIETY_ROLES.includes(d),
+  );
   if (teamDepartments.includes(trimmed)) return `${trimmed} Member`;
   return trimmed;
 }
 
 /** True if user can access "Manage society" (all departments) */
-export const SOCIETY_ROLES = ['ADMIN', 'Chairperson', 'Vice-Chairperson', 'Treasurer'];
+export const SOCIETY_ROLES = [
+  "ADMIN",
+  "Chairperson",
+  "Vice-Chairperson",
+  "Treasurer",
+];
 export function isSocietyRole(accountType) {
-  const t = String(accountType || '').trim();
+  const t = String(accountType || "").trim();
   return SOCIETY_ROLES.includes(t);
 }
 
 /** Core roles that can always access /uploadevent. Extra roles come from server (user.canManageEvents). */
 export function canManageEvents(accountType) {
-  return accountType === 'Event Management' || isSocietyRole(accountType);
+  return accountType === "Event Management" || isSocietyRole(accountType);
 }
 
 /** Society core roles and Event Management can add/remove event-upload departments. */
@@ -569,7 +648,10 @@ export function canManageEventUploadConfig(accountType) {
 /** Prefer server-computed flag; fallback to static check (e.g. before /me loads). */
 export function userCanManageEvents(user) {
   if (!user) return false;
-  return user.canManageEvents === true || (user.canManageEvents !== false && canManageEvents(user.accountType));
+  return (
+    user.canManageEvents === true ||
+    (user.canManageEvents !== false && canManageEvents(user.accountType))
+  );
 }
 
 /** Society roles + users on the Leadership Transition allowed list. */
@@ -578,107 +660,131 @@ export function userCanAccessLeadershipTransition(user) {
   if (user.canAccessLeadershipTransition === true) return true;
   if (user.canAccessLeadershipTransition === false) return false;
   const position = String(
-    user.additionalDetails?.position || user.additionalDetails?.p0 || user.position || user.p0 || ''
-  ).trim().toLowerCase();
-  const isDepartmentLead = [
-    'Social Media and Promotion', 'Technical', 'Event Management',
-    'Design and Creative', 'Content and Documentation',
-    'Capture The Event', 'Sponsorship and Marketing',
-  ].includes(String(user.accountType || '').trim()) && position.includes('lead');
+    user.additionalDetails?.position ||
+      user.additionalDetails?.p0 ||
+      user.position ||
+      user.p0 ||
+      "",
+  )
+    .trim()
+    .toLowerCase();
+  const isDepartmentLead =
+    [
+      "Social Media and Promotion",
+      "Technical",
+      "Event Management",
+      "Design and Creative",
+      "Content and Documentation",
+      "Capture The Event",
+      "Sponsorship and Marketing",
+    ].includes(String(user.accountType || "").trim()) &&
+    position.includes("lead");
   return isSocietyRole(user.accountType) || isDepartmentLead;
 }
 
 export async function sendOTP({ email, department }) {
-  const res = await authFetch('/api/v1/auth/sendotp', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/auth/sendotp", {
+    method: "POST",
     body: JSON.stringify({ email, department }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to send OTP');
+  if (!res.ok) throw new Error(data.message || "Failed to send OTP");
   return data;
 }
 
 /** Poll for OTP using one-time pollToken (for autofill). Returns { otp } when available. */
 export async function getOtpForAutofill(pollToken) {
-  if (!pollToken) throw new Error('Token required');
-  const res = await fetch(`${BASE}/api/v1/auth/otp-for-autofill?token=${encodeURIComponent(pollToken)}`);
+  if (!pollToken) throw new Error("Token required");
+  const res = await fetch(
+    `${BASE}/api/v1/auth/otp-for-autofill?token=${encodeURIComponent(pollToken)}`,
+  );
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to get OTP');
+  if (!res.ok) throw new Error(data.message || "Failed to get OTP");
   return data;
 }
 
 export async function signup(body) {
-  const res = await authFetch('/api/v1/auth/signup', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/auth/signup", {
+    method: "POST",
     body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Signup failed');
+  if (!res.ok) throw new Error(data.message || "Signup failed");
   if (data.token) setAuthToken(data.token);
   return data;
 }
 
 export async function login({ email, password }) {
-  const res = await authFetch('/api/v1/auth/login', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/auth/login", {
+    method: "POST",
     body: JSON.stringify({ email, password }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Login failed');
+  if (!res.ok) throw new Error(data.message || "Login failed");
   if (data.token) setAuthToken(data.token);
   return data;
 }
 
 export async function requestPasswordReset(email) {
   const res = await fetch(`${BASE}/api/v1/auth/forgot-password`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: email?.trim()?.toLowerCase() }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to send reset email');
+  if (!res.ok) throw new Error(data.message || "Failed to send reset email");
   return data;
 }
 
-export async function resetPasswordWithToken({ token, password, confirmPassword }) {
+export async function resetPasswordWithToken({
+  token,
+  password,
+  confirmPassword,
+}) {
   const res = await fetch(`${BASE}/api/v1/auth/reset-password`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token, password, confirmPassword }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to reset password');
+  if (!res.ok) throw new Error(data.message || "Failed to reset password");
   return data;
 }
 
-export async function changePassword({ oldPassword, newPassword, confirmPassword }) {
-  const res = await authFetch('/api/v1/auth/changepassword', {
-    method: 'POST',
+export async function changePassword({
+  oldPassword,
+  newPassword,
+  confirmPassword,
+}) {
+  const res = await authFetch("/api/v1/auth/changepassword", {
+    method: "POST",
     body: JSON.stringify({ oldPassword, newPassword, confirmPassword }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to change password');
+  if (!res.ok) throw new Error(data.message || "Failed to change password");
   return data;
 }
 
 export async function deleteAccount() {
-  const res = await authFetch('/api/v1/auth/account', { method: 'DELETE' });
+  const res = await authFetch("/api/v1/auth/account", { method: "DELETE" });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to delete account');
+  if (!res.ok) throw new Error(data.message || "Failed to delete account");
   return data;
 }
 
 export async function getMe() {
-  const res = await authFetch('/api/v1/auth/me');
+  const res = await authFetch("/api/v1/auth/me");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Not authenticated');
+  if (!res.ok) throw new Error(data.message || "Not authenticated");
   return data;
 }
 
 /** Bump server-side lastSeen for the current user (no-op on failure). */
 export async function sendPresenceHeartbeat() {
   try {
-    const res = await authFetch('/api/v1/auth/presence/heartbeat', { method: 'POST' });
+    const res = await authFetch("/api/v1/auth/presence/heartbeat", {
+      method: "POST",
+    });
     const data = await res.json().catch(() => ({}));
     return res.ok && data.success !== false;
   } catch {
@@ -688,9 +794,9 @@ export async function sendPresenceHeartbeat() {
 
 /** All users’ lastSeen, newest first (auth required). */
 export async function fetchLastSeenFeed() {
-  const res = await authFetch('/api/v1/auth/presence/last-seen');
+  const res = await authFetch("/api/v1/auth/presence/last-seen");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to load activity');
+  if (!res.ok) throw new Error(data.message || "Failed to load activity");
   return Array.isArray(data.users) ? data.users : [];
 }
 
@@ -698,24 +804,27 @@ export async function fetchLastSeenFeed() {
 export function enrichProfileSSE({ onMessage }) {
   const token = getAuthToken();
   const headers = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  return fetch(`${BASE}/api/v1/auth/enrich-profile`, { credentials: 'include', headers }).then((res) => {
-    if (!res.ok) throw new Error('Enrich failed');
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return fetch(`${BASE}/api/v1/auth/enrich-profile`, {
+    credentials: "include",
+    headers,
+  }).then((res) => {
+    if (!res.ok) throw new Error("Enrich failed");
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
-    let buffer = '';
+    let buffer = "";
     function read() {
       return reader.read().then(({ done, value }) => {
         if (done) return;
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
+          if (line.startsWith("data: ")) {
             try {
               const data = JSON.parse(line.slice(6));
               onMessage(data);
-            } catch (_) { }
+            } catch (_) {}
           }
         }
         return read();
@@ -727,9 +836,9 @@ export function enrichProfileSSE({ onMessage }) {
 
 export async function logout() {
   try {
-    const res = await authFetch('/api/v1/auth/logout', { method: 'POST' });
+    const res = await authFetch("/api/v1/auth/logout", { method: "POST" });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.message || 'Logout failed');
+    if (!res.ok) throw new Error(data.message || "Logout failed");
     return data;
   } finally {
     clearAuthToken();
@@ -738,104 +847,108 @@ export async function logout() {
 
 // Admin: signup config (allowed emails per department)
 export async function getSignupConfigs() {
-  const res = await authFetch('/api/v1/auth/signup-config');
+  const res = await authFetch("/api/v1/auth/signup-config");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch config');
+  if (!res.ok) throw new Error(data.message || "Failed to fetch config");
   return data;
 }
 
 export async function addSignupEmail(department, email) {
-  const res = await authFetch('/api/v1/auth/signup-config/add', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/auth/signup-config/add", {
+    method: "POST",
     body: JSON.stringify({ department, email }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to add email');
+  if (!res.ok) throw new Error(data.message || "Failed to add email");
   return data;
 }
 
 export async function removeSignupEmail(department, email) {
-  const res = await authFetch('/api/v1/auth/signup-config/remove', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/auth/signup-config/remove", {
+    method: "POST",
     body: JSON.stringify({ department, email }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to remove email');
+  if (!res.ok) throw new Error(data.message || "Failed to remove email");
   return data;
 }
 
 // Profile (auth required)
 export async function updateProfile(payload) {
-  const res = await authFetch('/api/v1/auth/profile', {
-    method: 'PUT',
+  const res = await authFetch("/api/v1/auth/profile", {
+    method: "PUT",
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to update profile');
+  if (!res.ok) throw new Error(data.message || "Failed to update profile");
   return data;
 }
 
 export async function updateAvatar(file) {
   const formData = new FormData();
-  formData.append('avatar', file);
+  formData.append("avatar", file);
   const token = getAuthToken();
   const headers = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/auth/profile/avatar`, {
-    method: 'POST',
-    credentials: 'include',
+    method: "POST",
+    credentials: "include",
     headers,
     body: formData,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to update avatar');
+  if (!res.ok) throw new Error(data.message || "Failed to update avatar");
   return data;
 }
 
 // Search people (team members + users with profile and predefinedProfile)
 export async function getSearchPeople(q, department, allDepartments = false) {
   const params = new URLSearchParams();
-  if (q != null && String(q).trim()) params.set('q', String(q).trim());
-  if (department) params.set('department', department);
-  if (allDepartments && !department) params.set('allDepartments', 'true');
-  const res = await authFetch(`/api/v1/auth/search-people?${params.toString()}`);
+  if (q != null && String(q).trim()) params.set("q", String(q).trim());
+  if (department) params.set("department", department);
+  if (allDepartments && !department) params.set("allDepartments", "true");
+  const res = await authFetch(
+    `/api/v1/auth/search-people?${params.toString()}`,
+  );
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Search failed');
+  if (!res.ok) throw new Error(data.message || "Search failed");
   return data;
 }
 
 // Send signup invite email to a predefined profile (not yet registered)
 export async function sendSignupInvite(email) {
-  const res = await authFetch('/api/v1/auth/send-signup-invite', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/auth/send-signup-invite", {
+    method: "POST",
     body: JSON.stringify({ email: String(email).trim().toLowerCase() }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to send invite');
+  if (!res.ok) throw new Error(data.message || "Failed to send invite");
   return data;
 }
 
 /** All users (society role only). For Manage Society "Show list". */
 export async function getAllUsers() {
-  const res = await authFetch('/api/v1/auth/all-users');
+  const res = await authFetch("/api/v1/auth/all-users");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch users');
+  if (!res.ok) throw new Error(data.message || "Failed to fetch users");
   return data;
 }
 
 /** All people: users + predefined-only + team members, sorted. Society role only. */
 export async function getAllPeople() {
-  const res = await authFetch('/api/v1/auth/all-people');
+  const res = await authFetch("/api/v1/auth/all-people");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch people');
+  if (!res.ok) throw new Error(data.message || "Failed to fetch people");
   return data;
 }
 
 /** Activity logs for a user. Society core roles only. */
 export async function getActivityLogs(userId) {
-  const res = await authFetch(`/api/v1/activity-logs/${encodeURIComponent(userId)}`);
+  const res = await authFetch(
+    `/api/v1/activity-logs/${encodeURIComponent(userId)}`,
+  );
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch activity logs');
+  if (!res.ok) throw new Error(data.message || "Failed to fetch activity logs");
   return data;
 }
 
@@ -843,204 +956,233 @@ export async function getActivityLogs(userId) {
 export async function getNotifications(limit = 50) {
   const res = await authFetch(`/api/v1/notifications?limit=${limit}`);
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch notifications');
+  if (!res.ok) throw new Error(data.message || "Failed to fetch notifications");
   return data;
 }
 
 /** Fetch unread notification count. */
 export async function getUnreadNotificationCount() {
-  const res = await authFetch('/api/v1/notifications/unread-count');
+  const res = await authFetch("/api/v1/notifications/unread-count");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch unread count');
+  if (!res.ok) throw new Error(data.message || "Failed to fetch unread count");
   return data;
 }
 
 /** Mark a single notification as read. */
 export async function markNotificationRead(id) {
-  const res = await authFetch(`/api/v1/notifications/${encodeURIComponent(id)}/read`, {
-    method: 'PATCH',
-  });
+  const res = await authFetch(
+    `/api/v1/notifications/${encodeURIComponent(id)}/read`,
+    {
+      method: "PATCH",
+    },
+  );
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to mark notification as read');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to mark notification as read");
   return data;
 }
 
 /** Mark all notifications as read. */
 export async function markAllNotificationsRead() {
-  const res = await authFetch('/api/v1/notifications/read-all', { method: 'PATCH' });
+  const res = await authFetch("/api/v1/notifications/read-all", {
+    method: "PATCH",
+  });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to mark all as read');
+  if (!res.ok) throw new Error(data.message || "Failed to mark all as read");
   return data;
 }
 
 /** Broadcast a notification to all registered users (heads/leads/core). */
 export async function broadcastNotificationToUsers(payload) {
-  const res = await authFetch('/api/v1/notifications/broadcast-users', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/notifications/broadcast-users", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to broadcast notification to users');
+  if (!res.ok)
+    throw new Error(
+      data.message || "Failed to broadcast notification to users",
+    );
   return data;
 }
 
 /** Broadcast a notification to all department members who have signed up. */
 export async function broadcastNotificationToMembers(payload) {
-  const res = await authFetch('/api/v1/notifications/broadcast-members', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/notifications/broadcast-members", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to broadcast notification to members');
+  if (!res.ok)
+    throw new Error(
+      data.message || "Failed to broadcast notification to members",
+    );
   return data;
 }
 
 /** Broadcast a notification to members of a specific department who have signed up. */
 export async function broadcastNotificationToDepartment(payload) {
-  const res = await authFetch('/api/v1/notifications/broadcast-department', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/notifications/broadcast-department", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to broadcast notification to department members');
+  if (!res.ok)
+    throw new Error(
+      data.message || "Failed to broadcast notification to department members",
+    );
   return data;
 }
 
 /** Reply to a notification (recipient sends a reply back to the original sender). */
 export async function replyToNotification(id, body) {
-  const res = await authFetch(`/api/v1/notifications/${encodeURIComponent(id)}/reply`, {
-    method: 'POST',
-    body: JSON.stringify({ body }),
-  });
+  const res = await authFetch(
+    `/api/v1/notifications/${encodeURIComponent(id)}/reply`,
+    {
+      method: "POST",
+      body: JSON.stringify({ body }),
+    },
+  );
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to send reply');
+  if (!res.ok) throw new Error(data.message || "Failed to send reply");
   return data;
 }
 
 /** Delete a reply — only the original sender is allowed to do this. */
 export async function deleteNotificationReply(replyId) {
-  const res = await authFetch(`/api/v1/notifications/replies/${encodeURIComponent(replyId)}`, {
-    method: 'DELETE',
-  });
+  const res = await authFetch(
+    `/api/v1/notifications/replies/${encodeURIComponent(replyId)}`,
+    {
+      method: "DELETE",
+    },
+  );
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to delete reply');
+  if (!res.ok) throw new Error(data.message || "Failed to delete reply");
   return data;
 }
 
-
 // Team (manage your department members; society roles pass department)
 export async function getTeamDepartments() {
-  const res = await authFetch('/api/v1/team/departments');
+  const res = await authFetch("/api/v1/team/departments");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch departments');
+  if (!res.ok) throw new Error(data.message || "Failed to fetch departments");
   return data;
 }
 
 /** Apply next academic session: promote all member years (society roles). */
 export async function applyNextSessionYearPromotion() {
-  const res = await authFetch('/api/v1/team/year-promotion/apply', { method: 'POST' });
+  const res = await authFetch("/api/v1/team/year-promotion/apply", {
+    method: "POST",
+  });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to apply next session changes');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to apply next session changes");
   return data;
 }
 
 /** History of year promotion sessions with revert info. */
 export async function getYearPromotionHistory() {
-  const res = await authFetch('/api/v1/team/year-promotion/history');
+  const res = await authFetch("/api/v1/team/year-promotion/history");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch promotion history');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to fetch promotion history");
   return data;
 }
 
 /** Revert the most recent active year promotion session. */
 export async function revertYearPromotion(sessionId) {
-  const res = await authFetch(`/api/v1/team/year-promotion/${encodeURIComponent(sessionId)}/revert`, {
-    method: 'POST',
-  });
+  const res = await authFetch(
+    `/api/v1/team/year-promotion/${encodeURIComponent(sessionId)}/revert`,
+    {
+      method: "POST",
+    },
+  );
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to revert promotion');
+  if (!res.ok) throw new Error(data.message || "Failed to revert promotion");
   return data;
 }
 
 export async function getTeamMembers(department) {
   const params = new URLSearchParams();
-  if (department) params.set('department', department);
+  if (department) params.set("department", department);
   const res = await authFetch(`/api/v1/team/members?${params.toString()}`);
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch team');
+  if (!res.ok) throw new Error(data.message || "Failed to fetch team");
   return data;
 }
 
 /** Roster from signup config: allowed emails with registered (user) or not (predefined), for table in Manage team */
 export async function getDepartmentRoster(department) {
   const params = new URLSearchParams();
-  if (department) params.set('department', department);
+  if (department) params.set("department", department);
   const res = await authFetch(`/api/v1/team/roster?${params.toString()}`);
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch roster');
+  if (!res.ok) throw new Error(data.message || "Failed to fetch roster");
   return data;
 }
 
 export async function addTeamMember(payload) {
-  const res = await authFetch('/api/v1/team/members', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/team/members", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to add member');
+  if (!res.ok) throw new Error(data.message || "Failed to add member");
   return data;
 }
 
 /** Upload team member photo to Cloudinary. Returns { url }. */
 export async function uploadTeamPhoto(file) {
   const formData = new FormData();
-  formData.append('photo', file);
+  formData.append("photo", file);
   const token = getAuthToken();
   const headers = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/team/upload-photo`, {
-    method: 'POST',
-    credentials: 'include',
+    method: "POST",
+    credentials: "include",
     headers,
     body: formData,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to upload photo');
+  if (!res.ok) throw new Error(data.message || "Failed to upload photo");
   return data;
 }
 
 /** Fetch the active (non-expired) invite link for a department, if any. Pass department for society roles. */
 export async function getActiveTeamInviteLink(department) {
   const params = new URLSearchParams();
-  if (department) params.set('department', department);
+  if (department) params.set("department", department);
   const res = await authFetch(`/api/v1/team/invite-link?${params.toString()}`);
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to fetch invite link');
+  if (!res.ok) throw new Error(data.message || "Failed to fetch invite link");
   return data;
 }
 
 /** Create team invite link for a department. Pass { department } for society; core team uses accountType. */
 export async function createTeamInviteLink(payload = {}) {
-  const res = await authFetch('/api/v1/team/invite-link', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/team/invite-link", {
+    method: "POST",
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to create invite link');
+  if (!res.ok) throw new Error(data.message || "Failed to create invite link");
   return data;
 }
 
 /** Suspend (turn off) a team invite link immediately. */
 export async function suspendTeamInviteLink(token) {
-  const res = await authFetch(`/api/v1/team/invite-link/${token}`, { method: 'DELETE' });
+  const res = await authFetch(`/api/v1/team/invite-link/${token}`, {
+    method: "DELETE",
+  });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to suspend link');
+  if (!res.ok) throw new Error(data.message || "Failed to suspend link");
   return data;
 }
 
 /** Ping backend root to wake cold-start servers (best-effort, no throw). */
 export function wakeBackend() {
-  fetch(`${BASE}/`, { method: 'GET' }).catch(() => {});
+  fetch(`${BASE}/`, { method: "GET" }).catch(() => {});
 }
 
 /** Validate team invite link (public). Throws on network failure. */
@@ -1053,13 +1195,13 @@ export async function validateTeamInviteLink(token) {
 /** Submit member form via invite link (public). Adds member to the link's department. */
 export async function addTeamMemberByInviteLink(token, payload) {
   const res = await fetch(`${BASE}/api/v1/team/join/${token}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(data.message || 'Failed to join team');
+    const err = new Error(data.message || "Failed to join team");
     if (data.code) err.code = data.code;
     if (data.department) err.department = data.department;
     throw err;
@@ -1068,98 +1210,106 @@ export async function addTeamMemberByInviteLink(token, payload) {
 }
 
 /** Upload team photo via invite link (public). Valid token required. Returns { url }. Pass previousPhotoUrl when reuploading to delete the old one from Cloudinary. */
-export async function uploadTeamPhotoByInviteLink(token, file, previousPhotoUrl = '') {
+export async function uploadTeamPhotoByInviteLink(
+  token,
+  file,
+  previousPhotoUrl = "",
+) {
   const formData = new FormData();
-  formData.append('photo', file);
-  if (previousPhotoUrl && typeof previousPhotoUrl === 'string') {
-    formData.append('previousPhotoUrl', previousPhotoUrl.trim());
+  formData.append("photo", file);
+  if (previousPhotoUrl && typeof previousPhotoUrl === "string") {
+    formData.append("previousPhotoUrl", previousPhotoUrl.trim());
   }
   const res = await fetch(`${BASE}/api/v1/team/join/${token}/upload-photo`, {
-    method: 'POST',
+    method: "POST",
     body: formData,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to upload photo');
+  if (!res.ok) throw new Error(data.message || "Failed to upload photo");
   return data;
 }
 
 export async function updateTeamMember(id, payload) {
   const res = await authFetch(`/api/v1/team/members/${id}`, {
-    method: 'PUT',
+    method: "PUT",
     body: JSON.stringify(payload),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to update member');
+  if (!res.ok) throw new Error(data.message || "Failed to update member");
   return data;
 }
 
 export async function deleteTeamMember(id, body = {}) {
   const res = await authFetch(`/api/v1/team/members/${id}`, {
-    method: 'DELETE',
+    method: "DELETE",
     body: Object.keys(body).length ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to delete member');
+  if (!res.ok) throw new Error(data.message || "Failed to delete member");
   return data;
 }
 
 export async function getDeletedTeamMembers(department) {
-  const q = department ? `?department=${encodeURIComponent(department)}` : '';
+  const q = department ? `?department=${encodeURIComponent(department)}` : "";
   const res = await authFetch(`/api/v1/team/members/deleted${q}`);
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to load deleted members');
+  if (!res.ok)
+    throw new Error(data.message || "Failed to load deleted members");
   return data;
 }
 
 export async function restoreTeamMember(id, body = {}) {
   const res = await authFetch(`/api/v1/team/members/${id}/restore`, {
-    method: 'POST',
+    method: "POST",
     body: Object.keys(body).length ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to restore member');
+  if (!res.ok) throw new Error(data.message || "Failed to restore member");
   return data;
 }
 
 export async function restoreAllDeletedTeamMembers(body = {}) {
-  const res = await authFetch('/api/v1/team/members/deleted/restore-all', {
-    method: 'POST',
+  const res = await authFetch("/api/v1/team/members/deleted/restore-all", {
+    method: "POST",
     body: Object.keys(body).length ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to restore members');
+  if (!res.ok) throw new Error(data.message || "Failed to restore members");
   return data;
 }
 
 export async function uploadTeamExcel(file, department) {
   const formData = new FormData();
-  formData.append('file', file);
-  if (department) formData.append('department', department);
+  formData.append("file", file);
+  if (department) formData.append("department", department);
   const token = getAuthToken();
   const headers = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${BASE}/api/v1/team/members/upload-excel`, {
-    method: 'POST',
-    credentials: 'include',
+    method: "POST",
+    credentials: "include",
     headers,
     body: formData,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Failed to upload');
+  if (!res.ok) throw new Error(data.message || "Failed to upload");
   return data;
 }
 
 export async function downloadTeamTemplate() {
   const token = getAuthToken();
   const headers = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  const res = await fetch(`${BASE}/api/v1/team/template`, { credentials: 'include', headers });
-  if (!res.ok) throw new Error('Failed to download template');
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(`${BASE}/api/v1/team/template`, {
+    credentials: "include",
+    headers,
+  });
+  if (!res.ok) throw new Error("Failed to download template");
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
-  a.download = 'team_members_template.xlsx';
+  a.download = "team_members_template.xlsx";
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -1170,7 +1320,8 @@ export async function getJamTheWebTeams(sortBy = "id") {
   if (sortBy === "score") params.set("sort", "score");
   const res = await authFetch(`/api/v1/jamtheweb?${params.toString()}`);
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to fetch Jam the Web data");
+  if (!res.ok)
+    throw new Error(data.message || "Failed to fetch Jam the Web data");
   return data;
 }
 
@@ -1178,15 +1329,20 @@ export async function getJamTheWebTeams(sortBy = "id") {
 export async function getJamTheWebTeamsPublic(sortBy = "id") {
   const params = new URLSearchParams();
   if (sortBy === "score") params.set("sort", "score");
-  const res = await fetch(`${BASE}/api/v1/jamtheweb?${params.toString()}`, { credentials: "include" });
+  const res = await fetch(`${BASE}/api/v1/jamtheweb?${params.toString()}`, {
+    credentials: "include",
+  });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to fetch Jam the Web data");
+  if (!res.ok)
+    throw new Error(data.message || "Failed to fetch Jam the Web data");
   return data;
 }
 
 /** Public: check if Jam the Web results are declared. */
 export async function getJamTheWebResultsDeclared() {
-  const res = await fetch(`${BASE}/api/v1/jamtheweb/declared`, { credentials: "include" });
+  const res = await fetch(`${BASE}/api/v1/jamtheweb/declared`, {
+    credentials: "include",
+  });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to fetch");
   return data;
@@ -1298,9 +1454,12 @@ export async function finalizeLeadershipDraft() {
 }
 
 export async function undoFinalizeLeadershipDraft() {
-  const res = await authFetch("/api/v1/leadership-transition/draft/undo-finalize", {
-    method: "POST",
-  });
+  const res = await authFetch(
+    "/api/v1/leadership-transition/draft/undo-finalize",
+    {
+      method: "POST",
+    },
+  );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to undo finalization");
   return data;
@@ -1316,9 +1475,12 @@ export async function approveLeadershipDraft() {
 }
 
 export async function revokeLeadershipDraftApproval() {
-  const res = await authFetch("/api/v1/leadership-transition/draft/revoke-approval", {
-    method: "POST",
-  });
+  const res = await authFetch(
+    "/api/v1/leadership-transition/draft/revoke-approval",
+    {
+      method: "POST",
+    },
+  );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to revoke approval");
   return data;
@@ -1344,9 +1506,12 @@ export async function applyLeadershipDraft() {
 }
 
 export async function removeLeadershipDraftChange(changeId) {
-  const res = await authFetch(`/api/v1/leadership-transition/draft/changes/${changeId}`, {
-    method: "DELETE",
-  });
+  const res = await authFetch(
+    `/api/v1/leadership-transition/draft/changes/${changeId}`,
+    {
+      method: "DELETE",
+    },
+  );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to remove change");
   return data;
@@ -1365,7 +1530,10 @@ export function getLeadershipReportDownloadUrl(sessionId) {
 }
 
 export async function fetchLeadershipReportBlob(sessionId, options = {}) {
-  const res = await authFetch(`/api/v1/leadership-transition/draft/report/${sessionId}`, options);
+  const res = await authFetch(
+    `/api/v1/leadership-transition/draft/report/${sessionId}`,
+    options,
+  );
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw new Error(data.message || "Failed to load report");
@@ -1385,7 +1553,6 @@ export async function downloadLeadershipReport(sessionId) {
   URL.revokeObjectURL(url);
 }
 
-
 export async function getLeadershipHistory() {
   const res = await authFetch("/api/v1/leadership-transition/history");
   const data = await res.json().catch(() => ({}));
@@ -1396,16 +1563,21 @@ export async function getLeadershipHistory() {
 export async function getLeadershipPendingEmails() {
   const res = await authFetch("/api/v1/leadership-transition/pending-emails");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to fetch pending emails");
+  if (!res.ok)
+    throw new Error(data.message || "Failed to fetch pending emails");
   return data;
 }
 
 export async function sendLeadershipPromotionEmails() {
-  const res = await authFetch("/api/v1/leadership-transition/pending-emails/send", {
-    method: "POST",
-  });
+  const res = await authFetch(
+    "/api/v1/leadership-transition/pending-emails/send",
+    {
+      method: "POST",
+    },
+  );
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to send promotion emails");
+  if (!res.ok)
+    throw new Error(data.message || "Failed to send promotion emails");
   return data;
 }
 
@@ -1461,7 +1633,9 @@ export async function deleteVaultDocument(id) {
 }
 
 export async function getPublicVaultShareItems(shareToken) {
-  const res = await fetch(`${BASE}/api/v1/vault/share/${encodeURIComponent(shareToken)}`);
+  const res = await fetch(
+    `${BASE}/api/v1/vault/share/${encodeURIComponent(shareToken)}`,
+  );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to fetch shared items");
   return data;
@@ -1481,7 +1655,7 @@ export async function toggleVaultDocumentLock(id) {
     method: "PUT",
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to toggle document lock");
+  if (!res.ok)
+    throw new Error(data.message || "Failed to toggle document lock");
   return data;
 }
-

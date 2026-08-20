@@ -7,6 +7,7 @@ import {
   CreditCard,
   Database,
   HardDrive,
+  Image,
   Link,
   Lock,
   Mail,
@@ -37,8 +38,10 @@ import {
   generateEmailContent,
 } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import WifiEventCollage from "./wifi_event";
 
 const societyItems = [
+  { id: "wifi-event-images", label: "Wifi Event Images", icon: Image },
   { id: "overview", label: "Overview", icon: Users },
   { id: "cloudinary-storage", label: "Cloudinary Storage", icon: Cloud },
   { id: "database", label: "MongoDB", icon: Database },
@@ -282,15 +285,21 @@ function MetricCard({ item, onSelect }) {
   return (
     <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-lg shadow-black/10 sm:p-4">
       <div className="flex items-start gap-2.5 sm:gap-3">
-        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10 ${item.bg} ${item.color}`}>
+        <span
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10 ${item.bg} ${item.color}`}
+        >
           <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
         </span>
         <div className="min-w-0">
-          <p className="text-xs font-bold text-richblack-25 sm:text-sm">{item.title}</p>
+          <p className="text-xs font-bold text-richblack-25 sm:text-sm">
+            {item.title}
+          </p>
           <p className="mt-3 text-lg font-bold text-richblack-25 sm:mt-5 sm:text-2xl">
             {item.value}
           </p>
-          <p className="mt-1 text-xs text-gray-400 sm:text-sm">{item.caption}</p>
+          <p className="mt-1 text-xs text-gray-400 sm:text-sm">
+            {item.caption}
+          </p>
         </div>
       </div>
       {item.percent == null && item.action ? (
@@ -327,14 +336,18 @@ function SettingsCard({ item, compact = false, onSelect }) {
       onClick={() => onSelect?.(item.id)}
       className="flex w-full items-center gap-3 rounded-lg border border-white/10 bg-white/[0.035] p-2.5 text-left transition hover:border-white/20 hover:bg-white/[0.06] sm:gap-4 sm:p-4"
     >
-      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-11 sm:w-11 ${item.bg} ${item.color}`}>
+      <span
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-11 sm:w-11 ${item.bg} ${item.color}`}
+      >
         <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-xs font-bold text-richblack-25 sm:text-sm">
           {item.title}
         </span>
-        <span className={`mt-1 block text-gray-400 ${compact ? "text-[11px]" : "text-[11px] sm:text-sm"}`}>
+        <span
+          className={`mt-1 block text-gray-400 ${compact ? "text-[11px]" : "text-[11px] sm:text-sm"}`}
+        >
           {item.desc}
         </span>
       </span>
@@ -348,8 +361,16 @@ function Panel({ title, subtitle, children }) {
     <section className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-xl shadow-black/10 sm:p-5">
       {(title || subtitle) && (
         <div className="mb-3 sm:mb-5">
-          {title && <h2 className="text-sm font-bold text-richblack-25 sm:text-lg">{title}</h2>}
-          {subtitle && <p className="mt-1 text-[11px] text-gray-400 sm:text-sm">{subtitle}</p>}
+          {title && (
+            <h2 className="text-sm font-bold text-richblack-25 sm:text-lg">
+              {title}
+            </h2>
+          )}
+          {subtitle && (
+            <p className="mt-1 text-[11px] text-gray-400 sm:text-sm">
+              {subtitle}
+            </p>
+          )}
         </div>
       )}
       {children}
@@ -471,7 +492,10 @@ function OverviewContent({ onSelect }) {
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      <Panel title="Society Overview" subtitle="Quick summary of your society's system and services.">
+      <Panel
+        title="Society Overview"
+        subtitle="Quick summary of your society's system and services."
+      >
         <div className="mb-4 flex justify-end sm:mb-8 sm:-mt-14">
           <button
             type="button"
@@ -479,7 +503,9 @@ function OverviewContent({ onSelect }) {
             disabled={overviewLoading}
             className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-3 py-1.5 text-xs font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:py-2 sm:text-sm"
           >
-            <RefreshCw className={`h-4 w-4 ${overviewLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${overviewLoading ? "animate-spin" : ""}`}
+            />
             Refresh
           </button>
         </div>
@@ -490,7 +516,10 @@ function OverviewContent({ onSelect }) {
         </div>
       </Panel>
 
-      <Panel title="Society Settings" subtitle="Configure and manage your society preferences.">
+      <Panel
+        title="Society Settings"
+        subtitle="Configure and manage your society preferences."
+      >
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
           {societyCards.map((item) => (
             <SettingsCard key={item.title} item={item} onSelect={onSelect} />
@@ -498,10 +527,18 @@ function OverviewContent({ onSelect }) {
         </div>
       </Panel>
 
-      <Panel title="Personal Settings" subtitle="Manage your account, security and preferences.">
+      <Panel
+        title="Personal Settings"
+        subtitle="Manage your account, security and preferences."
+      >
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
           {personalCards.map((item) => (
-            <SettingsCard key={item.title} item={item} compact onSelect={onSelect} />
+            <SettingsCard
+              key={item.title}
+              item={item}
+              compact
+              onSelect={onSelect}
+            />
           ))}
         </div>
       </Panel>
@@ -509,7 +546,12 @@ function OverviewContent({ onSelect }) {
       <Panel title="Others">
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
           {otherCards.map((item) => (
-            <SettingsCard key={item.title} item={item} compact onSelect={onSelect} />
+            <SettingsCard
+              key={item.title}
+              item={item}
+              compact
+              onSelect={onSelect}
+            />
           ))}
         </div>
       </Panel>
@@ -522,7 +564,10 @@ function PlaceholderContent({ activeTab }) {
   const Icon = activeItem?.icon || Lock;
 
   return (
-    <Panel title={activeItem?.label || "Settings"} subtitle="This settings area is ready for the next implementation step.">
+    <Panel
+      title={activeItem?.label || "Settings"}
+      subtitle="This settings area is ready for the next implementation step."
+    >
       <div className="flex min-h-[220px] flex-col items-center justify-center rounded-lg border border-dashed border-white/15 bg-white/[0.025] px-4 text-center sm:min-h-[360px] sm:px-6">
         <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300 sm:h-14 sm:w-14">
           <Icon className="h-5 w-5 sm:h-7 sm:w-7" />
@@ -557,17 +602,33 @@ function formatNumber(value) {
   return Number(value || 0).toLocaleString("en-IN");
 }
 
-function AnalyticsCard({ label, value, icon: Icon, tone = "text-emerald-300", subtext }) {
+function AnalyticsCard({
+  label,
+  value,
+  icon: Icon,
+  tone = "text-emerald-300",
+  subtext,
+}) {
   return (
     <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-lg shadow-black/10 sm:p-4">
       <div className="flex items-start justify-between gap-2.5 sm:gap-3">
         <div>
-          <p className="text-[11px] font-semibold text-gray-400 sm:text-sm">{label}</p>
-          <p className="mt-2 text-lg font-bold text-richblack-25 sm:text-2xl">{value}</p>
-          {subtext && <p className="mt-1 text-[10px] text-gray-500 sm:text-xs">{subtext}</p>}
+          <p className="text-[11px] font-semibold text-gray-400 sm:text-sm">
+            {label}
+          </p>
+          <p className="mt-2 text-lg font-bold text-richblack-25 sm:text-2xl">
+            {value}
+          </p>
+          {subtext && (
+            <p className="mt-1 text-[10px] text-gray-500 sm:text-xs">
+              {subtext}
+            </p>
+          )}
         </div>
         {Icon && (
-          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] sm:h-10 sm:w-10 ${tone}`}>
+          <span
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] sm:h-10 sm:w-10 ${tone}`}
+          >
             <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
           </span>
         )}
@@ -581,7 +642,10 @@ function LoadingSkeleton() {
     <div className="space-y-3 sm:space-y-4">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="h-24 animate-pulse rounded-lg border border-white/10 bg-white/[0.04] sm:h-28" />
+          <div
+            key={index}
+            className="h-24 animate-pulse rounded-lg border border-white/10 bg-white/[0.04] sm:h-28"
+          />
         ))}
       </div>
       <div className="h-52 animate-pulse rounded-lg border border-white/10 bg-white/[0.04] sm:h-72" />
@@ -589,12 +653,25 @@ function LoadingSkeleton() {
   );
 }
 
-function AnalyticsHeader({ title, subtitle, updatedAt, loading, onRefresh, connected }) {
+function AnalyticsHeader({
+  title,
+  subtitle,
+  updatedAt,
+  loading,
+  onRefresh,
+  connected,
+}) {
   return (
     <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5 sm:mb-5 sm:gap-3">
       <div>
-        <h2 className="text-sm font-bold text-richblack-25 sm:text-lg">{title}</h2>
-        {subtitle && <p className="mt-1 text-[11px] text-gray-400 sm:text-sm">{subtitle}</p>}
+        <h2 className="text-sm font-bold text-richblack-25 sm:text-lg">
+          {title}
+        </h2>
+        {subtitle && (
+          <p className="mt-1 text-[11px] text-gray-400 sm:text-sm">
+            {subtitle}
+          </p>
+        )}
         <div className="mt-2 flex flex-wrap items-center gap-2.5 text-[11px] text-gray-500 sm:gap-3 sm:text-xs">
           {connected != null && (
             <span className={connected ? "text-emerald-300" : "text-red-300"}>
@@ -602,7 +679,9 @@ function AnalyticsHeader({ title, subtitle, updatedAt, loading, onRefresh, conne
             </span>
           )}
           <span>
-            {updatedAt ? `Last refreshed ${new Date(updatedAt).toLocaleString("en-IN")}` : "Not refreshed yet"}
+            {updatedAt
+              ? `Last refreshed ${new Date(updatedAt).toLocaleString("en-IN")}`
+              : "Not refreshed yet"}
           </span>
         </div>
       </div>
@@ -692,7 +771,9 @@ function CloudinaryStorageContent() {
           <div className="space-y-4 sm:space-y-5">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
               <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 sm:p-4">
-                <p className="text-xs font-semibold text-gray-400 sm:text-sm">Used</p>
+                <p className="text-xs font-semibold text-gray-400 sm:text-sm">
+                  Used
+                </p>
                 <p className="mt-2 text-xl font-bold text-richblack-25 sm:text-3xl">
                   {formatStorageFromBytes(storage.usedBytes)}
                 </p>
@@ -718,7 +799,9 @@ function CloudinaryStorageContent() {
                 </p>
               </div>
               <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 sm:p-4">
-                <p className="text-xs font-semibold text-gray-400 sm:text-sm">Estimated Max</p>
+                <p className="text-xs font-semibold text-gray-400 sm:text-sm">
+                  Estimated Max
+                </p>
                 <p className="mt-2 text-xl font-bold text-richblack-25 sm:text-3xl">
                   {CLOUDINARY_ESTIMATED_FREE_PLAN_GB.toFixed(2)} GB
                 </p>
@@ -747,7 +830,10 @@ function CloudinaryStorageContent() {
                 ["Videos", usage.assets?.video],
                 ["Raw Files", usage.assets?.raw],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-lg border border-white/10 bg-white/[0.03] p-2.5 sm:p-4">
+                <div
+                  key={label}
+                  className="rounded-lg border border-white/10 bg-white/[0.03] p-2.5 sm:p-4"
+                >
                   <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500 sm:text-xs">
                     {label}
                   </p>
@@ -762,17 +848,24 @@ function CloudinaryStorageContent() {
       </Panel>
 
       {!loading && !error && usage && (
-        <Panel title="Storage By Folder" subtitle="Grouped by the top-level Cloudinary folder.">
+        <Panel
+          title="Storage By Folder"
+          subtitle="Grouped by the top-level Cloudinary folder."
+        >
           {usage.partial && (
             <div className="mb-4 rounded-lg border border-amber-400/20 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-100 sm:px-4 sm:py-3 sm:text-sm">
-              Showing a large-account sample from Cloudinary. Some assets may be outside this breakdown.
+              Showing a large-account sample from Cloudinary. Some assets may be
+              outside this breakdown.
             </div>
           )}
 
           {folders.length ? (
             <div className="space-y-2 sm:hidden">
               {folders.map((folder) => (
-                <div key={folder.folder} className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                <div
+                  key={folder.folder}
+                  className="rounded-lg border border-white/10 bg-white/[0.03] p-3"
+                >
                   <div className="flex items-center justify-between gap-2">
                     <p className="min-w-0 truncate text-xs font-semibold text-richblack-25">
                       {folder.folder}
@@ -782,7 +875,8 @@ function CloudinaryStorageContent() {
                     </span>
                   </div>
                   <p className="mt-1 text-[10px] text-gray-500">
-                    {folder.image} images · {folder.video} videos · {folder.raw} raw
+                    {folder.image} images · {folder.video} videos · {folder.raw}{" "}
+                    raw
                   </p>
                   <div className="mt-2 flex items-center justify-between text-[11px] text-gray-300">
                     <span>{formatStorage(folder.gb)}</span>
@@ -816,13 +910,16 @@ function CloudinaryStorageContent() {
                         {folder.folder}
                       </p>
                       <p className="mt-1 text-xs text-gray-500">
-                        {folder.image} images - {folder.video} videos - {folder.raw} raw
+                        {folder.image} images - {folder.video} videos -{" "}
+                        {folder.raw} raw
                       </p>
                     </div>
                     <span className="text-right font-semibold text-gray-200">
                       {formatStorage(folder.gb)}
                     </span>
-                    <span className="text-right text-gray-300">{folder.assets}</span>
+                    <span className="text-right text-gray-300">
+                      {folder.assets}
+                    </span>
                     <span className="text-right text-emerald-300">
                       {folder.percentOfUsed}%
                     </span>
@@ -884,25 +981,55 @@ function DatabaseAnalyticsContent() {
         )}
         {!loading && !error && data && (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
-            <AnalyticsCard label="Database Storage Used" value={`${summary.storageMb ?? 0} MB`} icon={Database} tone="text-emerald-300" />
-            <AnalyticsCard label="Total Documents" value={formatNumber(summary.totalDocuments)} icon={Users} tone="text-sky-300" />
-            <AnalyticsCard label="Total Collections" value={formatNumber(summary.totalCollections)} icon={Server} tone="text-violet-300" />
-            <AnalyticsCard label="Total Index Size" value={`${summary.indexMb ?? 0} MB`} icon={HardDrive} tone="text-amber-300" />
+            <AnalyticsCard
+              label="Database Storage Used"
+              value={`${summary.storageMb ?? 0} MB`}
+              icon={Database}
+              tone="text-emerald-300"
+            />
+            <AnalyticsCard
+              label="Total Documents"
+              value={formatNumber(summary.totalDocuments)}
+              icon={Users}
+              tone="text-sky-300"
+            />
+            <AnalyticsCard
+              label="Total Collections"
+              value={formatNumber(summary.totalCollections)}
+              icon={Server}
+              tone="text-violet-300"
+            />
+            <AnalyticsCard
+              label="Total Index Size"
+              value={`${summary.indexMb ?? 0} MB`}
+              icon={HardDrive}
+              tone="text-amber-300"
+            />
           </div>
         )}
       </Panel>
 
       {!loading && !error && data && (
         <>
-          <Panel title="Collection Analytics" subtitle="Important MongoDB collections by document volume.">
+          <Panel
+            title="Collection Analytics"
+            subtitle="Important MongoDB collections by document volume."
+          >
             <div className="space-y-2.5 sm:space-y-3">
               {collections.map((collection) => (
-                <div key={collection.name} className="rounded-lg border border-white/10 bg-white/[0.03] p-3 sm:p-4">
+                <div
+                  key={collection.name}
+                  className="rounded-lg border border-white/10 bg-white/[0.03] p-3 sm:p-4"
+                >
                   <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2.5 sm:mb-3 sm:gap-3">
                     <div>
-                      <p className="text-sm font-bold text-richblack-25">{collection.name}</p>
+                      <p className="text-sm font-bold text-richblack-25">
+                        {collection.name}
+                      </p>
                       <p className="text-[11px] text-gray-500 sm:text-xs">
-                        {formatNumber(collection.documents)} documents · {collection.storageMb} MB storage · {collection.indexMb} MB indexes
+                        {formatNumber(collection.documents)} documents ·{" "}
+                        {collection.storageMb} MB storage · {collection.indexMb}{" "}
+                        MB indexes
                       </p>
                     </div>
                     <span className="text-xs font-semibold text-emerald-300 sm:text-sm">
@@ -912,7 +1039,9 @@ function DatabaseAnalyticsContent() {
                   <div className="h-2 overflow-hidden rounded-full bg-white/10">
                     <div
                       className="h-full rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.35)]"
-                      style={{ width: `${Math.min(collection.percentOfDocuments, 100)}%` }}
+                      style={{
+                        width: `${Math.min(collection.percentOfDocuments, 100)}%`,
+                      }}
                     />
                   </div>
                 </div>
@@ -920,18 +1049,29 @@ function DatabaseAnalyticsContent() {
             </div>
           </Panel>
 
-          <Panel title="Database Distribution" subtitle="Collections containing the most documents.">
+          <Panel
+            title="Database Distribution"
+            subtitle="Collections containing the most documents."
+          >
             <div className="grid grid-cols-4 gap-2 rounded-lg border border-white/10 bg-white/[0.025] p-3 sm:flex sm:h-72 sm:items-end sm:gap-3 sm:p-4">
               {collections.slice(0, 8).map((collection) => (
-                <div key={collection.name} className="flex flex-col items-center gap-1.5 sm:min-w-0 sm:flex-1 sm:gap-2">
+                <div
+                  key={collection.name}
+                  className="flex flex-col items-center gap-1.5 sm:min-w-0 sm:flex-1 sm:gap-2"
+                >
                   <div className="flex h-20 w-full items-end rounded-md bg-white/[0.04] sm:h-48">
                     <div
                       className="w-full rounded-md bg-gradient-to-t from-emerald-500 to-cyan-300 shadow-[0_0_14px_rgba(52,211,153,0.22)]"
-                      style={{ height: `${Math.max(collection.percentOfDocuments, 4)}%` }}
+                      style={{
+                        height: `${Math.max(collection.percentOfDocuments, 4)}%`,
+                      }}
                       title={`${collection.name}: ${formatNumber(collection.documents)} documents`}
                     />
                   </div>
-                  <p className="w-full truncate text-center text-[9px] text-gray-400 sm:text-xs" title={collection.name}>
+                  <p
+                    className="w-full truncate text-center text-[9px] text-gray-400 sm:text-xs"
+                    title={collection.name}
+                  >
                     {collection.name}
                   </p>
                 </div>
@@ -970,7 +1110,8 @@ function EmailServiceAnalyticsContent() {
   const dailyLimit = summary.dailyLimit || 0;
   const sent = summary.sentToday || 0;
   const remaining = summary.remaining;
-  const usagePercent = dailyLimit > 0 ? Math.min(Math.round((sent / dailyLimit) * 100), 100) : 0;
+  const usagePercent =
+    dailyLimit > 0 ? Math.min(Math.round((sent / dailyLimit) * 100), 100) : 0;
 
   return (
     <div className="space-y-3 sm:space-y-4">
@@ -992,23 +1133,48 @@ function EmailServiceAnalyticsContent() {
         {!loading && !error && data && (
           <div className="space-y-4 sm:space-y-5">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
-              <AnalyticsCard label="Emails Sent Today" value={formatNumber(sent)} icon={Mail} tone="text-sky-300" />
+              <AnalyticsCard
+                label="Emails Sent Today"
+                value={formatNumber(sent)}
+                icon={Mail}
+                tone="text-sky-300"
+              />
               <AnalyticsCard
                 label="Daily Limit / Remaining"
-                value={dailyLimit ? `${formatNumber(dailyLimit)} / ${formatNumber(remaining ?? 0)}` : "Not reported"}
+                value={
+                  dailyLimit
+                    ? `${formatNumber(dailyLimit)} / ${formatNumber(remaining ?? 0)}`
+                    : "Not reported"
+                }
                 icon={CreditCard}
                 tone="text-emerald-300"
-                subtext={dailyLimit ? "limit / remaining" : "Set BREVO_DAILY_EMAIL_LIMIT for fallback"}
+                subtext={
+                  dailyLimit
+                    ? "limit / remaining"
+                    : "Set BREVO_DAILY_EMAIL_LIMIT for fallback"
+                }
               />
-              <AnalyticsCard label="Emails Delivered" value={formatNumber(summary.delivered)} icon={Shield} tone="text-violet-300" />
-              <AnalyticsCard label="Failed / Bounced" value={formatNumber(summary.failed)} icon={RotateCcw} tone="text-red-300" />
+              <AnalyticsCard
+                label="Emails Delivered"
+                value={formatNumber(summary.delivered)}
+                icon={Shield}
+                tone="text-violet-300"
+              />
+              <AnalyticsCard
+                label="Failed / Bounced"
+                value={formatNumber(summary.failed)}
+                icon={RotateCcw}
+                tone="text-red-300"
+              />
             </div>
 
             <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3 sm:p-4">
               <div className="mb-2 flex items-center justify-between text-xs sm:text-sm">
                 <span className="font-semibold text-gray-300">Email Usage</span>
                 <span className="text-gray-400">
-                  {dailyLimit ? `${formatNumber(sent)} / ${formatNumber(dailyLimit)} emails sent today` : `${formatNumber(sent)} emails sent today`}
+                  {dailyLimit
+                    ? `${formatNumber(sent)} / ${formatNumber(dailyLimit)} emails sent today`
+                    : `${formatNumber(sent)} emails sent today`}
                 </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-white/10">
@@ -1029,7 +1195,10 @@ function EmailServiceAnalyticsContent() {
 
       {!loading && !error && data && (
         <>
-          <Panel title="Email Performance" subtitle="Available Brevo SMTP metrics for today.">
+          <Panel
+            title="Email Performance"
+            subtitle="Available Brevo SMTP metrics for today."
+          >
             <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
               {[
                 ["Delivery rate", `${performance.deliveryRate || 0}%`],
@@ -1039,26 +1208,48 @@ function EmailServiceAnalyticsContent() {
                 ["Unsubscribes", formatNumber(performance.unsubscribed)],
                 ["Spam complaints", formatNumber(performance.spamReports)],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-lg border border-white/10 bg-white/[0.03] p-2.5 sm:p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500 sm:text-xs">{label}</p>
-                  <p className="mt-2 text-lg font-bold text-richblack-25 sm:text-2xl">{value}</p>
+                <div
+                  key={label}
+                  className="rounded-lg border border-white/10 bg-white/[0.03] p-2.5 sm:p-4"
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500 sm:text-xs">
+                    {label}
+                  </p>
+                  <p className="mt-2 text-lg font-bold text-richblack-25 sm:text-2xl">
+                    {value}
+                  </p>
                 </div>
               ))}
             </div>
           </Panel>
 
-          <Panel title="Recent Email Activity" subtitle="Safe Brevo event metadata only. Recipient addresses are shown; content remains hidden. All activity available from Brevo (up to 90 days).">
+          <Panel
+            title="Recent Email Activity"
+            subtitle="Safe Brevo event metadata only. Recipient addresses are shown; content remains hidden. All activity available from Brevo (up to 90 days)."
+          >
             {data.recentActivity?.length ? (
               <div className="divide-y divide-white/10 overflow-hidden rounded-lg border border-white/10">
                 {data.recentActivity.map((event, index) => (
-                  <div key={`${event.sentAt}-${index}`} className="grid gap-1 px-3 py-2.5 text-xs sm:gap-2 sm:px-4 sm:py-3 sm:text-sm md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_110px_190px]">
-                    <span className="truncate font-semibold text-richblack-25">{event.subject}</span>
-                    <span className="truncate text-cyan-200" title={event.recipient || ""}>
+                  <div
+                    key={`${event.sentAt}-${index}`}
+                    className="grid gap-1 px-3 py-2.5 text-xs sm:gap-2 sm:px-4 sm:py-3 sm:text-sm md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_110px_190px]"
+                  >
+                    <span className="truncate font-semibold text-richblack-25">
+                      {event.subject}
+                    </span>
+                    <span
+                      className="truncate text-cyan-200"
+                      title={event.recipient || ""}
+                    >
                       {event.recipient || "Recipient unavailable"}
                     </span>
-                    <span className="capitalize text-emerald-300">{event.status}</span>
+                    <span className="capitalize text-emerald-300">
+                      {event.status}
+                    </span>
                     <span className="text-gray-400">
-                      {event.sentAt ? new Date(event.sentAt).toLocaleString("en-IN") : "Time unavailable"}
+                      {event.sentAt
+                        ? new Date(event.sentAt).toLocaleString("en-IN")
+                        : "Time unavailable"}
                     </span>
                   </div>
                 ))}
@@ -1070,7 +1261,8 @@ function EmailServiceAnalyticsContent() {
             )}
             {(data.reportUnavailable || data.eventsUnavailable) && (
               <p className="mt-3 text-[11px] text-amber-200 sm:text-xs">
-                Some Brevo analytics were unavailable: {data.reportUnavailable || data.eventsUnavailable}
+                Some Brevo analytics were unavailable:{" "}
+                {data.reportUnavailable || data.eventsUnavailable}
               </p>
             )}
           </Panel>
@@ -1112,10 +1304,13 @@ function EmailAiAssist({ setForm, disabled = false, inputClass, labelClass }) {
     <div className="space-y-3 rounded-lg border border-violet-400/20 bg-violet-500/[0.06] p-4">
       <div className="flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-violet-300" />
-        <p className="text-sm font-semibold text-violet-200">AI Assist (Groq)</p>
+        <p className="text-sm font-semibold text-violet-200">
+          AI Assist (Groq)
+        </p>
       </div>
       <p className="text-xs leading-5 text-gray-400">
-        Describe what you want to announce in plain language. AI will fill Email Title, Subject, and Description. You can edit everything before sending.
+        Describe what you want to announce in plain language. AI will fill Email
+        Title, Subject, and Description. You can edit everything before sending.
       </p>
       <div>
         <label className={labelClass}>Raw Prompt</label>
@@ -1130,9 +1325,7 @@ function EmailAiAssist({ setForm, disabled = false, inputClass, labelClass }) {
           disabled={disabled || generating}
         />
       </div>
-      {aiError && (
-        <p className="text-xs text-red-300">{aiError}</p>
-      )}
+      {aiError && <p className="text-xs text-red-300">{aiError}</p>}
       <button
         type="button"
         onClick={handleGenerate}
@@ -1193,7 +1386,12 @@ function SendEmailToAllContent({ memberOnly = false }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const filterLabel = memberOnly && audienceFilter === "unsigned" ? "unsigned members (not yet signed up)" : memberOnly ? "members" : "heads, leads, and core users";
+    const filterLabel =
+      memberOnly && audienceFilter === "unsigned"
+        ? "unsigned members (not yet signed up)"
+        : memberOnly
+          ? "members"
+          : "heads, leads, and core users";
     const confirmed = window.confirm(
       `Send this email to ${audience?.count ?? 0} ${filterLabel}?`,
     );
@@ -1212,7 +1410,10 @@ function SendEmailToAllContent({ memberOnly = false }) {
         result = await sendMemberBroadcastEmail(form);
       }
       setSuccess(result.message || "Email broadcast sent.");
-      setAudience((prev) => ({ ...(prev || {}), count: result.total ?? prev?.count ?? 0 }));
+      setAudience((prev) => ({
+        ...(prev || {}),
+        count: result.total ?? prev?.count ?? 0,
+      }));
     } catch (err) {
       setError(err?.message || "Failed to send broadcast email");
     } finally {
@@ -1229,7 +1430,8 @@ function SendEmailToAllContent({ memberOnly = false }) {
     !sending;
   const inputClass =
     "w-full rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm text-richblack-25 outline-none transition placeholder:text-gray-500 focus:border-cyan-300/50 focus:bg-white/[0.055]";
-  const labelClass = "mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400";
+  const labelClass =
+    "mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400";
 
   const audienceLabel = !memberOnly
     ? "heads, leads, and core users"
@@ -1240,13 +1442,23 @@ function SendEmailToAllContent({ memberOnly = false }) {
   return (
     <div className="space-y-3 sm:space-y-4">
       <Panel
-        title={memberOnly ? "Send Email To All Members" : "Send Email To All Heads/Leads/Core"}
-        subtitle={memberOnly ? "Send one announcement to every active department member." : "Send one announcement to every registered head, lead, and core user."}
+        title={
+          memberOnly
+            ? "Send Email To All Members"
+            : "Send Email To All Heads/Leads/Core"
+        }
+        subtitle={
+          memberOnly
+            ? "Send one announcement to every active department member."
+            : "Send one announcement to every registered head, lead, and core user."
+        }
       >
         {/* Audience filter toggle — only in memberOnly mode */}
         {memberOnly && (
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-            <p className="text-xs font-bold uppercase tracking-wide text-gray-400">Send to</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-gray-400">
+              Send to
+            </p>
             <div className="flex overflow-hidden rounded-lg border border-white/10">
               <button
                 type="button"
@@ -1282,9 +1494,13 @@ function SendEmailToAllContent({ memberOnly = false }) {
         <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <AnalyticsCard
             label="Recipients"
-            value={loadingAudience ? "Checking..." : formatNumber(recipientCount)}
+            value={
+              loadingAudience ? "Checking..." : formatNumber(recipientCount)
+            }
             icon={Users}
-            tone={audienceFilter === "unsigned" ? "text-amber-300" : "text-cyan-300"}
+            tone={
+              audienceFilter === "unsigned" ? "text-amber-300" : "text-cyan-300"
+            }
             subtext={
               !memberOnly
                 ? "Heads, leads & core with email"
@@ -1295,10 +1511,19 @@ function SendEmailToAllContent({ memberOnly = false }) {
           />
           {memberOnly && (
             <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-lg shadow-black/10 sm:p-4">
-              <p className="text-[11px] font-semibold text-gray-400 sm:text-sm">Recipient details</p>
-              <button type="button" onClick={() => setShowRecipients(true)} disabled={loadingAudience} className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:opacity-60">
+              <p className="text-[11px] font-semibold text-gray-400 sm:text-sm">
+                Recipient details
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowRecipients(true)}
+                disabled={loadingAudience}
+                className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:opacity-60"
+              >
                 <Info className="h-4 w-4 text-cyan-300" />
-                {audienceFilter === "unsigned" ? "View unsigned list" : "View member list"}
+                {audienceFilter === "unsigned"
+                  ? "View unsigned list"
+                  : "View member list"}
               </button>
             </div>
           )}
@@ -1310,14 +1535,18 @@ function SendEmailToAllContent({ memberOnly = false }) {
             subtext="Uses existing site email sender"
           />
           <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-lg shadow-black/10 sm:p-4">
-            <p className="text-[11px] font-semibold text-gray-400 sm:text-sm">Audience Refresh</p>
+            <p className="text-[11px] font-semibold text-gray-400 sm:text-sm">
+              Audience Refresh
+            </p>
             <button
               type="button"
               onClick={loadAudience}
               disabled={loadingAudience || sending}
               className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <RefreshCw className={`h-4 w-4 ${loadingAudience ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${loadingAudience ? "animate-spin" : ""}`}
+              />
               Refresh Count
             </button>
           </div>
@@ -1407,7 +1636,11 @@ function SendEmailToAllContent({ memberOnly = false }) {
           <div className="flex flex-col gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
             <p className="text-xs leading-5 text-gray-400 sm:text-sm">
               This email will be sent to{" "}
-              <span className={`font-bold ${audienceFilter === "unsigned" && memberOnly ? "text-amber-300" : "text-cyan-300"}`}>{formatNumber(recipientCount)}</span>{" "}
+              <span
+                className={`font-bold ${audienceFilter === "unsigned" && memberOnly ? "text-amber-300" : "text-cyan-300"}`}
+              >
+                {formatNumber(recipientCount)}
+              </span>{" "}
               {audienceLabel}.
             </p>
             <button
@@ -1426,12 +1659,22 @@ function SendEmailToAllContent({ memberOnly = false }) {
         </form>
       </Panel>
       {memberOnly && showRecipients && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="member-recipients-title">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="member-recipients-title"
+        >
           <div className="flex max-h-[80vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-cyan-300/20 bg-[#202237] shadow-2xl shadow-black/50">
             <div className="flex items-center justify-between border-b border-white/10 p-5">
               <div>
-                <h2 id="member-recipients-title" className="text-lg font-bold text-richblack-25">
-                  {audienceFilter === "unsigned" ? "Members not yet signed up" : "Member email recipients"}
+                <h2
+                  id="member-recipients-title"
+                  className="text-lg font-bold text-richblack-25"
+                >
+                  {audienceFilter === "unsigned"
+                    ? "Members not yet signed up"
+                    : "Member email recipients"}
                 </h2>
                 <p className="mt-1 text-xs text-gray-400">
                   {formatNumber(recipientCount)}{" "}
@@ -1440,25 +1683,45 @@ function SendEmailToAllContent({ memberOnly = false }) {
                     : "members will receive this email."}
                 </p>
               </div>
-              <button type="button" onClick={() => setShowRecipients(false)} className="rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:bg-white/[0.06]">Close</button>
+              <button
+                type="button"
+                onClick={() => setShowRecipients(false)}
+                className="rounded-full border border-white/10 px-3 py-1.5 text-xs font-semibold text-gray-200 hover:bg-white/[0.06]"
+              >
+                Close
+              </button>
             </div>
             {audienceFilter === "unsigned" && (
               <div className="border-b border-white/10 bg-amber-500/5 px-5 py-2.5 flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-amber-400 shrink-0" />
-                <p className="text-[11px] text-amber-300">These members have filled the invite form but have not created a website account yet.</p>
+                <p className="text-[11px] text-amber-300">
+                  These members have filled the invite form but have not created
+                  a website account yet.
+                </p>
               </div>
             )}
             <div className="overflow-y-auto p-3">
               {(audience?.recipients || []).map((member) => (
-                <div key={member.email} className="flex items-center justify-between gap-3 border-b border-white/5 px-2 py-2.5 last:border-0">
+                <div
+                  key={member.email}
+                  className="flex items-center justify-between gap-3 border-b border-white/5 px-2 py-2.5 last:border-0"
+                >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-richblack-25">{member.name}</p>
-                    <p className="truncate text-xs text-gray-400">{member.email}</p>
+                    <p className="truncate text-sm font-medium text-richblack-25">
+                      {member.name}
+                    </p>
+                    <p className="truncate text-xs text-gray-400">
+                      {member.email}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-right text-[11px] text-cyan-300">{member.department}</span>
+                    <span className="text-right text-[11px] text-cyan-300">
+                      {member.department}
+                    </span>
                     {audienceFilter === "unsigned" && (
-                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-300 border border-amber-500/20">not signed up</span>
+                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-300 border border-amber-500/20">
+                        not signed up
+                      </span>
                     )}
                   </div>
                 </div>
@@ -1530,7 +1793,10 @@ function SendEmailToPersonContent() {
       setSending(true);
       setError("");
       setSuccess("");
-      const result = await sendTargetedEmail({ ...form, recipientEmail: email });
+      const result = await sendTargetedEmail({
+        ...form,
+        recipientEmail: email,
+      });
       setSuccess(result.message || "Email sent.");
       toast.success(result.message || "Email sent.");
       setConfirmOpen(false);
@@ -1543,12 +1809,22 @@ function SendEmailToPersonContent() {
 
   const inputClass =
     "w-full rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm text-richblack-25 outline-none transition placeholder:text-gray-500 focus:border-cyan-300/50 focus:bg-white/[0.055]";
-  const labelClass = "mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400";
-  const canSend = form.recipientEmail.trim() && form.title.trim() && form.subject.trim() && form.description.trim() && !sending;
+  const labelClass =
+    "mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400";
+  const canSend =
+    form.recipientEmail.trim() &&
+    form.title.trim() &&
+    form.subject.trim() &&
+    form.description.trim() &&
+    !sending;
   const matchingMembers = members.filter((member) => {
     const query = memberQuery.trim().toLowerCase();
     if (!query) return true;
-    return [member.name, member.email, member.department].some((value) => String(value || "").toLowerCase().includes(query));
+    return [member.name, member.email, member.department].some((value) =>
+      String(value || "")
+        .toLowerCase()
+        .includes(query),
+    );
   });
   const selectMember = (member) => {
     setForm((prev) => ({ ...prev, recipientEmail: member.email }));
@@ -1567,27 +1843,41 @@ function SendEmailToPersonContent() {
         <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <AnalyticsCard
             label="Society Members"
-            value={loadingMembers ? "Checking..." : formatNumber(members.length)}
+            value={
+              loadingMembers ? "Checking..." : formatNumber(members.length)
+            }
             icon={Users}
             tone="text-cyan-300"
             subtext="Available to select"
           />
           <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3 shadow-lg shadow-black/10 sm:p-4">
-            <p className="text-[11px] font-semibold text-gray-400 sm:text-sm">Member list</p>
+            <p className="text-[11px] font-semibold text-gray-400 sm:text-sm">
+              Member list
+            </p>
             <button
               type="button"
               onClick={loadMembers}
               disabled={loadingMembers || sending}
               className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <RefreshCw className={`h-4 w-4 ${loadingMembers ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${loadingMembers ? "animate-spin" : ""}`}
+              />
               Refresh Members
             </button>
           </div>
         </div>
 
-        {error && <div className="mb-4 rounded-lg border border-red-400/20 bg-red-500/10 p-3 text-xs text-red-200 sm:text-sm">{error}</div>}
-        {success && <div className="mb-4 rounded-lg border border-emerald-400/20 bg-emerald-500/10 p-3 text-xs text-emerald-100 sm:text-sm">{success}</div>}
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-400/20 bg-red-500/10 p-3 text-xs text-red-200 sm:text-sm">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="mb-4 rounded-lg border border-emerald-400/20 bg-emerald-500/10 p-3 text-xs text-emerald-100 sm:text-sm">
+            {success}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -1597,38 +1887,69 @@ function SendEmailToPersonContent() {
                 <input
                   className={inputClass}
                   value={memberQuery}
-                  onChange={(event) => { setMemberQuery(event.target.value); setMemberMenuOpen(true); }}
+                  onChange={(event) => {
+                    setMemberQuery(event.target.value);
+                    setMemberMenuOpen(true);
+                  }}
                   onFocus={() => setMemberMenuOpen(true)}
                   disabled={loadingMembers}
-                  placeholder={loadingMembers ? "Loading members..." : "Search name, email, or department"}
+                  placeholder={
+                    loadingMembers
+                      ? "Loading members..."
+                      : "Search name, email, or department"
+                  }
                 />
                 {memberMenuOpen && !loadingMembers && (
                   <div className="absolute z-30 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-cyan-300/20 bg-[#202237] p-1 shadow-2xl shadow-black/40">
-                    {matchingMembers.length ? matchingMembers.slice(0, 100).map((member) => (
-                      <button
-                        key={`${member.type}-${member._id || member.email}`}
-                        type="button"
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => selectMember(member)}
-                        className="w-full rounded-md px-3 py-2 text-left transition hover:bg-cyan-400/10"
-                      >
-                        <span className="block text-sm font-medium text-richblack-25">{member.name}</span>
-                        <span className="block truncate text-xs text-gray-400">{member.email} · {member.department}</span>
-                      </button>
-                    )) : <p className="px-3 py-3 text-sm text-gray-400">No members found.</p>}
+                    {matchingMembers.length ? (
+                      matchingMembers.slice(0, 100).map((member) => (
+                        <button
+                          key={`${member.type}-${member._id || member.email}`}
+                          type="button"
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => selectMember(member)}
+                          className="w-full rounded-md px-3 py-2 text-left transition hover:bg-cyan-400/10"
+                        >
+                          <span className="block text-sm font-medium text-richblack-25">
+                            {member.name}
+                          </span>
+                          <span className="block truncate text-xs text-gray-400">
+                            {member.email} · {member.department}
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="px-3 py-3 text-sm text-gray-400">
+                        No members found.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
               <select
                 className="hidden"
-                value={members.some((member) => member.email === form.recipientEmail) ? form.recipientEmail : ""}
+                value={
+                  members.some((member) => member.email === form.recipientEmail)
+                    ? form.recipientEmail
+                    : ""
+                }
                 onChange={updateField("recipientEmail")}
                 disabled={loadingMembers}
               >
                 <option value="">Choose from the member list</option>
                 {members.map((member) => {
-                  const name = [member.firstName, member.lastName].filter(Boolean).join(" ") || member.email;
-                  return <option key={member._id || member.email} value={member.email}>{name} — {member.email}</option>;
+                  const name =
+                    [member.firstName, member.lastName]
+                      .filter(Boolean)
+                      .join(" ") || member.email;
+                  return (
+                    <option
+                      key={member._id || member.email}
+                      value={member.email}
+                    >
+                      {name} — {member.email}
+                    </option>
+                  );
                 })}
               </select>
             </div>
@@ -1653,35 +1974,123 @@ function SendEmailToPersonContent() {
           />
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div><label className={labelClass}>Email Title</label><input value={form.title} onChange={updateField("title")} className={inputClass} maxLength={120} required /></div>
-            <div><label className={labelClass}>Subject</label><input value={form.subject} onChange={updateField("subject")} className={inputClass} maxLength={160} required /></div>
+            <div>
+              <label className={labelClass}>Email Title</label>
+              <input
+                value={form.title}
+                onChange={updateField("title")}
+                className={inputClass}
+                maxLength={120}
+                required
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Subject</label>
+              <input
+                value={form.subject}
+                onChange={updateField("subject")}
+                className={inputClass}
+                maxLength={160}
+                required
+              />
+            </div>
           </div>
           <div>
             <label className={labelClass}>Description</label>
-            <textarea value={form.description} onChange={updateField("description")} className={`${inputClass} min-h-40 resize-y leading-6`} maxLength={5000} placeholder="Write the email body..." required />
-            <p className="mt-1 text-right text-[11px] text-gray-500">{form.description.length}/5000</p>
+            <textarea
+              value={form.description}
+              onChange={updateField("description")}
+              className={`${inputClass} min-h-40 resize-y leading-6`}
+              maxLength={5000}
+              placeholder="Write the email body..."
+              required
+            />
+            <p className="mt-1 text-right text-[11px] text-gray-500">
+              {form.description.length}/5000
+            </p>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
-            <div><label className={labelClass}>Link URL (Optional)</label><input value={form.linkUrl} onChange={updateField("linkUrl")} className={inputClass} type="url" placeholder="https://www.gfg-bvcoe.com/events" /></div>
-            <div><label className={labelClass}>Link Button Text</label><input value={form.linkLabel} onChange={updateField("linkLabel")} className={inputClass} placeholder="Open link" /></div>
+            <div>
+              <label className={labelClass}>Link URL (Optional)</label>
+              <input
+                value={form.linkUrl}
+                onChange={updateField("linkUrl")}
+                className={inputClass}
+                type="url"
+                placeholder="https://www.gfg-bvcoe.com/events"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Link Button Text</label>
+              <input
+                value={form.linkLabel}
+                onChange={updateField("linkLabel")}
+                className={inputClass}
+                placeholder="Open link"
+              />
+            </div>
           </div>
           <div className="flex flex-col gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
-            <p className="text-xs leading-5 text-gray-400 sm:text-sm">This email will be sent only to <span className="font-bold text-cyan-300">{form.recipientEmail.trim() || "the selected recipient"}</span>.</p>
-            <button type="submit" disabled={!canSend} className="inline-flex items-center justify-center gap-2 rounded-full bg-cyan-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50">
-              <Mail className="h-4 w-4" />{sending ? "Sending..." : "Send Email"}
+            <p className="text-xs leading-5 text-gray-400 sm:text-sm">
+              This email will be sent only to{" "}
+              <span className="font-bold text-cyan-300">
+                {form.recipientEmail.trim() || "the selected recipient"}
+              </span>
+              .
+            </p>
+            <button
+              type="submit"
+              disabled={!canSend}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-cyan-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Mail className="h-4 w-4" />
+              {sending ? "Sending..." : "Send Email"}
             </button>
           </div>
         </form>
       </Panel>
       {confirmOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true" aria-labelledby="email-confirmation-title">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="email-confirmation-title"
+        >
           <div className="w-full max-w-md rounded-2xl border border-cyan-300/20 bg-[#202237] p-5 shadow-2xl shadow-black/50 sm:p-6">
-            <h2 id="email-confirmation-title" className="text-lg font-bold text-richblack-25">Send this email?</h2>
-            <p className="mt-2 text-sm leading-6 text-gray-300">The announcement will be sent only to <span className="font-semibold text-cyan-300">{form.recipientEmail.trim()}</span>.</p>
-            <p className="mt-1 text-xs text-gray-500">Subject: {form.subject}</p>
+            <h2
+              id="email-confirmation-title"
+              className="text-lg font-bold text-richblack-25"
+            >
+              Send this email?
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-gray-300">
+              The announcement will be sent only to{" "}
+              <span className="font-semibold text-cyan-300">
+                {form.recipientEmail.trim()}
+              </span>
+              .
+            </p>
+            <p className="mt-1 text-xs text-gray-500">
+              Subject: {form.subject}
+            </p>
             <div className="mt-6 flex justify-end gap-3">
-              <button type="button" onClick={() => setConfirmOpen(false)} disabled={sending} className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:opacity-50">Cancel</button>
-              <button type="button" onClick={sendEmail} disabled={sending} className="inline-flex items-center gap-2 rounded-full bg-cyan-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-cyan-400 disabled:opacity-50"><Mail className="h-4 w-4" />{sending ? "Sending..." : "Confirm & Send"}</button>
+              <button
+                type="button"
+                onClick={() => setConfirmOpen(false)}
+                disabled={sending}
+                className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-white/[0.06] disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={sendEmail}
+                disabled={sending}
+                className="inline-flex items-center gap-2 rounded-full bg-cyan-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-cyan-400 disabled:opacity-50"
+              >
+                <Mail className="h-4 w-4" />
+                {sending ? "Sending..." : "Confirm & Send"}
+              </button>
             </div>
           </div>
         </div>
@@ -1754,7 +2163,9 @@ function Settings() {
             aria-label={`${activeLabel} settings`}
           >
             <div className="min-h-0 flex-1 overflow-y-auto pr-1 sm:pr-2 lg:scrollbar-thin lg:scrollbar-track-transparent lg:scrollbar-thumb-emerald-400/20 hover:lg:scrollbar-thumb-emerald-400/35">
-              {activeTab === "overview" ? (
+              {activeTab === "wifi-event-images" ? (
+                <WifiEventCollage />
+              ) : activeTab === "overview" ? (
                 <OverviewContent onSelect={setActiveTab} />
               ) : activeTab === "cloudinary-storage" ? (
                 <CloudinaryStorageContent />
