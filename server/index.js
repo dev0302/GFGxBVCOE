@@ -32,6 +32,9 @@ const vectorVisionAdminRoutes = require("./routes/vectorVisionAdminRoute");
 const notificationRoutes = require("./routes/notificationRoute");
 const vaultRoutes = require("./routes/vaultRoute");
 const cloudinaryRoutes = require("./routes/cloudinaryRoute");
+
+const blogRoutes = require("./routes/blogRoute");
+
 const { setIo, setEmitToUser } = require("./utils/socketBus");
 const { setNotificationEmitter } = require("./utils/notificationService");
 const { setDraftIo } = require("./utils/leadershipDraftBus");
@@ -75,6 +78,9 @@ app.use("/api/v1/members/enroll", memberEnrollRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/vault", vaultRoutes);
 app.use("/api/v1/cloudinary", cloudinaryRoutes);
+
+app.use("/api/v1/blog", blogRoutes);
+
 app.use("/api/admin", vectorVisionAdminRoutes);
 app.use("/api", descriptionRouter);
 app.use("/api/v1/ai", aiRoutes);
