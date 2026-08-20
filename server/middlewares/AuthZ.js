@@ -1,6 +1,9 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const { userCanAccessLeadershipTransition } = require("../utils/leadershipAccess");
+const {
+  userCanAccessLeadershipTransition,
+  userCanReviewBlog,
+} = require("../utils/leadershipAccess");
 const { checkAndFinalizeExpiredSession } = require("../utils/tenureSession");
 
 exports.auth = async (req, res, next) => {
@@ -39,7 +42,8 @@ exports.auth = async (req, res, next) => {
       });
       return res.status(401).json({
         success: false,
-        message: "Your session has ended. Thank you for your contributions to GFG BVCOE.",
+        message:
+          "Your session has ended. Thank you for your contributions to GFG BVCOE.",
         code: "TENURE_SESSION_EXPIRED",
       });
     }
@@ -67,7 +71,9 @@ exports.optionalAuth = async (req, res, next) => {
     try {
       const decode = jwt.verify(token, process.env.JWT_SECRET);
       req.user = decode;
-    } catch (_) { /* invalid or expired – leave req.user unset */ }
+    } catch (_) {
+      /* invalid or expired – leave req.user unset */
+    }
     next();
   } catch (err) {
     next();
@@ -100,17 +106,19 @@ exports.canAccessLeadershipTransition = async (req, res, next) => {
     if (req.tenureEnded) {
       return res.status(403).json({
         success: false,
-        message: "Your tenure has ended. Platform access is limited until your session expires.",
+        message:
+          "Your tenure has ended. Platform access is limited until your session expires.",
       });
     }
     const allowed = await userCanAccessLeadershipTransition(
       req.user?.id,
-      req.user?.accountType
+      req.user?.accountType,
     );
     if (!allowed) {
       return res.status(403).json({
         success: false,
-        message: "Leadership Transition access is not granted for your account.",
+        message:
+          "Leadership Transition access is not granted for your account.",
       });
     }
     next();
@@ -129,10 +137,11 @@ exports.canAccessDashboard = (req, res, next) => {
     if (req.tenureEnded) {
       return res.status(403).json({
         success: false,
-        message: "Your tenure has ended. Dashboard access is no longer available.",
+        message:
+          "Your tenure has ended. Dashboard access is no longer available.",
       });
     }
-    const accountType = String(req.user?.accountType || '').trim();
+    const accountType = String(req.user?.accountType || "").trim();
     if (!SOCIETY_ROLES.includes(accountType)) {
       return res.status(403).json({
         success: false,
@@ -152,7 +161,12 @@ exports.canAccessDashboard = (req, res, next) => {
 /** Department members may view their team but cannot mutate its roster. */
 exports.requireTeamManagement = (req, res, next) => {
   if (req.user?.isDepartmentMember) {
-    return res.status(403).json({ success: false, message: "Department members have view-only team access." });
+    return res
+      .status(403)
+      .json({
+        success: false,
+        message: "Department members have view-only team access.",
+      });
   }
   next();
 };
@@ -160,7 +174,12 @@ exports.requireTeamManagement = (req, res, next) => {
 /** Settings are available only to accounts stored in the users collection. */
 exports.requireRegisteredUser = (req, res, next) => {
   if (req.user?.isDepartmentMember) {
-    return res.status(403).json({ success: false, message: "Settings are not available for department-member accounts." });
+    return res
+      .status(403)
+      .json({
+        success: false,
+        message: "Settings are not available for department-member accounts.",
+      });
   }
   next();
 };
@@ -171,11 +190,21 @@ exports.requireRegisteredUser = (req, res, next) => {
  */
 exports.requireSocietyRole = (req, res, next) => {
   if (req.user?.isDepartmentMember) {
-    return res.status(403).json({ success: false, message: "Action not permitted for department-member accounts." });
+    return res
+      .status(403)
+      .json({
+        success: false,
+        message: "Action not permitted for department-member accounts.",
+      });
   }
   const allowed = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
   if (!allowed.includes(String(req.user?.accountType || "").trim())) {
-    return res.status(403).json({ success: false, message: "This action is restricted to society core roles." });
+    return res
+      .status(403)
+      .json({
+        success: false,
+        message: "This action is restricted to society core roles.",
+      });
   }
   next();
 };
@@ -183,19 +212,12 @@ exports.requireSocietyRole = (req, res, next) => {
 /** Verify user is a Lead or Head for blog editorial actions, or an ADMIN */
 exports.isLeadOrHead = async (req, res, next) => {
   try {
-    const User = require("../models/User");
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found.",
-      });
-    }
-
-    if (user.role !== "lead" && user.role !== "head" && user.accountType !== "ADMIN") {
+    const allowed = await userCanReviewBlog(req.user.id);
+    if (!allowed) {
       return res.status(403).json({
         success: false,
-        message: "Access denied. Requires Lead, Head, or Admin role.",
+        message:
+          "Access denied. Requires a department Lead, Head, or Admin role.",
       });
     }
 
@@ -208,4 +230,3 @@ exports.isLeadOrHead = async (req, res, next) => {
     });
   }
 };
-

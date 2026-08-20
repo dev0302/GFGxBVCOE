@@ -55,7 +55,10 @@ import NotFound from "./components/NotFound";
 import GFGBentoGrid from "./components/GFGBentoGrid";
 import IncomingUploadModal from "./components/IncomingUploadModal";
 import AirdropAnimationLayer from "./components/AirdropAnimationLayer";
-import BlogSite from "./pages/blog/blogSite";
+import BlogSite from "./pages/blog_site/blogSite";
+import BlogForm from "./components/blogForm";
+import BlogPage from "./pages/blogPage";
+import BlogApprovalPage from "./pages/blogApprovalPage";
 
 function App() {
   const location = useLocation();
@@ -274,6 +277,12 @@ function App() {
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/gallery" element={<Gallery />} />
                       <Route path="/blog" element={<BlogSite />} />
+                      <Route path="/blog/create" element={<BlogForm />} />
+                      <Route path="/blog/post/:slug" element={<BlogPage />} />
+                      <Route
+                        path="/blog/approval"
+                        element={<BlogApprovalPage />}
+                      />
                       <Route path="/bentogrid" element={<GFGBentoGrid />} />
                       <Route path="/results" element={<ResultPage />} />
                       <Route path="/results2026" element={<ResultPage2026 />} />

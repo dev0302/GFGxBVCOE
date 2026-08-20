@@ -1,7 +1,25 @@
 import React, { useEffect, useState } from "react";
+import { PenLine } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { getPublicPosts } from "../../services/blog_api";
+import { useAuth } from "../../context/AuthContext";
+
+const canReviewPosts = (user) => {
+  const position = String(
+    user?.additionalDetails?.position || user?.additionalDetails?.p0 || "",
+  ).toLowerCase();
+  return (
+    ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"].includes(
+      user?.accountType,
+    ) ||
+    position.includes("lead") ||
+    position.includes("head")
+  );
+};
 
 const BlogSite = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,7 +51,7 @@ const BlogSite = () => {
     : posts;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#252537" }}>
+    <div className="min-h-screen bg-[#020b08] text-[#e8f1ed]">
       {/* Hero Section */}
       <div className="relative overflow-hidden pt-20 pb-12">
         {/* <div className="absolute inset-0 opacity-10">
@@ -85,9 +103,28 @@ const BlogSite = () => {
 
       {/* Blog Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h2 className="text-2xl sm:text-3xl font-bold text-richblack-5 font-audiowide mb-8">
-          All Posts
-        </h2>
+        <div className="mb-8 flex items-center justify-between gap-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-richblack-5 font-audiowide">
+            All Posts
+          </h2>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              onClick={() => navigate("/blog/create")}
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 px-4 py-2.5 font-montserrat text-sm font-semibold text-richblack-5 shadow-lg shadow-cyan-500/20 transition duration-300 hover:-translate-y-0.5 hover:shadow-cyan-500/40 sm:px-5"
+            >
+              <PenLine size={16} />
+              <span>Write a post</span>
+            </button>
+            {canReviewPosts(user) && (
+              <button
+                onClick={() => navigate("/blog/approval")}
+                className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-4 py-2.5 font-montserrat text-sm font-semibold text-emerald-300 transition hover:bg-emerald-400 hover:text-[#07130c] sm:px-5"
+              >
+                Editorial desk
+              </button>
+            )}
+          </div>
+        </div>
 
         {loading && (
           <p className="text-center py-20 text-richblack-200 text-lg font-montserrat">
@@ -104,7 +141,11 @@ const BlogSite = () => {
         {!loading && !error && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredPosts.map((post) => (
-              <BlogCard key={post._id || post.slug} post={post} />
+              <BlogCard
+                key={post._id || post.slug}
+                post={post}
+                navigate={navigate}
+              />
             ))}
           </div>
         )}
@@ -122,20 +163,23 @@ const BlogSite = () => {
   );
 };
 
-const BlogCard = ({ post }) => {
+const BlogCard = ({ post, navigate }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   // Color mapping for different categories
   const categoryColors = {
-    "Web Development": "from-blue-500 to-cyan-500",
-    React: "from-purple-500 to-pink-500",
-    CSS: "from-yellow-500 to-orange-500",
-    JavaScript: "from-yellow-400 to-yellow-600",
-    Design: "from-red-500 to-pink-500",
+    "Web Development": "text-[#55df8b] border-green-400/20 bg-green-700/[0.08]",
+    React: "text-[#55df8b] border-green-400/20 bg-green-700/[0.08]",
+    CSS: "text-[#55df8b] border-green-400/20 bg-green-700/[0.08]",
+    JavaScript: "text-[#55df8b] border-green-400/20 bg-green-700/[0.08]",
+    Design: "text-[#55df8b] border-green-400/20 bg-green-700/[0.08]",
   };
 
   const getCategoryColor = (category) => {
-    return categoryColors[category] || "from-cyan-500 to-purple-500";
+    return (
+      categoryColors[category] ||
+      "text-[#55df8b] border-green-400/20 bg-green-700/[0.08]"
+    );
   };
 
   return (
@@ -145,77 +189,89 @@ const BlogCard = ({ post }) => {
       className="group h-full"
     >
       <div
-        className={`relative h-full flex flex-col rounded-2xl overflow-hidden bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] backdrop-blur-sm border border-gray-700/50 transition-all duration-300 ${
+        className={`relative h-full flex flex-col overflow-hidden rounded-3xl border bg-[#04120c]/70 shadow-[0_15px_50px_rgba(0,0,0,0.18)] transition duration-500 ${
           isHovered
-            ? "border-cyan-500/50 shadow-2xl shadow-cyan-500/20 transform -translate-y-2"
-            : "hover:border-gray-600/50"
+            ? "-translate-y-1 border-green-500/35 bg-[#071d12] shadow-[0_20px_60px_rgba(15,180,80,0.08)]"
+            : "border-green-900/25"
         }`}
       >
         {/* Image Container */}
-        <div className="relative overflow-hidden h-48 sm:h-56 bg-gray-900">
+        <div className="relative h-56 overflow-hidden bg-[#03130c]">
           <img
             src={
               post.coverImage ||
-              "https://placehold.co/800x500/1e1e2f/94a3b8?text=GFG+Journal"
+              "https://placehold.co/800x500/03130c/55df8b?text=GFG+Journal"
             }
             alt={post.title}
-            className={`w-full h-full object-cover transition-transform duration-500 ${
-              isHovered ? "scale-110" : "scale-100"
+            className={`h-full w-full object-cover opacity-60 transition duration-700 ${
+              isHovered ? "scale-110 opacity-100" : "scale-100"
             }`}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#04120c] via-[#04120c]/30 to-transparent"></div>
 
           {/* Category Badge */}
-          <div className="absolute top-4 left-4">
+          <div className="absolute left-6 top-6">
             <span
-              className={`inline-block px-3 py-1 bg-gradient-to-r ${getCategoryColor(
-                post.category,
-              )} text-white text-xs font-bold rounded-full backdrop-blur-md bg-opacity-80`}
+              className={`inline-block rounded-full border px-3 py-1.5 text-[9px] font-bold uppercase tracking-[1.5px] backdrop-blur-md ${getCategoryColor(post.category)}`}
             >
-              {post.category}
+              {post.category || "GFG JOURNAL"}
             </span>
           </div>
         </div>
 
         {/* Content Container */}
-        <div className="flex-1 p-5 sm:p-6 flex flex-col">
+        <div className="flex flex-1 flex-col justify-between p-6 sm:p-7">
           {/* Title */}
-          <h3 className="text-lg sm:text-xl font-bold text-richblack-5 mb-3 font-montserrat line-clamp-2 group-hover:text-cyan-400 transition-colors duration-300">
+          <div className="flex items-center justify-between">
+            <div className="text-[10px] font-bold tracking-[1.5px] text-[#48db83]">
+              GFG × BVCOE
+            </div>
+            <button
+              type="button"
+              aria-label={`Read ${post.title}`}
+              onClick={() =>
+                navigate(`/blog/post/${encodeURIComponent(post.slug)}`)
+              }
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-green-900/40 text-lg text-[#91a49a] transition hover:rotate-45 hover:border-green-400/40 hover:bg-green-500 hover:text-white"
+            >
+              ↗
+            </button>
+          </div>
+          <h3 className="mt-5 line-clamp-2 text-[23px] font-semibold leading-[1.15] tracking-[-1px] text-[#e5eeea] transition-colors group-hover:text-[#39d878]">
             {post.title}
           </h3>
 
           {/* Description */}
-          <p className="text-richblack-200 text-sm sm:text-base font-nunito mb-4 flex-1 line-clamp-3">
+          <p className="mt-4 line-clamp-3 text-[13px] leading-6 text-[#82928a]">
             {post.summary ||
               "Read the latest story from the GFG-BVCOE community."}
           </p>
 
           {/* Meta Information */}
-          <div className="flex items-center justify-between pt-4 border-t border-richblack-200/20">
+          <div className="mt-8 flex items-center justify-between border-t border-green-900/25 pt-4 text-[9px] font-medium tracking-[1px] text-[#58675f]">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 flex items-center justify-center text-richblack-5 text-xs font-bold">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full border border-green-900/40 bg-green-700/20 text-xs font-bold text-[#55df8b]">
                 {getAuthorName(post.author).charAt(0)}
               </div>
-              <span className="text-richblack-100 text-sm font-montserrat truncate">
+              <span className="truncate uppercase text-[#82928a]">
                 {getAuthorName(post.author)}
               </span>
             </div>
-            <span className="text-richblack-200 text-xs sm:text-sm font-montserrat whitespace-nowrap ml-2">
+            <span className="ml-2 whitespace-nowrap">
               {formatPublishedDate(post.createdAt)}
             </span>
           </div>
         </div>
 
         {/* Read More Button */}
-        <div className="px-5 sm:px-6 pb-5 sm:pb-6 pt-0">
+        <div className="px-6 pb-6 pt-0 sm:px-7">
           <button
-            className={`w-full py-2.5 px-4 rounded-lg font-montserrat font-semibold text-sm transition-all duration-300 ${
-              isHovered
-                ? "bg-gradient-to-r from-cyan-500 to-purple-500 text-richblack-5 shadow-lg shadow-cyan-500/50"
-                : "bg-richblack-700/50 text-richblack-100 border border-richblack-200/30 hover:bg-richblack-800/50"
-            }`}
+            onClick={() =>
+              navigate(`/blog/post/${encodeURIComponent(post.slug)}`)
+            }
+            className="w-full rounded-full border border-green-400/20 bg-green-700/[0.08] px-4 py-3 text-sm font-semibold text-[#55df8b] transition hover:border-green-400/40 hover:bg-green-500 hover:text-white"
           >
-            Read More
+            Read story <span className="ml-1">↗</span>
           </button>
         </div>
       </div>
