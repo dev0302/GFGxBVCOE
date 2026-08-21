@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { PenLine } from "lucide-react";
+import { ChevronLeft, ChevronRight, PenLine } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getPublicPosts } from "../../services/blog_api";
 import { useAuth } from "../../context/AuthContext";
@@ -22,6 +22,7 @@ const BlogSite = () => {
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [categoryPage, setCategoryPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -42,8 +43,23 @@ const BlogSite = () => {
 
   // Get unique categories
   const categories = [
-    ...new Set(posts.map((post) => post.category).filter(Boolean)),
+    "Technology",
+    "Science & Innovation",
+    "Finance & Business",
+    "Education & Career",
+    "Lifestyle",
+    "Campus & Community",
+    "Entertainment",
+    "Sports",
+    "Culture & Society",
+    "Politics & Current Affairs",
   ];
+  const categoriesPerPage = 3;
+  const categoryPageCount = Math.ceil(categories.length / categoriesPerPage);
+  const visibleCategories = categories.slice(
+    categoryPage * categoriesPerPage,
+    (categoryPage + 1) * categoriesPerPage,
+  );
 
   // Filter posts based on selected category
   const filteredPosts = selectedCategory
@@ -74,30 +90,56 @@ const BlogSite = () => {
 
       {/* Category Filter */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-        <div className="flex flex-wrap gap-3">
+        <div className="flex items-center gap-3">
           <button
-            onClick={() => setSelectedCategory(null)}
-            className={`px-4 py-2 rounded-full font-montserrat font-semibold text-sm transition-all duration-300 ${
-              selectedCategory === null
-                ? "bg-gradient-to-r from-cyan-500 to-purple-500 text-richblack-5 shadow-lg shadow-cyan-500/50"
-                : "bg-richblack-700 text-richblack-100 hover:bg-richblack-800 border border-richblack-200"
-            }`}
+            type="button"
+            aria-label="Previous categories"
+            disabled={categoryPage === 0}
+            onClick={() => setCategoryPage((page) => Math.max(page - 1, 0))}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-richblack-200 bg-richblack-700 text-richblack-100 transition hover:bg-richblack-800 disabled:cursor-not-allowed disabled:opacity-30"
           >
-            All Posts
+            <ChevronLeft size={20} />
           </button>
-          {categories.map((category) => (
+
+          <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-4 rounded-full font-montserrat font-semibold text-sm transition-all duration-300 ${
-                selectedCategory === category
+              onClick={() => setSelectedCategory(null)}
+              className={`px-4 py-2 rounded-full font-montserrat font-semibold text-sm transition-all duration-300 ${
+                selectedCategory === null
                   ? "bg-gradient-to-r from-cyan-500 to-purple-500 text-richblack-5 shadow-lg shadow-cyan-500/50"
                   : "bg-richblack-700 text-richblack-100 hover:bg-richblack-800 border border-richblack-200"
               }`}
             >
-              {category}
+              All Posts
             </button>
-          ))}
+            {visibleCategories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`min-h-5  rounded-full font-montserrat font-semibold text-sm transition-all duration-300 ${
+                  selectedCategory === category
+                    ? "bg-gradient-to-r from-cyan-500 to-purple-500 text-richblack-5 shadow-lg shadow-cyan-500/50"
+                    : "bg-richblack-700 text-richblack-100 hover:bg-richblack-800 border border-richblack-200"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            aria-label="Next categories"
+            disabled={categoryPage === categoryPageCount - 1}
+            onClick={() =>
+              setCategoryPage((page) =>
+                Math.min(page + 1, categoryPageCount - 1),
+              )
+            }
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-richblack-200 bg-richblack-700 text-richblack-100 transition hover:bg-richblack-800 disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <ChevronRight size={20} />
+          </button>
         </div>
       </div>
 
