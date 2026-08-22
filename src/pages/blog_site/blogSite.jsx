@@ -25,6 +25,7 @@ const BlogSite = () => {
   const [categoryPage, setCategoryPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -62,9 +63,19 @@ const BlogSite = () => {
   );
 
   // Filter posts based on selected category
-  const filteredPosts = selectedCategory
-    ? posts.filter((post) => post.category === selectedCategory)
-    : posts;
+    // Filter posts based on selected category and search query
+  const filteredPosts = posts
+    .filter((post) =>
+      selectedCategory ? post.category === selectedCategory : true,
+    )
+    .filter((post) => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        post.title?.toLowerCase().includes(query) ||
+        post.summary?.toLowerCase().includes(query)
+      );
+    });
 
   return (
     <div className="min-h-screen bg-[#020b08] text-[#e8f1ed]">
@@ -86,6 +97,17 @@ const BlogSite = () => {
             Share your journey in words — because stories inspire change.
           </p>
         </div>
+      </div>
+
+            {/* Search Bar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search posts by title or summary..."
+          className="w-full rounded-full border border-richblack-200 bg-richblack-700 px-5 py-3 text-sm font-montserrat text-richblack-5 placeholder-richblack-300 outline-none transition focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/30"
+        />
       </div>
 
       {/* Category Filter */}
