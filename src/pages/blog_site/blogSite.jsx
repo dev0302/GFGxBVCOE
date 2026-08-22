@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, PenLine } from "lucide-react";
+import { ChevronLeft, ChevronRight, PenLine, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getPublicPosts } from "../../services/blog_api";
 import { useAuth } from "../../context/AuthContext";
@@ -63,7 +63,7 @@ const BlogSite = () => {
   );
 
   // Filter posts based on selected category
-    // Filter posts based on selected category and search query
+  // Filter posts based on selected category and search query
   const filteredPosts = posts
     .filter((post) =>
       selectedCategory ? post.category === selectedCategory : true,
@@ -99,15 +99,22 @@ const BlogSite = () => {
         </div>
       </div>
 
-            {/* Search Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search posts by title or summary..."
-          className="w-full rounded-full border border-richblack-200 bg-richblack-700 px-5 py-3 text-sm font-montserrat text-richblack-5 placeholder-richblack-300 outline-none transition focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/30"
-        />
+      {/* Search Bar */}
+      <div className="max-w-[25rem] ml-[60rem] px-2 py-4">
+        <div className="relative">
+          <Search
+            aria-hidden="true"
+            size={18}
+            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-richblack-300"
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search posts by title or summary..."
+            className="w-full rounded-full border border-richblack-200 bg-richblack-700 py-3 pl-11 pr-5 text-sm font-montserrat text-richblack-5 placeholder-richblack-300 outline-none transition focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/30"
+          />
+        </div>
       </div>
 
       {/* Category Filter */}
