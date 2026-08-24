@@ -12,7 +12,10 @@ import {
   userCanAccessLeadershipTransition,
 } from "../../services/api";
 import { subscribeOnlineUsers } from "../../services/presenceSocket";
-import { cloudinaryLargeAvatarUrl, cloudinaryTinyAvatarUrl } from "../../utils/cloudinary";
+import {
+  cloudinaryLargeAvatarUrl,
+  cloudinaryTinyAvatarUrl,
+} from "../../utils/cloudinary";
 import {
   Calendar,
   Clock,
@@ -24,7 +27,7 @@ import {
   Users,
 } from "react-feather";
 import { useSocketContext } from "../../context/SocketProvider";
-import { AiOutlineCaretDown } from "react-icons/ai"
+import { AiOutlineCaretDown } from "react-icons/ai";
 
 function formatLastSeenLabel(iso) {
   if (!iso) return "No visit logged yet";
@@ -35,7 +38,12 @@ function formatLastSeenLabel(iso) {
   if (sec < 3600) return `${Math.floor(sec / 60)} min ago`;
   if (sec < 86_400) return `${Math.floor(sec / 3600)} hr ago`;
   if (sec < 604_800) return `${Math.floor(sec / 86_400)} days ago`;
-  return d.toLocaleString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleString("en-IN", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function useSessionHoursLeft(sessionExpiresAt) {
@@ -100,11 +108,13 @@ function SessionEndingNotice({ hoursLeft }) {
           <Clock className="h-4 w-4" />
         </span>
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold text-emerald-100">Session ending soon</p>
+          <p className="text-[11px] font-semibold text-emerald-100">
+            Session ending soon
+          </p>
           <p className="mt-0.5 text-[10px] leading-snug text-emerald-200/85">
             Your tenure has ended. You have{" "}
-            <span className="font-bold text-emerald-300">{label}</span> of account access
-            remaining.
+            <span className="font-bold text-emerald-300">{label}</span> of
+            account access remaining.
           </p>
         </div>
       </div>
@@ -158,7 +168,7 @@ function ProfileDropDown({
 
   const onlineIdSet = useMemo(
     () => new Set((onlineUsers || []).map((p) => String(p.id))),
-    [onlineUsers]
+    [onlineUsers],
   );
 
   useEffect(() => {
@@ -231,7 +241,7 @@ function ProfileDropDown({
           ? Math.max(8, window.innerWidth - width - 8)
           : Math.max(
               12,
-              Math.min(rect.right - width, window.innerWidth - width - 12)
+              Math.min(rect.right - width, window.innerWidth - width - 12),
             ),
         width,
       });
@@ -305,7 +315,8 @@ function ProfileDropDown({
     const el = e.currentTarget;
     const delta = e.deltaY;
     const atTop = el.scrollTop <= 0;
-    const atBottom = Math.ceil(el.scrollTop + el.clientHeight) >= el.scrollHeight;
+    const atBottom =
+      Math.ceil(el.scrollTop + el.clientHeight) >= el.scrollHeight;
 
     // Prevent wheel chaining to page/background when flyout reaches limits.
     if ((delta < 0 && atTop) || (delta > 0 && atBottom)) {
@@ -314,20 +325,37 @@ function ProfileDropDown({
     e.stopPropagation();
   };
 
-  const dashboardAccessKeys = Array.isArray(user.dashboardAccess) ? user.dashboardAccess : [];
+  const dashboardAccessKeys = Array.isArray(user.dashboardAccess)
+    ? user.dashboardAccess
+    : [];
   const fallbackDashboardKeys = [];
   if (userCanManageEvents(user)) fallbackDashboardKeys.push("Event Management");
-  if (!dashboardAccessKeys.length && user?.accountType && !isSocietyRole(user.accountType)) {
+  if (
+    !dashboardAccessKeys.length &&
+    user?.accountType &&
+    !isSocietyRole(user.accountType) &&
+    !user?.isDepartmentMember
+  ) {
     fallbackDashboardKeys.push(user.accountType);
   }
-  const accessibleDashboardKeys = dashboardAccessKeys.length ? dashboardAccessKeys : fallbackDashboardKeys;
+  const accessibleDashboardKeys = dashboardAccessKeys.length
+    ? dashboardAccessKeys
+    : fallbackDashboardKeys;
 
-  const uniqueDashboardKeys = Array.from(new Set(accessibleDashboardKeys.filter(Boolean)));
+  const uniqueDashboardKeys = Array.from(
+    new Set(accessibleDashboardKeys.filter(Boolean)),
+  );
   uniqueDashboardKeys.sort((a, b) => {
     if (a === "Event Management") return -1;
     if (b === "Event Management") return 1;
-    const aLabel = a === "Event Management" ? "EM Dashboard" : `${getAccountTypeLabel(a) || a} Dashboard`;
-    const bLabel = b === "Event Management" ? "EM Dashboard" : `${getAccountTypeLabel(b) || b} Dashboard`;
+    const aLabel =
+      a === "Event Management"
+        ? "EM Dashboard"
+        : `${getAccountTypeLabel(a) || a} Dashboard`;
+    const bLabel =
+      b === "Event Management"
+        ? "EM Dashboard"
+        : `${getAccountTypeLabel(b) || b} Dashboard`;
     return aLabel.localeCompare(bLabel);
   });
 
@@ -426,350 +454,387 @@ function ProfileDropDown({
                   : "pointer-events-none opacity-0"
               }`}
           >
-
-        <div className="border-b border-gray-500/30 px-4 py-3.5">
-          <div className="flex items-center gap-3">
-            {user.image ? (
-              <div className="relative h-8 w-8">
-                {!avatarLoadedMenu && (
-                  <div className="absolute inset-0 z-0 rounded-full bg-gray-500/50 pointer-events-none" />
-                )}
-                <img
-                  key={`menu-${avatarImgSrc}`}
-                  src={avatarImgSrc || user.image}
-                  alt=""
-                  onLoad={() => setAvatarLoadedMenu(true)}
-                  onError={() => setAvatarLoadedMenu(true)}
-                  className="h-8 w-8 relative z-10 rounded-full object-cover border border-gray-500/50 opacity-100"
-                />
-              </div>
-            ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-600/80 text-xs font-semibold text-richblack-25">
-                {user.firstName?.[0]}
-                {user.lastName?.[0]}
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-semibold text-richblack-25">
-                {user.firstName} {user.lastName}
-              </div>
-              <div className="truncate text-xs text-gray-400">
-                {user.email}
-              </div>
-            </div>
-          </div>
-          {tenureEnding && <SessionEndingNotice hoursLeft={sessionHoursLeft} />}
-          <div className="mt-2 flex items-center justify-between text-[10px]">
-            <span className="inline-flex rounded-full bg-cyan-500/20 px-2 py-0.5 font-medium text-cyan-300">
-              {user.additionalDetails?.position ||
-                getAccountTypeLabel(user.accountType) ||
-                user.accountType}
-            </span>
-            <span className="text-gray-500">
-              Joined{" "}
-              <span className="font-medium text-gray-300">
-                {user.createdAt
-                  ? new Date(user.createdAt).toLocaleDateString("en-IN", {
-                      month: "short",
-                      year: "numeric",
-                    })
-                  : "—"}
-              </span>
-            </span>
-          </div>
-        </div>
-
-        <div className="border-b border-gray-500/30 px-4 py-2">
-          <div className="mb-2 flex min-h-7 items-center justify-between gap-2 pr-0.5">
-            <span className="flex h-7 items-center text-[8px] font-medium uppercase leading-none tracking-[0.12em] text-gray-400">
-              Online now
-            </span>
-            <button
-              type="button"
-              title="Recent activity — who was on the site"
-              aria-label="Open last activity list"
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setLastSeenOpen(true);
-              }}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-cyan-500/35 bg-cyan-500/10 text-cyan-300 shadow-[0_0_12px_rgba(34,211,238,0.12)] transition hover:border-cyan-400/50 hover:bg-cyan-500/18 hover:text-cyan-200 absolute right-4 mt-2"
-            >
-              <Clock className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
-            </button>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {onlineUsers.length ? (
-              onlineUsers.map((person) => {
-                const avatarSrc = person?.image
-                  ? cloudinaryTinyAvatarUrl(person.image)
-                  : "";
-                const initials = String(person?.name || "U")
-                  .split(" ")
-                  .filter(Boolean)
-                  .slice(0, 2)
-                  .map((s) => s[0]?.toUpperCase())
-                  .join("");
-                return (
-                  <button
-                    key={person.id}
-                    type="button"
-                    className="group relative inline-flex"
-                    title={person.name}
-                  >
-                    <span className="relative inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-300/20 bg-slate-800">
-                      {avatarSrc ? (
-                        <img
-                          src={avatarSrc}
-                          alt={person.name}
-                          className="h-7 w-7 rounded-full object-cover"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <span className="text-[10px] font-semibold text-richblack-25">
-                          {initials || "U"}
-                        </span>
-                      )}
-                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border border-[#1e1e2f] bg-emerald-400" />
-                    </span>
-                    <span className="pointer-events-none absolute -top-7 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-gray-500/30 bg-[#151525] px-2 py-0.5 text-[10px] text-gray-200 shadow-lg group-hover:block group-focus-visible:block">
-                      {person.name}
-                    </span>
-                  </button>
-                );
-              })
-            ) : (
-              <span className="text-[11px] text-gray-500">No users online</span>
-            )}
-          </div>
-        </div>
-
-        <div className="px-1 py-1.5 i-fonts">
-          <button
-            onClick={() => {
-              setOpen(false);
-              navigate("/profile");
-            }}
-            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
-          >
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
-              <User className="h-4 w-4" />
-            </span>
-            <span className="flex-1">
-              <span className="block text-xs font-medium">My profile</span>
-              <span className="block text-[10px] text-gray-500">
-                Edit details & display picture
-              </span>
-            </span>
-          </button>
-          {!tenureEnding && isSocietyRole(user.accountType) && (
-            <button
-              onClick={() => {
-                setOpen(false);
-                navigate("/dashboard");
-              }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
-            >
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
-                <Layout className="h-4 w-4" />
-              </span>
-              <span className="flex-1">
-                <span className="block text-xs font-medium">Signup Dashboard</span>
-                <span className="block text-[10px] text-gray-500">
-                  Manage signup access
-                </span>
-              </span>
-            </button>
-          )}
-          {userCanAccessLeadershipTransition(user) && (
-            <button
-              onClick={() => {
-                setOpen(false);
-                navigate("/leadership-transition");
-              }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300 relative"
-            >
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
-                <TrendingUp className="h-4 w-4" />
-              </span>
-              <span className="flex-1 min-w-0">
-                <span className="block text-xs font-medium">Leadership Transition</span>
-                <span className="block text-[10px] text-gray-500">
-                  Promotions & role management
-                </span>
-              </span>
-              {hasActiveLeadershipSession && (
-                <span className="mr-1 flex h-2 w-2 shrink-0 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
-                </span>
-              )}
-            </button>
-          )}
-          {!tenureEnding && (
-          <>
-          <button
-            onClick={() => {
-              setOpen(false);
-              navigate(
-                isSocietyRole(user.accountType)
-                  ? "/manage-society"
-                  : user?.isDepartmentMember ? "/view-team" : "/manage-team",
-              );
-            }}
-            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
-          >
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
-              <Users className="h-4 w-4" />
-            </span>
-            <span className="flex-1">
-              <span className="block text-xs font-medium">
-                {isSocietyRole(user.accountType)
-                  ? "Manage society"
-                  : user?.isDepartmentMember ? "View your team" : "Manage your team"}
-              </span>
-              <span className="block text-[10px] text-gray-500">
-                {isSocietyRole(user.accountType)
-                  ? "All departments & members"
-                  : user?.isDepartmentMember ? "View department members" : "Add members & upload Excel"}
-              </span>
-            </span>
-          </button>
-          {/* Dashboards */}
-          {isSociety ? (
-            <>
-              {/* Hover / click flyout: all department dashboards */}
-              <div
-                className="relative"
-                // onMouseEnter={() => setDeptFlyoutOpen(true)}
-                // onMouseLeave={() => setDeptFlyoutOpen(false)}
-                onMouseEnter={() =>  setDeptFlyoutOpen(true)}
-                onMouseLeave={() =>  setDeptFlyoutOpen(false)}
-                tabIndex={0}
-              >
-                <button
-                  type="button"
-                  onClick={() => setDeptFlyoutOpen((v) => !v)}
-                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
-                  aria-haspopup="menu"
-                  aria-expanded={deptFlyoutOpen}
-                >
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
-                    <Layout className="h-4 w-4" />
-                  </span>
-                  <span className="flex-1 min-w-0">
-                    <span className="block text-xs font-medium truncate">All department dashboards</span>
-                    <span className="block text-[10px] text-gray-500 truncate">
-                      Browse {deptDashboardKeys.length} dashboards
-                    </span>
-                  </span>
-                  <AiOutlineCaretDown
-                    className={`h-3.5 w-3.5 shrink-0 transition-transform duration-150 ${deptFlyoutOpen ? "rotate-90" : "rotate-90 opacity-70"}`}
-                  />
-                </button>
-
-                <div
-                  className={`absolute -top-60 right-full mr-[-200px] sm:mr-1 w-72 max-w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl border border-gray-500/40 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] shadow-xl backdrop-blur-sm overflow-hidden z-[70] transition-all duration-200 ease-out ${
-                    deptFlyoutOpen
-                      ? "pointer-events-auto opacity-100 translate-x-0 scale-100"
-                      : "pointer-events-none opacity-0 translate-x-1 scale-95"
-                  }`}
-                  role="menu"
-                >
-                  <div className="px-4 py-3 border-b border-gray-500/30">
-                    <div className="text-xs font-semibold text-richblack-25">Department dashboards</div>
-                    <div className="text-[10px] text-gray-400">Jump to a department dashboard</div>
-                  </div>
-                  <div
-                    className="max-h-[320px] overflow-y-auto px-1 py-1.5 overscroll-contain scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50"
-                    onWheel={handleFlyoutWheel}
-                  >
-                    {deptDashboardKeys.length ? (
-                      deptDashboardKeys.map((key) => {
-                        const title = `${getAccountTypeLabel(key) || key} Dashboard`;
-                        const to = key === emKey ? "/em-dashboard" : `/dashboard/${encodeURIComponent(key)}`;
-                        return (
-                          <button
-                            key={key}
-                            type="button"
-                            onClick={() => {
-                              setOpen(false);
-                              setDeptFlyoutOpen(false);
-                              navigate(to);
-                            }}
-                            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
-                            role="menuitem"
-                          >
-                            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
-                              <Layout className="h-4 w-4" />
-                            </span>
-                            <span className="flex-1 min-w-0">
-                              <span className="block text-xs font-medium truncate">{title}</span>
-                              <span className="block text-[10px] text-gray-500 truncate">
-                                Departments allowed, Generate QR
-                              </span>
-                            </span>
-                          </button>
-                        );
-                      })
-                    ) : (
-                      <div className="px-3 py-3 text-xs text-gray-400">
-                        No department dashboards available.
-                      </div>
+            <div className="border-b border-gray-500/30 px-4 py-3.5">
+              <div className="flex items-center gap-3">
+                {user.image ? (
+                  <div className="relative h-8 w-8">
+                    {!avatarLoadedMenu && (
+                      <div className="absolute inset-0 z-0 rounded-full bg-gray-500/50 pointer-events-none" />
                     )}
+                    <img
+                      key={`menu-${avatarImgSrc}`}
+                      src={avatarImgSrc || user.image}
+                      alt=""
+                      onLoad={() => setAvatarLoadedMenu(true)}
+                      onError={() => setAvatarLoadedMenu(true)}
+                      className="h-8 w-8 relative z-10 rounded-full object-cover border border-gray-500/50 opacity-100"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-600/80 text-xs font-semibold text-richblack-25">
+                    {user.firstName?.[0]}
+                    {user.lastName?.[0]}
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-semibold text-richblack-25">
+                    {user.firstName} {user.lastName}
+                  </div>
+                  <div className="truncate text-xs text-gray-400">
+                    {user.email}
                   </div>
                 </div>
               </div>
-            </>
-          ) : (
-            uniqueDashboardKeys.map((key) => {
-              const to = user?.isDepartmentMember
-                ? `/dashboard/member/${encodeURIComponent(key)}`
-                : key === "Event Management" ? "/em-dashboard" : `/dashboard/${encodeURIComponent(key)}`;
-              const isEm = key === "Event Management";
-              const Icon = isEm ? Calendar : Layout;
-              const title = isEm ? "EM Dashboard" : `${getAccountTypeLabel(key) || key} Dashboard`;
-              const subtitle = isEm ? "Upload & manage events" : "Configure access & permissions";
+              {tenureEnding && (
+                <SessionEndingNotice hoursLeft={sessionHoursLeft} />
+              )}
+              <div className="mt-2 flex items-center justify-between text-[10px]">
+                <span className="inline-flex rounded-full bg-cyan-500/20 px-2 py-0.5 font-medium text-cyan-300">
+                  {user.additionalDetails?.position ||
+                    getAccountTypeLabel(user.accountType) ||
+                    user.accountType}
+                </span>
+                <span className="text-gray-500">
+                  Joined{" "}
+                  <span className="font-medium text-gray-300">
+                    {user.createdAt
+                      ? new Date(user.createdAt).toLocaleDateString("en-IN", {
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : "—"}
+                  </span>
+                </span>
+              </div>
+            </div>
 
-              return (
+            <div className="border-b border-gray-500/30 px-4 py-2">
+              <div className="mb-2 flex min-h-7 items-center justify-between gap-2 pr-0.5">
+                <span className="flex h-7 items-center text-[8px] font-medium uppercase leading-none tracking-[0.12em] text-gray-400">
+                  Online now
+                </span>
                 <button
-                  key={key}
+                  type="button"
+                  title="Recent activity — who was on the site"
+                  aria-label="Open last activity list"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLastSeenOpen(true);
+                  }}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-cyan-500/35 bg-cyan-500/10 text-cyan-300 shadow-[0_0_12px_rgba(34,211,238,0.12)] transition hover:border-cyan-400/50 hover:bg-cyan-500/18 hover:text-cyan-200 absolute right-4 mt-2"
+                >
+                  <Clock
+                    className="h-3.5 w-3.5"
+                    strokeWidth={2.25}
+                    aria-hidden
+                  />
+                </button>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {onlineUsers.length ? (
+                  onlineUsers.map((person) => {
+                    const avatarSrc = person?.image
+                      ? cloudinaryTinyAvatarUrl(person.image)
+                      : "";
+                    const initials = String(person?.name || "U")
+                      .split(" ")
+                      .filter(Boolean)
+                      .slice(0, 2)
+                      .map((s) => s[0]?.toUpperCase())
+                      .join("");
+                    return (
+                      <button
+                        key={person.id}
+                        type="button"
+                        className="group relative inline-flex"
+                        title={person.name}
+                      >
+                        <span className="relative inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-300/20 bg-slate-800">
+                          {avatarSrc ? (
+                            <img
+                              src={avatarSrc}
+                              alt={person.name}
+                              className="h-7 w-7 rounded-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span className="text-[10px] font-semibold text-richblack-25">
+                              {initials || "U"}
+                            </span>
+                          )}
+                          <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border border-[#1e1e2f] bg-emerald-400" />
+                        </span>
+                        <span className="pointer-events-none absolute -top-7 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-gray-500/30 bg-[#151525] px-2 py-0.5 text-[10px] text-gray-200 shadow-lg group-hover:block group-focus-visible:block">
+                          {person.name}
+                        </span>
+                      </button>
+                    );
+                  })
+                ) : (
+                  <span className="text-[11px] text-gray-500">
+                    No users online
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="px-1 py-1.5 i-fonts">
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  navigate("/profile");
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
+              >
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+                  <User className="h-4 w-4" />
+                </span>
+                <span className="flex-1">
+                  <span className="block text-xs font-medium">My profile</span>
+                  <span className="block text-[10px] text-gray-500">
+                    Edit details & display picture
+                  </span>
+                </span>
+              </button>
+              {!tenureEnding && isSocietyRole(user.accountType) && (
+                <button
                   onClick={() => {
                     setOpen(false);
-                    navigate(to);
+                    navigate("/dashboard");
                   }}
                   className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
                 >
                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
-                    <Icon className="h-4 w-4" />
+                    <Layout className="h-4 w-4" />
                   </span>
                   <span className="flex-1">
-                    <span className="block text-xs font-medium">{title}</span>
-                    <span className="block text-[10px] text-gray-500">{subtitle}</span>
+                    <span className="block text-xs font-medium">
+                      Signup Dashboard
+                    </span>
+                    <span className="block text-[10px] text-gray-500">
+                      Manage signup access
+                    </span>
                   </span>
                 </button>
-              );
-            })
-          )}
-          </>
-          )}
-        </div>
+              )}
+              {userCanAccessLeadershipTransition(user) && (
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    navigate("/leadership-transition");
+                  }}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300 relative"
+                >
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+                    <TrendingUp className="h-4 w-4" />
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-xs font-medium">
+                      Leadership Transition
+                    </span>
+                    <span className="block text-[10px] text-gray-500">
+                      Promotions & role management
+                    </span>
+                  </span>
+                  {hasActiveLeadershipSession && (
+                    <span className="mr-1 flex h-2 w-2 shrink-0 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
+                    </span>
+                  )}
+                </button>
+              )}
+              {!tenureEnding && (
+                <>
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      navigate(
+                        isSocietyRole(user.accountType)
+                          ? "/manage-society"
+                          : user?.isDepartmentMember
+                            ? "/view-team"
+                            : "/manage-team",
+                      );
+                    }}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
+                  >
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+                      <Users className="h-4 w-4" />
+                    </span>
+                    <span className="flex-1">
+                      <span className="block text-xs font-medium">
+                        {isSocietyRole(user.accountType)
+                          ? "Manage society"
+                          : user?.isDepartmentMember
+                            ? "View your team"
+                            : "Manage your team"}
+                      </span>
+                      <span className="block text-[10px] text-gray-500">
+                        {isSocietyRole(user.accountType)
+                          ? "All departments & members"
+                          : user?.isDepartmentMember
+                            ? "View department members"
+                            : "Add members & upload Excel"}
+                      </span>
+                    </span>
+                  </button>
+                  {/* Dashboards */}
+                  {isSociety ? (
+                    <>
+                      {/* Hover / click flyout: all department dashboards */}
+                      <div
+                        className="relative"
+                        // onMouseEnter={() => setDeptFlyoutOpen(true)}
+                        // onMouseLeave={() => setDeptFlyoutOpen(false)}
+                        onMouseEnter={() => setDeptFlyoutOpen(true)}
+                        onMouseLeave={() => setDeptFlyoutOpen(false)}
+                        tabIndex={0}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setDeptFlyoutOpen((v) => !v)}
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
+                          aria-haspopup="menu"
+                          aria-expanded={deptFlyoutOpen}
+                        >
+                          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+                            <Layout className="h-4 w-4" />
+                          </span>
+                          <span className="flex-1 min-w-0">
+                            <span className="block text-xs font-medium truncate">
+                              All department dashboards
+                            </span>
+                            <span className="block text-[10px] text-gray-500 truncate">
+                              Browse {deptDashboardKeys.length} dashboards
+                            </span>
+                          </span>
+                          <AiOutlineCaretDown
+                            className={`h-3.5 w-3.5 shrink-0 transition-transform duration-150 ${deptFlyoutOpen ? "rotate-90" : "rotate-90 opacity-70"}`}
+                          />
+                        </button>
 
-        <div className="rounded-b-2xl border-t border-white/10 bg-transparent px-3 py-2.5 i-fonts">
-          <button
-            onClick={async () => {
-              setOpen(false);
-              await onLogout?.();
-              navigate("/");
-            }}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-500/90 to-red-500/90 px-3 py-2 text-xs font-semibold text-richblack-25 shadow transition-colors duration-300 ease-out hover:from-rose-500 hover:to-red-500"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            <span>Logout</span>
-          </button>
-        </div>
+                        <div
+                          className={`absolute -top-60 right-full mr-[-200px] sm:mr-1 w-72 max-w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl border border-gray-500/40 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] shadow-xl backdrop-blur-sm overflow-hidden z-[70] transition-all duration-200 ease-out ${
+                            deptFlyoutOpen
+                              ? "pointer-events-auto opacity-100 translate-x-0 scale-100"
+                              : "pointer-events-none opacity-0 translate-x-1 scale-95"
+                          }`}
+                          role="menu"
+                        >
+                          <div className="px-4 py-3 border-b border-gray-500/30">
+                            <div className="text-xs font-semibold text-richblack-25">
+                              Department dashboards
+                            </div>
+                            <div className="text-[10px] text-gray-400">
+                              Jump to a department dashboard
+                            </div>
+                          </div>
+                          <div
+                            className="max-h-[320px] overflow-y-auto px-1 py-1.5 overscroll-contain scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50"
+                            onWheel={handleFlyoutWheel}
+                          >
+                            {deptDashboardKeys.length ? (
+                              deptDashboardKeys.map((key) => {
+                                const title = `${getAccountTypeLabel(key) || key} Dashboard`;
+                                const to =
+                                  key === emKey
+                                    ? "/em-dashboard"
+                                    : `/dashboard/${encodeURIComponent(key)}`;
+                                return (
+                                  <button
+                                    key={key}
+                                    type="button"
+                                    onClick={() => {
+                                      setOpen(false);
+                                      setDeptFlyoutOpen(false);
+                                      navigate(to);
+                                    }}
+                                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
+                                    role="menuitem"
+                                  >
+                                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+                                      <Layout className="h-4 w-4" />
+                                    </span>
+                                    <span className="flex-1 min-w-0">
+                                      <span className="block text-xs font-medium truncate">
+                                        {title}
+                                      </span>
+                                      <span className="block text-[10px] text-gray-500 truncate">
+                                        Departments allowed, Generate QR
+                                      </span>
+                                    </span>
+                                  </button>
+                                );
+                              })
+                            ) : (
+                              <div className="px-3 py-3 text-xs text-gray-400">
+                                No department dashboards available.
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    uniqueDashboardKeys.map((key) => {
+                      const to =
+                        key === "Event Management"
+                          ? "/em-dashboard"
+                          : `/dashboard/${encodeURIComponent(key)}`;
+                      const isEm = key === "Event Management";
+                      const Icon = isEm ? Calendar : Layout;
+                      const title = isEm
+                        ? "EM Dashboard"
+                        : `${getAccountTypeLabel(key) || key} Dashboard`;
+                      const subtitle = isEm
+                        ? "Upload & manage events"
+                        : "Configure access & permissions";
+
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => {
+                            setOpen(false);
+                            navigate(to);
+                          }}
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
+                        >
+                          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+                            <Icon className="h-4 w-4" />
+                          </span>
+                          <span className="flex-1">
+                            <span className="block text-xs font-medium">
+                              {title}
+                            </span>
+                            <span className="block text-[10px] text-gray-500">
+                              {subtitle}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="rounded-b-2xl border-t border-white/10 bg-transparent px-3 py-2.5 i-fonts">
+              <button
+                onClick={async () => {
+                  setOpen(false);
+                  await onLogout?.();
+                  navigate("/");
+                }}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-500/90 to-red-500/90 px-3 py-2 text-xs font-semibold text-richblack-25 shadow transition-colors duration-300 ease-out hover:from-rose-500 hover:to-red-500"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span>Logout</span>
+              </button>
+            </div>
           </div>,
-          document.body
+          document.body,
         )}
 
       {typeof document !== "undefined" &&
@@ -811,18 +876,29 @@ function ProfileDropDown({
                     className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-fuchsia-500/20 blur-3xl"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.35, delay: 0.05, ease: "easeOut" }}
+                    transition={{
+                      duration: 0.35,
+                      delay: 0.05,
+                      ease: "easeOut",
+                    }}
                   />
                   <div className="pointer-events-none absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-cyan-500/15 blur-2xl" />
                   <motion.div
                     className="relative z-[1] shrink-0 border-b border-white/10 px-3 py-2.5"
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.22, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{
+                      duration: 0.22,
+                      delay: 0.06,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
                   >
                     <div className="flex items-start justify-between gap-2 i-fonts">
                       <div className="min-w-0 pr-1">
-                        <h2 id="last-seen-title" className="font-montserrat text-xs font-bold text-richblack-25">
+                        <h2
+                          id="last-seen-title"
+                          className="font-montserrat text-xs font-bold text-richblack-25"
+                        >
                           Last activity
                         </h2>
                         <p className="mt-0.5 text-[9px] leading-snug text-gray-400">
@@ -864,84 +940,94 @@ function ProfileDropDown({
                         {lastSeenError}
                       </motion.p>
                     )}
-                    {!lastSeenLoading && !lastSeenError && lastSeenRows.length === 0 && (
-                      <motion.p
-                        className="py-6 text-center text-xs text-gray-500 "
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        No members yet.
-                      </motion.p>
-                    )}
-                    {!lastSeenLoading && !lastSeenError && lastSeenRows.length > 0 && (
-                      <motion.div
-                        className="space-y-0"
-                        variants={lastSeenListContainer}
-                        initial="hidden"
-                        animate="show"
-                      >
-                        {lastSeenRows.map((row) => {
-                          // Feed row IDs are namespaced so a User and a department
-                          // member with the same Mongo ID cannot collide. Socket
-                          // presence uses the underlying document ID.
-                          const isOnline =
-                            onlineIdSet.has(String(row.id)) ||
-                            onlineIdSet.has(String(row.presenceId));
-                          const av = row.image ? cloudinaryTinyAvatarUrl(row.image) : "";
-                          const initials = String(row.name || "U")
-                            .split(/\s+/)
-                            .filter(Boolean)
-                            .slice(0, 2)
-                            .map((s) => s[0]?.toUpperCase())
-                            .join("");
-                          return (
-                            <motion.div
-                              key={row.id}
-                              variants={lastSeenListItem}
-                              className="mb-1.5 flex items-center gap-2.5 rounded-2xl border border-white/5 bg-white/[0.03] px-2.5 py-2 mt-1"
-                            >
-                              <div className="relative shrink-0">
-                                {av ? (
-                                  <img
-                                    src={av}
-                                    alt=""
-                                    className="h-9 w-9 rounded-full object-cover ring-1 ring-white/10"
-                                    loading="lazy"
-                                  />
-                                ) : (
-                                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-700 text-[11px] font-semibold text-richblack-25">
-                                    {initials || "?"}
-                                  </div>
-                                )}
-                                {isOnline && (
-                                  <span
-                                    className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-[#1e1e2f] bg-emerald-400"
-                                    title="Online"
-                                  />
-                                )}
-                              </div>
-                              <div className="min-w-0 flex-1 i-fonts">
-                                <div className="truncate text-xs font-semibold text-gray-100">{row.name}</div>
-                                <div className="mt-0.5 truncate text-[10px] text-gray-500">
-                                  {isOnline ? (
-                                    <span className="text-emerald-400/95">Online now</span>
+                    {!lastSeenLoading &&
+                      !lastSeenError &&
+                      lastSeenRows.length === 0 && (
+                        <motion.p
+                          className="py-6 text-center text-xs text-gray-500 "
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          No members yet.
+                        </motion.p>
+                      )}
+                    {!lastSeenLoading &&
+                      !lastSeenError &&
+                      lastSeenRows.length > 0 && (
+                        <motion.div
+                          className="space-y-0"
+                          variants={lastSeenListContainer}
+                          initial="hidden"
+                          animate="show"
+                        >
+                          {lastSeenRows.map((row) => {
+                            // Feed row IDs are namespaced so a User and a department
+                            // member with the same Mongo ID cannot collide. Socket
+                            // presence uses the underlying document ID.
+                            const isOnline =
+                              onlineIdSet.has(String(row.id)) ||
+                              onlineIdSet.has(String(row.presenceId));
+                            const av = row.image
+                              ? cloudinaryTinyAvatarUrl(row.image)
+                              : "";
+                            const initials = String(row.name || "U")
+                              .split(/\s+/)
+                              .filter(Boolean)
+                              .slice(0, 2)
+                              .map((s) => s[0]?.toUpperCase())
+                              .join("");
+                            return (
+                              <motion.div
+                                key={row.id}
+                                variants={lastSeenListItem}
+                                className="mb-1.5 flex items-center gap-2.5 rounded-2xl border border-white/5 bg-white/[0.03] px-2.5 py-2 mt-1"
+                              >
+                                <div className="relative shrink-0">
+                                  {av ? (
+                                    <img
+                                      src={av}
+                                      alt=""
+                                      className="h-9 w-9 rounded-full object-cover ring-1 ring-white/10"
+                                      loading="lazy"
+                                    />
                                   ) : (
-                                    formatLastSeenLabel(row.lastSeen)
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-700 text-[11px] font-semibold text-richblack-25">
+                                      {initials || "?"}
+                                    </div>
+                                  )}
+                                  {isOnline && (
+                                    <span
+                                      className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-[#1e1e2f] bg-emerald-400"
+                                      title="Online"
+                                    />
                                   )}
                                 </div>
-                              </div>
-                            </motion.div>
-                          );
-                        })}
-                      </motion.div>
-                    )}
+                                <div className="min-w-0 flex-1 i-fonts">
+                                  <div className="truncate text-xs font-semibold text-gray-100">
+                                    {row.name}
+                                  </div>
+                                  <div className="mt-0.5 truncate text-[10px] text-gray-500">
+                                    {isOnline ? (
+                                      <span className="text-emerald-400/95">
+                                        Online now
+                                      </span>
+                                    ) : (
+                                      formatLastSeenLabel(row.lastSeen)
+                                    )}
+                                  </div>
+                                </div>
+                              </motion.div>
+                            );
+                          })}
+                        </motion.div>
+                      )}
                   </div>
                 </motion.div>
               </>
             )}
           </AnimatePresence>,
-          document.body
+          document.body,
         )}
     </div>
   );
