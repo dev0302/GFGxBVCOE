@@ -1,9 +1,12 @@
 import { NavLink, useLocation, useParams } from "react-router-dom";
 import { Grid, Users, Folder } from "react-feather";
+import { useAuth } from "../../context/AuthContext";
+import { canManageDepartmentDashboard } from "../../utils/dashboardAccess";
 
 export default function DepartmentSidebar() {
   const location = useLocation();
   const { departmentKey } = useParams();
+  const { user } = useAuth();
 
   const encodedKey = encodeURIComponent(departmentKey || "");
   const links = [
@@ -23,15 +26,20 @@ export default function DepartmentSidebar() {
       icon: Folder,
     },
   ];
+  const visibleLinks = canManageDepartmentDashboard(user, departmentKey)
+    ? links
+    : links.filter((link) => link.name !== "Departments allowed");
 
   const matchRoute = (path) => {
-    return location.pathname === path || location.pathname.startsWith(path + "/");
+    return (
+      location.pathname === path || location.pathname.startsWith(path + "/")
+    );
   };
 
   return (
     <div className="flex h-screen min-w-[60px] md:min-w-[220px] flex-col border-r border-gray-500/30 bg-[#1e1e2f]/95 pb-6 pt-20 sm:pt-24 transition-all duration-300">
       <div className="flex flex-col gap-0.5 px-2 md:px-4">
-        {links.map((link) => {
+        {visibleLinks.map((link) => {
           const Icon = link.icon;
           const isActive = matchRoute(link.path);
           return (
@@ -54,4 +62,3 @@ export default function DepartmentSidebar() {
     </div>
   );
 }
-

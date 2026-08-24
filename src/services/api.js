@@ -365,6 +365,23 @@ export async function removeDashboardAllowedDepartment(
   return data;
 }
 
+/** Enable or disable dashboard access for all members of the dashboard's department. */
+export async function updateDashboardMemberAccess(departmentKey, enabled) {
+  const key = String(departmentKey || "").trim();
+  if (!key) throw new Error("dashboardKey required");
+  const res = await authFetch(
+    `/api/v1/dashboards/${encodeURIComponent(key)}/member-access`,
+    {
+      method: "POST",
+      body: JSON.stringify({ enabled: Boolean(enabled) }),
+    },
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok)
+    throw new Error(data.message || "Failed to update member access");
+  return data;
+}
+
 export async function addEventUploadDepartment(department) {
   const res = await authFetch("/api/v1/events/upload-allowed/add", {
     method: "POST",

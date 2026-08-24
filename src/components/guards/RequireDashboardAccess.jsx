@@ -23,9 +23,10 @@ export default function RequireDashboardAccess({ dashboardKey, children }) {
 
   if (!user) return <Navigate to="/login" replace />;
 
-  const access = Array.isArray(user.dashboardAccess) ? user.dashboardAccess : [];
+  const access = Array.isArray(user.dashboardAccess)
+    ? user.dashboardAccess
+    : [];
   if (!key || !access.includes(key)) return <Navigate to="/notfound" replace />;
 
   return children ?? null;
 }
-
