@@ -18,7 +18,7 @@ const postSchema = new mongoose.Schema(
     content: {
       type: String,
       required: true,
-      maxlength: 50000,
+      maxlength: 200000, // HTML markup from WYSIWYG adds overhead over plain text
     },
     summary: {
       type: String,
