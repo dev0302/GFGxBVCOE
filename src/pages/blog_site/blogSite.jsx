@@ -1,20 +1,38 @@
 import React, { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, PenLine, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, PenLine, Search, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getPublicPosts } from "../../services/blog_api";
+import { getPublicPosts, getPendingPosts } from "../../services/blog_api";
 import { useAuth } from "../../context/AuthContext";
+import { NativeTypewriter } from "../../components/ui/native-typewriter";
+import { FloatingPathsBackground } from "../../components/ui/floating-paths";
+import confetti from "canvas-confetti";
 
 const canReviewPosts = (user) => {
   const position = String(
     user?.additionalDetails?.position || user?.additionalDetails?.p0 || "",
   ).toLowerCase();
   return (
-    ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"].includes(
-      user?.accountType,
-    ) ||
+    ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"].includes(user?.accountType) ||
     position.includes("lead") ||
     position.includes("head")
   );
+};
+
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS
+   Kept the existing dark-forest / signal-green identity,
+   just made it consistent: one radius scale, one shadow
+   scale, one spacing rhythm, one glass-panel recipe.
+═══════════════════════════════════════════════════ */
+const tokens = {
+  panel: "rgba(255,255,255,0.035)",
+  panelHover: "rgba(74,222,128,0.07)",
+  border: "rgba(120,220,160,0.14)",
+  borderHover: "rgba(120,220,160,0.32)",
+  textPrimary: "#eaf7ee",
+  textMuted: "#7fa88f",
+  accent: "#3ddc84",
+  accentSoft: "#8ff0b4",
 };
 
 const BlogSite = () => {
@@ -22,10 +40,10 @@ const BlogSite = () => {
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [categoryPage, setCategoryPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [pendingCount, setPendingCount] = useState(0);
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -38,313 +56,435 @@ const BlogSite = () => {
         setLoading(false);
       }
     };
-
     loadPosts();
   }, []);
 
-  // Get unique categories
-  const categories = [
-    "Technology",
-    "Science & Innovation",
-    "Finance & Business",
-    "Education & Career",
-    "Lifestyle",
-    "Campus & Community",
-    "Entertainment",
-    "Sports",
-    "Culture & Society",
-    "Politics & Current Affairs",
-  ];
-  const categoriesPerPage = 3;
-  const categoryPageCount = Math.ceil(categories.length / categoriesPerPage);
-  const visibleCategories = categories.slice(
-    categoryPage * categoriesPerPage,
-    (categoryPage + 1) * categoriesPerPage,
-  );
+  useEffect(() => {
+    if (!canReviewPosts(user)) return;
+    getPendingPosts()
+      .then((data) => {
+        const arr = Array.isArray(data.posts) ? data.posts : [];
+        setPendingCount(arr.length);
+      })
+      .catch(() => {});
+  }, [user]);
 
-  // Filter posts based on selected category
-  // Filter posts based on selected category and search query
+  // ── Celebration confetti on page open ──
+  useEffect(() => {
+    const end = Date.now() + 3 * 1000;
+    const colors = ["#a786ff", "#fd8bbc", "#eca184", "#f8deb1"];
+
+    const frame = () => {
+      if (Date.now() > end) return;
+      confetti({
+        particleCount: 2,
+        angle: 60,
+        spread: 55,
+        startVelocity: 60,
+        origin: { x: 0, y: 0.5 },
+        colors,
+      });
+      confetti({
+        particleCount: 2,
+        angle: 120,
+        spread: 55,
+        startVelocity: 60,
+        origin: { x: 1, y: 0.5 },
+        colors,
+      });
+      requestAnimationFrame(frame);
+    };
+
+    frame();
+  }, []);
+
+  const categories = [
+    "Technology", "Science & Innovation", "Finance & Business",
+    "Education & Career", "Lifestyle", "Campus & Community",
+    "Entertainment", "Sports", "Culture & Society", "Politics & Current Affairs",
+  ];
+
   const filteredPosts = posts
-    .filter((post) =>
-      selectedCategory ? post.category === selectedCategory : true,
-    )
+    .filter((post) => (selectedCategory ? post.category === selectedCategory : true))
     .filter((post) => {
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase();
-      return (
-        post.title?.toLowerCase().includes(query) ||
-        post.summary?.toLowerCase().includes(query)
-      );
+      return post.title?.toLowerCase().includes(query) || post.summary?.toLowerCase().includes(query);
     });
 
   return (
-    <div className="min-h-screen bg-[#020b08] text-[#e8f1ed]">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden pt-20 pb-12">
-        {/* <div className="absolute inset-0 opacity-10">
-          <div className="top-0 left-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl"></div>
-          <div className=" top-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl"></div>
-        </div> */}
+    <div
+      className="relative min-h-screen overflow-x-hidden"
+      style={{ background: "linear-gradient(160deg,#02100a 0%,#03170d 45%,#041d10 75%,#02100a 100%)" }}
+    >
+      <style>{`
+        @keyframes bs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+        .bs-scrollbar-hide::-webkit-scrollbar { display: none; }
+        .bs-scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        @media (prefers-reduced-motion: reduce) {
+          .bs-scrollbar-hide, * { scroll-behavior: auto !important; }
+        }
+      `}</style>
 
-        <div className="relative max-w-7xl mt-20  items-center m-auto px-4 sm:px-6 lg:px-8 flex flex-col">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-audiowide font-bold text-richblack-5 mb-2 leading-tight">
-            The GFG-BVCOE{" "}
-            <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+      {/* Background glow layer */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div
+          className="absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full opacity-[0.16] sm:h-[600px] sm:w-[600px]"
+          style={{ background: "radial-gradient(circle,#22c55e 0%,#16a34a 40%,transparent 70%)", filter: "blur(90px)" }}
+        />
+        <div
+          className="absolute top-1/3 -right-24 h-[380px] w-[380px] rounded-full opacity-[0.10] sm:h-[500px] sm:w-[500px]"
+          style={{ background: "radial-gradient(circle,#4ade80 0%,#15803d 50%,transparent 70%)", filter: "blur(110px)" }}
+        />
+        <div
+          className="absolute bottom-0 left-1/4 h-[320px] w-[320px] rounded-full opacity-[0.07] sm:h-[400px] sm:w-[400px]"
+          style={{ background: "radial-gradient(circle,#86efac 0%,#166534 50%,transparent 70%)", filter: "blur(90px)" }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.05]"
+          style={{ backgroundImage: "radial-gradient(rgba(74,222,128,0.9) 1px,transparent 1px)", backgroundSize: "30px 30px" }}
+        />
+      </div>
+
+      <div className="relative z-10" style={{ color: tokens.textPrimary }}>
+        {/* ── HERO ── */}
+        <section className="flex flex-col items-center px-4 pb-14 pt-24 text-center sm:pt-32">
+        
+
+          <h1
+            className="font-audiowide text-[2.25rem] font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl"
+            style={{ color: "#e4ede7" }}
+          >
+            The Gfg-Bvcoe
+            <span
+              className="ml-3 block sm:inline"
+              style={{
+                background: "linear-gradient(90deg,#4ade80 0%,#22c55e 50%,#86efac 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                filter: "drop-shadow(0 0 26px rgba(74,222,128,0.4))",
+              }}
+            >
               Journal
             </span>
           </h1>
-          <p className="text-lg sm:text-xl font-nunito mb-4 max-w-2xl leading-relaxed bg-gradient-to-r from-richblack-100 to-richblack-200 bg-clip-text text-transparent">
-            Share your journey in words — because stories inspire change.
+
+          <p className="i-fonts mt-5 max-w-lg font-nunito text-base leading-relaxed sm:text-lg" style={{ color: tokens.textMuted }}>
+            <NativeTypewriter
+              content="Share your journey in words - because stories inspire change."
+              speed={45}
+              deleteSpeed={25}
+              pauseMs={5000}
+              loop
+              cursor
+              style={{ color: tokens.textMuted }}
+            />
           </p>
-        </div>
-      </div>
 
-      {/* Search Bar */}
-      <div className="max-w-[25rem] ml-[60rem] px-2 py-4">
-        <div className="relative">
-          <Search
-            aria-hidden="true"
-            size={18}
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-richblack-300"
+          <div
+            className="mt-9 h-px w-32 rounded-full"
+            style={{ background: "linear-gradient(90deg,transparent,#22c55e,transparent)", boxShadow: "0 0 10px rgba(34,197,94,0.5)" }}
           />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search posts by title or summary..."
-            className="w-full rounded-full border border-richblack-200 bg-richblack-700 py-3 pl-11 pr-5 text-sm font-montserrat text-richblack-5 placeholder-richblack-300 outline-none transition focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/30"
-          />
-        </div>
-      </div>
+        </section>
 
-      {/* Category Filter */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            aria-label="Previous categories"
-            disabled={categoryPage === 0}
-            onClick={() => setCategoryPage((page) => Math.max(page - 1, 0))}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-richblack-200 bg-richblack-700 text-richblack-100 transition hover:bg-richblack-800 disabled:cursor-not-allowed disabled:opacity-30"
+        {/* ── CONTROLS ── */}
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div
+            className="flex flex-col gap-4 rounded-3xl p-4 sm:p-5"
+            style={{ background: tokens.panel, border: `1px solid ${tokens.border}`, backdropFilter: "blur(14px)" }}
           >
-            <ChevronLeft size={20} />
-          </button>
+            {/* Search + actions row */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="relative w-full sm:max-w-sm">
+                <Search size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2" style={{ color: tokens.accent }} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search posts..."
+                  className="w-full rounded-full py-3 pl-11 pr-5 text-sm font-montserrat outline-none transition-all duration-300 focus:ring-2"
+                  style={{
+                    color: tokens.textPrimary,
+                    background: "rgba(4,25,14,0.55)",
+                    border: `1px solid ${tokens.border}`,
+                  }}
+                />
+              </div>
 
-          <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className={`px-4 py-2 rounded-full font-montserrat font-semibold text-sm transition-all duration-300 ${
-                selectedCategory === null
-                  ? "bg-gradient-to-r from-cyan-500 to-purple-500 text-richblack-5 shadow-lg shadow-cyan-500/50"
-                  : "bg-richblack-700 text-richblack-100 hover:bg-richblack-800 border border-richblack-200"
-              }`}
-            >
-              All Posts
-            </button>
-            {visibleCategories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`min-h-5  rounded-full font-montserrat font-semibold text-sm transition-all duration-300 ${
-                  selectedCategory === category
-                    ? "bg-gradient-to-r from-cyan-500 to-purple-500 text-richblack-5 shadow-lg shadow-cyan-500/50"
-                    : "bg-richblack-700 text-richblack-100 hover:bg-richblack-800 border border-richblack-200"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+              <div className="flex shrink-0 items-center gap-2.5">
+                <button
+                  onClick={() => navigate("/blog/create")}
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-full sm:px-5 py-2.5 font-montserrat sm:text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 sm:flex-none text-[12px] px-4"
+                  style={{
+                    background: "linear-gradient(135deg,#16a34a 0%,#22c55e 50%,#4ade80 100%)",
+                    boxShadow: "0 4px 20px rgba(34,197,94,0.3),inset 0 1px 0 rgba(255,255,255,0.2)",
+                  }}
+                >
+                  <PenLine size={15} /> Write a post
+                </button>
+
+                {canReviewPosts(user) && (
+                  <button
+                    onClick={() => navigate("/blog/approval")}
+                    className="relative inline-flex flex-1 items-center justify-center gap-2 rounded-full sm:px-5 py-2.5 font-montserrat sm:text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 sm:flex-none text-[12px] px-4"
+                    style={{
+                      background: "linear-gradient(135deg,#4c1d95 0%,#6d28d9 40%,#7c3aed 70%,#818cf8 100%)",
+                      boxShadow: "0 4px 20px rgba(109,40,217,0.35),inset 0 1px 0 rgba(255,255,255,0.15)",
+                      border: "1px solid rgba(167,139,250,0.35)",
+                    }}
+                  >
+                    Editorial desk
+                    {pendingCount > 0 && (
+                      <span
+                        className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1.5 text-[10px] font-bold leading-none"
+                        style={{
+                          background: "linear-gradient(135deg,#f59e0b 0%,#ef4444 100%)",
+                          color: "#fff",
+                          boxShadow: "0 0 8px rgba(239,68,68,0.6)",
+                          animation: "bs-pulse 2s ease-in-out infinite",
+                        }}
+                      >
+                        {pendingCount > 99 ? "99+" : pendingCount}
+                      </span>
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Category rail — horizontal scroll, no pagination state needed */}
+            <div className="relative -mx-1">
+              <div className="bs-scrollbar-hide flex gap-2 overflow-x-auto px-1 py-0.5">
+                {[null, ...categories].map((cat) => {
+                  const isActive = selectedCategory === cat;
+                  return (
+                    <button
+                      key={cat ?? "__all__"}
+                      onClick={() => setSelectedCategory(cat)}
+                      className="shrink-0 whitespace-nowrap rounded-full px-4 py-2 font-montserrat text-[13px] font-semibold transition-all duration-300"
+                      style={
+                        isActive
+                          ? {
+                              background: "linear-gradient(135deg,#16a34a 0%,#22c55e 60%,#4ade80 100%)",
+                              color: "#fff",
+                              boxShadow: "0 4px 16px rgba(34,197,94,0.35)",
+                            }
+                          : {
+                              background: "rgba(14,60,30,0.4)",
+                              color: tokens.accentSoft,
+                              border: `1px solid ${tokens.border}`,
+                            }
+                      }
+                    >
+                      {cat ?? "All Posts"}
+                    </button>
+                  );
+                })}
+              </div>
+              {/* edge fade hints for scrollability */}
+              <div className="pointer-events-none absolute right-0 top-0 h-full w-8 sm:hidden" style={{ background: "linear-gradient(90deg,transparent,rgba(3,20,10,0.9))" }} />
+            </div>
           </div>
-
-          <button
-            type="button"
-            aria-label="Next categories"
-            disabled={categoryPage === categoryPageCount - 1}
-            onClick={() =>
-              setCategoryPage((page) =>
-                Math.min(page + 1, categoryPageCount - 1),
-              )
-            }
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-richblack-200 bg-richblack-700 text-richblack-100 transition hover:bg-richblack-800 disabled:cursor-not-allowed disabled:opacity-30"
-          >
-            <ChevronRight size={20} />
-          </button>
         </div>
-      </div>
 
-      {/* Blog Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8 flex items-center justify-between gap-4">
-          <h2 className="text-2xl sm:text-3xl font-bold text-richblack-5 font-audiowide">
-            All Posts
-          </h2>
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              onClick={() => navigate("/blog/create")}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 px-4 py-2.5 font-montserrat text-sm font-semibold text-richblack-5 shadow-lg shadow-cyan-500/20 transition duration-300 hover:-translate-y-0.5 hover:shadow-cyan-500/40 sm:px-5"
+        {/* ── POSTS GRID ── */}
+        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+          <div className="mb-9 flex flex-wrap items-center gap-4">
+            <h2
+              className="font-audiowide text-xl font-bold sm:text-2xl lg:text-3xl"
+              style={{
+                background: "linear-gradient(90deg,#ffffff 30%,#4ade80 80%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
             >
-              <PenLine size={16} />
-              <span>Write a post</span>
-            </button>
-            {canReviewPosts(user) && (
-              <button
-                onClick={() => navigate("/blog/approval")}
-                className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-4 py-2.5 font-montserrat text-sm font-semibold text-emerald-300 transition hover:bg-emerald-400 hover:text-[#07130c] sm:px-5"
+              {selectedCategory ?? "All Posts"}
+            </h2>
+            <div className="h-px flex-1 min-w-[24px]" style={{ background: "linear-gradient(90deg,rgba(74,222,128,0.4),transparent)" }} />
+            {!loading && (
+              <span
+                className="rounded-full px-3 py-1 text-xs font-bold"
+                style={{ color: tokens.accent, background: "rgba(34,197,94,0.1)", border: `1px solid ${tokens.border}` }}
               >
-                Editorial desk
-              </button>
+                {filteredPosts.length} posts
+              </span>
             )}
           </div>
-        </div>
 
-        {loading && (
-          <p className="text-center py-20 text-richblack-200 text-lg font-montserrat">
-            Loading posts...
-          </p>
-        )}
-
-        {!loading && error && (
-          <p className="text-center py-20 text-red-300 text-lg font-montserrat">
-            {error}
-          </p>
-        )}
-
-        {!loading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPosts.map((post) => (
-              <BlogCard
-                key={post._id || post.slug}
-                post={post}
-                navigate={navigate}
+          {loading && (
+            <div className="flex flex-col items-center justify-center py-28">
+              <div
+                className="h-11 w-11 animate-spin rounded-full"
+                style={{ border: "2px solid rgba(74,222,128,0.15)", borderTopColor: "#22c55e", boxShadow: "0 0 20px rgba(34,197,94,0.3)" }}
               />
-            ))}
-          </div>
-        )}
+              <p className="mt-5 font-montserrat text-sm" style={{ color: tokens.textMuted }}>Loading posts...</p>
+            </div>
+          )}
 
-        {/* No posts message */}
-        {!loading && !error && filteredPosts.length === 0 && (
-          <div className="text-center py-20">
-            <p className="text-richblack-200 text-lg font-montserrat">
-              No posts found in this category.
-            </p>
-          </div>
-        )}
+          {!loading && error && (
+            <p className="py-20 text-center font-montserrat text-red-400">{error}</p>
+          )}
+
+          {!loading && !error && filteredPosts.length > 0 && (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {filteredPosts.map((post, index) => (
+                <BlogCard key={post._id || post.slug} post={post} navigate={navigate} index={index} />
+              ))}
+            </div>
+          )}
+
+          {!loading && !error && filteredPosts.length === 0 && (
+            <div className="flex flex-col items-center justify-center rounded-3xl py-24 text-center" style={{ background: tokens.panel, border: `1px solid ${tokens.border}` }}>
+              <div
+                className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl"
+                style={{ background: "rgba(14,60,30,0.6)", border: `1px solid ${tokens.border}` }}
+              >
+                <Search size={24} style={{ color: tokens.accent }} />
+              </div>
+              <p className="font-montserrat text-base" style={{ color: tokens.textMuted }}>No posts found.</p>
+              <p className="mt-1 font-montserrat text-xs" style={{ color: "rgba(127,168,143,0.6)" }}>Try a different search term or category.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-const BlogCard = ({ post, navigate }) => {
+/* ═══════════════════════════════════════════════════
+   BLOG CARD
+═══════════════════════════════════════════════════ */
+const BlogCard = ({ post, navigate, index = 0 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
-  // Color mapping for different categories
-  const categoryColors = {
-    "Web Development": "text-[#55df8b] border-green-400/20 bg-green-700/[0.08]",
-    React: "text-[#55df8b] border-green-400/20 bg-green-700/[0.08]",
-    CSS: "text-[#55df8b] border-green-400/20 bg-green-700/[0.08]",
-    JavaScript: "text-[#55df8b] border-green-400/20 bg-green-700/[0.08]",
-    Design: "text-[#55df8b] border-green-400/20 bg-green-700/[0.08]",
-  };
+  const goToPost = () => navigate("/blog/post/" + encodeURIComponent(post.slug));
 
-  const getCategoryColor = (category) => {
-    return (
-      categoryColors[category] ||
-      "text-[#55df8b] border-green-400/20 bg-green-700/[0.08]"
-    );
-  };
+  // Alternate path direction per card so adjacent cards look different
+  const pathPosition = index % 2 === 0 ? -1 : 1;
 
   return (
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group h-full"
+      onClick={goToPost}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter") goToPost(); }}
+      className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-3xl transition-all duration-500 focus:outline-none focus-visible:ring-2"
+      style={{
+        background: isHovered
+          ? "linear-gradient(160deg,rgba(22,101,52,0.5) 0%,rgba(5,46,22,0.85) 60%,rgba(2,13,7,0.95) 100%)"
+          : "linear-gradient(160deg,rgba(14,60,30,0.42) 0%,rgba(4,30,14,0.7) 60%,rgba(2,11,6,0.88) 100%)",
+        border: isHovered ? `1px solid ${tokens.borderHover}` : `1px solid ${tokens.border}`,
+        boxShadow: isHovered
+          ? "0 20px 50px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.06)"
+          : "0 6px 24px rgba(0,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.03)",
+        transform: isHovered ? "translateY(-4px)" : "translateY(0)",
+      }}
     >
-      <div
-        className={`relative h-full flex flex-col overflow-hidden rounded-3xl border bg-[#04120c]/70 shadow-[0_15px_50px_rgba(0,0,0,0.18)] transition duration-500 ${
-          isHovered
-            ? "-translate-y-1 border-green-500/35 bg-[#071d12] shadow-[0_20px_60px_rgba(15,180,80,0.08)]"
-            : "border-green-900/25"
-        }`}
-      >
-        {/* Image Container */}
-        <div className="relative h-56 overflow-hidden bg-[#03130c]">
-          <img
-            src={
-              post.coverImage ||
-              "https://placehold.co/800x500/03130c/55df8b?text=GFG+Journal"
-            }
-            alt={post.title}
-            className={`h-full w-full object-cover opacity-60 transition duration-700 ${
-              isHovered ? "scale-110 opacity-100" : "scale-100"
-            }`}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#04120c] via-[#04120c]/30 to-transparent"></div>
+      {/* ── Floating paths background — sits behind all card content ── */}
+      <FloatingPathsBackground
+        position={pathPosition}
+        className="absolute inset-0 opacity-30"
+      />
 
-          {/* Category Badge */}
-          <div className="absolute left-6 top-6">
-            <span
-              className={`inline-block rounded-full border px-3 py-1.5 text-[9px] font-bold uppercase tracking-[1.5px] backdrop-blur-md ${getCategoryColor(post.category)}`}
-            >
-              {post.category || "GFG JOURNAL"}
-            </span>
-          </div>
-        </div>
+      {/* Image */}
+      <div className="relative h-44 overflow-hidden sm:h-48">
+        <img
+          src={post.coverImage || "https://placehold.co/800x500/031a0d/4ade80?text=GFG+Journal"}
+          alt={post.title}
+          className="h-full w-full object-cover transition-all duration-700"
+          style={{ transform: isHovered ? "scale(1.06)" : "scale(1)", opacity: isHovered ? 0.9 : 0.72 }}
+        />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top,rgba(2,13,7,0.95) 0%,rgba(4,20,10,0.3) 55%,transparent 100%)" }} />
 
-        {/* Content Container */}
-        <div className="flex flex-1 flex-col justify-between p-6 sm:p-7">
-          {/* Title */}
-          <div className="flex items-center justify-between">
-            <div className="text-[10px] font-bold tracking-[1.5px] text-[#48db83]">
-              GFG × BVCOE
-            </div>
-            <button
-              type="button"
-              aria-label={`Read ${post.title}`}
-              onClick={() =>
-                navigate(`/blog/post/${encodeURIComponent(post.slug)}`)
-              }
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-green-900/40 text-lg text-[#91a49a] transition hover:rotate-45 hover:border-green-400/40 hover:bg-green-500 hover:text-white"
-            >
-              ↗
-            </button>
-          </div>
-          <h3 className="mt-5 line-clamp-2 text-[23px] font-semibold leading-[1.15] tracking-[-1px] text-[#e5eeea] transition-colors group-hover:text-[#39d878]">
-            {post.title}
-          </h3>
-
-          {/* Description */}
-          <p className="mt-4 line-clamp-3 text-[13px] leading-6 text-[#82928a]">
-            {post.summary ||
-              "Read the latest story from the GFG-BVCOE community."}
-          </p>
-
-          {/* Meta Information */}
-          <div className="mt-8 flex items-center justify-between border-t border-green-900/25 pt-4 text-[9px] font-medium tracking-[1px] text-[#58675f]">
-            <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full border border-green-900/40 bg-green-700/20 text-xs font-bold text-[#55df8b]">
-                {getAuthorName(post.author).charAt(0)}
-              </div>
-              <span className="truncate uppercase text-[#82928a]">
-                {getAuthorName(post.author)}
-              </span>
-            </div>
-            <span className="ml-2 whitespace-nowrap">
-              {formatPublishedDate(post.createdAt)}
-            </span>
-          </div>
-        </div>
-
-        {/* Read More Button */}
-        <div className="px-6 pb-6 pt-0 sm:px-7">
-          <button
-            onClick={() =>
-              navigate(`/blog/post/${encodeURIComponent(post.slug)}`)
-            }
-            className="w-full rounded-full border border-green-400/20 bg-green-700/[0.08] px-4 py-3 text-sm font-semibold text-[#55df8b] transition hover:border-green-400/40 hover:bg-green-500 hover:text-white"
+        {post.category && (
+          <span
+            className="absolute left-3.5 top-3.5 rounded-full px-3 py-1.5 text-[9px] font-bold uppercase tracking-[1.6px]"
+            style={{ color: tokens.accent, background: "rgba(3,20,10,0.85)", border: `1px solid ${tokens.border}` }}
           >
-            Read story <span className="ml-1">↗</span>
-          </button>
+            {post.category}
+          </span>
+        )}
+
+        <button
+          type="button"
+          aria-label={"Read " + post.title}
+          onClick={(e) => { e.stopPropagation(); goToPost(); }}
+          className="absolute right-3.5 top-3.5 flex h-9 w-9 items-center justify-center rounded-full text-sm text-white transition-all duration-300 hover:rotate-45"
+          style={{ background: "rgba(22,163,74,0.5)", border: `1px solid ${tokens.borderHover}` }}
+        >
+          &#8599;
+        </button>
+      </div>
+
+      {/* Text content */}
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
+        <p className="text-[9px] font-bold tracking-[2px]" style={{ color: tokens.accent }}>GFG × BVCOE</p>
+        <h3
+          className="mt-2.5 line-clamp-2 text-lg font-semibold leading-snug transition-colors duration-300 sm:text-xl"
+          style={{ color: isHovered ? tokens.accent : "#d8f3e2" }}
+        >
+          {post.title}
+        </h3>
+        <p className="mt-2.5 line-clamp-3 flex-1 text-[13px] leading-6" style={{ color: "#6f9682" }}>
+          {post.summary || "Read the latest story from the GFG-BVCOE community."}
+        </p>
+
+        {post.tags?.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {post.tags.slice(0, 3).map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full px-2.5 py-1 text-[10px] font-medium"
+                style={{ background: "rgba(34,197,94,0.08)", border: `1px solid ${tokens.border}`, color: tokens.accent }}
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div
+          className="mt-5 flex items-center justify-between border-t pt-4 text-[10px] font-medium uppercase tracking-[0.6px]"
+          style={{ borderColor: "rgba(34,197,94,0.1)", color: tokens.textMuted }}
+        >
+          <div className="flex min-w-0 items-center gap-2">
+            <div
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+              style={{ background: "rgba(22,163,74,0.32)", border: `1px solid ${tokens.border}`, color: tokens.accent }}
+            >
+              {getAuthorName(post.author).charAt(0)}
+            </div>
+            <span className="truncate" style={{ color: "#6f9682" }}>{getAuthorName(post.author)}</span>
+          </div>
+          <span className="shrink-0">{formatPublishedDate(post.createdAt)}</span>
         </div>
+      </div>
+
+      {/* CTA */}
+      <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+        <button
+          onClick={(e) => { e.stopPropagation(); goToPost(); }}
+          className="w-full rounded-full py-3 text-sm font-bold transition-all duration-300"
+          style={
+            isHovered
+              ? {
+                  background: "linear-gradient(135deg,#15803d 0%,#22c55e 100%)",
+                  color: "#ffffff",
+                  boxShadow: "0 6px 20px rgba(34,197,94,0.3)",
+                }
+              : {
+                  background: "rgba(22,163,74,0.08)",
+                  color: tokens.accent,
+                  border: `1px solid ${tokens.border}`,
+                }
+          }
+        >
+          Read Blog &#8599;
+        </button>
       </div>
     </div>
   );
@@ -353,18 +493,12 @@ const BlogCard = ({ post, navigate }) => {
 const getAuthorName = (author) => {
   if (!author) return "GFG-BVCOE";
   if (typeof author === "string") return author;
-  return (
-    `${author.firstName || ""} ${author.lastName || ""}`.trim() || "GFG-BVCOE"
-  );
+  return (`${author.firstName || ''} ${author.lastName || ''}`.trim() || 'GFG-BVCOE');
 };
 
 const formatPublishedDate = (date) => {
   if (!date) return "";
-  return new Date(date).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  return new Date(date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 };
 
 export default BlogSite;

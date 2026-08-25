@@ -36,6 +36,8 @@ const getPostPayload = ({
   coverImage,
   category,
   tags,
+  fullName,
+  notifyEmail,
 }) => ({
   title,
   content,
@@ -43,6 +45,8 @@ const getPostPayload = ({
   coverImage,
   category,
   tags,
+  fullName,
+  notifyEmail,
 });
 
 export async function getPublicPosts() {
@@ -84,5 +88,19 @@ export async function approvePost(postId, action, feedback = "") {
   return request(`/approve/${encodeURIComponent(postId)}`, {
     method: "POST",
     body: JSON.stringify({ action, feedback }),
+  });
+}
+
+export async function getReviewHistory() {
+  return request("/history");
+}
+
+export async function getAllPosts() {
+  return request("/all");
+}
+
+export async function deletePost(postId) {
+  return request(`/delete/${encodeURIComponent(postId)}`, {
+    method: "DELETE",
   });
 }
