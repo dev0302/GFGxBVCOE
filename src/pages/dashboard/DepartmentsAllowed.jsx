@@ -5,7 +5,6 @@ import {
   getDashboardAllowed,
   addDashboardAllowedDepartment,
   removeDashboardAllowedDepartment,
-  updateDashboardMemberAccess,
   AUTH_DEPARTMENTS,
   getAccountTypeLabel,
   getMe,
@@ -26,7 +25,6 @@ export default function DepartmentsAllowed() {
   const [removingDept, setRemovingDept] = useState(null);
   const [addDeptValue, setAddDeptValue] = useState("");
   const [showUnlockAnimation, setShowUnlockAnimation] = useState(false);
-  const [updatingMemberAccess, setUpdatingMemberAccess] = useState(false);
 
   const dashboardLabel = getAccountTypeLabel(departmentKey) || departmentKey;
   const canManage = canManageDepartmentDashboard(user, departmentKey);
@@ -81,25 +79,6 @@ export default function DepartmentsAllowed() {
       })
       .catch((err) => toast.error(err.message || "Failed to remove"))
       .finally(() => setRemovingDept(null));
-  };
-
-  const handleMemberAccessToggle = () => {
-    const enabled = !allowedConfig?.departmentMembersEnabled;
-    setUpdatingMemberAccess(true);
-    updateDashboardMemberAccess(departmentKey, enabled)
-      .then((res) => {
-        if (res.data) setAllowedConfig(res.data);
-        toast.success(
-          enabled
-            ? "All department members can now access this dashboard."
-            : "Department member access disabled.",
-        );
-        return getMe().then((r) => r.user && setUser(r.user));
-      })
-      .catch((err) =>
-        toast.error(err.message || "Failed to update member access"),
-      )
-      .finally(() => setUpdatingMemberAccess(false));
   };
 
   if (loadingAllowed && !allowedConfig) {
@@ -211,30 +190,6 @@ export default function DepartmentsAllowed() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between gap-4 border-t border-gray-500/20 pt-4">
-                <div>
-                  <p className="text-sm font-medium text-richblack-25">
-                    Allow all {dashboardLabel} members
-                  </p>
-                  <p className="mt-1 text-xs text-gray-400">
-                    Give every member of this department access to this
-                    dashboard.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={allowedConfig.departmentMembersEnabled === true}
-                  aria-label={`${allowedConfig.departmentMembersEnabled ? "Disable" : "Enable"} dashboard access for all ${dashboardLabel} members`}
-                  onClick={handleMemberAccessToggle}
-                  disabled={updatingMemberAccess}
-                  className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-wait disabled:opacity-60 ${allowedConfig.departmentMembersEnabled ? "bg-cyan-500" : "bg-gray-600"}`}
-                >
-                  <span
-                    className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${allowedConfig.departmentMembersEnabled ? "translate-x-6" : "translate-x-1"}`}
-                  />
-                </button>
-              </div>
             </div>
           ) : null}
         </section>
