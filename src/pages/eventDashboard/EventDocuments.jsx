@@ -38,6 +38,7 @@ import {
   toggleVaultDocumentLock,
 } from "../../services/api";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
+import MemberSectionAccessToggle from "../../components/DepartmentDashboard/MemberSectionAccessToggle";
 
 function getInlinePdfUrl(url) {
   if (!url || typeof url !== "string") return url;
@@ -500,6 +501,7 @@ export default function EventDocuments() {
 
   return (
     <div className="flex-1 p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 max-w-[1400px] mx-auto w-full  sm:mt-[-20px] ">
+      <MemberSectionAccessToggle section="documents" title="Document Vault" />
       {/* Hidden File Input for PC File Browser (Supports Multiple Files) */}
       <input
         type="file"
