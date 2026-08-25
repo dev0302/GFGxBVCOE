@@ -347,9 +347,13 @@ async function sendBroadcastToDepartmentMembers({
 
 async function notifyBlogSubmission({ post, author }) {
   try {
-    const authorName = `${author.firstName} ${author.lastName}`.trim();
-    const notificationTitle = "New Blog Post Pending Approval";
-    const notificationBody = `${authorName} submitted a new blog post: "${post.title}". Please review it.`;
+    // Use the fullName the author typed in the blog form as the display name.
+    // Fall back to the account's first+last name if fullName is blank.
+    const accountName = `${author.firstName} ${author.lastName}`.trim();
+    const displayName = (post.fullName && post.fullName.trim()) ? post.fullName.trim() : accountName;
+
+    const notificationTitle = "New Blog Submitted for Review";
+    const notificationBody = `${displayName} submitted a blog for review: "${post.title}"`;
 
     // Build the approval redirect URL from the environment base URL
     const appBaseUrl = (process.env.FRONTEND_URL || "").replace(/\/$/, "");
@@ -373,7 +377,7 @@ async function notifyBlogSubmission({ post, author }) {
             title: notificationTitle,
             body: notificationBody,
             senderId: author._id.toString(),
-            senderName: authorName,
+            senderName: displayName,
             senderRole: "author",
             metadata: {
               postId: post._id.toString(),
@@ -397,7 +401,7 @@ async function notifyBlogSubmission({ post, author }) {
 
           // Send Brevo email to this user
           const emailHtml = blogSubmissionReviewTemplate({
-            authorName,
+            authorName: displayName,
             postTitle: post.title,
             category: post.category || "",
             approvalUrl,
