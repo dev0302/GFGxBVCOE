@@ -705,3 +705,90 @@ exports.tenureEndTemplate = (data) => {
   `;
   return wrapCard(inner);
 };
+
+/**
+ * Sent to ALL platform users when a blog post is submitted for review.
+ * data: { authorName, postTitle, category, approvalUrl }
+ */
+exports.blogSubmissionReviewTemplate = (data = {}) => {
+  const {
+    authorName = "A community member",
+    postTitle = "Untitled",
+    category = "",
+    approvalUrl = "",
+  } = data;
+
+  const inner = `
+    <h1 style="${BASE_STYLES.title}">📝 New Blog Submitted for Review</h1>
+    <p style="${BASE_STYLES.body}">
+      A new blog post has been submitted by <strong style="color: #e5e7eb;">${escapeHtml(authorName)}</strong>
+      and is awaiting approval before it goes live on the community journal.
+    </p>
+    <div style="${BASE_STYLES.box}; text-align: left;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 10px 0;">Post details</p>
+      <p style="color: #e5e7eb; font-size: 15px; font-weight: bold; margin: 0 0 6px 0;">${escapeHtml(postTitle)}</p>
+      ${category ? `<p style="color: #94a3b8; font-size: 13px; margin: 0;">Category: ${escapeHtml(category)}</p>` : ""}
+    </div>
+    <p style="${BASE_STYLES.body}">
+      Please log in to the GFGxBVCOE dashboard to review this submission and approve or reject it.
+    </p>
+    ${approvalUrl
+      ? `<div style="margin: 24px 0;">
+          <a href="${escapeHtml(approvalUrl)}" style="${BASE_STYLES.button}">Review Submission →</a>
+        </div>`
+      : ""}
+    <p style="${BASE_STYLES.footer}">
+      You are receiving this because you are a registered member of the GFGxBVCOE platform.
+    </p>
+  `;
+  return wrapCard(inner);
+};
+
+/**
+ * Sent to the blog author when their post is approved or rejected.
+ * data: { authorName, postTitle, status, feedback, reviewerName }
+ *   status: "approved" | "rejected"
+ */
+exports.blogStatusUpdateTemplate = (data = {}) => {
+  const {
+    authorName = "Author",
+    postTitle = "Untitled",
+    status = "approved",
+    feedback = "",
+    reviewerName = "the reviewer",
+  } = data;
+
+  const isApproved = status === "approved";
+  const accentColor = isApproved ? "#22d3ee" : "#f87171";
+  const statusLabel = isApproved ? "✅ Approved" : "❌ Rejected";
+
+  const inner = `
+    <h1 style="${BASE_STYLES.title}">Blog Post ${isApproved ? "Approved 🎉" : "Rejected"}</h1>
+    <p style="${BASE_STYLES.body}">
+      Hi <strong style="color: #e5e7eb;">${escapeHtml(authorName)}</strong>,<br/>
+      Your blog post has been reviewed by <strong style="color: #e5e7eb;">${escapeHtml(reviewerName)}</strong>.
+    </p>
+    <div style="${BASE_STYLES.box}; text-align: left;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 10px 0;">Post details</p>
+      <p style="color: #e5e7eb; font-size: 15px; font-weight: bold; margin: 0 0 8px 0;">${escapeHtml(postTitle)}</p>
+      <p style="color: ${accentColor}; font-size: 13px; font-weight: bold; margin: 0;">
+        Status: ${statusLabel}
+      </p>
+      ${feedback
+        ? `<p style="color: #94a3b8; font-size: 13px; margin: 10px 0 0 0; border-top: 1px solid #334155; padding-top: 10px;">
+            <span style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px;">Reviewer feedback</span>
+            "${escapeHtml(feedback)}"
+           </p>`
+        : ""}
+    </div>
+    <p style="${BASE_STYLES.body}">
+      ${isApproved
+        ? "Congratulations! Your post is now live on the GFGxBVCOE community journal. Thank you for contributing!"
+        : "You can revise your post based on the feedback above and resubmit it for approval."}
+    </p>
+    <p style="${BASE_STYLES.footer}">
+      This update was sent because you submitted a blog post to GFGxBVCOE.
+    </p>
+  `;
+  return wrapCard(inner);
+};

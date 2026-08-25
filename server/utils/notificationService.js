@@ -4,6 +4,10 @@ const User = require("../models/User");
 const { getTeamMemberModel } = require("../models/TeamMember");
 const mailSender = require("./mailSender");
 const {
+  blogSubmissionReviewTemplate,
+  blogStatusUpdateTemplate,
+} = require("../mail/templates");
+const {
   SOCIETY_ROLES,
   getDepartmentRankFromPosition,
   TEAM_DEPARTMENTS,
@@ -343,73 +347,70 @@ async function sendBroadcastToDepartmentMembers({
 
 async function notifyBlogSubmission({ post, author }) {
   try {
-    const reviewers = (
-      await User.find({
-        $or: [
-          { accountType: { $in: SOCIETY_ROLES } },
-          { accountType: { $in: TEAM_DEPARTMENTS } },
-        ],
-      })
-        .populate("additionalDetails", "position p0")
-        .select("_id email firstName lastName accountType additionalDetails")
-        .lean()
-    ).filter((reviewer) => {
-      if (SOCIETY_ROLES.includes(reviewer.accountType)) return true;
-      const position =
-        reviewer.additionalDetails?.position ||
-        reviewer.additionalDetails?.p0 ||
-        "";
-      return ["Lead", "Head"].includes(getDepartmentRankFromPosition(position));
-    });
+    const authorName = `${author.firstName} ${author.lastName}`.trim();
+    const notificationTitle = "New Blog Post Pending Approval";
+    const notificationBody = `${authorName} submitted a new blog post: "${post.title}". Please review it.`;
 
-    const title = "New Blog Post Pending Approval";
-    const body = `${author.firstName} ${author.lastName} submitted a new blog post: "${post.title}".`;
+    // Build the approval redirect URL from the environment base URL
+    const appBaseUrl = (process.env.FRONTEND_URL || "").replace(/\/$/, "");
+    const approvalUrl = `${appBaseUrl}/blog/approval`;
 
-    for (const reviewer of reviewers) {
-      const notification = await Notification.create({
-        recipientId: reviewer._id,
-        type: "blog_pending_approval",
-        title,
-        body,
-        senderId: author._id.toString(),
-        senderName: `${author.firstName} ${author.lastName}`,
-        senderRole: "author",
-        metadata: {
-          postId: post._id.toString(),
-          title: post.title,
-        },
-      });
+    // --- In-app notifications: emit to ALL users in the User collection ---
+    const BATCH = 100;
+    const total = await User.countDocuments({});
+    let skip = 0;
 
-      const payload = {
-        _id: notification._id,
-        type: notification.type,
-        title: notification.title,
-        body: notification.body,
-        metadata: notification.metadata,
-        senderId: notification.senderId,
-        senderName: notification.senderName,
-        senderRole: notification.senderRole,
-        readAt: notification.readAt,
-        createdAt: notification.createdAt,
-        replies: [],
-      };
-      emitNotification(reviewer._id, payload);
+    while (skip < total) {
+      const users = await User.find({}).select("_id email firstName lastName").skip(skip).limit(BATCH).lean();
+      skip += BATCH;
 
-      const emailHtml = `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-          <h2 style="color: #0f766e;">Hello ${reviewer.firstName},</h2>
-          <p>A new blog post has been submitted and is pending your review.</p>
-          <hr style="border: 0; border-top: 1px solid #eee;" />
-          <p><strong>Title:</strong> ${post.title}</p>
-          <p><strong>Author:</strong> ${author.firstName} ${author.lastName}</p>
-          <p><strong>Category:</strong> ${post.category || "N/A"}</p>
-          <hr style="border: 0; border-top: 1px solid #eee;" />
-          <p>Please log in to the GFG-BVCOE Dashboard to approve or reject this submission.</p>
-          <br />
-          <p>Regards,<br /><strong>GFG-BVCOE Platform</strong></p>
-        </div>
-      `;
-      await mailSender(reviewer.email, title, emailHtml);
+      for (const user of users) {
+        try {
+          // Create in-app notification
+          const notification = await Notification.create({
+            recipientId: user._id,
+            type: "blog_pending_approval",
+            title: notificationTitle,
+            body: notificationBody,
+            senderId: author._id.toString(),
+            senderName: authorName,
+            senderRole: "author",
+            metadata: {
+              postId: post._id.toString(),
+              title: post.title,
+            },
+          });
+
+          emitNotification(String(user._id), {
+            _id: notification._id,
+            type: notification.type,
+            title: notification.title,
+            body: notification.body,
+            metadata: notification.metadata,
+            senderId: notification.senderId,
+            senderName: notification.senderName,
+            senderRole: notification.senderRole,
+            readAt: notification.readAt,
+            createdAt: notification.createdAt,
+            replies: [],
+          });
+
+          // Send Brevo email to this user
+          const emailHtml = blogSubmissionReviewTemplate({
+            authorName,
+            postTitle: post.title,
+            category: post.category || "",
+            approvalUrl,
+          });
+
+          // Fire-and-forget per user — don't let one failure block the rest
+          mailSender(user.email, notificationTitle, emailHtml).catch((err) =>
+            console.error(`notifyBlogSubmission: email failed for ${user.email}:`, err.message),
+          );
+        } catch (userErr) {
+          console.error("notifyBlogSubmission: user loop error:", userErr.message);
+        }
+      }
     }
   } catch (error) {
     console.error("notifyBlogSubmission error:", error);
@@ -429,6 +430,7 @@ async function notifyBlogStatusChange({
     const title = `Blog Post ${isApproved ? "Approved" : "Rejected"}`;
     const body = `Your blog post "${post.title}" has been ${statusText} by ${reviewer.firstName} ${reviewer.lastName}.${feedback ? ` Feedback: "${feedback}"` : ""}`;
 
+    // In-app notification for the author
     const notification = await Notification.create({
       recipientId: author._id,
       type: `blog_${statusText}`,
@@ -445,7 +447,7 @@ async function notifyBlogStatusChange({
       },
     });
 
-    const payload = {
+    emitNotification(author._id, {
       _id: notification._id,
       type: notification.type,
       title: notification.title,
@@ -457,24 +459,22 @@ async function notifyBlogStatusChange({
       readAt: notification.readAt,
       createdAt: notification.createdAt,
       replies: [],
-    };
-    emitNotification(author._id, payload);
+    });
 
-    const emailHtml = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <h2 style="color: ${isApproved ? "#0f766e" : "#be123c"};">Hello ${author.firstName},</h2>
-        <p>Your blog post submission has been reviewed.</p>
-        <hr style="border: 0; border-top: 1px solid #eee;" />
-        <p><strong>Title:</strong> ${post.title}</p>
-        <p><strong>Status:</strong> <span style="color: ${isApproved ? "#0f766e" : "#be123c"}; font-weight: bold; text-transform: uppercase;">${statusText}</span></p>
-        ${feedback ? `<p><strong>Feedback from Reviewer:</strong> "${feedback}"</p>` : ""}
-        <hr style="border: 0; border-top: 1px solid #eee;" />
-        <p>${isApproved ? "Congratulations! Your post is now live on the public blog feed." : "You can edit your post based on the feedback and submit it again for approval."}</p>
-        <br />
-        <p>Regards,<br /><strong>GFG-BVCOE Platform</strong></p>
-      </div>
-    `;
-    await mailSender(author.email, title, emailHtml);
+    // Send Brevo email — to the notifyEmail the author entered in the form
+    const recipientEmail = post.notifyEmail || author.email;
+    const reviewerName = `${reviewer.firstName} ${reviewer.lastName}`.trim();
+    const authorName = `${author.firstName} ${author.lastName}`.trim();
+
+    const emailHtml = blogStatusUpdateTemplate({
+      authorName,
+      postTitle: post.title,
+      status: statusText,
+      feedback: feedback || "",
+      reviewerName,
+    });
+
+    await mailSender(recipientEmail, title, emailHtml);
   } catch (error) {
     console.error("notifyBlogStatusChange error:", error);
   }

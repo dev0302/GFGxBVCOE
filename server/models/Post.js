@@ -53,11 +53,36 @@ const postSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    notifyEmail: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    fullName: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     qualityAudit: {
       hasCode: { type: Boolean, default: false },
       hasHeadings: { type: Boolean, default: false },
       shortParagraphs: { type: Boolean, default: false },
       score: { type: Number, default: 0 }
+    },
+    // Editorial history
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    reviewedAt: {
+      type: Date,
+      default: null,
+    },
+    reviewAction: {
+      type: String,
+      enum: ["approved", "rejected", null],
+      default: null,
     },
   },
   { timestamps: true }
