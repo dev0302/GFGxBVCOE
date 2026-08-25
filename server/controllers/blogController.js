@@ -45,7 +45,7 @@ const normalizeTags = (tags) => {
 
 exports.submitPost = async (req, res) => {
   try {
-    const { title, content, summary, coverImage, category } = req.body;
+    const { title, content, summary, coverImage, category, notifyEmail, fullName } = req.body;
     const tags = normalizeTags(req.body.tags);
     if (!title || !content) {
       return res.status(400).json({
@@ -77,6 +77,37 @@ exports.submitPost = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Tags must be an array of strings.",
+      });
+    }
+    if (!fullName || (typeof fullName === "string" && !fullName.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: "Full name is required.",
+      });
+    }
+    if (typeof fullName !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "Full name must be a string.",
+      });
+    }
+    if (!notifyEmail || (typeof notifyEmail === "string" && !notifyEmail.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: "Notification email is required.",
+      });
+    }
+    if (typeof notifyEmail !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "Notification email must be a string.",
+      });
+    }
+    // Basic email format check
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(notifyEmail.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: "Notification email is not a valid email address.",
       });
     }
 
@@ -130,6 +161,8 @@ exports.submitPost = async (req, res) => {
       author: req.user.id,
       status: "pending_approval",
       qualityAudit,
+      fullName: fullName.trim(),
+      notifyEmail: notifyEmail.trim(),
     });
 
     const author = await User.findById(req.user.id).select(
@@ -213,6 +246,11 @@ exports.approvePost = async (req, res) => {
       post.feedback = feedback || "No feedback provided.";
     }
 
+    // Store editorial audit trail
+    post.reviewedBy = reviewer._id;
+    post.reviewedAt = new Date();
+    post.reviewAction = action === "approve" ? "approved" : "rejected";
+
     await post.save();
 
     if (author) {
@@ -257,6 +295,52 @@ exports.getPublicPosts = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to retrieve public blog posts.",
+      error: error.message,
+    });
+  }
+};
+
+exports.getReviewHistory = async (req, res) => {
+  try {
+    const posts = await Post.find({
+      status: { $in: ["published", "rejected"] },
+      reviewedBy: { $ne: null },
+    })
+      .populate("author", "firstName lastName email image")
+      .populate("reviewedBy", "firstName lastName email image accountType")
+      .sort({ reviewedAt: -1 })
+      .limit(100);
+
+    return res.status(200).json({
+      success: true,
+      posts,
+    });
+  } catch (error) {
+    console.error("getReviewHistory error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve review history.",
+      error: error.message,
+    });
+  }
+};
+
+exports.getAllPosts = async (req, res) => {
+  try {
+    const posts = await Post.find({})
+      .populate("author", "firstName lastName email image")
+      .populate("reviewedBy", "firstName lastName")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      posts,
+    });
+  } catch (error) {
+    console.error("getAllPosts error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve posts.",
       error: error.message,
     });
   }
