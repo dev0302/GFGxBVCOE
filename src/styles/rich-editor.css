@@ -1,0 +1,210 @@
+/* ──────────────────────────────────────────────────────────────────────────────
+   TipTap Rich Editor — dark GFGxBVCOE theme
+   Imported once in main.jsx / index.css
+────────────────────────────────────────────────────────────────────────────── */
+
+/* Editor editable area */
+.rich-editor-content {
+  color: #c8ddd0;
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  line-height: 1.85;
+  caret-color: #34d488;
+}
+
+/* Placeholder */
+.rich-editor-content p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #3d5a49;
+  pointer-events: none;
+  height: 0;
+}
+
+/* ── Typography inside the editor ── */
+
+.rich-editor-content h1,
+.blog-prose h1 {
+  font-family: 'Audiowide', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 1.6rem 0 0.75rem;
+  background: linear-gradient(135deg, #ffffff 30%, #86efac 70%, #22c55e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.rich-editor-content h2,
+.blog-prose h2 {
+  font-family: 'Audiowide', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 1.4rem 0 0.6rem;
+  color: #86efac;
+}
+
+.rich-editor-content h3,
+.blog-prose h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 1.2rem 0 0.5rem;
+  color: #4ade80;
+}
+
+.rich-editor-content p,
+.blog-prose p {
+  margin: 0.65rem 0;
+}
+
+.rich-editor-content strong,
+.blog-prose strong {
+  color: #e2f5eb;
+  font-weight: 700;
+}
+
+.rich-editor-content em,
+.blog-prose em {
+  color: #a7f3c2;
+  font-style: italic;
+}
+
+.rich-editor-content u,
+.blog-prose u {
+  text-decoration-color: rgba(74, 222, 128, 0.5);
+}
+
+.rich-editor-content s,
+.blog-prose s {
+  color: #6b7280;
+}
+
+/* Highlight */
+.rich-editor-content mark,
+.blog-prose mark {
+  background: rgba(250, 204, 21, 0.22);
+  color: #fde68a;
+  border-radius: 3px;
+  padding: 0 3px;
+}
+
+/* Inline code */
+.rich-editor-content code,
+.blog-prose code {
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.88em;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(74, 222, 128, 0.18);
+  border-radius: 5px;
+  padding: 1px 6px;
+  color: #34d488;
+}
+
+/* Code block */
+.rich-editor-content pre,
+.blog-prose pre {
+  background: #07100c;
+  border: 1px solid rgba(74, 222, 128, 0.18);
+  border-radius: 10px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  margin: 1.2rem 0;
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.rich-editor-content pre code,
+.blog-prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #a7f3c2;
+  font-size: inherit;
+}
+
+/* Blockquote */
+.rich-editor-content blockquote,
+.blog-prose blockquote {
+  border-left: 3px solid #22c55e;
+  background: rgba(34, 197, 94, 0.05);
+  margin: 1.2rem 0;
+  padding: 12px 20px;
+  border-radius: 0 8px 8px 0;
+  color: #7aab8c;
+  font-style: italic;
+}
+
+/* Lists */
+.rich-editor-content ul,
+.blog-prose ul {
+  list-style: none;
+  margin: 0.8rem 0;
+  padding-left: 1.5rem;
+}
+
+.rich-editor-content ul li,
+.blog-prose ul li {
+  position: relative;
+  margin: 0.3rem 0;
+}
+
+.rich-editor-content ul li::before,
+.blog-prose ul li::before {
+  content: "▹";
+  position: absolute;
+  left: -1.3rem;
+  color: #22c55e;
+}
+
+.rich-editor-content ol,
+.blog-prose ol {
+  list-style: decimal;
+  margin: 0.8rem 0;
+  padding-left: 1.6rem;
+  color: #9dbfac;
+}
+
+.rich-editor-content ol li::marker,
+.blog-prose ol li::marker {
+  color: #22c55e;
+  font-weight: 700;
+}
+
+/* Horizontal rule */
+.rich-editor-content hr,
+.blog-prose hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(74,222,128,0.4), rgba(34,197,94,0.15), transparent);
+  margin: 1.8rem 0;
+}
+
+/* Links */
+.rich-editor-content a,
+.blog-prose a {
+  color: #34d488;
+  text-decoration: underline;
+  text-decoration-color: rgba(52, 212, 136, 0.4);
+  transition: color 0.2s;
+}
+.rich-editor-content a:hover,
+.blog-prose a:hover {
+  color: #6ee7b7;
+}
+
+/* Text alignment utilities written by TipTap */
+.rich-editor-content [style*="text-align: center"],
+.blog-prose [style*="text-align: center"] { text-align: center; }
+.rich-editor-content [style*="text-align: right"],
+.blog-prose [style*="text-align: right"]  { text-align: right; }
+.rich-editor-content [style*="text-align: left"],
+.blog-prose [style*="text-align: left"]   { text-align: left; }
+
+/* Selection colour inside editor */
+.rich-editor-content ::selection {
+  background: rgba(34, 197, 94, 0.25);
+}

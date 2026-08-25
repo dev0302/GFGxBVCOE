@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { submitPost } from "../services/blog_api";
+import RichTextEditor from "./ui/RichTextEditor";
 
 const DEFAULT_CATEGORIES = [
   "Web Development",
@@ -103,7 +104,9 @@ const BlogForm = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!form.title.trim() || !form.content.trim()) {
+    // Strip HTML tags to check actual text content (TipTap outputs "<p></p>" when empty)
+    const plainText = form.content.replace(/<[^>]*>/g, "").trim();
+    if (!form.title.trim() || !plainText) {
       toast.error("Title and body text are required.");
       return;
     }
@@ -254,19 +257,14 @@ const BlogForm = () => {
                 >
                   Body text <span className="text-pink-200">*</span>
                 </label>
-                <textarea
-                  id="content"
-                  name="content"
+                <RichTextEditor
                   value={form.content}
-                  onChange={updateField}
-                  required
-                  rows={15}
-                  placeholder="Start writing here..."
-                  className="w-full resize-y rounded-xl border border-white/10 bg-[#0b1013] p-4 text-base leading-7 outline-none transition placeholder:text-richblack-700 focus:border-cyan-300"
+                  onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
+                  placeholder="Start writing here… use the toolbar above for headings, bold, lists, code blocks and more."
                 />
                 <p className="mt-2 text-xs text-richblack-200">
-                  You can use paragraphs, headings, and code snippets. Posts
-                  are reviewed before publishing.
+                  Use the toolbar for rich formatting — bold, italic, headings,
+                  code blocks, quotes and more. Posts are reviewed before publishing.
                 </p>
               </div>
             </div>

@@ -259,11 +259,10 @@ const BlogPage = () => {
             />
 
             <div
-              className="whitespace-pre-wrap font-nunito text-[16.5px] leading-[1.9] sm:text-[18px]"
+              className="blog-prose mt-2 font-nunito text-[16.5px] leading-[1.9] sm:text-[18px]"
               style={{ color: "#9dbfac" }}
-            >
-              {post.content}
-            </div>
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
           </div>
         </div>
 
