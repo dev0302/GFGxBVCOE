@@ -384,6 +384,51 @@ const journeyPhotos = [
                     </button>
                   </NavLink>
 
+                  <div className="relative inline-block">
+  <style>{`
+    @keyframes newBadgeBlink {
+      0%, 100% {
+        transform: rotate(6deg) scale(1);
+        opacity: 1;
+        box-shadow: 0 2px 10px rgba(244,114,182,0.5);
+      }
+      50% {
+        transform: rotate(6deg) scale(1.025);
+        opacity: 0.75;
+        box-shadow: 0 2px 18px rgba(244,114,182,0.9);
+      }
+    }
+  `}</style>
+
+  <span
+    className="absolute -right-3 -top-3 z-10 rotate-6 rounded-full bg-gradient-to-r from-pink-400 to-pink-200 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-red-100 shadow-[0_2px_10px_rgba(253,224,71,0.5)]"
+    style={{ animation: "newBadgeBlink 1.1s ease-in-out infinite" }}
+  >
+    ✨ New
+  </span>
+
+  <NavLink to="/blog">
+    <button
+      id="btn-join"
+      className="
+        group inline-flex items-center gap-3
+        rounded-full
+        bg-green-600/80
+        px-6 py-3.5
+        text-sm font-bold text-richblack-25
+        transition
+        hover:-translate-y-1
+        hover:bg-green-600
+
+        sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
+      "
+    >
+      Gfg Blogs
+      <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+    </button>
+  </NavLink>
+</div>
+
                   <button
                     id="btn-about"
                     onClick={() => navigate("/about")}
@@ -452,6 +497,9 @@ const journeyPhotos = [
 
                     <Trophy className="h-4 w-4 transition group-hover:rotate-6 group-hover:scale-110" />
                   </button>
+
+                  
+
                 </div>
               </div>
 

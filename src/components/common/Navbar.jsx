@@ -173,7 +173,7 @@ function Navbar() {
               <li>
                 <NavLink to="/blog" className={navLinkClass}>
                   <SaxStickynoteLinear className="mr-1.5 h-4 w-4" />
-                  Blog
+                  Blogs
                 </NavLink>
               </li>
               <li>
@@ -489,7 +489,7 @@ function Navbar() {
               onClick={() => setIsMenuOpen(false)}
             >
               <SaxStickynoteLinear className="mr-1.5 h-5 w-5" />
-              Blog
+              Blogs
             </NavLink>
           </li>
           <li>
