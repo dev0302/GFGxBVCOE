@@ -10,6 +10,8 @@ const {
   deletePost,
   getReviewHistory,
   getAllPosts,
+  getCategories,
+  addCategory,
 } = require("../controllers/blogController");
 
 const router = express.Router();
@@ -31,6 +33,12 @@ router.get("/all", auth, isLeadOrHead, getAllPosts);
 
 // Public feed: view all published posts
 router.get("/public", getPublicPosts);
+
+// Public list of blog categories
+router.get("/categories", getCategories);
+
+// Authenticated users can add a new category
+router.post("/categories", auth, addCategory);
 
 // Public route: fetch specific blog post details by slug
 router.get("/post/:slug", getPostBySlug);

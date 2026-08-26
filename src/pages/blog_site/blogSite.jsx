@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, PenLine, Search, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getPublicPosts, getPendingPosts } from "../../services/blog_api";
+import { getBlogCategories, getPublicPosts, getPendingPosts } from "../../services/blog_api";
 import { useAuth } from "../../context/AuthContext";
 import { NativeTypewriter } from "../../components/ui/native-typewriter";
-import { FloatingPathsBackground } from "../../components/ui/floating-paths";
 import confetti from "canvas-confetti";
 
 const canReviewPosts = (user) => {
@@ -39,6 +38,7 @@ const BlogSite = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -57,6 +57,14 @@ const BlogSite = () => {
       }
     };
     loadPosts();
+  }, []);
+
+  useEffect(() => {
+    getBlogCategories()
+      .then((data) => {
+        setCategories(Array.isArray(data.categories) ? data.categories : []);
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -97,12 +105,6 @@ const BlogSite = () => {
 
     frame();
   }, []);
-
-  const categories = [
-    "Technology", "Science & Innovation", "Finance & Business",
-    "Education & Career", "Lifestyle", "Campus & Community",
-    "Entertainment", "Sports", "Culture & Society", "Politics & Current Affairs",
-  ];
 
   const filteredPosts = posts
     .filter((post) => (selectedCategory ? post.category === selectedCategory : true))
@@ -253,14 +255,35 @@ const BlogSite = () => {
               </div>
             </div>
 
-            {/* Category rail — horizontal scroll, no pagination state needed */}
+            {/* Category rail */}
             <div className="relative -mx-1">
               <div className="bs-scrollbar-hide flex gap-2 overflow-x-auto px-1 py-0.5">
-                {[null, ...categories].map((cat) => {
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory(null)}
+                  className="shrink-0 whitespace-nowrap rounded-full px-4 py-2 font-montserrat text-[13px] font-semibold transition-all duration-300"
+                  style={
+                    !selectedCategory
+                      ? {
+                          background: "linear-gradient(135deg,#16a34a 0%,#22c55e 60%,#4ade80 100%)",
+                          color: "#fff",
+                          boxShadow: "0 4px 16px rgba(34,197,94,0.35)",
+                        }
+                      : {
+                          background: "rgba(14,60,30,0.4)",
+                          color: tokens.accentSoft,
+                          border: `1px solid ${tokens.border}`,
+                        }
+                  }
+                >
+                  All Posts
+                </button>
+                {categories.map((cat) => {
                   const isActive = selectedCategory === cat;
                   return (
                     <button
-                      key={cat ?? "__all__"}
+                      key={cat}
+                      type="button"
                       onClick={() => setSelectedCategory(cat)}
                       className="shrink-0 whitespace-nowrap rounded-full px-4 py-2 font-montserrat text-[13px] font-semibold transition-all duration-300"
                       style={
@@ -277,12 +300,11 @@ const BlogSite = () => {
                             }
                       }
                     >
-                      {cat ?? "All Posts"}
+                      {cat}
                     </button>
                   );
                 })}
               </div>
-              {/* edge fade hints for scrollability */}
               <div className="pointer-events-none absolute right-0 top-0 h-full w-8 sm:hidden" style={{ background: "linear-gradient(90deg,transparent,rgba(3,20,10,0.9))" }} />
             </div>
           </div>
@@ -329,8 +351,8 @@ const BlogSite = () => {
 
           {!loading && !error && filteredPosts.length > 0 && (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {filteredPosts.map((post, index) => (
-                <BlogCard key={post._id || post.slug} post={post} navigate={navigate} index={index} />
+              {filteredPosts.map((post) => (
+                <BlogCard key={post._id || post.slug} post={post} navigate={navigate} />
               ))}
             </div>
           )}
@@ -356,13 +378,10 @@ const BlogSite = () => {
 /* ═══════════════════════════════════════════════════
    BLOG CARD
 ═══════════════════════════════════════════════════ */
-const BlogCard = ({ post, navigate, index = 0 }) => {
+const BlogCard = ({ post, navigate }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const goToPost = () => navigate("/blog/post/" + encodeURIComponent(post.slug));
-
-  // Alternate path direction per card so adjacent cards look different
-  const pathPosition = index % 2 === 0 ? -1 : 1;
 
   return (
     <div
@@ -374,22 +393,10 @@ const BlogCard = ({ post, navigate, index = 0 }) => {
       onKeyDown={(e) => { if (e.key === "Enter") goToPost(); }}
       className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-3xl transition-all duration-500 focus:outline-none focus-visible:ring-2"
       style={{
-        background: isHovered
-          ? "linear-gradient(160deg,rgba(22,101,52,0.5) 0%,rgba(5,46,22,0.85) 60%,rgba(2,13,7,0.95) 100%)"
-          : "linear-gradient(160deg,rgba(14,60,30,0.42) 0%,rgba(4,30,14,0.7) 60%,rgba(2,11,6,0.88) 100%)",
         border: isHovered ? `1px solid ${tokens.borderHover}` : `1px solid ${tokens.border}`,
-        boxShadow: isHovered
-          ? "0 20px 50px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.06)"
-          : "0 6px 24px rgba(0,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.03)",
         transform: isHovered ? "translateY(-4px)" : "translateY(0)",
       }}
     >
-      {/* ── Floating paths background — sits behind all card content ── */}
-      <FloatingPathsBackground
-        position={pathPosition}
-        className="absolute inset-0 opacity-30"
-      />
-
       {/* Image */}
       <div className="relative h-44 overflow-hidden sm:h-48">
         <img

@@ -53,6 +53,17 @@ export async function getPublicPosts() {
   return request("/public");
 }
 
+export async function getBlogCategories() {
+  return request("/categories");
+}
+
+export async function addBlogCategory(name) {
+  return request("/categories", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+}
+
 export async function getPostBySlug(slug) {
   return request(`/post/${encodeURIComponent(slug)}`);
 }

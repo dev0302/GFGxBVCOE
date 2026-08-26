@@ -3,18 +3,8 @@ import { ArrowLeft, ImagePlus, Loader2, Send, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
-import { submitPost } from "../services/blog_api";
+import { addBlogCategory, getBlogCategories, submitPost } from "../services/blog_api";
 import RichTextEditor from "./ui/RichTextEditor";
-
-const DEFAULT_CATEGORIES = [
-  "Web Development",
-  "React",
-  "JavaScript",
-  "CSS",
-  "Design",
-  "Community",
-  "Career",
-];
 
 const initialForm = {
   title: "",
@@ -34,10 +24,36 @@ const BlogForm = () => {
   const [coverImage, setCoverImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [categoryList, setCategoryList] = useState(DEFAULT_CATEGORIES);
+  const [categoryList, setCategoryList] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [addingCategory, setAddingCategory] = useState(false);
   const [customCategory, setCustomCategory] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
   const customInputRef = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadCategories = async () => {
+      try {
+        const data = await getBlogCategories();
+        if (!cancelled) {
+          setCategoryList(Array.isArray(data.categories) ? data.categories : []);
+        }
+      } catch (requestError) {
+        if (!cancelled) {
+          toast.error(requestError.message || "Failed to load categories.");
+        }
+      } finally {
+        if (!cancelled) setCategoriesLoading(false);
+      }
+    };
+
+    loadCategories();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!coverImage) {
@@ -66,26 +82,39 @@ const BlogForm = () => {
     }
   };
 
-  const handleAddCustomCategory = () => {
+  const handleAddCustomCategory = async () => {
     const trimmed = customCategory.trim();
     if (!trimmed) {
       toast.error("Please enter a category name.");
       return;
     }
+
     const exists = categoryList.some(
       (c) => c.toLowerCase() === trimmed.toLowerCase(),
     );
     if (exists) {
-      toast.error("This category already exists.");
       setForm((current) => ({ ...current, category: trimmed }));
       setShowCustomInput(false);
       setCustomCategory("");
       return;
     }
-    setCategoryList((prev) => [...prev, trimmed]);
-    setForm((current) => ({ ...current, category: trimmed }));
-    setCustomCategory("");
-    setShowCustomInput(false);
+
+    setAddingCategory(true);
+    try {
+      const data = await addBlogCategory(trimmed);
+      const savedCategory = data.category || trimmed;
+      setCategoryList((prev) =>
+        [...prev, savedCategory].sort((a, b) => a.localeCompare(b)),
+      );
+      setForm((current) => ({ ...current, category: savedCategory }));
+      setCustomCategory("");
+      setShowCustomInput(false);
+      toast.success("Category added.");
+    } catch (requestError) {
+      toast.error(requestError.message || "Failed to add category.");
+    } finally {
+      setAddingCategory(false);
+    }
   };
 
   const handleImageChange = (event) => {
@@ -309,9 +338,12 @@ const BlogForm = () => {
                     name="category"
                     value={showCustomInput ? "__custom__" : form.category}
                     onChange={handleCategoryChange}
-                    className="w-full rounded-xl border border-white/15 bg-[#0b1013] px-3.5 py-3 text-sm outline-none transition focus:border-cyan-300"
+                    disabled={categoriesLoading}
+                    className="w-full rounded-xl border border-white/15 bg-[#0b1013] px-3.5 py-3 text-sm outline-none transition focus:border-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    <option value="">Choose a category</option>
+                    <option value="">
+                      {categoriesLoading ? "Loading categories..." : "Choose a category"}
+                    </option>
                     {categoryList.map((cat) => (
                       <option key={cat} value={cat}>
                         {cat}
@@ -337,9 +369,10 @@ const BlogForm = () => {
                       <button
                         type="button"
                         onClick={handleAddCustomCategory}
-                        className="rounded-lg bg-cyan-400 px-4 py-2 text-xs font-bold text-[#071013] transition hover:bg-cyan-300"
+                        disabled={addingCategory}
+                        className="rounded-lg bg-cyan-400 px-4 py-2 text-xs font-bold text-[#071013] transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        Add
+                        {addingCategory ? "Adding..." : "Add"}
                       </button>
                       <button
                         type="button"
