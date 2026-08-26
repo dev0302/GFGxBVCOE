@@ -342,8 +342,19 @@ function ProfileDropDown({
     ? dashboardAccessKeys
     : fallbackDashboardKeys;
 
+  const memberLockedDeptKey =
+    user?.isDepartmentMember &&
+    user?.accountType &&
+    !isSocietyRole(user.accountType) &&
+    !dashboardAccessKeys.includes(user.accountType)
+      ? user.accountType
+      : null;
+
   const uniqueDashboardKeys = Array.from(
-    new Set(accessibleDashboardKeys.filter(Boolean)),
+    new Set([
+      ...accessibleDashboardKeys.filter(Boolean),
+      ...(memberLockedDeptKey ? [memberLockedDeptKey] : []),
+    ]),
   );
   uniqueDashboardKeys.sort((a, b) => {
     if (a === "Event Management") return -1;
@@ -788,9 +799,16 @@ function ProfileDropDown({
                       const title = isEm
                         ? "EM Dashboard"
                         : `${getAccountTypeLabel(key) || key} Dashboard`;
+                      const hasAccess = dashboardAccessKeys.includes(key);
+                      const isLockedMemberDashboard =
+                        !hasAccess &&
+                        user?.isDepartmentMember &&
+                        key === user.accountType;
                       const subtitle = isEm
                         ? "Upload & manage events"
-                        : "Configure access & permissions";
+                        : isLockedMemberDashboard
+                          ? "Coming soon — ask your Head or Lead to enable access"
+                          : "Configure access & permissions";
 
                       return (
                         <button
@@ -799,7 +817,11 @@ function ProfileDropDown({
                             setOpen(false);
                             navigate(to);
                           }}
-                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
+                          className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300 ${
+                            isLockedMemberDashboard
+                              ? "text-gray-300"
+                              : "text-gray-200"
+                          }`}
                         >
                           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
                             <Icon className="h-4 w-4" />
@@ -808,7 +830,13 @@ function ProfileDropDown({
                             <span className="block text-xs font-medium">
                               {title}
                             </span>
-                            <span className="block text-[10px] text-gray-500">
+                            <span
+                              className={`block text-[10px] ${
+                                isLockedMemberDashboard
+                                  ? "text-amber-400/80"
+                                  : "text-gray-500"
+                              }`}
+                            >
                               {subtitle}
                             </span>
                           </span>

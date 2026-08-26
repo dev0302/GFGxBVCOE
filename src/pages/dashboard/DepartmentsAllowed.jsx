@@ -16,6 +16,36 @@ import { Spinner } from "@/components/ui/spinner";
 import { AddDepartmentUnlockAnimation } from "../../components/EventDashboard/AddDepartmentUnlockAnimation";
 import { canManageDepartmentDashboard } from "../../utils/dashboardAccess";
 
+function MemberAccessToggle({ enabled, disabled, onToggle, dashboardLabel }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={enabled === true}
+      aria-label={`${enabled ? "Disable" : "Enable"} dashboard access for all ${dashboardLabel} members`}
+      onClick={onToggle}
+      disabled={disabled}
+      className={`relative inline-flex h-7 w-11 shrink-0 items-center rounded-full p-0.5 transition-all duration-300 ease-out overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 disabled:cursor-wait disabled:opacity-60 ${
+        enabled
+          ? "bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-400 shadow-[0_0_14px_rgba(34,197,94,0.45),inset_0_1px_0_rgba(255,255,255,0.35)]"
+          : "bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_0_8px_rgba(245,158,11,0.25)]"
+      }`}
+    >
+      {enabled && (
+        <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <span className="absolute -inset-y-3 -left-1/2 h-[180%] w-1/2 bg-gradient-to-r from-transparent via-white/45 to-transparent animate-shine" />
+        </span>
+      )}
+      <span
+        aria-hidden
+        className={`relative z-10 block h-6 w-6 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-300 ease-out ${
+          enabled ? "translate-x-4" : "translate-x-0"
+        }`}
+      />
+    </button>
+  );
+}
+
 export default function DepartmentsAllowed() {
   const { departmentKey } = useParams();
   const { user, setUser } = useAuth();
@@ -123,6 +153,45 @@ export default function DepartmentsAllowed() {
           </p>
         </div>
 
+        {allowedConfig && (
+          <section className="bg-gradient-to-br from-[#1e1e2f]/90 to-[#2c2c3e]/90 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg" aria-hidden>
+                    🔓
+                  </span>
+                  <h2 className="text-base font-semibold text-richblack-25 sm:text-lg">
+                    Allow all {dashboardLabel} members
+                  </h2>
+                </div>
+                <p className="mt-1.5 text-xs text-gray-400 sm:text-sm">
+                  Give every member of this department access to this dashboard.
+                  When off, members still see the dashboard option but get a
+                  coming-soon message until you turn this on.
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-3 self-start sm:self-center">
+                <span
+                  className={`text-xs font-semibold uppercase tracking-wide ${
+                    allowedConfig.departmentMembersEnabled
+                      ? "text-emerald-400"
+                      : "text-amber-400"
+                  }`}
+                >
+                  {allowedConfig.departmentMembersEnabled ? "On" : "Off"}
+                </span>
+                <MemberAccessToggle
+                  enabled={allowedConfig.departmentMembersEnabled === true}
+                  disabled={updatingMemberAccess}
+                  onToggle={handleMemberAccessToggle}
+                  dashboardLabel={dashboardLabel}
+                />
+              </div>
+            </div>
+          </section>
+        )}
+
         <section className="bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">
           <SectionTitle icon="👥">Allowed departments</SectionTitle>
           {loadingAllowed ? (
@@ -209,31 +278,6 @@ export default function DepartmentsAllowed() {
                     All departments are already in the allowed list.
                   </p>
                 )}
-              </div>
-
-              <div className="flex items-center justify-between gap-4 border-t border-gray-500/20 pt-4">
-                <div>
-                  <p className="text-sm font-medium text-richblack-25">
-                    Allow all {dashboardLabel} members
-                  </p>
-                  <p className="mt-1 text-xs text-gray-400">
-                    Give every member of this department access to this
-                    dashboard.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={allowedConfig.departmentMembersEnabled === true}
-                  aria-label={`${allowedConfig.departmentMembersEnabled ? "Disable" : "Enable"} dashboard access for all ${dashboardLabel} members`}
-                  onClick={handleMemberAccessToggle}
-                  disabled={updatingMemberAccess}
-                  className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-wait disabled:opacity-60 ${allowedConfig.departmentMembersEnabled ? "bg-cyan-500" : "bg-gray-600"}`}
-                >
-                  <span
-                    className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${allowedConfig.departmentMembersEnabled ? "translate-x-6" : "translate-x-1"}`}
-                  />
-                </button>
               </div>
             </div>
           ) : null}

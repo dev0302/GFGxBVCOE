@@ -2,7 +2,6 @@ import React from 'react';
 import notfoundimg from "../images/notFound.png";
 import { NavLink } from 'react-router-dom';
 
-
 const NotFound = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] font-['Inter'] text-richblack-25">
@@ -12,29 +11,36 @@ const NotFound = () => {
         <img
           src={notfoundimg}
           alt="Cute Bear"
-          className="h-[180px] absolute -top-[125px] left-[30px] md:left-[60px] md:-top-[95px]  pointer-events-none animate-bounce"
+          className="h-[180px] absolute -top-[125px] left-[30px] md:left-[60px] md:-top-[95px] pointer-events-none animate-bounce"
         />
-        
+
+        {/* 404 Badge */}
+        <span className="text-xs tracking-widest text-[#888] mb-1 font-semibold">
+          ERROR 404
+        </span>
+
         {/* Title */}
         <h2 className="text-lg font-bold text-red-400 mb-2 text-center">
-          We are no longer accepting responses.
+          Page Not Found
         </h2>
-        
+
         {/* Description */}
         <p className="text-sm text-[#aaa] mb-6 text-center">
-         The interviews for Execom 2025 have been successfully completed. If you have any queries, feel free to reach out to us.
+          The page you're looking for doesn't exist or may have been moved. Let's get you back on track.
         </p>
-        
+
         {/* Buttons */}
         <div className="flex justify-between w-full gap-3">
-          <NavLink to="/results">
-            <button className="flex-1 py-2.5 px-4 rounded-lg bg-[#a540b9] text-[#ccc] text-sm transition-all duration-300 hover:scale-105 hover:opacity-95">
-            See Results
-          </button>
+          <NavLink to="/" className="flex-1">
+            <button className="w-full py-2.5 px-4 rounded-lg bg-[#a540b9] text-[#ccc] text-sm transition-all duration-300 hover:scale-105 hover:opacity-95">
+              Go Home
+            </button>
           </NavLink>
-          <button className="flex-1 py-2.5 px-4 rounded-lg bg-cyan-700 text-richblack-25 text-sm transition-all duration-300 hover:scale-105 hover:opacity-95">
-            <NavLink to="/contact">Contact us</NavLink>
-          </button>
+          <NavLink to="/contact" className="flex-1">
+            <button className="w-full py-2.5 px-4 rounded-lg bg-cyan-700 text-richblack-25 text-sm transition-all duration-300 hover:scale-105 hover:opacity-95">
+              Contact Us
+            </button>
+          </NavLink>
         </div>
       </div>
     </div>
