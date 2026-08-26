@@ -11,9 +11,15 @@ const dashboardAccessConfigSchema = new mongoose.Schema(
   {
     dashboardKey: { type: String, required: true, unique: true, trim: true },
     extraAllowedDepartments: [{ type: String, trim: true }],
+    // Kept for backwards compatibility with existing dashboard-wide settings.
+    // New settings grant member access section by section.
+    departmentMembersEnabled: { type: Boolean, default: false },
+    memberSectionAccess: { type: Map, of: Boolean, default: {} },
   },
   { timestamps: true },
 );
 
-module.exports = mongoose.model("DashboardAccessConfig", dashboardAccessConfigSchema);
-
+module.exports = mongoose.model(
+  "DashboardAccessConfig",
+  dashboardAccessConfigSchema,
+);

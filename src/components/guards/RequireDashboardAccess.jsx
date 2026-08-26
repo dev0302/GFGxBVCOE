@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import DashboardLocked from "./DashboardLocked";
 
 function normalizeKey(value) {
   return String(value || "").trim();
@@ -23,9 +24,21 @@ export default function RequireDashboardAccess({ dashboardKey, children }) {
 
   if (!user) return <Navigate to="/login" replace />;
 
-  const access = Array.isArray(user.dashboardAccess) ? user.dashboardAccess : [];
-  if (!key || !access.includes(key)) return <Navigate to="/notfound" replace />;
+  const access = Array.isArray(user.dashboardAccess)
+    ? user.dashboardAccess
+    : [];
+  const isOwnDeptMemberLocked =
+    user.isDepartmentMember &&
+    key === user.accountType &&
+    !access.includes(key);
+
+  if (!key) return <Navigate to="/notfound" replace />;
+  if (!access.includes(key)) {
+    if (isOwnDeptMemberLocked) {
+      return <DashboardLocked departmentKey={key} />;
+    }
+    return <Navigate to="/notfound" replace />;
+  }
 
   return children ?? null;
 }
-

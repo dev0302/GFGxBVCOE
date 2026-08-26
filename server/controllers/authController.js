@@ -9,12 +9,19 @@ const otpGenerator = require("otp-generator");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const mailSender = require("../utils/mailSender");
-const { emailVerificationTemplate, passwordResetTemplate, passwordChangedTemplate, signupInviteTemplate } = require("../mail/templates");
+const {
+  emailVerificationTemplate,
+  passwordResetTemplate,
+  passwordChangedTemplate,
+  signupInviteTemplate,
+} = require("../mail/templates");
 const { imageUpload, uploadImageFromUrl } = require("../config/cloudinary");
 const { getTeamMemberModel } = require("../models/TeamMember");
 const { getEventUploadAllowedList } = require("./eventController");
 const DashboardAccessConfig = require("../models/DashboardAccessConfig");
-const { userCanAccessLeadershipTransition } = require("../utils/leadershipAccess");
+const {
+  userCanAccessLeadershipTransition,
+} = require("../utils/leadershipAccess");
 const {
   normalizeProfileTextFields,
   normalizeDepartmentName,
@@ -45,15 +52,23 @@ async function findDepartmentMemberByEmail(email) {
 
 async function currentDepartmentMember(req) {
   if (!req.user?.isDepartmentMember || !req.user.memberDepartment) return null;
-  const member = await getTeamMemberModel(req.user.memberDepartment).findById(req.user.id);
+  const member = await getTeamMemberModel(req.user.memberDepartment).findById(
+    req.user.id,
+  );
   if (!member || member.email !== req.user.email) return null;
   return { member, department: req.user.memberDepartment };
 }
 
-function memberAsUser(memberDoc, department) {
+async function memberAsUser(memberDoc, department) {
   const member = memberDoc.toObject ? memberDoc.toObject() : memberDoc;
-  const parts = String(member.name || "").trim().split(/\s+/).filter(Boolean);
+  const parts = String(member.name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
   const profile = member.profile || {};
+  const dashboardConfig = await DashboardAccessConfig.findOne({
+    dashboardKey: department,
+  }).lean();
   return {
     _id: member._id,
     firstName: parts[0] || member.email || "Member",
@@ -72,21 +87,45 @@ function memberAsUser(memberDoc, department) {
       year: profile.year || member.year || "",
       branch: profile.branch || member.branch || "",
       section: profile.section || member.section || "",
-      non_tech_society: profile.non_tech_society || member.non_tech_society || "",
+      non_tech_society:
+        profile.non_tech_society || member.non_tech_society || "",
     },
-    dashboardAccess: [],
+    dashboardAccess: Object.values(dashboardConfig?.memberSectionAccess || {}).some(Boolean) || dashboardConfig?.departmentMembersEnabled
+      ? [department]
+      : [],
+    departmentDashboardSections: {
+      [department]: ["generate-qr", "documents"].filter(
+        (section) => dashboardConfig?.memberSectionAccess?.[section] ?? dashboardConfig?.departmentMembersEnabled,
+      ),
+    },
     canManageEvents: false,
     canAccessLeadershipTransition: false,
   };
 }
 
 function memberToken(member, department) {
-  return jwt.sign({ email: member.email, id: member._id, accountType: department, isDepartmentMember: true, memberDepartment: department }, process.env.JWT_SECRET, { expiresIn: "1y" });
+  return jwt.sign(
+    {
+      email: member.email,
+      id: member._id,
+      accountType: department,
+      isDepartmentMember: true,
+      memberDepartment: department,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "1y" },
+  );
 }
 
 function authCookieOptions() {
   const isProduction = process.env.NODE_ENV === "production";
-  return { expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), httpOnly: true, secure: isProduction, sameSite: isProduction ? "none" : "lax", path: "/" };
+  return {
+    expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    path: "/",
+  };
 }
 
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
@@ -97,7 +136,10 @@ function escapeRegex(value) {
 
 function normalizeUserProfileFields(user) {
   if (!user) return user;
-  const next = { ...user, accountType: normalizeDepartmentName(user.accountType) };
+  const next = {
+    ...user,
+    accountType: normalizeDepartmentName(user.accountType),
+  };
   if (next.additionalDetails) {
     next.additionalDetails = normalizeProfileTextFields(next.additionalDetails);
   }
@@ -112,7 +154,9 @@ function findPredefinedByEmail(email) {
   const trimmed = (email || "").trim();
   if (!trimmed) return null;
   const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return PredefinedProfile.findOne({ email: { $regex: new RegExp(`^${escaped}$`, "i") } }).lean();
+  return PredefinedProfile.findOne({
+    email: { $regex: new RegExp(`^${escaped}$`, "i") },
+  }).lean();
 }
 
 exports.sendOTP = async (req, res) => {
@@ -139,7 +183,8 @@ exports.sendOTP = async (req, res) => {
     if (!config && !departmentMember) {
       return res.status(403).json({
         success: false,
-        message: "This email is not allowed to sign up for the selected department.",
+        message:
+          "This email is not allowed to sign up for the selected department.",
       });
     }
 
@@ -151,7 +196,9 @@ exports.sendOTP = async (req, res) => {
       });
     }
 
-    await OTP.collection.createIndex({ otp: 1 }, { unique: true }).catch(() => { });
+    await OTP.collection
+      .createIndex({ otp: 1 }, { unique: true })
+      .catch(() => {});
 
     let otp;
     let otpBody;
@@ -174,8 +221,10 @@ exports.sendOTP = async (req, res) => {
 
     // Link hits backend to mark "user allowed autofill" - no redirect to frontend
     // console.log(process.env.API_URL);
-    
-    const apiUrl = (process.env.API_URL || `http://localhost:${process.env.PORT || 8080}`).replace(/\/$/, "");
+
+    const apiUrl = (
+      process.env.API_URL || `http://localhost:${process.env.PORT || 8080}`
+    ).replace(/\/$/, "");
     const autofillUrl = `${apiUrl}/api/v1/auth/allow-autofill?token=${encodeURIComponent(pollToken)}`;
     const htmlContent = emailVerificationTemplate(otp, autofillUrl);
 
@@ -207,7 +256,7 @@ exports.allowAutofill = async (req, res) => {
     const updated = await OTP.findOneAndUpdate(
       { pollToken: token.trim() },
       { $set: { autofillAllowed: true } },
-      { new: true }
+      { new: true },
     );
     if (!updated) {
       return res.status(404).send("Link expired or already used.");
@@ -233,17 +282,29 @@ exports.getOtpForAutofill = async (req, res) => {
   try {
     const { token } = req.query;
     if (!token || typeof token !== "string") {
-      return res.status(400).json({ success: false, message: "Token required." });
+      return res
+        .status(400)
+        .json({ success: false, message: "Token required." });
     }
-    const doc = await OTP.findOne({ pollToken: token.trim(), autofillAllowed: true }).lean();
+    const doc = await OTP.findOne({
+      pollToken: token.trim(),
+      autofillAllowed: true,
+    }).lean();
     if (!doc) {
-      return res.status(404).json({ success: false, message: "Not yet allowed or already used." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Not yet allowed or already used." });
     }
-    await OTP.updateOne({ _id: doc._id }, { $unset: { pollToken: 1, autofillAllowed: 1 } });
+    await OTP.updateOne(
+      { _id: doc._id },
+      { $unset: { pollToken: 1, autofillAllowed: 1 } },
+    );
     return res.status(200).json({ success: true, otp: doc.otp });
   } catch (error) {
     console.error("getOtpForAutofill error:", error);
-    return res.status(500).json({ success: false, message: "Something went wrong." });
+    return res
+      .status(500)
+      .json({ success: false, message: "Something went wrong." });
   }
 };
 
@@ -259,7 +320,15 @@ exports.signup = async (req, res) => {
       otp,
     } = req.body;
 
-    if (!firstName || !lastName || !email || !password || !confirmPassword || !otp || !accountType) {
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !password ||
+      !confirmPassword ||
+      !otp ||
+      !accountType
+    ) {
       return res.status(403).json({
         success: false,
         message: "All fields are required.",
@@ -286,15 +355,21 @@ exports.signup = async (req, res) => {
       department: accountType.trim(),
       allowedEmails: emailNorm,
     });
-    const departmentMember = await findDepartmentMember(emailNorm, accountType.trim());
+    const departmentMember = await findDepartmentMember(
+      emailNorm,
+      accountType.trim(),
+    );
     if (!config && !departmentMember) {
       return res.status(403).json({
         success: false,
-        message: "This email is not allowed to sign up for the selected department.",
+        message:
+          "This email is not allowed to sign up for the selected department.",
       });
     }
 
-    const recentOTP = await OTP.find({ email: emailNorm }).sort({ createdAt: -1 }).limit(1);
+    const recentOTP = await OTP.find({ email: emailNorm })
+      .sort({ createdAt: -1 })
+      .limit(1);
     if (!recentOTP.length || recentOTP[0].otp.toString() !== otp.toString()) {
       return res.status(401).json({
         success: false,
@@ -310,15 +385,19 @@ exports.signup = async (req, res) => {
       const member = departmentMember.member;
       member.password = hashPassword;
       member.signedIn = true;
-      if (!member.name?.trim()) member.name = `${firstName.trim()} ${lastName.trim()}`.trim();
+      if (!member.name?.trim())
+        member.name = `${firstName.trim()} ${lastName.trim()}`.trim();
       await member.save();
       const token = memberToken(member, departmentMember.department);
-      return res.cookie("Token", token, authCookieOptions()).status(201).json({
-        success: true,
-        message: "Department member registered successfully.",
-        token,
-        user: memberAsUser(member, departmentMember.department),
-      });
+      return res
+        .cookie("Token", token, authCookieOptions())
+        .status(201)
+        .json({
+          success: true,
+          message: "Department member registered successfully.",
+          token,
+          user: await memberAsUser(member, departmentMember.department),
+        });
     }
 
     const profileDetails = await Profile.create({
@@ -344,7 +423,9 @@ exports.signup = async (req, res) => {
       id: newUser._id,
       accountType: newUser.accountType,
     };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1y" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1y",
+    });
 
     let userObj = newUser.toObject();
     userObj.token = token;
@@ -386,25 +467,40 @@ exports.login = async (req, res) => {
     }
 
     const emailNorm = email.trim().toLowerCase();
-    let user = await User.findOne({ email: emailNorm }).populate("additionalDetails");
+    let user = await User.findOne({ email: emailNorm }).populate(
+      "additionalDetails",
+    );
     if (!user) {
       const departmentMember = await findDepartmentMemberByEmail(emailNorm);
       if (!departmentMember || !departmentMember.member.password) {
-        return res.status(401).json({ success: false, message: "User not registered." });
+        return res
+          .status(401)
+          .json({ success: false, message: "User not registered." });
       }
       if (!(await bcrypt.compare(password, departmentMember.member.password))) {
-        return res.status(403).json({ success: false, message: "Password incorrect." });
+        return res
+          .status(403)
+          .json({ success: false, message: "Password incorrect." });
       }
       departmentMember.member.signedIn = true;
       departmentMember.member.lastSeen = new Date();
       await departmentMember.member.save();
-      const token = memberToken(departmentMember.member, departmentMember.department);
-      return res.cookie("Token", token, authCookieOptions()).status(200).json({
-        success: true,
-        token,
-        user: memberAsUser(departmentMember.member, departmentMember.department),
-        message: "User logged in successfully.",
-      });
+      const token = memberToken(
+        departmentMember.member,
+        departmentMember.department,
+      );
+      return res
+        .cookie("Token", token, authCookieOptions())
+        .status(200)
+        .json({
+          success: true,
+          token,
+          user: await memberAsUser(
+            departmentMember.member,
+            departmentMember.department,
+          ),
+          message: "User logged in successfully.",
+        });
     }
 
     if (!(await bcrypt.compare(password, user.password))) {
@@ -419,13 +515,15 @@ exports.login = async (req, res) => {
       id: user._id,
       accountType: user.accountType,
     };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1y" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1y",
+    });
 
     user = user.toObject();
     user.token = token;
     user.password = undefined;
     const eventUploadAllowed = await getEventUploadAllowedList();
-    const accountType = String(user.accountType || '').trim();
+    const accountType = String(user.accountType || "").trim();
     user.canManageEvents = eventUploadAllowed.includes(accountType);
 
     // Dashboards access: EM dashboard uses existing event-upload allowed list,
@@ -444,7 +542,8 @@ exports.login = async (req, res) => {
       dashboardAccess.add("Event Management");
       nonEmDashboardKeys.forEach((k) => dashboardAccess.add(k));
     } else {
-      if (eventUploadAllowed.includes(accountType)) dashboardAccess.add("Event Management");
+      if (eventUploadAllowed.includes(accountType))
+        dashboardAccess.add("Event Management");
 
       const docs = await DashboardAccessConfig.find({
         dashboardKey: { $in: nonEmDashboardKeys },
@@ -463,10 +562,8 @@ exports.login = async (req, res) => {
       });
     }
     user.dashboardAccess = Array.from(dashboardAccess);
-    user.canAccessLeadershipTransition = await userCanAccessLeadershipTransition(
-      user._id,
-      accountType
-    );
+    user.canAccessLeadershipTransition =
+      await userCanAccessLeadershipTransition(user._id, accountType);
 
     const isProduction = process.env.NODE_ENV === "production";
     const options = {
@@ -506,12 +603,15 @@ exports.forgotPassword = async (req, res) => {
     }
 
     const existingUser = await User.findOne({ email: emailNorm });
-    const departmentMember = existingUser ? null : await findDepartmentMemberByEmail(emailNorm);
+    const departmentMember = existingUser
+      ? null
+      : await findDepartmentMemberByEmail(emailNorm);
     const user = existingUser || departmentMember?.member;
     if (!user || (departmentMember && !user.password)) {
       return res.status(200).json({
         success: true,
-        message: "If an account exists with this email, you will receive a password reset link.",
+        message:
+          "If an account exists with this email, you will receive a password reset link.",
       });
     }
 
@@ -521,20 +621,25 @@ exports.forgotPassword = async (req, res) => {
     await PasswordReset.create({ email: emailNorm, token, expiresAt });
 
     const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-    console.log("forgot pass base url:" + process.env.FRONTEND_URL );
-    
+    console.log("forgot pass base url:" + process.env.FRONTEND_URL);
+
     const resetLink = `${baseUrl}/reset-password/${token}`;
     const htmlContent = passwordResetTemplate(resetLink);
 
     if (process.env.BREVO_API_KEY && process.env.SENDER_EMAIL) {
-      await mailSender(user.email, "Reset your password – GFGxBVCOE", htmlContent);
+      await mailSender(
+        user.email,
+        "Reset your password – GFGxBVCOE",
+        htmlContent,
+      );
     } else {
       console.log("[forgotPassword] No mail config. Reset link:", resetLink);
     }
 
     return res.status(200).json({
       success: true,
-      message: "If an account exists with this email, you will receive a password reset link.",
+      message:
+        "If an account exists with this email, you will receive a password reset link.",
     });
   } catch (error) {
     console.error("forgotPassword error:", error);
@@ -577,7 +682,9 @@ exports.resetPassword = async (req, res) => {
     }
 
     const existingUser = await User.findOne({ email: resetDoc.email });
-    const departmentMember = existingUser ? null : await findDepartmentMemberByEmail(resetDoc.email);
+    const departmentMember = existingUser
+      ? null
+      : await findDepartmentMemberByEmail(resetDoc.email);
     const user = existingUser || departmentMember?.member;
     if (!user) {
       await PasswordReset.deleteOne({ token });
@@ -626,11 +733,15 @@ exports.changePassword = async (req, res) => {
     const currentMember = await currentDepartmentMember(req);
     if (currentMember) {
       if (!(await bcrypt.compare(oldPassword, currentMember.member.password))) {
-        return res.status(401).json({ success: false, message: "Old password is incorrect." });
+        return res
+          .status(401)
+          .json({ success: false, message: "Old password is incorrect." });
       }
       currentMember.member.password = await bcrypt.hash(newPassword, 10);
       await currentMember.member.save();
-      return res.status(200).json({ success: true, message: "Password updated successfully." });
+      return res
+        .status(200)
+        .json({ success: true, message: "Password updated successfully." });
     }
     const user = await User.findById(userId);
     if (!user) {
@@ -679,11 +790,16 @@ exports.presenceHeartbeat = async (req, res) => {
       await currentMember.member.save();
       return res.status(200).json({ success: true });
     }
-    await User.updateOne({ _id: req.user.id }, { $set: { lastSeen: new Date() } });
+    await User.updateOne(
+      { _id: req.user.id },
+      { $set: { lastSeen: new Date() } },
+    );
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error("presenceHeartbeat error:", error);
-    return res.status(500).json({ success: false, message: "Could not update presence." });
+    return res
+      .status(500)
+      .json({ success: false, message: "Could not update presence." });
   }
 };
 
@@ -703,7 +819,7 @@ exports.getLastSeenFeed = async (req, res) => {
           .limit(600)
           .lean();
         return members.map((member) => ({ ...member, department }));
-      })
+      }),
     );
 
     const activityRows = [
@@ -748,16 +864,29 @@ exports.me = async (req, res) => {
   try {
     const currentMember = await currentDepartmentMember(req);
     if (currentMember) {
-      const user = memberAsUser(currentMember.member, currentMember.department);
-      return res.status(200).json({ success: true, user, token: memberToken(currentMember.member, currentMember.department) });
+      const user = await memberAsUser(
+        currentMember.member,
+        currentMember.department,
+      );
+      return res
+        .status(200)
+        .json({
+          success: true,
+          user,
+          token: memberToken(currentMember.member, currentMember.department),
+        });
     }
-    const userDoc = await User.findById(req.user.id).populate("additionalDetails").select("-password");
+    const userDoc = await User.findById(req.user.id)
+      .populate("additionalDetails")
+      .select("-password");
     if (!userDoc) {
-      return res.status(404).json({ success: false, message: "User not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found." });
     }
     const user = userDoc.toObject();
     const eventUploadAllowed = await getEventUploadAllowedList();
-    const accountType = String(user.accountType || '').trim();
+    const accountType = String(user.accountType || "").trim();
     user.canManageEvents = eventUploadAllowed.includes(accountType);
 
     // Dashboards access: EM dashboard uses existing event-upload allowed list,
@@ -776,7 +905,8 @@ exports.me = async (req, res) => {
       dashboardAccess.add("Event Management");
       nonEmDashboardKeys.forEach((k) => dashboardAccess.add(k));
     } else {
-      if (eventUploadAllowed.includes(accountType)) dashboardAccess.add("Event Management");
+      if (eventUploadAllowed.includes(accountType))
+        dashboardAccess.add("Event Management");
 
       const docs = await DashboardAccessConfig.find({
         dashboardKey: { $in: nonEmDashboardKeys },
@@ -795,10 +925,8 @@ exports.me = async (req, res) => {
       });
     }
     user.dashboardAccess = Array.from(dashboardAccess);
-    user.canAccessLeadershipTransition = await userCanAccessLeadershipTransition(
-      user._id,
-      accountType
-    );
+    user.canAccessLeadershipTransition =
+      await userCanAccessLeadershipTransition(user._id, accountType);
     if (user.tenureEndedAt) {
       user.canAccessLeadershipTransition = false;
       user.dashboardAccess = [];
@@ -809,7 +937,9 @@ exports.me = async (req, res) => {
       id: user._id,
       accountType: user.accountType,
     };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1y" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1y",
+    });
     return res.status(200).json({ success: true, user, token });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -853,17 +983,39 @@ exports.updateProfile = async (req, res) => {
     if (currentMember) {
       const member = currentMember.member;
       const profile = member.profile || {};
-      const nextFirst = firstName !== undefined ? firstName.trim() : String(member.name || "").trim().split(/\s+/)[0] || "";
-      const nextLast = lastName !== undefined ? lastName.trim() : String(member.name || "").trim().split(/\s+/).slice(1).join(" ");
+      const nextFirst =
+        firstName !== undefined
+          ? firstName.trim()
+          : String(member.name || "")
+              .trim()
+              .split(/\s+/)[0] || "";
+      const nextLast =
+        lastName !== undefined
+          ? lastName.trim()
+          : String(member.name || "")
+              .trim()
+              .split(/\s+/)
+              .slice(1)
+              .join(" ");
       member.name = `${nextFirst} ${nextLast}`.trim() || member.name;
       if (contact !== undefined) member.contact = (contact || "").trim();
-      ["gender", "dob", "about", "yearOfStudy", "branch", "section", "non_tech_society", "position"].forEach((key) => {
+      [
+        "gender",
+        "dob",
+        "about",
+        "yearOfStudy",
+        "branch",
+        "section",
+        "non_tech_society",
+        "position",
+      ].forEach((key) => {
         if (req.body[key] !== undefined) profile[key] = req.body[key] || "";
       });
       if (contact !== undefined) profile.phoneNumber = (contact || "").trim();
       profile.socials = profile.socials || {};
       ["instagram", "linkedin", "github"].forEach((key) => {
-        if (req.body[key] !== undefined) profile.socials[key] = req.body[key] || "";
+        if (req.body[key] !== undefined)
+          profile.socials[key] = req.body[key] || "";
       });
       member.profile = profile;
       // Sync profile fields back to top-level TeamMember fields so the team
@@ -872,14 +1024,23 @@ exports.updateProfile = async (req, res) => {
       if (yearOfStudy !== undefined) member.year = (yearOfStudy || "").trim();
       if (branch !== undefined) member.branch = (branch || "").trim();
       if (section !== undefined) member.section = (section || "").trim();
-      if (non_tech_society !== undefined) member.non_tech_society = (non_tech_society || "").trim();
+      if (non_tech_society !== undefined)
+        member.non_tech_society = (non_tech_society || "").trim();
       await member.save();
-      return res.status(200).json({ success: true, message: "Profile updated.", data: memberAsUser(member, currentMember.department) });
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "Profile updated.",
+          data: await memberAsUser(member, currentMember.department),
+        });
     }
 
     const user = await User.findById(userId).populate("additionalDetails");
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found." });
     }
 
     if (firstName !== undefined) user.firstName = firstName.trim();
@@ -912,7 +1073,8 @@ exports.updateProfile = async (req, res) => {
       if (gender !== undefined) profile.gender = gender || null;
       if (dob !== undefined) profile.dob = dob || null;
       if (about !== undefined) profile.about = about || null;
-      if (contact !== undefined) profile.phoneNumber = (contact || "").trim() || null;
+      if (contact !== undefined)
+        profile.phoneNumber = (contact || "").trim() || null;
       if (yearOfStudy !== undefined) {
         profile.yearOfStudy = yearOfStudy || null;
         // Also keep profile.year in sync — the team list reads
@@ -922,19 +1084,29 @@ exports.updateProfile = async (req, res) => {
       }
       if (branch !== undefined) profile.branch = branch || null;
       if (section !== undefined) profile.section = section || null;
-      if (non_tech_society !== undefined) profile.non_tech_society = non_tech_society || null;
+      if (non_tech_society !== undefined)
+        profile.non_tech_society = non_tech_society || null;
       if (position !== undefined) profile.position = position || null;
-      if (instagram !== undefined || linkedin !== undefined || github !== undefined) {
+      if (
+        instagram !== undefined ||
+        linkedin !== undefined ||
+        github !== undefined
+      ) {
         profile.socials = profile.socials || {};
-        if (instagram !== undefined) profile.socials.instagram = instagram || null;
+        if (instagram !== undefined)
+          profile.socials.instagram = instagram || null;
         if (linkedin !== undefined) profile.socials.linkedin = linkedin || null;
         if (github !== undefined) profile.socials.github = github || null;
       }
       await profile.save();
     }
 
-    const updated = await User.findById(userId).populate("additionalDetails").select("-password");
-    return res.status(200).json({ success: true, message: "Profile updated.", data: updated });
+    const updated = await User.findById(userId)
+      .populate("additionalDetails")
+      .select("-password");
+    return res
+      .status(200)
+      .json({ success: true, message: "Profile updated.", data: updated });
   } catch (error) {
     console.error("updateProfile error:", error);
     return res.status(500).json({
@@ -948,7 +1120,9 @@ exports.updateAvatar = async (req, res) => {
   try {
     const userId = req.user.id;
     if (!req.files?.avatar) {
-      return res.status(400).json({ success: false, message: "No image file provided." });
+      return res
+        .status(400)
+        .json({ success: false, message: "No image file provided." });
     }
     const file = req.files.avatar;
     const result = await imageUpload(file, "gfg-avatars");
@@ -956,17 +1130,28 @@ exports.updateAvatar = async (req, res) => {
     if (currentMember) {
       currentMember.member.photo = result.secure_url;
       await currentMember.member.save();
-      return res.status(200).json({ success: true, message: "Display picture updated.", data: memberAsUser(currentMember.member, currentMember.department) });
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "Display picture updated.",
+          data: await memberAsUser(
+            currentMember.member,
+            currentMember.department,
+          ),
+        });
     }
     const user = await User.findByIdAndUpdate(
       userId,
       { image: result.secure_url },
-      { new: true }
+      { new: true },
     )
       .populate("additionalDetails")
       .select("-password");
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found." });
     }
     return res.status(200).json({
       success: true,
@@ -1035,15 +1220,23 @@ exports.enrichProfile = async (req, res) => {
         profile.yearOfStudy = predefined.year;
       }
       if (predefined.position) profile.position = predefined.position;
-      if (predefined.p0 !== undefined && predefined.p0 !== "") profile.p0 = predefined.p0;
-      if (predefined.p1 !== undefined && predefined.p1 !== "") profile.p1 = predefined.p1;
-      if (predefined.p2 !== undefined && predefined.p2 !== "") profile.p2 = predefined.p2;
+      if (predefined.p0 !== undefined && predefined.p0 !== "")
+        profile.p0 = predefined.p0;
+      if (predefined.p1 !== undefined && predefined.p1 !== "")
+        profile.p1 = predefined.p1;
+      if (predefined.p2 !== undefined && predefined.p2 !== "")
+        profile.p2 = predefined.p2;
       if (profile.socials) {
-        if (predefined.instaLink && predefined.instaLink !== "nil") profile.socials.instagram = predefined.instaLink;
-        if (predefined.linkedinLink) profile.socials.linkedin = predefined.linkedinLink;
+        if (predefined.instaLink && predefined.instaLink !== "nil")
+          profile.socials.instagram = predefined.instaLink;
+        if (predefined.linkedinLink)
+          profile.socials.linkedin = predefined.linkedinLink;
       } else {
         profile.socials = {
-          instagram: predefined.instaLink && predefined.instaLink !== "nil" ? predefined.instaLink : null,
+          instagram:
+            predefined.instaLink && predefined.instaLink !== "nil"
+              ? predefined.instaLink
+              : null,
           linkedin: predefined.linkedinLink || null,
           github: null,
         };
@@ -1058,11 +1251,12 @@ exports.enrichProfile = async (req, res) => {
     console.log("profile type:", typeof user.additionalDetails);
     console.log("profile id:", user.additionalDetails?._id);
 
-
     const imagePath = (predefined.image || "").trim();
     if (imagePath) {
       sendSSE(res, "uploading_image", "Uploading image…");
-      const imageUrl = imagePath.startsWith("http") ? imagePath : `${PREDEFINED_IMAGE_BASE}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
+      const imageUrl = imagePath.startsWith("http")
+        ? imagePath
+        : `${PREDEFINED_IMAGE_BASE}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
       try {
         const upload = await uploadImageFromUrl(imageUrl, "gfg-avatars");
         user.image = upload.secure_url;
@@ -1073,7 +1267,6 @@ exports.enrichProfile = async (req, res) => {
     }
 
     console.log("All fineeeeee");
-
 
     sendSSE(res, "done", "Profile updated.");
     res.end();
@@ -1105,13 +1298,16 @@ function filterTeamMembersByQuery(members, q) {
         (m.branch && m.branch.toLowerCase().includes(lower)) ||
         (m.year && String(m.year).toLowerCase().includes(lower)) ||
         (m.section && m.section.toLowerCase().includes(lower)) ||
-        (m.non_tech_society && m.non_tech_society.toLowerCase().includes(lower)) ||
-        (m.contact && String(m.contact).includes(q))
+        (m.non_tech_society &&
+          m.non_tech_society.toLowerCase().includes(lower)) ||
+        (m.contact && String(m.contact).includes(q)),
     );
   }
   if (q.length === 1) {
     const lower = q.toLowerCase();
-    return members.filter((m) => (m.name || "").toLowerCase().startsWith(lower));
+    return members.filter((m) =>
+      (m.name || "").toLowerCase().startsWith(lower),
+    );
   }
   return members;
 }
@@ -1144,7 +1340,9 @@ async function searchTeamMembersInDepartments(departments, q) {
   let combined = [];
   for (const dept of departments) {
     const TeamModel = getTeamMemberModel(dept);
-    const all = await TeamModel.find(ACTIVE_TEAM_MEMBER_FILTER).sort({ createdAt: -1 }).lean();
+    const all = await TeamModel.find(ACTIVE_TEAM_MEMBER_FILTER)
+      .sort({ createdAt: -1 })
+      .lean();
     const filtered = filterTeamMembersByQuery(all, q);
     for (const m of filtered) {
       combined.push(departments.length > 1 ? { ...m, department: dept } : m);
@@ -1191,8 +1389,14 @@ exports.searchPeople = async (req, res) => {
       if (q.includes(" ")) {
         const firstToken = q.split(/\s+/)[0];
         if (firstToken.length >= 1) {
-          const firstRegex = new RegExp(firstToken.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-          const byFirst = await User.find({ tenureEndedAt: null, firstName: firstRegex })
+          const firstRegex = new RegExp(
+            firstToken.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+            "i",
+          );
+          const byFirst = await User.find({
+            tenureEndedAt: null,
+            firstName: firstRegex,
+          })
             .select("-password")
             .populate("additionalDetails")
             .limit(50)
@@ -1200,7 +1404,10 @@ exports.searchPeople = async (req, res) => {
           const seen = new Set(userDocs.map((u) => u._id.toString()));
           for (const u of byFirst) {
             if (seen.has(u._id.toString())) continue;
-            const fullName = [u.firstName, u.lastName].filter(Boolean).join(" ").toLowerCase();
+            const fullName = [u.firstName, u.lastName]
+              .filter(Boolean)
+              .join(" ")
+              .toLowerCase();
             if (fullName.includes(qLower) || fullName.startsWith(qLower)) {
               userDocs.push(u);
               seen.add(u._id.toString());
@@ -1211,13 +1418,15 @@ exports.searchPeople = async (req, res) => {
       }
 
       for (const u of userDocs) {
-        const predefined = await PredefinedProfile.findOne({ email: u.email }).lean();
+        const predefined = await PredefinedProfile.findOne({
+          email: u.email,
+        }).lean();
         u.predefinedProfile = predefined || null;
       }
       users = userDocs.map(normalizeUserProfileFields);
       if (scopeDepartment) {
         users = users.filter(
-          (u) => normalizeDepartmentName(u.accountType) === scopeDepartment
+          (u) => normalizeDepartmentName(u.accountType) === scopeDepartment,
         );
       }
     }
@@ -1272,11 +1481,15 @@ exports.getAllPeople = async (req, res) => {
       .lean();
     const teamMembers = [];
     const unregisteredProfiles = [];
-    const registeredEmails = new Set(users.map((user) => (user.email || "").trim().toLowerCase()));
+    const registeredEmails = new Set(
+      users.map((user) => (user.email || "").trim().toLowerCase()),
+    );
     const unregisteredProfileEmails = new Set();
     for (const dept of TEAM_DEPARTMENTS) {
       const Model = getTeamMemberModel(dept);
-      const members = await Model.find(ACTIVE_TEAM_MEMBER_FILTER).sort({ createdAt: -1 }).lean();
+      const members = await Model.find(ACTIVE_TEAM_MEMBER_FILTER)
+        .sort({ createdAt: -1 })
+        .lean();
       for (const m of members) {
         teamMembers.push({ type: "teamMember", data: m, department: dept });
       }
@@ -1284,13 +1497,20 @@ exports.getAllPeople = async (req, res) => {
       // The clients already render `predefinedOnly`; include configured and
       // department-role profiles so Heads and Leads remain visible before they
       // complete registration.
-      const configs = await SignupConfig.find({ department: { $in: departmentLookupKeys(dept) } }).lean();
-      const emails = [...new Set(configs.flatMap((config) => config.allowedEmails || [])
-        .map((email) => (email || "").trim().toLowerCase())
-        .filter(Boolean))];
+      const configs = await SignupConfig.find({
+        department: { $in: departmentLookupKeys(dept) },
+      }).lean();
+      const emails = [
+        ...new Set(
+          configs
+            .flatMap((config) => config.allowedEmails || [])
+            .map((email) => (email || "").trim().toLowerCase())
+            .filter(Boolean),
+        ),
+      ];
       const departmentPattern = new RegExp(
         departmentLookupKeys(dept).map(escapeRegex).join("|"),
-        "i"
+        "i",
       );
       const profiles = await PredefinedProfile.find({
         $or: [
@@ -1303,7 +1523,12 @@ exports.getAllPeople = async (req, res) => {
       }).lean();
       for (const profile of profiles) {
         const email = (profile.email || "").trim().toLowerCase();
-        if (!email || registeredEmails.has(email) || unregisteredProfileEmails.has(email)) continue;
+        if (
+          !email ||
+          registeredEmails.has(email) ||
+          unregisteredProfileEmails.has(email)
+        )
+          continue;
         unregisteredProfileEmails.add(email);
         unregisteredProfiles.push({
           type: "predefinedOnly",
@@ -1314,7 +1539,10 @@ exports.getAllPeople = async (req, res) => {
     }
 
     const list = [
-      ...users.map((u) => ({ type: "user", data: normalizeUserProfileFields(u) })),
+      ...users.map((u) => ({
+        type: "user",
+        data: normalizeUserProfileFields(u),
+      })),
       ...teamMembers,
       ...unregisteredProfiles,
     ];
@@ -1338,21 +1566,32 @@ exports.sendSignupInvite = async (req, res) => {
     const { email } = req.body;
     const emailNorm = (email || "").trim().toLowerCase();
     if (!emailNorm) {
-      return res.status(400).json({ success: false, message: "Email is required." });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email is required." });
     }
 
     const predefined = await findPredefinedByEmail(emailNorm);
     if (!predefined) {
-      return res.status(404).json({ success: false, message: "No predefined profile found for this email." });
+      return res
+        .status(404)
+        .json({
+          success: false,
+          message: "No predefined profile found for this email.",
+        });
     }
 
     const existingUser = await User.findOne({ email: emailNorm }).lean();
     if (existingUser) {
-      return res.status(400).json({ success: false, message: "This person is already registered." });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "This person is already registered.",
+        });
     }
 
     console.log(process.env.FRONTEND_URL);
-    
 
     const baseUrl =
       process.env.FRONTEND_URL ||
@@ -1362,7 +1601,11 @@ exports.sendSignupInvite = async (req, res) => {
     const signupLink = `${baseUrl.replace(/\/$/, "")}/signup`;
 
     const htmlContent = signupInviteTemplate(predefined, signupLink);
-    await mailSender(emailNorm, "You're invited to sign up – GFGxBVCOE", htmlContent);
+    await mailSender(
+      emailNorm,
+      "You're invited to sign up – GFGxBVCOE",
+      htmlContent,
+    );
 
     return res.status(200).json({
       success: true,
@@ -1385,15 +1628,27 @@ exports.deleteAccount = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json({ success: false, message: "Not authenticated." });
+      return res
+        .status(401)
+        .json({ success: false, message: "Not authenticated." });
     }
     if (req.user?.isDepartmentMember) {
-      return res.status(403).json({ success: false, message: "Department-member records are managed by the department and cannot be deleted here." });
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message:
+            "Department-member records are managed by the department and cannot be deleted here.",
+        });
     }
 
-    const userDoc = await User.findById(userId).select("additionalDetails").lean();
+    const userDoc = await User.findById(userId)
+      .select("additionalDetails")
+      .lean();
     if (!userDoc) {
-      return res.status(404).json({ success: false, message: "User not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found." });
     }
 
     if (userDoc.additionalDetails) {
