@@ -50,6 +50,7 @@ import EventDocuments from "./pages/eventDashboard/EventDocuments";
 import PublicShareView from "./pages/eventDashboard/PublicShareView";
 import DepartmentDashboardLayout from "./components/DepartmentDashboard/DepartmentDashboardLayout";
 import MemberDashboard from "./pages/MemberDashboard";
+import RequireDepartmentSectionAccess from "./components/guards/RequireDepartmentSectionAccess";
 import LeadershipTransitionLayout from "./components/LeadershipTransition/LeadershipTransitionLayout";
 import Navbar from "./components/common/Navbar";
 import NotFound from "./components/NotFound";
@@ -214,8 +215,8 @@ function App() {
                           path="departments"
                           element={<DepartmentDepartmentsAllowed />}
                         />
-                        <Route path="generate-qr" element={<GenerateQR />} />
-                        <Route path="documents" element={<EventDocuments />} />
+                        <Route path="generate-qr" element={<RequireDepartmentSectionAccess section="generate-qr"><GenerateQR /></RequireDepartmentSectionAccess>} />
+                        <Route path="documents" element={<RequireDepartmentSectionAccess section="documents"><EventDocuments /></RequireDepartmentSectionAccess>} />
                       </Route>
                       <Route path="/login" element={<Login />} />
                       <Route

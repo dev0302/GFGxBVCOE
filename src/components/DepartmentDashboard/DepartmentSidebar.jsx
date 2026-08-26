@@ -19,16 +19,22 @@ export default function DepartmentSidebar() {
       name: "Generate QR",
       path: `/dashboard/${encodedKey}/generate-qr`,
       icon: Grid,
+      section: "generate-qr",
     },
     {
       name: "Document Vault",
       path: `/dashboard/${encodedKey}/documents`,
       icon: Folder,
+      section: "documents",
     },
   ];
   const visibleLinks = canManageDepartmentDashboard(user, departmentKey)
     ? links
     : links.filter((link) => link.name !== "Departments allowed");
+  const memberSections = user?.departmentDashboardSections?.[departmentKey] || [];
+  const sectionLinks = user?.isDepartmentMember
+    ? visibleLinks.filter((link) => link.section && memberSections.includes(link.section))
+    : visibleLinks;
 
   const matchRoute = (path) => {
     return (
@@ -39,7 +45,7 @@ export default function DepartmentSidebar() {
   return (
     <div className="flex h-screen min-w-[60px] md:min-w-[220px] flex-col border-r border-gray-500/30 bg-[#1e1e2f]/95 pb-6 pt-20 sm:pt-24 transition-all duration-300">
       <div className="flex flex-col gap-0.5 px-2 md:px-4">
-        {visibleLinks.map((link) => {
+        {sectionLinks.map((link) => {
           const Icon = link.icon;
           const isActive = matchRoute(link.path);
           return (
