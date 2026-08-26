@@ -11,9 +11,6 @@ export default function MemberDashboard() {
   if (!user.isDepartmentMember || departmentName !== user.accountType) {
     return <Navigate to="/" replace />;
   }
-  if (!user.dashboardAccess?.includes(departmentName)) {
-    return <Navigate to="/" replace />;
-  }
 
   return (
     <Navigate to={`/dashboard/${encodeURIComponent(departmentName)}`} replace />
