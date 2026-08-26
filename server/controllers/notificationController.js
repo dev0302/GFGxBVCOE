@@ -2,7 +2,7 @@ const Notification = require("../models/Notification");
 const NotificationReply = require("../models/NotificationReply");
 const User = require("../models/User");
 const { getTeamMemberModel } = require("../models/TeamMember");
-const { sendBroadcastToAllUsers, sendBroadcastToAllMembers, sendBroadcastToDepartmentMembers, emitNotification } = require("../utils/notificationService");
+const { sendBroadcastToAllUsers, sendBroadcastToAllMembers, sendBroadcastToDepartmentMembers, sendBroadcastToAll, getBroadcastAudienceCounts, emitNotification } = require("../utils/notificationService");
 
 const BROADCAST_TYPES = ["broadcast_users", "broadcast_members", "broadcast_department"];
 
@@ -419,9 +419,13 @@ exports.broadcastToMembers = async (req, res) => {
     const senderId   = String(req.user?.id || req.user?._id || "").trim();
     const senderName = String(req.user?.name || `${req.user?.firstName || ""} ${req.user?.lastName || ""}`.trim() || "Society").trim();
     const result = await sendBroadcastToAllMembers({ senderId, senderName, senderRole, title, body });
+    const leadershipNote =
+      result.leadershipSent > 0
+        ? ` Heads/leads/core also notified (${result.leadershipSent}, tagged "Sent to members only").`
+        : "";
     return res.status(200).json({
       success: true,
-      message: `Notification sent to ${result.sent} of ${result.total} members.`,
+      message: `Notification sent to ${result.sent} of ${result.total} members.${leadershipNote}`,
       ...result,
     });
   } catch (error) {
@@ -451,9 +455,13 @@ exports.broadcastToDepartment = async (req, res) => {
     const senderId   = String(req.user?.id || req.user?._id || "").trim();
     const senderName = String(req.user?.name || `${req.user?.firstName || ""} ${req.user?.lastName || ""}`.trim() || "Society").trim();
     const result = await sendBroadcastToDepartmentMembers({ department, senderId, senderName, senderRole, title, body });
+    const leadershipNote =
+      result.leadershipSent > 0
+        ? ` Heads/leads/core also notified (${result.leadershipSent}, tagged "Sent to members only").`
+        : "";
     return res.status(200).json({
       success: true,
-      message: `Notification sent to ${result.sent} of ${result.total} ${department} members.`,
+      message: `Notification sent to ${result.sent} of ${result.total} ${department} members.${leadershipNote}`,
       ...result,
     });
   } catch (error) {
@@ -461,6 +469,66 @@ exports.broadcastToDepartment = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message || "Failed to broadcast notification to department members.",
+    });
+  }
+};
+
+exports.getBroadcastAudience = async (req, res) => {
+  try {
+    const department = String(req.query?.department || "").trim();
+    const counts = await getBroadcastAudienceCounts(department || null);
+    return res.status(200).json({ success: true, data: counts });
+  } catch (error) {
+    console.error("getBroadcastAudience error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to fetch broadcast audience.",
+    });
+  }
+};
+
+exports.broadcastToAll = async (req, res) => {
+  try {
+    const title = String(req.body?.title || "").trim();
+    const body = String(req.body?.body || "").trim();
+    const department = String(req.body?.department || "").trim();
+    if (!title || !body) {
+      return res.status(400).json({ success: false, message: "Title and body are required." });
+    }
+    if (!department) {
+      const allowed = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
+      if (!allowed.includes(String(req.user?.accountType || "").trim())) {
+        return res.status(403).json({
+          success: false,
+          message: "Society-wide broadcast is restricted to society core roles.",
+        });
+      }
+    }
+    if (title.length > 120 || body.length > 500) {
+      return res.status(400).json({ success: false, message: "Title (max 120) or body (max 500) is too long." });
+    }
+    const senderRole = String(req.user?.accountType || "Society").trim();
+    const senderId = String(req.user?.id || req.user?._id || "").trim();
+    const senderName = String(req.user?.name || `${req.user?.firstName || ""} ${req.user?.lastName || ""}`.trim() || "Society").trim();
+    const result = await sendBroadcastToAll({
+      department: department || undefined,
+      senderId,
+      senderName,
+      senderRole,
+      title,
+      body,
+    });
+    const scope = department ? `${department} (members + heads/leads/core)` : "everyone (members + heads/leads/core)";
+    return res.status(200).json({
+      success: true,
+      message: `Notification sent to ${result.sent} of ${result.total} recipients across ${scope}.`,
+      ...result,
+    });
+  } catch (error) {
+    console.error("broadcastToAll error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to broadcast notification to all.",
     });
   }
 };

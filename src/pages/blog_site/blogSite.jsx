@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, PenLine, Search, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getBlogCategories, getPublicPosts, getPendingPosts } from "../../services/blog_api";
+import {
+  getBlogCategories,
+  getPublicPosts,
+  getPendingPosts,
+  getBlogOgMeta,
+} from "../../services/blog_api";
+import { setPageMeta, resetPageMeta } from "../../utils/pageMeta";
 import { useAuth } from "../../context/AuthContext";
 import { NativeTypewriter } from "../../components/ui/native-typewriter";
 import confetti from "canvas-confetti";
@@ -57,6 +63,22 @@ const BlogSite = () => {
       }
     };
     loadPosts();
+  }, []);
+
+  useEffect(() => {
+    getBlogOgMeta()
+      .then((data) => {
+        if (!data?.og) return;
+        setPageMeta({
+          title: data.og.title,
+          description: data.og.description,
+          image: data.og.image,
+          url: data.og.url || `${window.location.origin}/blog`,
+        });
+      })
+      .catch(() => {});
+
+    return () => resetPageMeta();
   }, []);
 
   useEffect(() => {

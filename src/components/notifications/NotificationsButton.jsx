@@ -576,6 +576,11 @@ export default function NotificationsButton({
                                     {/* Sender role row + reply button row */}
                                     <div className="mt-1 flex items-center justify-between gap-2">
                                       <div className="flex flex-col gap-0.5">
+                                        {n.metadata?.sentToMembersOnly && (
+                                          <span className="inline-flex w-fit rounded-full border border-amber-400/30 bg-amber-500/10 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-amber-300">
+                                            {n.metadata?.audienceTag || "Sent to members only"}
+                                          </span>
+                                        )}
                                         {isReply ? (
                                           (n.senderName || n.metadata?.senderRole) && (
                                             <p className={`text-[9px] font-medium ${color === "pink" ? "text-pink-300" : "text-green-400"}`}>

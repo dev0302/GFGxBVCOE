@@ -1051,6 +1051,32 @@ export async function broadcastNotificationToDepartment(payload) {
   return data;
 }
 
+/** Fetch broadcast audience counts (members + heads/leads/core). Optional department scope. */
+export async function getNotificationBroadcastAudience(department) {
+  const query = department
+    ? `?department=${encodeURIComponent(department)}`
+    : "";
+  const res = await authFetch(`/api/v1/notifications/broadcast-audience${query}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to fetch notification audience");
+  }
+  return data;
+}
+
+/** Broadcast a notification to all members and heads/leads/core together. */
+export async function broadcastNotificationToAll(payload) {
+  const res = await authFetch("/api/v1/notifications/broadcast-all", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to broadcast notification to all");
+  }
+  return data;
+}
+
 /** Reply to a notification (recipient sends a reply back to the original sender). */
 export async function replyToNotification(id, body) {
   const res = await authFetch(

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { getTeamDepartments, getTeamMembers, getDepartmentRoster, getAllPeople, getAccountTypeLabel, sendSignupInvite, applyNextSessionYearPromotion, getYearPromotionHistory, revertYearPromotion, broadcastNotificationToUsers, broadcastNotificationToMembers } from "../services/api";
+import { getTeamDepartments, getTeamMembers, getDepartmentRoster, getAllPeople, getAccountTypeLabel, sendSignupInvite, applyNextSessionYearPromotion, getYearPromotionHistory, revertYearPromotion, broadcastNotificationToUsers, broadcastNotificationToMembers, broadcastNotificationToAll, getNotificationBroadcastAudience } from "../services/api";
 import { isSocietyRole } from "../services/api";
 import { toast } from "sonner";
 import { Users, ChevronRight, Printer, FileText, X, Download, List, Mail, RefreshCw, RotateCcw, Clock, Bell } from "react-feather";
@@ -120,11 +120,12 @@ export default function ManageSociety() {
 
   // Broadcast notification compose modal
   const [notifModalOpen, setNotifModalOpen] = useState(false);
-  const [notifTarget, setNotifTarget] = useState("users"); // "users" | "members"
+  const [notifTarget, setNotifTarget] = useState("users"); // "users" | "members" | "all"
   const [notifSending, setNotifSending] = useState(false);
   const [notifError, setNotifError] = useState("");
   const [notifSuccess, setNotifSuccess] = useState("");
   const [notifForm, setNotifForm] = useState({ title: "", body: "" });
+  const [broadcastAudienceTotal, setBroadcastAudienceTotal] = useState(null);
 
   // Initial departments load: if Redux has nothing, show spinner; otherwise hydrate from Redux and refresh in background.
   useEffect(() => {
@@ -146,6 +147,13 @@ export default function ManageSociety() {
       })
       .finally(() => setLoading(false));
   }, [user, location.pathname, manageSociety.departments?.length, dispatch]);
+
+  useEffect(() => {
+    if (!user || !isSocietyRole(user?.accountType)) return;
+    getNotificationBroadcastAudience()
+      .then((res) => setBroadcastAudienceTotal(res?.data?.total ?? null))
+      .catch(() => setBroadcastAudienceTotal(null));
+  }, [user]);
 
   useEffect(() => {
     if (!selectedDepartment || loading || departments.length === 0) return;
@@ -595,6 +603,21 @@ export default function ManageSociety() {
   <Bell className="h-4 w-4" />
   All Members
 </button>
+          <button
+  type="button"
+  onClick={() => {
+    setNotifTarget("all");
+    setNotifForm({ title: "", body: "" });
+    setNotifError("");
+    setNotifSuccess("");
+    setNotifModalOpen(true);
+  }}
+  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 hover:bg-emerald-500/25 hover:border-emerald-400/50 transition-colors text-[10px] sm:text-sm font-medium"
+>
+  <Bell className="h-4 w-4" />
+  Send notification to all
+  {broadcastAudienceTotal != null ? ` (${broadcastAudienceTotal})` : ""}
+</button>
         </div>
 
         {loading ? (
@@ -699,7 +722,11 @@ export default function ManageSociety() {
                         Send Notification
                       </h2>
                       <p className="text-[10px] text-pink-300 font-medium">
-                        {notifTarget === "users" ? "→ All Heads / Leads / Core users" : "→ All Department Members (with account)"}
+                        {notifTarget === "users"
+                          ? "→ All Heads / Leads / Core users"
+                          : notifTarget === "members"
+                            ? "→ All Department Members (heads/leads/core get a copy tagged “Sent to members only”)"
+                            : `→ Everyone — members + heads/leads/core${broadcastAudienceTotal != null ? ` (${broadcastAudienceTotal})` : ""}`}
                       </p>
                     </div>
                   </div>
@@ -783,7 +810,12 @@ export default function ManageSociety() {
                         setNotifError("");
                         setNotifSuccess("");
                         try {
-                          const fn = notifTarget === "users" ? broadcastNotificationToUsers : broadcastNotificationToMembers;
+                          const fn =
+                            notifTarget === "users"
+                              ? broadcastNotificationToUsers
+                              : notifTarget === "members"
+                                ? broadcastNotificationToMembers
+                                : broadcastNotificationToAll;
                           const result = await fn({ title: notifForm.title.trim(), body: notifForm.body.trim() });
                           setNotifSuccess(result.message || "Notification sent!");
                           setNotifForm({ title: "", body: "" });

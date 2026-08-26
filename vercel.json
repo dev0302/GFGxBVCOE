@@ -1,6 +1,14 @@
 {
     "rewrites": [
         {
+            "source": "/blog",
+            "destination": "/api/og-blog"
+        },
+        {
+            "source": "/blog/",
+            "destination": "/api/og-blog"
+        },
+        {
             "source": "/(.*)",
             "destination": "/"
         }

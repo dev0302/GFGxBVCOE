@@ -7,6 +7,8 @@ const {
   broadcastToUsers,
   broadcastToMembers,
   broadcastToDepartment,
+  broadcastToAll,
+  getBroadcastAudience,
   replyToNotification,
   deleteReply,
 } = require("../controllers/notificationController");
@@ -26,8 +28,10 @@ router.post("/:id/reply", auth, replyToNotification);
 router.delete("/replies/:replyId", auth, deleteReply);
 
 // Society-wide broadcasts — restricted to Chairperson / Vice-Chairperson / Treasurer / ADMIN
+router.get("/broadcast-audience", auth, requireRegisteredUser, getBroadcastAudience);
 router.post("/broadcast-users", auth, requireSocietyRole, broadcastToUsers);
 router.post("/broadcast-members", auth, requireSocietyRole, broadcastToMembers);
+router.post("/broadcast-all", auth, requireRegisteredUser, broadcastToAll);
 
 // Department-level broadcast — heads/leads/core can send to their own dept
 router.post("/broadcast-department", auth, requireRegisteredUser, broadcastToDepartment);

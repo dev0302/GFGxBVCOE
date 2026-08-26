@@ -21,6 +21,8 @@ import {
   getAccountTypeLabel,
   sendSignupInvite,
   broadcastNotificationToDepartment,
+  broadcastNotificationToAll,
+  getNotificationBroadcastAudience,
 } from "../services/api";
 import { toast } from "sonner";
 import {
@@ -249,6 +251,8 @@ export default function ManageTeam({
   const [deptNotifError, setDeptNotifError] = useState("");
   const [deptNotifSuccess, setDeptNotifSuccess] = useState("");
   const [deptNotifForm, setDeptNotifForm] = useState({ title: "", body: "" });
+  const [deptNotifTarget, setDeptNotifTarget] = useState("members"); // "members" | "all"
+  const [deptBroadcastAudience, setDeptBroadcastAudience] = useState(null);
 
   const department = isSociety ? propDepartment : user?.accountType;
   // console.log(department);
@@ -651,6 +655,16 @@ export default function ManageTeam({
 
   const displayDepartment = department || user?.accountType || "";
 
+  useEffect(() => {
+    if (!displayDepartment) {
+      setDeptBroadcastAudience(null);
+      return;
+    }
+    getNotificationBroadcastAudience(displayDepartment)
+      .then((res) => setDeptBroadcastAudience(res?.data || null))
+      .catch(() => setDeptBroadcastAudience(null));
+  }, [displayDepartment]);
+
   const fetchActiveInviteLink = async () => {
     setInviteLinkFetching(true);
     try {
@@ -895,9 +909,11 @@ export default function ManageTeam({
                 Print / Export list
               </button>
               {(isSociety || !isReadOnly) && (
+                <>
                 <button
   type="button"
   onClick={() => {
+    setDeptNotifTarget("members");
     setDeptNotifForm({ title: "", body: "" });
     setDeptNotifError("");
     setDeptNotifSuccess("");
@@ -907,7 +923,24 @@ export default function ManageTeam({
 >
   <Bell className="h-4 w-4" />
   Notify {displayDepartment} Members
+  {deptBroadcastAudience?.members != null ? ` (${deptBroadcastAudience.members})` : ""}
 </button>
+                <button
+  type="button"
+  onClick={() => {
+    setDeptNotifTarget("all");
+    setDeptNotifForm({ title: "", body: "" });
+    setDeptNotifError("");
+    setDeptNotifSuccess("");
+    setDeptNotifModalOpen(true);
+  }}
+  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 hover:bg-emerald-500/25 hover:border-emerald-400/50 transition-colors text-sm font-medium"
+>
+  <Bell className="h-4 w-4" />
+  Send notification to all
+  {deptBroadcastAudience?.total != null ? ` (${deptBroadcastAudience.total})` : ""}
+</button>
+                </>
               )}
               {!isReadOnly && <button
                 type="button"
@@ -2507,10 +2540,14 @@ export default function ManageTeam({
                   </span>
                   <div>
                     <h2 id="dept-notif-modal-title" className="text-sm font-bold text-richblack-25">
-                      Notify Department Members
+                      {deptNotifTarget === "all"
+                        ? "Notify Everyone"
+                        : "Notify Department Members"}
                     </h2>
                     <p className="text-[10px] text-pink-300 font-medium">
-                      → {displayDepartment} members with a website account
+                      {deptNotifTarget === "all"
+                        ? `→ All ${displayDepartment} members + heads/leads/core${deptBroadcastAudience?.total != null ? ` (${deptBroadcastAudience.total})` : ""}`
+                        : `→ ${displayDepartment} members only (heads/leads/core get a copy tagged “Sent to members only”)`}
                     </p>
                   </div>
                 </div>
@@ -2594,11 +2631,15 @@ export default function ManageTeam({
                       setDeptNotifError("");
                       setDeptNotifSuccess("");
                       try {
-                        const result = await broadcastNotificationToDepartment({
+                        const payload = {
                           department: displayDepartment,
                           title: deptNotifForm.title.trim(),
                           body: deptNotifForm.body.trim(),
-                        });
+                        };
+                        const result =
+                          deptNotifTarget === "all"
+                            ? await broadcastNotificationToAll(payload)
+                            : await broadcastNotificationToDepartment(payload);
                         setDeptNotifSuccess(result.message || "Notification sent!");
                         setDeptNotifForm({ title: "", body: "" });
                         toast.success(result.message || "Notification sent!");
@@ -2612,7 +2653,11 @@ export default function ManageTeam({
                     className="inline-flex items-center gap-1.5 rounded-full bg-pink-500 px-4 py-1.5 text-xs font-bold text-white transition hover:bg-pink-400 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Bell className="h-3.5 w-3.5" />
-                    {deptNotifSending ? "Sending…" : "Send Notification"}
+                    {deptNotifSending
+                      ? "Sending…"
+                      : deptNotifTarget === "all"
+                        ? `Send to all${deptBroadcastAudience?.total != null ? ` (${deptBroadcastAudience.total})` : ""}`
+                        : "Send to members"}
                   </button>
                 </div>
               </div>
