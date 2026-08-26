@@ -29,6 +29,35 @@ function emitNotification(userId, notification) {
   } catch (_) {}
 }
 
+async function getAllLeadershipRecipients() {
+  const recipientIds = new Set();
+
+  const societyUsers = await User.find({ accountType: { $in: SOCIETY_ROLES } })
+    .select("_id")
+    .lean();
+  for (const u of societyUsers) {
+    recipientIds.add(String(u._id));
+  }
+
+  for (const dept of BROADCAST_TEAM_DEPARTMENTS) {
+    const deptUsers = await User.find({ accountType: dept })
+      .populate("additionalDetails", "position p0")
+      .select("_id additionalDetails")
+      .lean();
+
+    for (const u of deptUsers) {
+      const position =
+        u.additionalDetails?.position || u.additionalDetails?.p0 || "";
+      const rank = getDepartmentRankFromPosition(position);
+      if (rank === "Lead" || rank === "Head") {
+        recipientIds.add(String(u._id));
+      }
+    }
+  }
+
+  return Array.from(recipientIds);
+}
+
 async function getInviteSubmissionRecipients(department) {
   const recipientIds = new Set();
 
@@ -54,6 +83,114 @@ async function getInviteSubmissionRecipients(department) {
   }
 
   return Array.from(recipientIds);
+}
+
+async function countAllMembers() {
+  let total = 0;
+  for (const dept of BROADCAST_TEAM_DEPARTMENTS) {
+    try {
+      total += await getTeamMemberModel(dept).countDocuments({ deletedAt: null });
+    } catch (_) {}
+  }
+  return total;
+}
+
+async function countDepartmentMembers(department) {
+  const dept = String(department || "").trim();
+  if (!dept) return 0;
+  try {
+    return await getTeamMemberModel(dept).countDocuments({ deletedAt: null });
+  } catch (_) {
+    return 0;
+  }
+}
+
+async function getBroadcastAudienceCounts(department) {
+  const dept = String(department || "").trim();
+  if (dept) {
+    const members = await countDepartmentMembers(dept);
+    const leadershipIds = await getInviteSubmissionRecipients(dept);
+    return {
+      members,
+      users: leadershipIds.length,
+      total: members + leadershipIds.length,
+    };
+  }
+
+  const members = await countAllMembers();
+  const leadershipIds = await getAllLeadershipRecipients();
+  return { members, users: leadershipIds.length, total: members + leadershipIds.length };
+}
+
+async function createAndEmitBroadcastNotification({
+  recipientId,
+  type,
+  titleStr,
+  bodyStr,
+  metadata,
+  senderId,
+  senderName,
+  senderRole,
+}) {
+  const notification = await Notification.create({
+    recipientId,
+    type,
+    title: titleStr,
+    body: bodyStr,
+    metadata,
+    senderId,
+    senderName,
+    senderRole,
+  });
+  emitNotification(String(recipientId), {
+    _id: notification._id,
+    type: notification.type,
+    title: notification.title,
+    body: notification.body,
+    metadata: notification.metadata,
+    senderId: notification.senderId,
+    senderName: notification.senderName,
+    senderRole: notification.senderRole,
+    readAt: notification.readAt,
+    createdAt: notification.createdAt,
+    replies: [],
+  });
+  return notification;
+}
+
+async function sendLeadershipCopyOfMemberBroadcast({
+  recipientIds,
+  type,
+  titleStr,
+  bodyStr,
+  baseMetadata,
+  senderId,
+  senderName,
+  senderRole,
+}) {
+  const leadershipMetadata = {
+    ...baseMetadata,
+    sentToMembersOnly: true,
+    audienceTag: "Sent to members only",
+  };
+
+  let sent = 0;
+  for (const recipientId of recipientIds) {
+    try {
+      await createAndEmitBroadcastNotification({
+        recipientId,
+        type,
+        titleStr,
+        bodyStr,
+        metadata: leadershipMetadata,
+        senderId,
+        senderName,
+        senderRole,
+      });
+      sent++;
+    } catch (_) {}
+  }
+  return sent;
 }
 
 async function notifyTeamInviteSubmission({
@@ -123,63 +260,49 @@ async function sendBroadcastToAllUsers({
   title,
   body,
   metadata = {},
+  broadcastGroupId: sharedGroupId,
+  broadcastType = "users",
+  recipientIds,
 }) {
   const titleStr = String(title || "").trim();
   const bodyStr = String(body || "").trim();
-  const broadcastGroupId = crypto.randomUUID();
+  const broadcastGroupId = sharedGroupId || crypto.randomUUID();
   const baseMetadata = {
     ...metadata,
     senderRole: String(senderRole || ""),
     color: "pink",
-    broadcastType: "users",
+    broadcastType,
     broadcastGroupId,
   };
 
-  const total = await User.countDocuments({});
-  if (!total) return { sent: 0, total: 0 };
+  let userIds = Array.isArray(recipientIds)
+    ? recipientIds.map(String).filter(Boolean)
+    : null;
 
-  const BATCH = 100;
-  let skip = 0;
-  let sent = 0;
-
-  while (skip < total) {
-    const users = await User.find({})
-      .select("_id")
-      .skip(skip)
-      .limit(BATCH)
-      .lean();
-    skip += BATCH;
-    for (const user of users) {
-      try {
-        const notification = await Notification.create({
-          recipientId: user._id,
-          type: "broadcast_users",
-          title: titleStr,
-          body: bodyStr,
-          metadata: baseMetadata,
-          senderId,
-          senderName,
-          senderRole,
-        });
-        emitNotification(String(user._id), {
-          _id: notification._id,
-          type: notification.type,
-          title: notification.title,
-          body: notification.body,
-          metadata: notification.metadata,
-          senderId: notification.senderId,
-          senderName: notification.senderName,
-          senderRole: notification.senderRole,
-          readAt: notification.readAt,
-          createdAt: notification.createdAt,
-          replies: [],
-        });
-        sent++;
-      } catch (_) {}
-    }
+  if (!userIds) {
+    userIds = await getAllLeadershipRecipients();
   }
 
-  return { sent, total };
+  if (!userIds.length) return { sent: 0, total: 0 };
+
+  let sent = 0;
+  for (const userId of userIds) {
+    try {
+      await createAndEmitBroadcastNotification({
+        recipientId: userId,
+        type: "broadcast_users",
+        titleStr,
+        bodyStr,
+        metadata: baseMetadata,
+        senderId,
+        senderName,
+        senderRole,
+      });
+      sent++;
+    } catch (_) {}
+  }
+
+  return { sent, total: userIds.length };
 }
 
 /**
@@ -198,15 +321,18 @@ async function sendBroadcastToAllMembers({
   title,
   body,
   metadata = {},
+  broadcastGroupId: sharedGroupId,
+  broadcastType = "members",
+  skipLeadershipCopy = false,
 }) {
   const titleStr = String(title || "").trim();
   const bodyStr = String(body || "").trim();
-  const broadcastGroupId = crypto.randomUUID();
+  const broadcastGroupId = sharedGroupId || crypto.randomUUID();
   const baseMetadata = {
     ...metadata,
     senderRole: String(senderRole || ""),
     color: "pink",
-    broadcastType: "members",
+    broadcastType,
     broadcastGroupId,
   };
 
@@ -229,39 +355,47 @@ async function sendBroadcastToAllMembers({
     }
   }
 
-  if (!memberIds.length) return { sent: 0, total: 0 };
+  if (!memberIds.length && skipLeadershipCopy) {
+    return { sent: 0, total: 0, leadershipSent: 0 };
+  }
 
   let sent = 0;
   for (const memberId of memberIds) {
     try {
-      const notification = await Notification.create({
+      await createAndEmitBroadcastNotification({
         recipientId: memberId,
         type: "broadcast_members",
-        title: titleStr,
-        body: bodyStr,
+        titleStr,
+        bodyStr,
         metadata: baseMetadata,
         senderId,
         senderName,
         senderRole,
       });
-      emitNotification(memberId, {
-        _id: notification._id,
-        type: notification.type,
-        title: notification.title,
-        body: notification.body,
-        metadata: notification.metadata,
-        senderId: notification.senderId,
-        senderName: notification.senderName,
-        senderRole: notification.senderRole,
-        readAt: notification.readAt,
-        createdAt: notification.createdAt,
-        replies: [],
-      });
       sent++;
     } catch (_) {}
   }
 
-  return { sent, total: memberIds.length };
+  let leadershipSent = 0;
+  if (!skipLeadershipCopy && memberIds.length) {
+    const leadershipIds = await getAllLeadershipRecipients();
+    leadershipSent = await sendLeadershipCopyOfMemberBroadcast({
+      recipientIds: leadershipIds,
+      type: "broadcast_members",
+      titleStr,
+      bodyStr,
+      baseMetadata,
+      senderId,
+      senderName,
+      senderRole,
+    });
+  }
+
+  return {
+    sent,
+    total: memberIds.length,
+    leadershipSent,
+  };
 }
 
 /**
@@ -278,9 +412,12 @@ async function sendBroadcastToDepartmentMembers({
   title,
   body,
   metadata = {},
+  broadcastGroupId: sharedGroupId,
+  broadcastType = "department",
+  skipLeadershipCopy = false,
 }) {
   const dept = String(department || "").trim();
-  if (!dept) return { sent: 0, total: 0 };
+  if (!dept) return { sent: 0, total: 0, leadershipSent: 0 };
 
   const titleStr = String(title || "").trim();
   const bodyStr = String(body || "").trim();
@@ -296,17 +433,15 @@ async function sendBroadcastToDepartmentMembers({
       `sendBroadcastToDepartmentMembers: failed to read ${dept}:`,
       err.message,
     );
-    return { sent: 0, total: 0 };
+    return { sent: 0, total: 0, leadershipSent: 0 };
   }
 
-  if (!members.length) return { sent: 0, total: 0 };
-
-  const broadcastGroupId = crypto.randomUUID();
+  const broadcastGroupId = sharedGroupId || crypto.randomUUID();
   const baseMetadata = {
     ...metadata,
     senderRole: String(senderRole || ""),
     color: "pink",
-    broadcastType: "department",
+    broadcastType,
     department: dept,
     broadcastGroupId,
   };
@@ -315,34 +450,118 @@ async function sendBroadcastToDepartmentMembers({
   for (const member of members) {
     try {
       const memberId = String(member._id);
-      const notification = await Notification.create({
+      await createAndEmitBroadcastNotification({
         recipientId: memberId,
         type: "broadcast_department",
-        title: titleStr,
-        body: bodyStr,
+        titleStr,
+        bodyStr,
         metadata: baseMetadata,
         senderId,
         senderName,
         senderRole,
       });
-      emitNotification(memberId, {
-        _id: notification._id,
-        type: notification.type,
-        title: notification.title,
-        body: notification.body,
-        metadata: notification.metadata,
-        senderId: notification.senderId,
-        senderName: notification.senderName,
-        senderRole: notification.senderRole,
-        readAt: notification.readAt,
-        createdAt: notification.createdAt,
-        replies: [],
-      });
       sent++;
     } catch (_) {}
   }
 
-  return { sent, total: members.length };
+  let leadershipSent = 0;
+  if (!skipLeadershipCopy && members.length) {
+    const leadershipIds = await getInviteSubmissionRecipients(dept);
+    leadershipSent = await sendLeadershipCopyOfMemberBroadcast({
+      recipientIds: leadershipIds,
+      type: "broadcast_department",
+      titleStr,
+      bodyStr,
+      baseMetadata,
+      senderId,
+      senderName,
+      senderRole,
+    });
+  }
+
+  return { sent, total: members.length, leadershipSent };
+}
+
+/**
+ * Broadcast to members AND heads/leads/core together (no "members only" tag).
+ */
+async function sendBroadcastToAll({
+  department,
+  senderId = "",
+  senderName = "",
+  senderRole,
+  title,
+  body,
+  metadata = {},
+}) {
+  const dept = String(department || "").trim();
+  const broadcastGroupId = crypto.randomUUID();
+  const audience = await getBroadcastAudienceCounts(dept || null);
+
+  if (!audience.total) {
+    return { sent: 0, total: 0, members: { sent: 0, total: 0 }, users: { sent: 0, total: 0 } };
+  }
+
+  let memberResult = { sent: 0, total: 0 };
+  let userResult = { sent: 0, total: 0 };
+
+  if (dept) {
+    memberResult = await sendBroadcastToDepartmentMembers({
+      department: dept,
+      senderId,
+      senderName,
+      senderRole,
+      title,
+      body,
+      metadata,
+      broadcastGroupId,
+      broadcastType: "all",
+      skipLeadershipCopy: true,
+    });
+    const leadershipIds = await getInviteSubmissionRecipients(dept);
+    userResult = await sendBroadcastToAllUsers({
+      senderId,
+      senderName,
+      senderRole,
+      title,
+      body,
+      metadata: { ...metadata, department: dept },
+      broadcastGroupId,
+      broadcastType: "all",
+      recipientIds: leadershipIds,
+    });
+  } else {
+    memberResult = await sendBroadcastToAllMembers({
+      senderId,
+      senderName,
+      senderRole,
+      title,
+      body,
+      metadata,
+      broadcastGroupId,
+      broadcastType: "all",
+      skipLeadershipCopy: true,
+    });
+    const leadershipIds = await getAllLeadershipRecipients();
+    userResult = await sendBroadcastToAllUsers({
+      senderId,
+      senderName,
+      senderRole,
+      title,
+      body,
+      metadata,
+      broadcastGroupId,
+      broadcastType: "all",
+      recipientIds: leadershipIds,
+    });
+  }
+
+  return {
+    sent: memberResult.sent + userResult.sent,
+    total: audience.total,
+    members: memberResult,
+    users: userResult,
+  };
 }
 
 async function notifyBlogSubmission({ post, author }) {
@@ -488,10 +707,13 @@ module.exports = {
   setNotificationEmitter,
   emitNotification,
   getInviteSubmissionRecipients,
+  getAllLeadershipRecipients,
   notifyTeamInviteSubmission,
   sendBroadcastToAllUsers,
   sendBroadcastToAllMembers,
   sendBroadcastToDepartmentMembers,
+  sendBroadcastToAll,
+  getBroadcastAudienceCounts,
   notifyBlogSubmission,
   notifyBlogStatusChange,
 };
