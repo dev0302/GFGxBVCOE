@@ -2,21 +2,24 @@ import { getApiBase, getSiteUrl, renderOgPage } from "./og-utils.js";
 
 export default async function handler(req, res) {
   const siteUrl = getSiteUrl(req);
-  const apiBase = getApiBase();
+  const slug = String(req.query.slug || "").trim();
 
   const defaults = {
     title: "GFG BVCOE Blog",
     description: "Stories, insights, and updates from the GFG-BVCOE community.",
     image: `${siteUrl}/gfg_web_og.png`,
-    url: `${siteUrl}/blog`,
-    type: "website",
+    url: slug ? `${siteUrl}/blog/post/${encodeURIComponent(slug)}` : `${siteUrl}/blog`,
+    type: "article",
   };
 
   let og = { ...defaults };
+  const apiBase = getApiBase();
 
   try {
-    if (apiBase) {
-      const response = await fetch(`${apiBase}/api/v1/blog/og-meta`);
+    if (apiBase && slug) {
+      const response = await fetch(
+        `${apiBase}/api/v1/blog/og-meta/${encodeURIComponent(slug)}`,
+      );
       if (response.ok) {
         const data = await response.json();
         if (data?.success && data.og) {
@@ -31,10 +34,11 @@ export default async function handler(req, res) {
       }
     }
   } catch (error) {
-    console.error("og-blog metadata fetch failed:", error);
+    console.error("og-blog-post metadata fetch failed:", error);
   }
 
-  const { html } = renderOgPage(req, og, { fallbackPath: "/blog" });
+  const fallbackPath = slug ? `/blog/post/${encodeURIComponent(slug)}` : "/blog";
+  const { html } = renderOgPage(req, og, { fallbackPath });
 
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=600");

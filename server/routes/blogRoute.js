@@ -13,6 +13,7 @@ const {
   getCategories,
   addCategory,
   getBlogOgMeta,
+  getBlogPostOgMeta,
 } = require("../controllers/blogController");
 
 const router = express.Router();
@@ -37,6 +38,9 @@ router.get("/public", getPublicPosts);
 
 // Open Graph metadata for the blog listing page (first published post)
 router.get("/og-meta", getBlogOgMeta);
+
+// Open Graph metadata for a single published blog post
+router.get("/og-meta/:slug", getBlogPostOgMeta);
 
 // Public list of blog categories
 router.get("/categories", getCategories);

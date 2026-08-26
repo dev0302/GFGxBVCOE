@@ -2,6 +2,7 @@ import { ArrowLeft, CalendarDays, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getPostBySlug } from "../services/blog_api";
+import { setPageMeta, resetPageMeta } from "../utils/pageMeta";
 
 const getAuthorName = (author) => {
   if (!author) return "GFG-BVCOE";
@@ -40,6 +41,21 @@ const BlogPage = () => {
     loadPost();
     return () => { cancelled = true; };
   }, [slug]);
+
+  useEffect(() => {
+    if (!post) return;
+
+    setPageMeta({
+      title: post.title,
+      description:
+        post.summary?.trim() ||
+        "Read this story from the GFG-BVCOE community.",
+      image: post.coverImage || "/gfg_web_og.png",
+      url: `${window.location.origin}/blog/post/${encodeURIComponent(post.slug || slug)}`,
+    });
+
+    return () => resetPageMeta();
+  }, [post, slug]);
 
   if (loading) {
     return (

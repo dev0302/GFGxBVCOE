@@ -57,6 +57,10 @@ export async function getBlogOgMeta() {
   return request("/og-meta");
 }
 
+export async function getBlogPostOgMeta(slug) {
+  return request(`/og-meta/${encodeURIComponent(slug)}`);
+}
+
 export async function getBlogCategories() {
   return request("/categories");
 }
