@@ -1,11 +1,22 @@
 import gfgLogo from "../../images/gfgLogo.png";
-import { Instagram, Linkedin, Monitor, ChevronDown } from "react-feather";
+import {
+  Instagram,
+  Linkedin,
+  Monitor,
+  ChevronDown,
+  GitHub,
+  Globe,
+  X,
+  ExternalLink,
+} from "react-feather";
 import dev from "../../images/dev.png";
 import himank from "../../images/himank.webp";
 import gaurav from "../../images/gaurav.jpg";
 import vansh from "../../images/vansh.png";
 import harpreet from "../../images/harpreet.png";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Footer = () => {
   const [locStats, setLocStats] = useState([]);
@@ -13,6 +24,28 @@ const Footer = () => {
   const [hasFetchedLocStats, setHasFetchedLocStats] = useState(false);
   const [locStatsStatus, setLocStatsStatus] = useState("idle"); // idle | loading | success | error
   const [locStatsError, setLocStatsError] = useState(null);
+  const [isDevModalOpen, setIsDevModalOpen] = useState(false);
+
+  const leadProfiles = [
+    {
+      label: "Portfolio",
+      url: "https://devmalik-portfolio.vercel.app/",
+      icon: Globe,
+      iconBg: "bg-sky-400/15 text-sky-300 border-sky-400/25",
+    },
+    {
+      label: "GitHub",
+      url: "https://github.com/dev0302",
+      icon: GitHub,
+      iconBg: "bg-white/10 text-white border-white/15",
+    },
+    {
+      label: "LinkedIn",
+      url: "https://www.linkedin.com/in/dev-malik-976230311",
+      icon: Linkedin,
+      iconBg: "bg-[#0ea5e9]/15 text-[#7dd3fc] border-[#38bdf8]/25",
+    },
+  ];
 
   const devs = [
     {
@@ -87,7 +120,6 @@ const Footer = () => {
         if (Array.isArray(data)) {
           const cleaned = data
             .filter((c) => c?.author?.login)
-            .slice(0, 10)
             .map((c) => ({
               name: c.author.login,
               avatarUrl: c.author.avatar_url,
@@ -95,7 +127,8 @@ const Footer = () => {
               additions: (c.weeks || []).reduce((s, w) => s + (w?.a || 0), 0),
               deletions: (c.weeks || []).reduce((s, w) => s + (w?.d || 0), 0),
             }))
-            .sort((a, b) => b.additions - a.additions);
+            .sort((a, b) => b.additions - a.additions)
+            .slice(0, 20);
 
           setLocStats(cleaned);
           setLocStatsStatus("success");
@@ -115,12 +148,29 @@ const Footer = () => {
     fetchStats();
   }, [isMatrixOpen, hasFetchedLocStats]);
 
+  useEffect(() => {
+    if (!isDevModalOpen) return;
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setIsDevModalOpen(false);
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isDevModalOpen]);
+
   const maxAdditions =
     locStats.length > 0
       ? Math.max(...locStats.map((c) => c.additions))
       : 1;
 
   return (
+    <>
     <section
       className="relative text-[#cbd5e1] font-inter px-4 pt-12 pb-10 overflow-hidden"
       style={{
@@ -201,74 +251,129 @@ const Footer = () => {
         </div>
 
         {/* TEAM SECTION */}
-        <div className="mt-16 flex flex-col md:flex-row justify-center items-center md:items-start gap-12 md:gap-20">
-          {/* Developed By Section */}
-          <div className="flex flex-col items-center gap-6">
-            <span className="text-gray-500 uppercase tracking-[0.2em] text-[11px] font-bold">
-              Developed by
-            </span>
-            <div className="flex flex-wrap justify-center items-end gap-8">
-              {devs.map((person, index) => (
-                <a
-                  key={index}
-                  href={person.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex flex-col items-center gap-3 transition-all duration-300 hover:-translate-y-2"
-                >
-                  <div className="relative flex flex-col items-center">
-                    {person.isLead && (
-                      <span className="absolute -top-6 whitespace-nowrap bg-blue-500/20 text-[#38bdf8] text-[9px] font-bold px-2 py-0.5 rounded-full border border-[#38bdf8]/30 uppercase tracking-tighter">
-                        Lead Developer
-                      </span>
-                    )}
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-[#38bdf8] to-[#7dd3fc] rounded-full opacity-0 group-hover:opacity-100 transition duration-300 blur"></div>
-                    <img
-                      src={person.img}
-                      alt={person.name}
-                      className="relative h-14 w-14 rounded-full border-2 border-white/20 object-cover bg-slate-800 p-0.5 shadow-xl"
-                    />
-                  </div>
-                  <span className="text-sm font-medium text-richblack-25/80 group-hover:text-[#38bdf8] transition-colors duration-300 tracking-wide">
-                    {person.name}
-                  </span>
-                </a>
-              ))}
-            </div>
-          </div>
+        {/* TEAM SECTION */}
+<div className="mt-8 flex flex-col items-center gap-14">
+  {/* Developed and Lead by Section */}
+  <div className="flex flex-col items-center gap-6">
+    <span className="text-gray-500 uppercase tracking-[0.2em] text-[12px] font-bold mb-4">
+      Developed and Lead by
+    </span>
 
-          <div className="hidden md:block w-px h-24 bg-gradient-to-b from-transparent via-white/10 to-transparent self-center"></div>
+    <div className="flex flex-wrap justify-center gap-8">
+      {devs
+        .filter((person) => person.isLead)
+        .map((person, index) => (
+          <button
+            key={index}
+            type="button"
+            onClick={() => setIsDevModalOpen(true)}
+            aria-haspopup="dialog"
+            aria-expanded={isDevModalOpen}
+            className="group flex flex-col items-center gap-3 bg-transparent border-0 p-0 cursor-pointer transition-all duration-500 hover:-translate-y-2"
+          >
+            <div className="relative flex flex-col items-center">
+              <span className="absolute -top-7 whitespace-nowrap bg-blue-500/20 text-[#38bdf8] text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-[#38bdf8]/30 uppercase tracking-tighter animate-pulse">
+                Lead Developer
+              </span>
 
-          {/* Contributors Section */}
-          <div className="flex flex-col items-center gap-6">
-            <span className="text-gray-500 uppercase tracking-[0.2em] text-[11px] font-bold">
-              Contributors
-            </span>
-            <div className="flex flex-wrap justify-center items-center gap-8">
-              {contributors.map((person, index) => (
-                <a
-                  key={index}
-                  href={person.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex flex-col items-center gap-3 transition-all duration-300 hover:-translate-y-2"
-                >
-                  <div className="relative">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full opacity-0 group-hover:opacity-100 transition duration-300 blur"></div>
-                    <img
-                      src={person.img}
-                      alt={person.name}
-                      className="relative h-12 w-12 rounded-full border-2 border-white/20 object-cover bg-slate-800 p-0.5 shadow-xl"
-                    />
-                  </div>
-                  <span className="text-sm font-medium text-richblack-25/80 group-hover:text-emerald-400 transition-colors duration-300 tracking-wide">
-                    {person.name}
-                  </span>
-                </a>
-              ))}
+              {/* Animated glowing ring */}
+              <div className="absolute -inset-1.5 bg-gradient-to-r from-[#38bdf8] via-[#7dd3fc] to-[#38bdf8] rounded-full opacity-40 group-hover:opacity-100 blur-md transition-all duration-500 animate-[spin_6s_linear_infinite]"></div>
+
+              {/* Soft pulsing halo */}
+              <div className="absolute -inset-0.5 bg-[#38bdf8]/20 rounded-full blur-lg animate-pulse"></div>
+
+              <img
+                src={person.img}
+                alt={person.name}
+                className="relative h-16 w-16 md:h-[72px] md:w-[72px] rounded-full border-[3px] border-white/20 object-cover bg-slate-800 p-1 shadow-xl transition-transform duration-500 group-hover:scale-110"
+              />
             </div>
-          </div>
-        </div>
+
+            <span className="text-sm font-semibold text-richblack-25/90 group-hover:text-[#38bdf8] transition-colors duration-300 tracking-wide">
+              {person.name}
+            </span>
+          </button>
+        ))}
+    </div>
+  </div>
+
+  {/* Divider */}
+  <div className="w-full max-w-md h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mt-[-20px] mb-[-20px]"></div>
+
+  {/* Row below: Co-Developers + Best Contributors */}
+  <div className="flex flex-col md:flex-row justify-center items-start gap-12 md:gap-20">
+    {/* Co-Developers Section */}
+    <div className="flex flex-col items-center gap-6">
+      <span className="text-gray-500 uppercase tracking-[0.2em] text-[11px] font-bold">
+        Co-Developers
+      </span>
+
+      <div className="flex flex-wrap justify-center items-center gap-8">
+        {devs
+          .filter((person) => !person.isLead)
+          .map((person, index) => (
+            <a
+              key={index}
+              href={person.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex flex-col items-center gap-3 transition-all duration-300 hover:-translate-y-2"
+            >
+              <div className="relative">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-[#38bdf8] to-[#7dd3fc] rounded-full opacity-0 group-hover:opacity-100 transition duration-300 blur"></div>
+
+                <img
+                  src={person.img}
+                  alt={person.name}
+                  className="relative h-12 w-12 rounded-full border-2 border-white/20 object-cover bg-slate-800 p-0.5 shadow-xl"
+                />
+              </div>
+
+              <span className="text-sm font-medium text-richblack-25/80 group-hover:text-[#38bdf8] transition-colors duration-300 tracking-wide">
+                {person.name}
+              </span>
+            </a>
+          ))}
+      </div>
+    </div>
+
+    {/* Vertical Divider */}
+    <div className="hidden md:block w-px h-24 bg-gradient-to-b from-transparent via-white/10 to-transparent self-center"></div>
+
+    {/* Best Contributors Section */}
+    <div className="flex flex-col items-center gap-6">
+      <span className="text-gray-500 uppercase tracking-[0.2em] text-[11px] font-bold">
+        Best Contributors
+      </span>
+
+      <div className="flex flex-wrap justify-center items-center gap-8">
+        {contributors.map((person, index) => (
+          <a
+            key={index}
+            href={person.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex flex-col items-center gap-3 transition-all duration-300 hover:-translate-y-2"
+          >
+            <div className="relative">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full opacity-0 group-hover:opacity-100 transition duration-300 blur"></div>
+
+              <img
+                src={person.img}
+                alt={person.name}
+                className="relative h-12 w-12 rounded-full border-2 border-white/20 object-cover bg-slate-800 p-0.5 shadow-xl"
+              />
+            </div>
+
+            <span className="text-sm font-medium text-richblack-25/80 group-hover:text-emerald-400 transition-colors duration-300 tracking-wide">
+              {person.name}
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
 
         {/* TOGGLEABLE LOC CONTRIBUTION MATRIX */}
         <div className="mt-16 mx-auto max-w-2xl bg-white/[0.03] border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl shadow-2xl transition-all duration-500">
@@ -305,7 +410,7 @@ const Footer = () => {
             <div
               className={`transition-all duration-500 ease-in-out ${
                 isMatrixOpen
-                  ? "max-h-[1000px] opacity-100 pb-8 px-6"
+                  ? "max-h-[2400px] opacity-100 pb-8 px-6"
                   : "max-h-0 opacity-0 overflow-hidden"
               }`}
             >
@@ -391,6 +496,114 @@ const Footer = () => {
         </div>
       </footer>
     </section>
+
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {isDevModalOpen && (
+              <motion.div
+                key="dev-profile-modal"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+                className="fixed inset-0 z-[1100] flex items-center justify-center p-4"
+                onClick={() => setIsDevModalOpen(false)}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="dev-profile-modal-title"
+              >
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-[#050510]/70 backdrop-blur-md"
+                />
+
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.88, y: 28 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.94, y: 16 }}
+                  transition={{ type: "spring", damping: 24, stiffness: 280, mass: 0.85 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="relative w-full max-w-[400px] overflow-hidden rounded-3xl border border-white/10 bg-[#161629]/95 shadow-[0_28px_80px_rgba(0,0,0,0.55)] backdrop-blur-2xl"
+                >
+                  <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-72 -translate-x-1/2 rounded-full bg-[#38bdf8]/25 blur-3xl" />
+                  <div className="pointer-events-none absolute -bottom-20 -right-10 h-40 w-40 rounded-full bg-emerald-400/10 blur-3xl" />
+
+                  <button
+                    type="button"
+                    onClick={() => setIsDevModalOpen(false)}
+                    className="absolute right-3.5 top-3.5 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                    aria-label="Close"
+                  >
+                    <X size={16} />
+                  </button>
+
+                  <div className="relative px-6 pb-6 pt-8">
+                    <div className="flex flex-col items-center text-center">
+                      <div className="relative mb-4">
+                        <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-[#38bdf8] via-[#7dd3fc] to-[#38bdf8] opacity-70 blur-md" />
+                        <img
+                          src={dev}
+                          alt="Dev"
+                          className="relative h-20 w-20 rounded-full border-2 border-white/20 object-cover bg-slate-800 p-0.5"
+                        />
+                      </div>
+                      <h2
+                        id="dev-profile-modal-title"
+                        className="text-xl font-bold tracking-tight text-white"
+                      >
+                        Dev Malik
+                      </h2>
+                      <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#38bdf8]">
+                        Lead Developer
+                      </p>
+                    </div>
+
+                    <div className="mt-6 flex flex-col gap-2.5">
+                      {leadProfiles.map((profile, i) => {
+                        const Icon = profile.icon;
+                        return (
+                          <motion.a
+                            key={profile.label}
+                            href={profile.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            initial={{ opacity: 0, x: -12 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.12 + i * 0.06, duration: 0.28 }}
+                            className="group/link flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-3.5 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.07]"
+                          >
+                            <span
+                              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${profile.iconBg}`}
+                            >
+                              <Icon size={18} />
+                            </span>
+                            <span className="min-w-0 flex-1 text-left">
+                              <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
+                                {profile.label}
+                              </span>
+                              <span className="mt-0.5 block truncate text-sm text-white/90">
+                                {profile.url.replace(/^https?:\/\//, "")}
+                              </span>
+                            </span>
+                            <ExternalLink
+                              size={14}
+                              className="shrink-0 text-white/30 transition-colors group-hover/link:text-[#38bdf8]"
+                            />
+                          </motion.a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
+    </>
   );
 };
 
