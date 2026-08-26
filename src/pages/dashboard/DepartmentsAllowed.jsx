@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import {
   getDashboardAllowed,
@@ -13,6 +13,37 @@ import { toast } from "sonner";
 import { SectionTitle } from "../../components/EventDashboard/SectionTitle";
 import { Spinner } from "@/components/ui/spinner";
 import { AddDepartmentUnlockAnimation } from "../../components/EventDashboard/AddDepartmentUnlockAnimation";
+import { canManageDepartmentDashboard } from "../../utils/dashboardAccess";
+
+function MemberAccessToggle({ enabled, disabled, onToggle, dashboardLabel }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={enabled === true}
+      aria-label={`${enabled ? "Disable" : "Enable"} dashboard access for all ${dashboardLabel} members`}
+      onClick={onToggle}
+      disabled={disabled}
+      className={`relative inline-flex h-7 w-11 shrink-0 items-center rounded-full p-0.5 transition-all duration-300 ease-out overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 disabled:cursor-wait disabled:opacity-60 ${
+        enabled
+          ? "bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-400 shadow-[0_0_14px_rgba(34,197,94,0.45),inset_0_1px_0_rgba(255,255,255,0.35)]"
+          : "bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_0_8px_rgba(245,158,11,0.25)]"
+      }`}
+    >
+      {enabled && (
+        <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <span className="absolute -inset-y-3 -left-1/2 h-[180%] w-1/2 bg-gradient-to-r from-transparent via-white/45 to-transparent animate-shine" />
+        </span>
+      )}
+      <span
+        aria-hidden
+        className={`relative z-10 block h-6 w-6 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-300 ease-out ${
+          enabled ? "translate-x-4" : "translate-x-0"
+        }`}
+      />
+    </button>
+  );
+}
 
 export default function DepartmentsAllowed() {
   const { departmentKey } = useParams();
@@ -26,6 +57,7 @@ export default function DepartmentsAllowed() {
   const [showUnlockAnimation, setShowUnlockAnimation] = useState(false);
 
   const dashboardLabel = getAccountTypeLabel(departmentKey) || departmentKey;
+  const canManage = canManageDepartmentDashboard(user, departmentKey);
 
   const loadAllowedConfig = useCallback(() => {
     setLoadingAllowed(true);
@@ -38,8 +70,12 @@ export default function DepartmentsAllowed() {
   }, [departmentKey]);
 
   useEffect(() => {
-    loadAllowedConfig();
-  }, [loadAllowedConfig]);
+    if (canManage) loadAllowedConfig();
+  }, [canManage, loadAllowedConfig]);
+
+  if (!canManage) {
+    return <Navigate to={`/dashboard/${encodeURIComponent(departmentKey || "")}/generate-qr`} replace />;
+  }
 
   const handleAddAllowedDept = () => {
     const dept = addDeptValue.trim();
@@ -51,7 +87,9 @@ export default function DepartmentsAllowed() {
       .then((res) => {
         if (res.data) setAllowedConfig(res.data);
         setAddDeptValue("");
-        toast.success(`Department added. They will see ${dashboardLabel} Dashboard in their menu.`);
+        toast.success(
+          `Department added. They will see ${dashboardLabel} Dashboard in their menu.`,
+        );
         return getMe().then((r) => r.user && setUser(r.user));
       })
       .catch((err) => {
@@ -89,9 +127,49 @@ export default function DepartmentsAllowed() {
             Departments allowed to access {dashboardLabel} Dashboard
           </h1>
           <p className="mt-2 text-gray-400 text-sm">
-            Society roles and the core {dashboardLabel} department are always allowed. Add or remove other departments below.
+            Society roles and the core {dashboardLabel} department are always
+            allowed. Add or remove other departments below.
           </p>
         </div>
+
+        {allowedConfig && (
+          <section className="bg-gradient-to-br from-[#1e1e2f]/90 to-[#2c2c3e]/90 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg" aria-hidden>
+                    🔓
+                  </span>
+                  <h2 className="text-base font-semibold text-richblack-25 sm:text-lg">
+                    Allow all {dashboardLabel} members
+                  </h2>
+                </div>
+                <p className="mt-1.5 text-xs text-gray-400 sm:text-sm">
+                  Give every member of this department access to this dashboard.
+                  When off, members still see the dashboard option but get a
+                  coming-soon message until you turn this on.
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-3 self-start sm:self-center">
+                <span
+                  className={`text-xs font-semibold uppercase tracking-wide ${
+                    allowedConfig.departmentMembersEnabled
+                      ? "text-emerald-400"
+                      : "text-amber-400"
+                  }`}
+                >
+                  {allowedConfig.departmentMembersEnabled ? "On" : "Off"}
+                </span>
+                <MemberAccessToggle
+                  enabled={allowedConfig.departmentMembersEnabled === true}
+                  disabled={updatingMemberAccess}
+                  onToggle={handleMemberAccessToggle}
+                  dashboardLabel={dashboardLabel}
+                />
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="bg-gradient-to-br from-[#1e1e2f]/80 to-[#2c2c3e]/80 border border-gray-500/20 rounded-2xl p-6 md:p-8 shadow-xl">
           <SectionTitle icon="👥">Allowed departments</SectionTitle>
@@ -102,10 +180,15 @@ export default function DepartmentsAllowed() {
           ) : allowedConfig ? (
             <div className="space-y-4">
               <div>
-                <p className="text-xs font-medium text-gray-400 mb-2">Always allowed (cannot be removed)</p>
+                <p className="text-xs font-medium text-gray-400 mb-2">
+                  Always allowed (cannot be removed)
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {allowedConfig.core?.map((d) => (
-                    <span key={d} className="px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 text-sm font-medium">
+                    <span
+                      key={d}
+                      className="px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 text-sm font-medium"
+                    >
                       {getAccountTypeLabel(d) || d}
                     </span>
                   ))}
@@ -114,14 +197,18 @@ export default function DepartmentsAllowed() {
 
               {allowedConfig.extra?.length > 0 && (
                 <div>
-                  <p className="text-xs font-medium text-gray-400 mb-2">Additionally allowed</p>
+                  <p className="text-xs font-medium text-gray-400 mb-2">
+                    Additionally allowed
+                  </p>
                   <ul className="space-y-2">
                     {allowedConfig.extra.map((d) => (
                       <li
                         key={d}
                         className="flex items-center justify-between gap-3 px-4 py-2 rounded-xl bg-[#252536] border border-gray-500/20"
                       >
-                        <span className="text-richblack-25 font-medium">{getAccountTypeLabel(d) || d}</span>
+                        <span className="text-richblack-25 font-medium">
+                          {getAccountTypeLabel(d) || d}
+                        </span>
                         <button
                           type="button"
                           onClick={() => handleRemoveAllowedDept(d)}
@@ -137,7 +224,9 @@ export default function DepartmentsAllowed() {
               )}
 
               <div>
-                <p className="text-xs font-medium text-gray-400 mb-2">Add department</p>
+                <p className="text-xs font-medium text-gray-400 mb-2">
+                  Add department
+                </p>
                 <div className="flex flex-wrap gap-2 items-center">
                   <select
                     value={addDeptValue}
@@ -145,7 +234,9 @@ export default function DepartmentsAllowed() {
                     className="px-4 py-2.5 rounded-xl bg-[#252536] border border-gray-500/40 text-richblack-25 focus:border-cyan-500 outline-none min-w-[200px]"
                   >
                     <option value="">Select department</option>
-                    {AUTH_DEPARTMENTS.filter((d) => !allowedConfig.all?.includes(d)).map((d) => (
+                    {AUTH_DEPARTMENTS.filter(
+                      (d) => !allowedConfig.all?.includes(d),
+                    ).map((d) => (
                       <option key={d} value={d}>
                         {getAccountTypeLabel(d) || d}
                       </option>
@@ -160,9 +251,37 @@ export default function DepartmentsAllowed() {
                     {addingDept ? "Adding…" : "Add"}
                   </button>
                 </div>
-                {AUTH_DEPARTMENTS.filter((d) => !allowedConfig.all?.includes(d)).length === 0 && (
-                  <p className="text-xs text-gray-500 mt-2">All departments are already in the allowed list.</p>
+                {AUTH_DEPARTMENTS.filter((d) => !allowedConfig.all?.includes(d))
+                  .length === 0 && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    All departments are already in the allowed list.
+                  </p>
                 )}
+              </div>
+
+              <div className="flex items-center justify-between gap-4 border-t border-gray-500/20 pt-4">
+                <div>
+                  <p className="text-sm font-medium text-richblack-25">
+                    Allow all {dashboardLabel} members
+                  </p>
+                  <p className="mt-1 text-xs text-gray-400">
+                    Give every member of this department access to this
+                    dashboard.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={allowedConfig.departmentMembersEnabled === true}
+                  aria-label={`${allowedConfig.departmentMembersEnabled ? "Disable" : "Enable"} dashboard access for all ${dashboardLabel} members`}
+                  onClick={handleMemberAccessToggle}
+                  disabled={updatingMemberAccess}
+                  className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-wait disabled:opacity-60 ${allowedConfig.departmentMembersEnabled ? "bg-cyan-500" : "bg-gray-600"}`}
+                >
+                  <span
+                    className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${allowedConfig.departmentMembersEnabled ? "translate-x-6" : "translate-x-1"}`}
+                  />
+                </button>
               </div>
             </div>
           ) : null}
@@ -176,4 +295,3 @@ export default function DepartmentsAllowed() {
     </div>
   );
 }
-
