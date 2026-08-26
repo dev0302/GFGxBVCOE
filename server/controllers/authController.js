@@ -90,9 +90,14 @@ async function memberAsUser(memberDoc, department) {
       non_tech_society:
         profile.non_tech_society || member.non_tech_society || "",
     },
-    dashboardAccess: dashboardConfig?.departmentMembersEnabled
+    dashboardAccess: Object.values(dashboardConfig?.memberSectionAccess || {}).some(Boolean) || dashboardConfig?.departmentMembersEnabled
       ? [department]
       : [],
+    departmentDashboardSections: {
+      [department]: ["generate-qr", "documents"].filter(
+        (section) => dashboardConfig?.memberSectionAccess?.[section] ?? dashboardConfig?.departmentMembersEnabled,
+      ),
+    },
     canManageEvents: false,
     canAccessLeadershipTransition: false,
   };

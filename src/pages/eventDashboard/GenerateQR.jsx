@@ -5,6 +5,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 import { ShiningText } from "@/components/ui/shining-text";
+import MemberSectionAccessToggle from "../../components/DepartmentDashboard/MemberSectionAccessToggle";
 
 const DEFAULT_URL = "https://geeksforgeeks.org";
 const STORAGE_KEY = "gfg_generate_qr_last";
@@ -245,6 +246,7 @@ export default function GenerateQR() {
             Enter URL and title, then click Generate to reveal two QR designs with smooth animation.
           </p>
         </div>
+        <MemberSectionAccessToggle section="generate-qr" title="Generate QR" />
 
         <section className="rounded-2xl border border-gray-500/20 bg-gradient-to-br from-[#1e1e2f]/85 to-[#2c2c3e]/85 p-6 shadow-xl md:p-8">
           <div className="grid gap-5 md:grid-cols-2">

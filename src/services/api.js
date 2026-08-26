@@ -366,14 +366,14 @@ export async function removeDashboardAllowedDepartment(
 }
 
 /** Enable or disable dashboard access for all members of the dashboard's department. */
-export async function updateDashboardMemberAccess(departmentKey, enabled) {
+export async function updateDashboardMemberAccess(departmentKey, enabled, section) {
   const key = String(departmentKey || "").trim();
   if (!key) throw new Error("dashboardKey required");
   const res = await authFetch(
     `/api/v1/dashboards/${encodeURIComponent(key)}/member-access`,
     {
       method: "POST",
-      body: JSON.stringify({ enabled: Boolean(enabled) }),
+      body: JSON.stringify({ enabled: Boolean(enabled), ...(section ? { section } : {}) }),
     },
   );
   const data = await res.json().catch(() => ({}));

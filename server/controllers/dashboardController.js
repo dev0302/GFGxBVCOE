@@ -14,6 +14,7 @@ const DASHBOARD_KEYS = [
   "Capture The Event",
   "Sponsorship and Marketing",
 ];
+const MEMBER_ACCESS_SECTIONS = ["generate-qr", "documents"];
 
 function computeCoreRoles(dashboardKey) {
   return [...SOCIETY_ROLES, dashboardKey];
@@ -39,11 +40,18 @@ async function getDashboardAllowedList(dashboardKey) {
   const core = computeCoreRoles(dashboardKey);
   const doc = await DashboardAccessConfig.findOne({ dashboardKey }).lean();
   const extra = (doc?.extraAllowedDepartments || []).filter(Boolean);
+  const memberSections = Object.fromEntries(
+    MEMBER_ACCESS_SECTIONS.map((section) => [
+      section,
+      doc?.memberSectionAccess?.[section] ?? doc?.departmentMembersEnabled === true,
+    ]),
+  );
   return {
     core,
     extra,
     all: [...core, ...extra],
     departmentMembersEnabled: doc?.departmentMembersEnabled === true,
+    memberSections,
   };
 }
 
@@ -137,7 +145,7 @@ async function getDashboardAllowed(req, res) {
 async function updateDashboardMemberAccess(req, res) {
   try {
     const { dashboardKey } = req.params;
-    const { enabled } = req.body;
+    const { enabled, section } = req.body;
 
     if (!isKnownDashboardKey(dashboardKey)) {
       return res
@@ -151,7 +159,15 @@ async function updateDashboardMemberAccess(req, res) {
     }
 
     const doc = await getDashboardConfig(dashboardKey);
-    doc.departmentMembersEnabled = enabled;
+    if (section !== undefined) {
+      if (!MEMBER_ACCESS_SECTIONS.includes(section)) {
+        return res.status(400).json({ success: false, message: "Unknown dashboard section." });
+      }
+      doc.memberSectionAccess.set(section, enabled);
+    } else {
+      // Support existing clients while they transition to section-level controls.
+      doc.departmentMembersEnabled = enabled;
+    }
     await doc.save();
 
     const allowed = await getDashboardAllowedList(dashboardKey);
@@ -278,6 +294,7 @@ async function removeDashboardAllowedDepartment(req, res) {
 
 module.exports = {
   DASHBOARD_KEYS,
+  MEMBER_ACCESS_SECTIONS,
   getDashboardAllowed,
   addDashboardAllowedDepartment,
   removeDashboardAllowedDepartment,
