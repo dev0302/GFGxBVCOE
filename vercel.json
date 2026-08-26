@@ -9,6 +9,10 @@
             "destination": "/api/og-blog"
         },
         {
+            "source": "/blog/post/:slug",
+            "destination": "/api/og-blog-post?slug=:slug"
+        },
+        {
             "source": "/(.*)",
             "destination": "/"
         }

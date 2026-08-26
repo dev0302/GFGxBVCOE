@@ -319,6 +319,7 @@ exports.getBlogOgMeta = async (req, res) => {
         description: post?.summary?.trim() || defaultDescription,
         image,
         url: siteUrl ? `${siteUrl}/blog` : "/blog",
+        type: "website",
       },
     });
   } catch (error) {
@@ -326,6 +327,52 @@ exports.getBlogOgMeta = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to retrieve blog preview metadata.",
+      error: error.message,
+    });
+  }
+};
+
+exports.getBlogPostOgMeta = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const post = await Post.findOne({ slug, status: "published" }).select(
+      "title summary coverImage slug",
+    );
+
+    const siteUrl = (process.env.FRONTEND_URL || "").replace(/\/$/, "");
+    const defaultTitle = "GFG BVCOE Blog";
+    const defaultDescription =
+      "Stories, insights, and updates from the GFG-BVCOE community.";
+    const defaultImage = toAbsoluteAssetUrl(siteUrl, "/gfg_web_og.png");
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Blog post not found.",
+      });
+    }
+
+    const image = post.coverImage?.trim()
+      ? toAbsoluteAssetUrl(siteUrl, post.coverImage)
+      : defaultImage;
+
+    return res.status(200).json({
+      success: true,
+      og: {
+        title: post.title?.trim() || defaultTitle,
+        description: post.summary?.trim() || defaultDescription,
+        image,
+        url: siteUrl
+          ? `${siteUrl}/blog/post/${encodeURIComponent(slug)}`
+          : `/blog/post/${slug}`,
+        type: "article",
+      },
+    });
+  } catch (error) {
+    console.error("getBlogPostOgMeta error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve blog post preview metadata.",
       error: error.message,
     });
   }
