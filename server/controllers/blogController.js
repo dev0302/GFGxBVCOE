@@ -306,7 +306,7 @@ exports.getBlogOgMeta = async (req, res) => {
     const defaultTitle = "GFG BVCOE Blog";
     const defaultDescription =
       "Stories, insights, and updates from the GFG-BVCOE community.";
-    const defaultImage = toAbsoluteAssetUrl(siteUrl, "/gfgLogo.png");
+    const defaultImage = toAbsoluteAssetUrl(siteUrl, "/gfg_web_og.png");
 
     const image = post?.coverImage?.trim()
       ? toAbsoluteAssetUrl(siteUrl, post.coverImage)

@@ -55,7 +55,7 @@ export default async function handler(req, res) {
   const defaults = {
     title: "GFG BVCOE Blog",
     description: "Stories, insights, and updates from the GFG-BVCOE community.",
-    image: `${siteUrl}/gfgLogo.png`,
+    image: `${siteUrl}/gfg_web_og.png`,
     url: `${siteUrl}/blog`,
   };
 
