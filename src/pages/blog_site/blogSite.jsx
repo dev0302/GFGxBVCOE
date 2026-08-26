@@ -10,6 +10,7 @@ import {
 import { setPageMeta, resetPageMeta } from "../../utils/pageMeta";
 import { useAuth } from "../../context/AuthContext";
 import { NativeTypewriter } from "../../components/ui/native-typewriter";
+import BlogShareActions from "../../components/BlogShareActions";
 import confetti from "canvas-confetti";
 
 const canReviewPosts = (user) => {
@@ -438,15 +439,18 @@ const BlogCard = ({ post, navigate }) => {
           </span>
         )}
 
-        <button
-          type="button"
-          aria-label={"Read " + post.title}
-          onClick={(e) => { e.stopPropagation(); goToPost(); }}
-          className="absolute right-3.5 top-3.5 flex h-9 w-9 items-center justify-center rounded-full text-sm text-white transition-all duration-300 hover:rotate-45"
-          style={{ background: "rgba(22,163,74,0.5)", border: `1px solid ${tokens.borderHover}` }}
-        >
-          &#8599;
-        </button>
+        <div className="absolute right-3.5 top-3.5 z-10 flex items-center gap-2">
+          <BlogShareActions post={post} />
+          <button
+            type="button"
+            aria-label={"Read " + post.title}
+            onClick={(e) => { e.stopPropagation(); goToPost(); }}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-sm text-white transition-all duration-300 hover:rotate-45"
+            style={{ background: "rgba(22,163,74,0.5)", border: `1px solid ${tokens.borderHover}` }}
+          >
+            &#8599;
+          </button>
+        </div>
       </div>
 
       {/* Text content */}

@@ -1,4 +1,5 @@
 import { ArrowLeft, CalendarDays, UserRound } from "lucide-react";
+import BlogShareActions from "../components/BlogShareActions";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getPostBySlug } from "../services/blog_api";
@@ -190,6 +191,9 @@ const BlogPage = () => {
               className="absolute inset-0 opacity-20"
               style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%)" }}
             />
+            <div className="absolute right-4 top-4 z-10 sm:right-8 sm:top-6">
+              <BlogShareActions post={post} />
+            </div>
             {post.category && (
               <span
                 className="absolute bottom-6 left-6 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-[1.8px] text-[#4ade80] sm:left-10"
