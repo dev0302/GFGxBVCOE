@@ -1,7 +1,7 @@
 const DEFAULTS = {
   title: "GFG - BVCOE",
   description: "GeeksforGeeks Student Chapter at BVCOE",
-  image: "/gfgLogo.png",
+  image: "/gfg_web_og.png",
 };
 
 const META_KEYS = [
