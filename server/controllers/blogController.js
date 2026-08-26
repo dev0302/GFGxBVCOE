@@ -1,6 +1,11 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
 const {
+  ensureCategoryExists,
+  findCategoryByName,
+  listCategoryNames,
+} = require("../utils/blogCategoryStore");
+const {
   notifyBlogSubmission,
   notifyBlogStatusChange,
 } = require("../utils/notificationService");
@@ -149,6 +154,9 @@ exports.submitPost = async (req, res) => {
     const qualityAudit = calculateQualityAudit(sanitizedContent);
 
     const slug = await generateUniqueSlug(title);
+    const normalizedCategory = category?.trim()
+      ? await ensureCategoryExists(category)
+      : "";
 
     const post = await Post.create({
       title,
@@ -156,7 +164,7 @@ exports.submitPost = async (req, res) => {
       content: sanitizedContent,
       summary: summary || "",
       coverImage: coverImageUrl,
-      category: category || "",
+      category: normalizedCategory || "",
       tags: tags || [],
       author: req.user.id,
       status: "pending_approval",
@@ -462,7 +470,9 @@ exports.editPost = async (req, res) => {
     }
 
     if (category !== undefined) {
-      post.category = category;
+      post.category = category?.trim()
+        ? await ensureCategoryExists(category)
+        : "";
     }
 
     if (tags !== undefined) {
@@ -503,6 +513,74 @@ exports.editPost = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to edit post.",
+      error: error.message,
+    });
+  }
+};
+
+exports.getCategories = async (req, res) => {
+  try {
+    const categories = await listCategoryNames();
+    return res.status(200).json({
+      success: true,
+      categories,
+    });
+  } catch (error) {
+    console.error("getCategories error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve blog categories.",
+      error: error.message,
+    });
+  }
+};
+
+exports.addCategory = async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name || typeof name !== "string" || !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Category name is required.",
+      });
+    }
+
+    const trimmed = name.trim();
+    if (trimmed.length > 80) {
+      return res.status(400).json({
+        success: false,
+        message: "Category name must be 80 characters or fewer.",
+      });
+    }
+
+    if (containsProfanity(trimmed)) {
+      return res.status(400).json({
+        success: false,
+        message: "Category name contains inappropriate language.",
+      });
+    }
+
+    const existing = await findCategoryByName(trimmed);
+    if (existing) {
+      return res.status(200).json({
+        success: true,
+        message: "Category already exists.",
+        category: existing.name,
+      });
+    }
+
+    const category = await ensureCategoryExists(trimmed);
+    return res.status(201).json({
+      success: true,
+      message: "Category added successfully.",
+      category,
+    });
+  } catch (error) {
+    console.error("addCategory error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to add category.",
       error: error.message,
     });
   }
