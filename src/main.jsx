@@ -20,3 +20,10 @@ createRoot(document.getElementById("root")).render(
     </Provider>
   </StrictMode>,
 );
+
+// Register minimal PWA service worker for Share-to-Vault (no offline caching)
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
+  });
+}

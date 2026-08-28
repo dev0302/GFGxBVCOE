@@ -47,6 +47,7 @@ import LeadershipHistory from "./pages/leadershipTransition/History";
 import EventDashboardLayout from "./components/EventDashboard/EventDashboardLayout";
 import EventDocuments from "./pages/eventDashboard/EventDocuments";
 import PublicShareView from "./pages/eventDashboard/PublicShareView";
+import ShareTarget from "./pages/ShareTarget";
 import DepartmentDashboardLayout from "./components/DepartmentDashboard/DepartmentDashboardLayout";
 import MemberDashboard from "./pages/MemberDashboard";
 import RequireDepartmentSectionAccess from "./components/guards/RequireDepartmentSectionAccess";
@@ -94,7 +95,7 @@ function App() {
       (base) =>
         location.pathname === base || location.pathname.startsWith(`${base}/`),
     );
-  const hideNavbar = location.pathname.startsWith("/share/vault/");
+  const hideNavbar = location.pathname.startsWith("/share/vault/") || location.pathname === "/share-target";
 
   return (
     <AuthProvider>
@@ -295,6 +296,7 @@ function App() {
                         path="/share/vault/:shareToken"
                         element={<PublicShareView />}
                       />
+                      <Route path="/share-target" element={<ShareTarget />} />
                     </Routes>
                   </motion.main>
                 </AnimatePresence>

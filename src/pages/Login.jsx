@@ -1,8 +1,24 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
+
+function getSafeNextPath(raw) {
+  if (!raw || typeof raw !== "string") return null;
+  let decoded = raw;
+  try {
+    decoded = decodeURIComponent(raw);
+  } catch {
+    // keep raw if decode fails
+  }
+  // Only allow internal app paths like "/share-target?id=..."
+  if (!decoded.startsWith("/")) return null;
+  if (decoded.startsWith("//")) return null;
+  if (decoded.includes("://")) return null;
+  if (decoded.includes("\\")) return null;
+  return decoded;
+}
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -11,6 +27,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,7 +42,8 @@ const Login = () => {
         position: "bottom-right",
         style: { background: "#16a34a", color: "#fff", border: "none" },
       });
-      navigate("/");
+      const next = getSafeNextPath(searchParams.get("next"));
+      navigate(next || "/");
     } catch (err) {
       toast.error(err.message || "Login failed.");
     } finally {
