@@ -44,7 +44,7 @@ export default function Tasks() {
   
   const ordered = useMemo(() => {
     let list = [...tasks];
-    if (isPrivileged && user?._id) {
+    if (user?._id) {
       if (filterTab === "to-me") {
         list = list.filter((t) => String(t.assignedTo.id) === String(user._id));
       } else if (filterTab === "by-me") {
@@ -52,9 +52,9 @@ export default function Tasks() {
       }
     }
     return list.sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt));
-  }, [tasks, isPrivileged, filterTab, user]);
+  }, [tasks, filterTab, user]);
 
-  return <section className="min-h-screen bg-[#0c0c18] px-4 py-24 text-gray-100 sm:px-8"><div className="mx-auto max-w-6xl"><div className="mb-8 flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-cyan-300">GFG BVCOE workspace</p><h1 className="mt-2 text-3xl font-bold">Task management</h1><p className="mt-1 text-sm text-gray-400">Track assignments, deadlines, and permanent task history.</p></div><div className="flex items-center gap-3 flex-wrap">{isPrivileged ? <div className="flex gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5"><button onClick={() => setFilterTab("to-me")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "to-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned to me</button><button onClick={() => setFilterTab("by-me")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "by-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned by me</button></div> : <div className="flex gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5"><button disabled className="px-3.5 py-2 rounded-lg text-xs font-bold bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10 cursor-default">Assigned to me</button></div>}{isPrivileged && <button onClick={() => { setOpen(true); setSearch(""); }} className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300"><UserPlus size={16}/> Assign task</button>}</div></div><div className="grid gap-3 md:grid-cols-3">{ordered.map((task) => (
+  return <section className="min-h-screen bg-[#0c0c18] px-4 py-24 text-gray-100 sm:px-8"><div className="mx-auto max-w-6xl"><div className="mb-8 flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-cyan-300">GFG BVCOE workspace</p><h1 className="mt-2 text-3xl font-bold">Task management</h1><p className="mt-1 text-sm text-gray-400">Track assignments, deadlines, and permanent task history.</p></div><div className="flex items-center gap-3 flex-wrap"><div className="flex gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5"><button onClick={() => setFilterTab("to-me")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "to-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned to me</button><button onClick={() => setFilterTab("by-me")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "by-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned by me</button></div><button onClick={() => { setOpen(true); setSearch(""); }} className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300"><UserPlus size={16}/> Assign task</button></div></div><div className="grid gap-3 md:grid-cols-3">{ordered.map((task) => (
   <article key={task._id} className="rounded-2xl border border-white/10 bg-white/[.04] p-4 flex flex-col justify-between">
     <div>
       <div className="flex items-start justify-between gap-3">
