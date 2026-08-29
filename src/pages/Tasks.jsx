@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle, Clipboard, Search, UserPlus } from "react-feather";
+import { CheckCircle, Clipboard, Download, Search, UserPlus } from "react-feather";
 import { completeTask, createTask, getTaskPeople, getTasks, deleteTask } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
@@ -89,6 +89,28 @@ export default function Tasks() {
   const reset = () => { setOpen(false); setStep(0); setSelected(null); setTitle(""); setDescription(""); setDeadline(""); };
   const submit = async () => { setLoading(true); try { const data = await createTask({ title, description, priority, deadline: deadline || undefined, assignedToId: selected.id, assignedToDepartment: selected.department }); toast.success(data.message); reset(); load(); } catch (e) { toast.error(e.message); } finally { setLoading(false); } };
   
+  const handleDownloadExcel = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ""}/api/v1/tasks/download-excel`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token") || sessionStorage.getItem("token") || ""}`
+        }
+      });
+      if (!response.ok) throw new Error("Failed to download file");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Task_Assigining.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      toast.success("Excel report downloaded successfully");
+    } catch (e) {
+      toast.error(e.message || "Error downloading file");
+    }
+  };
+  
   const ordered = useMemo(() => {
     let list = [...tasks];
     if (user?._id) {
@@ -111,7 +133,7 @@ export default function Tasks() {
         animation: borderPulse 2.5s infinite ease-in-out;
       }
     `}</style>
-    <div className="mx-auto max-w-6xl"><div className="mb-8 flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-cyan-300">GFG BVCOE workspace</p><h1 className="mt-2 text-3xl font-bold">Task management</h1><p className="mt-1 text-sm text-gray-400">Track assignments, deadlines, and permanent task history.</p></div><div className="flex items-center gap-3 flex-wrap"><div className="flex gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5"><button onClick={() => setFilterTab("to-me")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "to-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned to me</button><button onClick={() => setFilterTab("by-me")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "by-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned by me</button></div><button onClick={() => { setOpen(true); setSearch(""); }} className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300"><UserPlus size={16}/> Assign task</button></div></div><div className="grid gap-3 md:grid-cols-3">{ordered.map((task) => {
+    <div className="mx-auto max-w-6xl"><div className="mb-8 flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-cyan-300">GFG BVCOE workspace</p><h1 className="mt-2 text-3xl font-bold">Task management</h1><p className="mt-1 text-sm text-gray-400">Track assignments, deadlines, and permanent task history.</p></div><div className="flex items-center gap-3 flex-wrap"><div className="flex gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5"><button onClick={() => setFilterTab("to-me")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "to-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned to me</button><button onClick={() => setFilterTab("by-me")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "by-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned by me</button></div><button onClick={handleDownloadExcel} className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-2.5 text-sm font-bold text-cyan-400 hover:bg-cyan-500/10"><Download size={16}/> Download Report</button><button onClick={() => { setOpen(true); setSearch(""); }} className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300"><UserPlus size={16}/> Assign task</button></div></div><div className="grid gap-3 md:grid-cols-3">{ordered.map((task) => {
   const taskState = getTaskState(task);
   return (
     <article key={task._id} className={`rounded-2xl border p-4 flex flex-col justify-between transition-all duration-300 ${taskState.cardClass}`}>

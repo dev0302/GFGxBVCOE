@@ -3,6 +3,8 @@ const User = require("../models/User");
 const { getTeamMemberModel } = require("../models/TeamMember");
 const { TEAM_DEPARTMENTS, SOCIETY_ROLES, getDepartmentRankFromPosition } = require("../utils/leadershipPositions");
 const mailSender = require("../utils/mailSender");
+const XLSX = require("xlsx");
+const ExcelFile = require("../models/ExcelFile");
 
 const text = (value) => String(value || "").trim();
 const escapeHtml = (value) => text(value).replace(/[&<>'"]/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" }[c]));
@@ -21,6 +23,76 @@ function getRankValue(roleOrPosition) {
   if (lower.includes("lead")) return 40;
   
   return 10; // Executive / Member
+}
+
+async function syncTaskExcel() {
+  try {
+    const tasks = await Task.find({}).lean();
+    const rows = tasks.map(task => {
+      const isCompleted = task.status === "COMPLETED";
+      const hasDeadline = !!task.deadline;
+      const now = new Date();
+      
+      let computedStatus = task.status;
+      let onTime = "N/A";
+      
+      if (isCompleted) {
+        const completedDate = new Date(task.completedAt || task.updatedAt);
+        if (!hasDeadline || completedDate <= new Date(task.deadline)) {
+          computedStatus = "Completed";
+          onTime = "Yes";
+        } else {
+          computedStatus = "Completed Late";
+          onTime = "No";
+        }
+      } else {
+        const deadlineDate = hasDeadline ? new Date(task.deadline) : null;
+        if (hasDeadline && now > deadlineDate) {
+          computedStatus = "Overdue";
+          onTime = "Deadline Missed";
+        } else {
+          computedStatus = "Ongoing";
+          onTime = "Ongoing";
+        }
+      }
+      
+      return {
+        "Task ID": String(task._id),
+        "Title": task.title || "",
+        "Description": task.description || "",
+        "Priority": task.priority || "MEDIUM",
+        "Department": task.department || "",
+        "Assigned By Name": task.assignedBy?.name || "",
+        "Assigned By Email": task.assignedBy?.email || "",
+        "Assigned To Name": task.assignedTo?.name || "",
+        "Assigned To Email": task.assignedTo?.email || "",
+        "Assigned Date": task.createdAt ? new Date(task.createdAt).toLocaleString("en-IN") : "",
+        "Deadline": task.deadline ? new Date(task.deadline).toLocaleString("en-IN") : "No deadline",
+        "Completion Date": task.completedAt ? new Date(task.completedAt).toLocaleString("en-IN") : "Not completed",
+        "Status": computedStatus,
+        "Completed On Time": onTime
+      };
+    });
+    
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Task Assigning");
+    
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    
+    await ExcelFile.findOneAndUpdate(
+      { filename: "Task Assigining.xlsx" },
+      { data: buffer, updatedAt: new Date() },
+      { upsert: true, new: true }
+    );
+    
+    const fs = require("fs");
+    const path = require("path");
+    fs.writeFileSync(path.join(__dirname, "../Task Assigining.xlsx"), buffer);
+    console.log("[Excel Sync] Synchronized Task Assigining.xlsx successfully.");
+  } catch (error) {
+    console.error("[Excel Sync] Error during synchronization:", error.message);
+  }
 }
 
 async function currentPerson(user) {
@@ -153,6 +225,7 @@ exports.createTask = async (req, res) => {
     }
     
     const task = await Task.create({ title, description, priority: ["LOW", "MEDIUM", "HIGH"].includes(req.body.priority) ? req.body.priority : "MEDIUM", assignedTo, assignedBy, department: assignedTo.department, deadline, history: [{ action: "ASSIGNED", by: assignedBy }] });
+    await syncTaskExcel();
     let emailSent = false;
     if (assignedTo.email) {
       emailSent = await triggerGithubEmailWorkflow(task, assignedTo, assignedBy);
@@ -183,6 +256,7 @@ exports.completeTask = async (req, res) => {
     if (String(task.assignedTo.id) !== String(person.id)) return res.status(403).json({ success:false, message:"Only the assignee can complete this task." });
     if (task.status === "COMPLETED") return res.json({ success:true, task, message:"Task is already completed." });
     task.status = "COMPLETED"; task.completedAt = new Date(); task.completedBy = person; task.history.push({ action:"COMPLETED", by:person }); await task.save();
+    await syncTaskExcel();
     res.json({ success:true, task, message:"Task marked as completed." });
   } catch (error) { res.status(500).json({ success:false, message:"Unable to complete task.", error:error.message }); }
 };
@@ -205,8 +279,25 @@ exports.deleteTask = async (req, res) => {
     }
     
     await Task.findByIdAndDelete(req.params.id);
+    await syncTaskExcel();
     res.json({ success: true, message: "Task deleted successfully." });
   } catch (error) {
     res.status(500).json({ success: false, message: "Unable to delete task.", error: error.message });
+  }
+};
+
+exports.downloadExcel = async (req, res) => {
+  try {
+    let excel = await ExcelFile.findOne({ filename: "Task Assigining.xlsx" });
+    if (!excel) {
+      await syncTaskExcel();
+      excel = await ExcelFile.findOne({ filename: "Task Assigining.xlsx" });
+      if (!excel) return res.status(404).json({ success: false, message: "Excel record not found." });
+    }
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", "attachment; filename=Task_Assigining.xlsx");
+    res.send(excel.data);
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Unable to download Excel record.", error: error.message });
   }
 };
