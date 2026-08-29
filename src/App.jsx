@@ -60,7 +60,6 @@ import BlogSite from "./pages/blog_site/blogSite";
 import BlogForm from "./components/blogForm";
 import BlogPage from "./pages/blogPage";
 import BlogApprovalPage from "./pages/blogApprovalPage";
-import Tasks from "./pages/Tasks";
 
 function App() {
   const location = useLocation();
@@ -262,7 +261,6 @@ function App() {
                       />
                       <Route path="/profile" element={<Profile />} />
                       <Route path="/settings" element={<Settings />} />
-                      <Route path="/tasks" element={<Tasks />} />
                       <Route path="/manage-team" element={<ManageTeam />} />
                       <Route
                         path="/view-team"

@@ -15,34 +15,6 @@ export function getAuthToken() {
   }
 }
 
-export async function getTaskPeople(search = "") {
-  const res = await authFetch(`/api/v1/tasks/eligible-people?search=${encodeURIComponent(search)}`);
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to load people");
-  return data.people || [];
-}
-
-export async function createTask(payload) {
-  const res = await authFetch("/api/v1/tasks", { method: "POST", body: JSON.stringify(payload) });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to assign task");
-  return data;
-}
-
-export async function getTasks(status = "") {
-  const res = await authFetch(`/api/v1/tasks${status ? `?status=${encodeURIComponent(status)}` : ""}`);
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to load tasks");
-  return data.tasks || [];
-}
-
-export async function completeTask(id) {
-  const res = await authFetch(`/api/v1/tasks/${id}/complete`, { method: "PATCH" });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to complete task");
-  return data;
-}
-
 /** Store token after login/signup so requests can use Authorization header. */
 export function setAuthToken(token) {
   try {
