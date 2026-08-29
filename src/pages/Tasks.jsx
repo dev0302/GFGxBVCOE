@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle, Clipboard, Search, UserPlus } from "react-feather";
 import { completeTask, createTask, getTaskPeople, getTasks } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 const initials = (name = "") => name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
 
@@ -22,9 +23,17 @@ function ExpandableDescription({ text }) {
 }
 
 export default function Tasks() {
+  const { user } = useAuth();
+  const [assignedToMeOnly, setAssignedToMeOnly] = useState(false);
   const [tasks, setTasks] = useState([]), [people, setPeople] = useState([]), [search, setSearch] = useState("");
   const [step, setStep] = useState(0), [open, setOpen] = useState(false), [selected, setSelected] = useState(null);
   const [title, setTitle] = useState(""), [description, setDescription] = useState(""), [priority, setPriority] = useState("MEDIUM"), [deadline, setDeadline] = useState(""), [loading, setLoading] = useState(false);
+  
+  const isCore = useMemo(() => ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"].includes(user?.accountType), [user]);
+  const position = useMemo(() => String(user?.additionalDetails?.position || user?.additionalDetails?.role || user?.additionalDetails?.p0 || "").toLowerCase(), [user]);
+  const isLeadOrHead = useMemo(() => position.includes("lead") || position.includes("head"), [position]);
+  const isPrivileged = isCore || isLeadOrHead;
+
   const canAssign = people.length > 0 || open;
   const load = async () => { try { setTasks(await getTasks()); } catch (e) { toast.error(e.message); } };
   useEffect(() => { load(); }, []);
@@ -32,8 +41,16 @@ export default function Tasks() {
   const invalidDetails = !title.trim() || !description.trim();
   const reset = () => { setOpen(false); setStep(0); setSelected(null); setTitle(""); setDescription(""); setDeadline(""); };
   const submit = async () => { setLoading(true); try { const data = await createTask({ title, description, priority, deadline: deadline || undefined, assignedToId: selected.id, assignedToDepartment: selected.department }); toast.success(data.message); reset(); load(); } catch (e) { toast.error(e.message); } finally { setLoading(false); } };
-  const ordered = useMemo(() => [...tasks].sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt)), [tasks]);
-  return <section className="min-h-screen bg-[#0c0c18] px-4 py-24 text-gray-100 sm:px-8"><div className="mx-auto max-w-6xl"><div className="mb-8 flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-cyan-300">GFG BVCOE workspace</p><h1 className="mt-2 text-3xl font-bold">Task management</h1><p className="mt-1 text-sm text-gray-400">Track assignments, deadlines, and permanent task history.</p></div><button onClick={() => { setOpen(true); setSearch(""); }} className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300"><UserPlus size={16}/> Assign task</button></div><div className="grid gap-3 md:grid-cols-3">{ordered.map((task) => (
+  
+  const ordered = useMemo(() => {
+    let list = [...tasks];
+    if (isPrivileged && assignedToMeOnly && user?._id) {
+      list = list.filter((t) => String(t.assignedTo.id) === String(user._id));
+    }
+    return list.sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt));
+  }, [tasks, isPrivileged, assignedToMeOnly, user]);
+
+  return <section className="min-h-screen bg-[#0c0c18] px-4 py-24 text-gray-100 sm:px-8"><div className="mx-auto max-w-6xl"><div className="mb-8 flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-cyan-300">GFG BVCOE workspace</p><h1 className="mt-2 text-3xl font-bold">Task management</h1><p className="mt-1 text-sm text-gray-400">Track assignments, deadlines, and permanent task history.</p></div><div className="flex items-center gap-3 flex-wrap">{isPrivileged && <div className="flex gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5"><button onClick={() => setAssignedToMeOnly(false)} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${!assignedToMeOnly ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>All Tasks</button><button onClick={() => setAssignedToMeOnly(true)} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${assignedToMeOnly ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned to me</button></div>}{isPrivileged ? <button onClick={() => { setOpen(true); setSearch(""); }} className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300"><UserPlus size={16}/> Assign task</button> : <button disabled className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-2.5 text-sm font-bold text-cyan-300 cursor-default">Assigned to me</button>}</div></div><div className="grid gap-3 md:grid-cols-3">{ordered.map((task) => (
   <article key={task._id} className="rounded-2xl border border-white/10 bg-white/[.04] p-4 flex flex-col justify-between">
     <div>
       <div className="flex items-start justify-between gap-3">
