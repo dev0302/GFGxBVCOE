@@ -288,6 +288,10 @@ exports.deleteTask = async (req, res) => {
 
 exports.downloadExcel = async (req, res) => {
   try {
+    const person = await currentPerson(req.user);
+    if (!person || getRankValue(person.role) < 40) {
+      return res.status(403).json({ success: false, message: "Only Leads, Heads, and Core roles can access this report." });
+    }
     let excel = await ExcelFile.findOne({ filename: "Task Assigining.xlsx" });
     if (!excel) {
       await syncTaskExcel();
