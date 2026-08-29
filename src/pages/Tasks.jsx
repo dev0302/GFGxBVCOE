@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle, Clipboard, Download, Search, UserPlus } from "react-feather";
-import { completeTask, createTask, getTaskPeople, getTasks, deleteTask } from "../services/api";
+import { completeTask, createTask, getTaskPeople, getTasks, deleteTask, getAuthToken } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 const initials = (name = "") => name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
@@ -93,10 +93,13 @@ export default function Tasks() {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ""}/api/v1/tasks/download-excel`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token") || sessionStorage.getItem("token") || ""}`
+          Authorization: `Bearer ${getAuthToken() || ""}`
         }
       });
-      if (!response.ok) throw new Error("Failed to download file");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to download file");
+      }
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
