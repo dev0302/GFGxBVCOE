@@ -189,7 +189,7 @@ export default function Tasks() {
               <CheckCircle size={14}/> Mark complete
             </button>
           )}
-          {isPrivileged && (
+          {isPrivileged && (String(task.assignedBy.id) === String(user?._id) || isCore) && (
             <button onClick={async () => { if (window.confirm("Are you sure you want to delete this task?")) { try { await deleteTask(task._id); toast.success("Task deleted successfully"); load(); } catch(e) { toast.error(e.message); } } }} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-500/20 bg-rose-500/10 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/20">
               Delete task
             </button>
