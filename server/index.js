@@ -32,7 +32,6 @@ const vectorVisionAdminRoutes = require("./routes/vectorVisionAdminRoute");
 const notificationRoutes = require("./routes/notificationRoute");
 const vaultRoutes = require("./routes/vaultRoute");
 const cloudinaryRoutes = require("./routes/cloudinaryRoute");
-const taskRoutes = require("./routes/taskRoute");
 
 const blogRoutes = require("./routes/blogRoute");
 
@@ -79,7 +78,6 @@ app.use("/api/v1/members/enroll", memberEnrollRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/vault", vaultRoutes);
 app.use("/api/v1/cloudinary", cloudinaryRoutes);
-app.use("/api/v1/tasks", taskRoutes);
 
 app.use("/api/v1/blog", blogRoutes);
 
