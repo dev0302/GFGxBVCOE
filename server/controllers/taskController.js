@@ -1,7 +1,7 @@
 const Task = require("../models/Task");
 const User = require("../models/User");
 const { getTeamMemberModel } = require("../models/TeamMember");
-const { TEAM_DEPARTMENTS, SOCIETY_ROLES } = require("../utils/leadershipPositions");
+const { TEAM_DEPARTMENTS, SOCIETY_ROLES, getDepartmentRankFromPosition } = require("../utils/leadershipPositions");
 const mailSender = require("../utils/mailSender");
 
 const text = (value) => String(value || "").trim();
@@ -21,9 +21,17 @@ async function currentPerson(user) {
 async function canAssign(req) {
   const role = text(req.user.accountType);
   if (SOCIETY_ROLES.includes(role)) return true;
-  if (!req.user.isDepartmentMember) return false;
-  const person = await currentPerson(req.user);
-  return /\b(head|lead)\b/i.test(text(person?.role));
+  if (req.user.isDepartmentMember) {
+    const person = await currentPerson(req.user);
+    return /\b(head|lead)\b/i.test(text(person?.role));
+  }
+  const user = await User.findById(req.user.id)
+    .populate("additionalDetails", "position p0")
+    .lean();
+  if (!user) return false;
+  const position = user.additionalDetails?.position || user.additionalDetails?.p0 || "";
+  const rank = getDepartmentRankFromPosition(position);
+  return rank === "Head" || rank === "Lead";
 }
 
 async function findAssignee(id, department) {
@@ -41,9 +49,12 @@ exports.getEligiblePeople = async (req, res) => {
   try {
     if (!(await canAssign(req))) return res.status(403).json({ success: false, message: "Only Heads, Leads, and society core roles can assign tasks." });
     const query = text(req.query.search).toLowerCase();
-    const departments = req.user.isDepartmentMember ? [req.user.memberDepartment] : TEAM_DEPARTMENTS;
+    const isCore = SOCIETY_ROLES.includes(text(req.user.accountType));
+    const allowedDept = req.user.isDepartmentMember ? req.user.memberDepartment : req.user.accountType;
+    const departments = isCore ? TEAM_DEPARTMENTS : [allowedDept];
     const people = [];
-    const users = await User.find({}).select("firstName lastName email image accountType additionalDetails").lean();
+    const userFilter = isCore ? {} : { accountType: allowedDept };
+    const users = await User.find(userFilter).select("firstName lastName email image accountType additionalDetails").lean();
     users.forEach((u) => people.push({ id: u._id, name: `${u.firstName || ""} ${u.lastName || ""}`.trim(), email: u.email || "", image: u.image || "", department: TEAM_DEPARTMENTS.includes(u.accountType) ? u.accountType : "Core Team", role: u.accountType || "", year: "", isDepartmentMember: false }));
     for (const department of departments) {
       const rows = await getTeamMemberModel(department).find({ $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] }).select("name email photo year profile").lean();
@@ -65,7 +76,13 @@ exports.createTask = async (req, res) => {
     if (!assignedTo) return res.status(404).json({ success: false, message: "The selected person no longer exists." });
     const assignedBy = await currentPerson(req.user);
     if (!assignedBy) return res.status(401).json({ success: false, message: "Your account could not be verified." });
-    if (req.user.isDepartmentMember && assignedTo.department !== req.user.memberDepartment) return res.status(403).json({ success: false, message: "Heads and Leads may only assign tasks inside their department." });
+    const isCore = SOCIETY_ROLES.includes(text(req.user.accountType));
+    if (!isCore) {
+      const userDept = req.user.isDepartmentMember ? req.user.memberDepartment : req.user.accountType;
+      if (assignedTo.department !== userDept) {
+        return res.status(403).json({ success: false, message: "Heads and Leads may only assign tasks inside their department." });
+      }
+    }
     const task = await Task.create({ title, description, priority: ["LOW", "MEDIUM", "HIGH"].includes(req.body.priority) ? req.body.priority : "MEDIUM", assignedTo, assignedBy, department: assignedTo.department, deadline, history: [{ action: "ASSIGNED", by: assignedBy }] });
     let emailSent = false;
     if (assignedTo.email) {
