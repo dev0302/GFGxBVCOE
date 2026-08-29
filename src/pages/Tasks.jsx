@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle, Clipboard, Search, UserPlus } from "react-feather";
-import { completeTask, createTask, getTaskPeople, getTasks } from "../services/api";
+import { completeTask, createTask, getTaskPeople, getTasks, deleteTask } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 const initials = (name = "") => name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
@@ -158,11 +158,18 @@ export default function Tasks() {
           </div>
         </div>
         
-        {task.status === "ONGOING" && (
-          <button onClick={async () => { try { await completeTask(task._id); toast.success("Task marked complete"); load(); } catch(e) { toast.error(e.message); } }} className="mt-2 w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20">
-            <CheckCircle size={14}/> Mark complete
-          </button>
-        )}
+        <div className="flex gap-2 mt-2">
+          {task.status === "ONGOING" && (
+            <button onClick={async () => { try { await completeTask(task._id); toast.success("Task marked complete"); load(); } catch(e) { toast.error(e.message); } }} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20">
+              <CheckCircle size={14}/> Mark complete
+            </button>
+          )}
+          {isPrivileged && (
+            <button onClick={async () => { if (window.confirm("Are you sure you want to delete this task?")) { try { await deleteTask(task._id); toast.success("Task deleted successfully"); load(); } catch(e) { toast.error(e.message); } } }} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-500/20 bg-rose-500/10 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/20">
+              Delete task
+            </button>
+          )}
+        </div>
       </div>
     </article>
   );

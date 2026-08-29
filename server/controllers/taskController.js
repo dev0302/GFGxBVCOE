@@ -186,3 +186,27 @@ exports.completeTask = async (req, res) => {
     res.json({ success:true, task, message:"Task marked as completed." });
   } catch (error) { res.status(500).json({ success:false, message:"Unable to complete task.", error:error.message }); }
 };
+
+exports.deleteTask = async (req, res) => {
+  try {
+    const person = await currentPerson(req.user);
+    if (!person || getRankValue(person.role) < 40) {
+      return res.status(403).json({ success: false, message: "Only Heads, Leads, and society core roles can delete tasks." });
+    }
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ success: false, message: "Task not found." });
+    
+    const isCore = SOCIETY_ROLES.includes(text(req.user.accountType));
+    const isAssigner = String(task.assignedBy.id) === String(person.id);
+    const inSameDepartment = task.department === person.department;
+    
+    if (!isCore && !isAssigner && !inSameDepartment) {
+      return res.status(403).json({ success: false, message: "You can only delete tasks that you assigned or that belong to your department." });
+    }
+    
+    await Task.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: "Task deleted successfully." });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Unable to delete task.", error: error.message });
+  }
+};
