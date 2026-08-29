@@ -43,6 +43,13 @@ export async function completeTask(id) {
   return data;
 }
 
+export async function deleteTask(id) {
+  const res = await authFetch(`/api/v1/tasks/${id}`, { method: "DELETE" });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to delete task");
+  return data;
+}
+
 /** Store token after login/signup so requests can use Authorization header. */
 export function setAuthToken(token) {
   try {

@@ -1,10 +1,11 @@
 const express = require("express");
 const { auth } = require("../middlewares/AuthZ");
-const { getEligiblePeople, createTask, getTasks, completeTask } = require("../controllers/taskController");
+const { getEligiblePeople, createTask, getTasks, completeTask, deleteTask } = require("../controllers/taskController");
 const router = express.Router();
 router.use(auth);
 router.get("/eligible-people", getEligiblePeople);
 router.get("/", getTasks);
 router.post("/", createTask);
 router.patch("/:id/complete", completeTask);
+router.delete("/:id", deleteTask);
 module.exports = router;
