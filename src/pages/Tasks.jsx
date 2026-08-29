@@ -49,33 +49,33 @@ export default function Tasks() {
         <span>{task.deadline ? `Due: ${new Date(task.deadline).toLocaleDateString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}` : "No deadline"}</span>
       </div>
       
-      <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/[0.03]">
-        <div className="flex items-center gap-1.5 min-w-0">
-          {task.assignedBy.image ? (
-            <img src={task.assignedBy.image} alt="" className="h-6 w-6 rounded-full object-cover border border-white/10" />
-          ) : (
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[8px] font-bold text-gray-200">
-              {initials(task.assignedBy.name)}
-            </span>
-          )}
-          <div className="min-w-0">
-            <span className="block text-[9px] text-gray-500 leading-none">By</span>
-            <span className="text-xs font-semibold text-gray-300 truncate block" title={task.assignedBy.name}>{task.assignedBy.name}</span>
+      <div className="flex flex-col gap-2 pt-2 border-t border-white/[0.03] text-xs">
+        <div className="flex items-center gap-2">
+          <span className="text-gray-500 w-24 shrink-0 font-medium">Assigned By:</span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            {task.assignedBy.image ? (
+              <img src={task.assignedBy.image} alt="" className="h-5 w-5 rounded-full object-cover border border-white/10" />
+            ) : (
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[8px] font-bold text-gray-200">
+                {initials(task.assignedBy.name)}
+              </span>
+            )}
+            <span className="font-semibold text-gray-300 truncate" title={task.assignedBy.name}>{task.assignedBy.name}</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 min-w-0 text-right justify-end">
-          <div className="min-w-0">
-            <span className="block text-[9px] text-gray-500 leading-none">To</span>
-            <span className="text-xs font-semibold text-gray-300 truncate block" title={task.assignedTo.name}>{task.assignedTo.name}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-gray-500 w-24 shrink-0 font-medium">Assigned To:</span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            {task.assignedTo.image ? (
+              <img src={task.assignedTo.image} alt="" className="h-5 w-5 rounded-full object-cover border border-white/10" />
+            ) : (
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[8px] font-bold text-gray-200">
+                {initials(task.assignedTo.name)}
+              </span>
+            )}
+            <span className="font-semibold text-gray-300 truncate" title={task.assignedTo.name}>{task.assignedTo.name}</span>
           </div>
-          {task.assignedTo.image ? (
-            <img src={task.assignedTo.image} alt="" className="h-6 w-6 rounded-full object-cover border border-white/10" />
-          ) : (
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[8px] font-bold text-gray-200">
-              {initials(task.assignedTo.name)}
-            </span>
-          )}
         </div>
       </div>
       
