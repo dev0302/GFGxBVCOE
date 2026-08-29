@@ -1,0 +1,30 @@
+name: Send Task Email
+
+on:
+  repository_dispatch:
+    types: [task-assigned]
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send email via Brevo API
+        run: |
+          curl --request POST \
+            --url https://api.brevo.com/v3/smtp/email \
+            --header 'accept: application/json' \
+            --header 'api-key: ${{ secrets.BREVO_API_KEY }}' \
+            --header 'content-type: application/json' \
+            --data '{
+              "sender": {
+                "name": "GFGxBVCOE",
+                "email": "${{ secrets.SENDER_EMAIL }}"
+              },
+              "to": [
+                {
+                  "email": "${{ github.event.client_payload.assignee_email }}"
+                }
+              ],
+              "subject": "New Task Assigned — GFG BVCOE",
+              "htmlContent": "<h2>You are assigned to the task</h2><p><strong>Task:</strong> ${{ github.event.client_payload.title }}</p><p><strong>Description:</strong><br/>${{ github.event.client_payload.description }}</p><p><strong>Assigned by:</strong> ${{ github.event.client_payload.assigner_name }}</p><p><strong>Department:</strong> ${{ github.event.client_payload.department }}</p><p><strong>Deadline:</strong> ${{ github.event.client_payload.deadline }}</p>"
+            }'

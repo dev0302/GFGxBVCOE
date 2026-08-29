@@ -88,6 +88,46 @@ exports.getEligiblePeople = async (req, res) => {
   } catch (error) { res.status(500).json({ success: false, message: "Unable to load eligible people.", error: error.message }); }
 };
 
+async function triggerGithubEmailWorkflow(task, assignee, assignedBy) {
+  try {
+    const token = process.env.GITHUB_TOKEN;
+    if (!token) {
+      console.log("[tasks] GITHUB_TOKEN not set. Skipping GitHub workflow trigger.");
+      return false;
+    }
+    const repoUrl = "https://api.github.com/repos/dev0302/GFGxBVCOE/dispatches";
+    const response = await fetch(repoUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `token ${token}`,
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "GFGxBVCOE-Backend"
+      },
+      body: JSON.stringify({
+        event_type: "task-assigned",
+        client_payload: {
+          title: task.title,
+          description: task.description.replace(/\n/g, "<br/>"),
+          assignee_email: assignee.email,
+          assigner_name: assignedBy.name,
+          department: assignee.department || task.department,
+          deadline: task.deadline ? new Date(task.deadline).toLocaleString() : "No deadline"
+        }
+      })
+    });
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("[tasks] GitHub workflow trigger failed:", response.status, errText);
+      return false;
+    }
+    console.log("[tasks] GitHub email workflow triggered successfully.");
+    return true;
+  } catch (error) {
+    console.error("[tasks] Error triggering GitHub workflow:", error.message);
+    return false;
+  }
+}
+
 exports.createTask = async (req, res) => {
   try {
     const assignedBy = await currentPerson(req.user);
@@ -115,9 +155,11 @@ exports.createTask = async (req, res) => {
     const task = await Task.create({ title, description, priority: ["LOW", "MEDIUM", "HIGH"].includes(req.body.priority) ? req.body.priority : "MEDIUM", assignedTo, assignedBy, department: assignedTo.department, deadline, history: [{ action: "ASSIGNED", by: assignedBy }] });
     let emailSent = false;
     if (assignedTo.email) {
-      const result = await mailSender(assignedTo.email, "New Task Assigned — GFG BVCOE", `<h2>You are assigned to the task</h2><p><strong>Task:</strong> ${escapeHtml(title)}</p><p><strong>Description:</strong><br/>${escapeHtml(description).replace(/\n/g,"<br/>")}</p><p><strong>Assigned by:</strong> ${escapeHtml(assignedBy.name)}</p><p><strong>Department:</strong> ${escapeHtml(assignedTo.department)}</p><p><strong>Deadline:</strong> ${deadline ? deadline.toLocaleString() : "No deadline"}</p>`);
-      emailSent = Boolean(result);
-      if (!emailSent) console.error(`[tasks] Task ${task._id} created but notification email failed.`);
+      emailSent = await triggerGithubEmailWorkflow(task, assignedTo, assignedBy);
+      if (!emailSent) {
+        const result = await mailSender(assignedTo.email, "New Task Assigned — GFG BVCOE", `<h2>You are assigned to the task</h2><p><strong>Task:</strong> ${escapeHtml(title)}</p><p><strong>Description:</strong><br/>${escapeHtml(description).replace(/\n/g,"<br/>")}</p><p><strong>Assigned by:</strong> ${escapeHtml(assignedBy.name)}</p><p><strong>Department:</strong> ${escapeHtml(assignedTo.department)}</p><p><strong>Deadline:</strong> ${deadline ? deadline.toLocaleString() : "No deadline"}</p>`);
+        emailSent = Boolean(result);
+      }
     }
     res.status(201).json({ success: true, task, emailSent, message: emailSent ? "Task assigned successfully. Email notification sent." : "Task assigned successfully. Email notification could not be sent." });
   } catch (error) { res.status(500).json({ success: false, message: "Unable to assign task.", error: error.message }); }
