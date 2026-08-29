@@ -272,10 +272,9 @@ exports.deleteTask = async (req, res) => {
     
     const isCore = SOCIETY_ROLES.includes(text(req.user.accountType));
     const isAssigner = String(task.assignedBy.id) === String(person.id);
-    const inSameDepartment = task.department === person.department;
     
-    if (!isCore && !isAssigner && !inSameDepartment) {
-      return res.status(403).json({ success: false, message: "You can only delete tasks that you assigned or that belong to your department." });
+    if (!isCore && !isAssigner) {
+      return res.status(403).json({ success: false, message: "You can only delete tasks that you have assigned." });
     }
     
     await Task.findByIdAndDelete(req.params.id);
