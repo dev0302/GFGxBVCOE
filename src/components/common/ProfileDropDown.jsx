@@ -234,9 +234,17 @@ function ProfileDropDown({
 
       const isMobileViewport = window.innerWidth < 640;
       const width = Math.min(256, window.innerWidth - 24);
+      const top = rect.bottom + 8;
+
+      // Keep the action list within the viewport while leaving the account
+      // details and logout control permanently visible.
+      const menuItemsMaxHeight = Math.max(
+        96,
+        window.innerHeight - top - 232,
+      );
 
       setMenuPosition({
-        top: rect.bottom + 8,
+        top,
         left: isMobileViewport
           ? Math.max(8, window.innerWidth - width - 8)
           : Math.max(
@@ -244,6 +252,7 @@ function ProfileDropDown({
               Math.min(rect.right - width, window.innerWidth - width - 12),
             ),
         width,
+        menuItemsMaxHeight,
       });
     };
 
@@ -590,7 +599,13 @@ function ProfileDropDown({
               </div>
             </div>
 
-            <div className="px-1 py-1.5 i-fonts">
+            <div
+              className="max-h-[var(--profile-menu-actions-max-height)] overflow-y-auto overscroll-none px-1 py-1.5 i-fonts scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50"
+              style={{
+                "--profile-menu-actions-max-height": `${menuPosition.menuItemsMaxHeight}px`,
+              }}
+              onWheel={handleFlyoutWheel}
+            >
               <button
                 onClick={() => {
                   setOpen(false);
@@ -743,7 +758,7 @@ function ProfileDropDown({
                             </div>
                           </div>
                           <div
-                            className="max-h-[320px] overflow-y-auto px-1 py-1.5 overscroll-contain scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50"
+                            className="max-h-[320px] overflow-y-auto px-1 py-1.5 overscroll-none scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50"
                             onWheel={handleFlyoutWheel}
                           >
                             {deptDashboardKeys.length ? (
@@ -944,7 +959,7 @@ function ProfileDropDown({
                   </motion.div>
                   <div
                     data-lenis-prevent="true"
-                    className="relative z-[1] min-h-0 flex-1 overflow-y-auto overscroll-contain px-2.5 py-1.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30"
+                    className="relative z-[1] min-h-0 flex-1 overflow-y-auto overscroll-none px-2.5 py-1.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30"
                     style={{ WebkitOverflowScrolling: "touch" }}
                     onWheel={(e) => e.stopPropagation()}
                   >
