@@ -12,27 +12,72 @@ const SCROLL_DISTANCE = 3200;
 const CLOUDINARY_TRANSFORM = "w_128,h_128,c_fill,f_auto,q_auto";
 
 const RAW_IMAGES = [
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1783760137/gfg-avatars/mskhuvj43hnoycxe0mtn.jpg",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1774978083/gfg-avatars/uj6gux97lrecvgio0sei.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1774973529/gfg-avatars/g6tt6x8itatqtjmgt2wm.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1774969269/gfg-avatars/ayuxiasqkmxsrhbk1elc.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1774940762/gfg-avatars/m263zehxnnnfu7ecf2sx.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1774873629/gfg-avatars/kegohysezqkks4kr7iv6.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1774810211/gfg-avatars/ltm1nbzlg535avr2vqag.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1774809335/gfg-avatars/axiufnktqq7k485ksmwm.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1773071409/gfg-avatars/ixfyhiuilrimdsunof9c.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1773412911/gfg-avatars/tnze2ztp4lwn0bhcvpfy.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1772024447/gfg-avatars/es0qdtjstittj8k5qiaq.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1771864701/gfg-avatars/c8mbazffvobzqhvl501w.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1772028823/gfg-avatars/qdszguldh9qnpudf4b1u.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1771695434/gfg-avatars/bdkprijuuchnkqggmar5.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1771267811/gfg-avatars/a9qwbpg6xpb9d7eiaeva.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1771308086/gfg-avatars/xzavxgsvwsqxppl4lh6m.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1771254332/gfg-avatars/g5s7eagxeabljn1n285w.jpg",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1771254113/gfg-avatars/n8ddryjhxpkc1hgjo4ro.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1771253483/gfg-avatars/u0y8pxtqzxwdulfjuydr.webp",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1781892760/gfg-avatars/esqurvehtciqhjnny4xn.jpg",
-  "https://res.cloudinary.com/duwmby01d/image/upload/v1771241592/gfg-avatars/ljasaqmoc4yz2ldft396.webp",
+  
+
+
+
+"https://res.cloudinary.com/duwmby01d/image/upload/v1786861929/IMG-20260815-WA0036_hbu6ye.jpg",
+
+"https://res.cloudinary.com/duwmby01d/image/upload/v1786861928/IMG-20260815-WA0034_d4khya.jpg",
+
+"https://res.cloudinary.com/duwmby01d/image/upload/v1786862697/2026-02-20-17-05-37-741_ql5czn.jpg",
+
+
+
+" https://res.cloudinary.com/duwmby01d/image/upload/v1786861929/IMG-20260815-WA0033_wy7uw6.jpg",
+
+"https://res.cloudinary.com/duwmby01d/image/upload/v1786864048/IMG-20260816-WA0022_refits.jpg",
+
+"https://res.cloudinary.com/duwmby01d/image/upload/v1786861923/IMG-20260815-WA0044_txycrz.jpg",
+
+" https://res.cloudinary.com/duwmby01d/image/upload/v1786861922/IMG-20260815-WA0084_sidqgv.jpg",
+
+"https://res.cloudinary.com/duwmby01d/image/upload/v1786861935/IMG-20260815-WA0029_ps0ldd.jpg",
+
+
+
+
+
+" https://res.cloudinary.com/duwmby01d/image/upload/v1786861927/IMG-20260815-WA0038_m2i8a2.jpg",
+
+"https://res.cloudinary.com/duwmby01d/image/upload/v1786861921/IMG-20260815-WA0086_al8mxk.jpg",
+
+" https://res.cloudinary.com/duwmby01d/image/upload/v1786864049/SAVE_20260816_123617_o8prwz.jpg",
+
+"https://res.cloudinary.com/duwmby01d/image/upload/v1786861928/IMG-20260815-WA0037_vtvqgi.jpg",
+
+"https://res.cloudinary.com/duwmby01d/image/upload/v1786861921/IMG-20260816-WA0002_k6z5ag.jpg",
+
+"https://res.cloudinary.com/duwmby01d/image/upload/v1786861935/IMG-20260815-WA0025_j5wt48.jpg",
+
+"https://res.cloudinary.com/duwmby01d/image/upload/v1786861928/IMG-20260815-WA0032_drdljm.jpg",
+
+"https://res.cloudinary.com/duwmby01d/image/upload/v1786861929/fjwen_dylsm2.jpg",
+
+"https://res.cloudinary.com/duwmby01d/image/upload/v1786861931/IMG-20260815-WA0061_joibzt.jpg",
+
+"https://res.cloudinary.com/duwmby01d/image/upload/v1786861922/IMG-20260815-WA0048_kjo6i4.jpg"
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1783760137/gfg-avatars/mskhuvj43hnoycxe0mtn.jpg",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1774978083/gfg-avatars/uj6gux97lrecvgio0sei.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1774973529/gfg-avatars/g6tt6x8itatqtjmgt2wm.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1774969269/gfg-avatars/ayuxiasqkmxsrhbk1elc.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1774940762/gfg-avatars/m263zehxnnnfu7ecf2sx.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1774873629/gfg-avatars/kegohysezqkks4kr7iv6.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1774810211/gfg-avatars/ltm1nbzlg535avr2vqag.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1774809335/gfg-avatars/axiufnktqq7k485ksmwm.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1773071409/gfg-avatars/ixfyhiuilrimdsunof9c.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1773412911/gfg-avatars/tnze2ztp4lwn0bhcvpfy.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1772024447/gfg-avatars/es0qdtjstittj8k5qiaq.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1771864701/gfg-avatars/c8mbazffvobzqhvl501w.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1772028823/gfg-avatars/qdszguldh9qnpudf4b1u.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1771695434/gfg-avatars/bdkprijuuchnkqggmar5.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1771267811/gfg-avatars/a9qwbpg6xpb9d7eiaeva.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1771308086/gfg-avatars/xzavxgsvwsqxppl4lh6m.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1771254332/gfg-avatars/g5s7eagxeabljn1n285w.jpg",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1771254113/gfg-avatars/n8ddryjhxpkc1hgjo4ro.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1771253483/gfg-avatars/u0y8pxtqzxwdulfjuydr.webp",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1781892760/gfg-avatars/esqurvehtciqhjnny4xn.jpg",
+  // "https://res.cloudinary.com/duwmby01d/image/upload/v1771241592/gfg-avatars/ljasaqmoc4yz2ldft396.webp",
 ];
 
 const cloudinarySizedImage = (url) =>
