@@ -1,0 +1,12 @@
+const express = require("express");
+const { auth } = require("../middlewares/AuthZ");
+const { getEligiblePeople, createTask, getTasks, completeTask, deleteTask, downloadExcel } = require("../controllers/taskController");
+const router = express.Router();
+router.use(auth);
+router.get("/eligible-people", getEligiblePeople);
+router.get("/", getTasks);
+router.get("/download-excel", downloadExcel);
+router.post("/", createTask);
+router.patch("/:id/complete", completeTask);
+router.delete("/:id", deleteTask);
+module.exports = router;
