@@ -600,7 +600,11 @@ function ProfileDropDown({
             </div>
 
             <div
-              className="max-h-[var(--profile-menu-actions-max-height)] overflow-y-auto overscroll-none px-1 py-1.5 i-fonts scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50"
+              className={`max-h-[var(--profile-menu-actions-max-height)] px-1 py-1.5 i-fonts scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50 ${
+                deptFlyoutOpen
+                  ? "overflow-visible"
+                  : "overflow-y-auto overscroll-none"
+              }`}
               style={{
                 "--profile-menu-actions-max-height": `${menuPosition.menuItemsMaxHeight}px`,
               }}
@@ -742,7 +746,7 @@ function ProfileDropDown({
                         </button>
 
                         <div
-                          className={`absolute -top-60 right-full mr-[-200px] sm:mr-1 w-72 max-w-[min(18rem,calc(100vw-1.5rem))] rounded-2xl border border-gray-500/40 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] shadow-xl backdrop-blur-sm overflow-hidden z-[70] transition-all duration-200 ease-out ${
+                          className={`absolute -top-60 right-full z-[70] mr-[-200px] w-72 max-w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-gray-500/40 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] shadow-xl backdrop-blur-sm transition-all duration-200 ease-out sm:mr-1 ${
                             deptFlyoutOpen
                               ? "pointer-events-auto opacity-100 translate-x-0 scale-100"
                               : "pointer-events-none opacity-0 translate-x-1 scale-95"
