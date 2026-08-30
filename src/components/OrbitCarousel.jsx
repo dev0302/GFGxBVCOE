@@ -7,82 +7,56 @@ import { ChevronLeft, ChevronRight, Users } from "lucide-react";
 const people = [
   {
     id: 1,
-    name: "Person 1 Name",
-    position: "Position",
+    name: "Piyush Kumar Singh",
+    position: "Chairperson",
     avatar:
-      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1773412911/gfg-avatars/tnze2ztp4lwn0bhcvpfy.webp",
+      "https://res.cloudinary.com/duwmby01d/image/upload/v1786861921/IMG-20260816-WA0010_uamsv6.jpg",
   },
   {
     id: 2,
-    name: "Person 2 Name",
-    position: "Position",
+    name: "Dhruv Kapoor",
+    position: "Vice Chairperson",
     avatar:
-      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1772024447/gfg-avatars/es0qdtjstittj8k5qiaq.webp",
+      "https://res.cloudinary.com/duwmby01d/image/upload/v1786864148/gfg_pfp_mt5sut.jpg",
   },
   {
     id: 3,
-    name: "Person 3 Name",
-    position: "Position",
+    name: "Aarti Singh",
+    position: "Vice Chairperson",
     avatar:
-      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1771864701/gfg-avatars/c8mbazffvobzqhvl501w.webp",
+      "https://res.cloudinary.com/duwmby01d/image/upload/v1786861922/IMG-20260815-WA0083_rsyobh.jpg",
   },
   {
     id: 4,
-    name: "Person 4 Name",
-    position: "Position",
+    name: "Niharika Arora",
+    position: "Creative and Design Lead",
     avatar:
-      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1772028823/gfg-avatars/qdszguldh9qnpudf4b1u.webp",
+      "https://res.cloudinary.com/duwmby01d/image/upload/v1786861921/IMG-20260816-WA0006_m60ksy.jpg",
   },
   {
     id: 5,
-    name: "Person 5 Name",
-    position: "Position",
+    name: "Gaurav Karakoti",
+    position: "Event Management Lead",
     avatar:
-      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1771695434/gfg-avatars/bdkprijuuchnkqggmar5.webp",
+      "https://res.cloudinary.com/duwmby01d/image/upload/v1786861929/IMG-20260815-WA0035_ywupzq.jpg",
   },
   {
     id: 6,
-    name: "Person 6 Name",
-    position: "Position",
+    name: "Radhika Trivedi",
+    position: "SM Lead",
     avatar:
-      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1771267811/gfg-avatars/a9qwbpg6xpb9d7eiaeva.webp",
+      "https://res.cloudinary.com/duwmby01d/image/upload/v1786864049/SAVE_20260816_123617_o8prwz.jpg",
   },
   {
     id: 7,
-    name: "Person 7 Name",
-    position: "Position",
+    name: "Prashray Kumar",
+    position: "Treasurer",
     avatar:
-      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1771308086/gfg-avatars/xzavxgsvwsqxppl4lh6m.webp",
-  },
-  {
-    id: 8,
-    name: "Person 8 Name",
-    position: "Position",
-    avatar:
-      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1771254332/gfg-avatars/g5s7eagxeabljn1n285w.jpg",
-  },
-  {
-    id: 9,
-    name: "Person 9 Name",
-    position: "Position",
-    avatar:
-      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1771254113/gfg-avatars/n8ddryjhxpkc1hgjo4ro.webp",
-  },
-  {
-    id: 10,
-    name: "Person 10 Name",
-    position: "Position",
-    avatar:
-      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1771253483/gfg-avatars/u0y8pxtqzxwdulfjuydr.webp",
-  },
-  {
-    id: 11,
-    name: "Person 11 Name",
-    position: "Position",
-    avatar:
-      "https://res.cloudinary.com/duwmby01d/image/upload/h_128,w_128,c_fill/v1781892760/gfg-avatars/esqurvehtciqhjnny4xn.jpg",
+      "https://res.cloudinary.com/duwmby01d/image/upload/v1786861927/IMG-20260815-WA0038_m2i8a2.jpg",
   },
 ];
+
+
 // --- Utility for fallback images ---
 const safeImage = (e) => {
   const target = e.target;
