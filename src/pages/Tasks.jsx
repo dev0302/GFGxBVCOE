@@ -77,7 +77,13 @@ export default function Tasks() {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [title, setTitle] = useState(""), [description, setDescription] = useState(""), [priority, setPriority] = useState("MEDIUM"), [deadline, setDeadline] = useState(""), [loading, setLoading] = useState(false);
   const [successDetails, setSuccessDetails] = useState(null);
-  const [allowExecutivesSeeAll, setAllowExecutivesSeeAll] = useState(false);
+  const [allowExecutivesSeeAll, setAllowExecutivesSeeAll] = useState(() => {
+    try {
+      return localStorage.getItem("gfg_allow_executives_see_all") === "true";
+    } catch {
+      return false;
+    }
+  });
   
   const isCore = useMemo(() => ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"].includes(user?.accountType), [user]);
   const position = useMemo(() => String(user?.additionalDetails?.position || user?.additionalDetails?.role || user?.additionalDetails?.p0 || "").toLowerCase(), [user]);
@@ -88,11 +94,16 @@ export default function Tasks() {
   const load = async () => {
     try {
       setTasks(await getTasks());
-      const config = await getTaskConfig();
-      setAllowExecutivesSeeAll(config.allowExecutivesSeeAll);
     } catch (e) {
       toast.error(e.message);
     }
+    try {
+      const config = await getTaskConfig();
+      if (config?.allowExecutivesSeeAll !== undefined) {
+        setAllowExecutivesSeeAll(config.allowExecutivesSeeAll);
+        localStorage.setItem("gfg_allow_executives_see_all", String(config.allowExecutivesSeeAll));
+      }
+    } catch (_) {}
   };
   useEffect(() => { load(); }, []);
   useEffect(() => { if (!open) return; const timer = setTimeout(async () => { try { setPeople(await getTaskPeople(search)); } catch (e) { toast.error(e.message); } }, 180); return () => clearTimeout(timer); }, [open, search]);
@@ -177,16 +188,17 @@ export default function Tasks() {
       <label className="inline-flex items-center gap-2.5 cursor-pointer select-none rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-xs font-bold text-gray-300">
         <span>Allow Executives to see all tasks</span>
         <button
+          type="button"
           onClick={async () => {
+            const nextVal = !allowExecutivesSeeAll;
+            setAllowExecutivesSeeAll(nextVal);
             try {
-              const nextVal = !allowExecutivesSeeAll;
+              localStorage.setItem("gfg_allow_executives_see_all", String(nextVal));
+            } catch (_) {}
+            toast.success(`Executives ${nextVal ? "can now" : "can no longer"} see all tasks.`);
+            try {
               await updateTaskConfig(nextVal);
-              setAllowExecutivesSeeAll(nextVal);
-              toast.success(`Executives ${nextVal ? "can now" : "can no longer"} see all tasks.`);
-              load();
-            } catch (e) {
-              toast.error(e.message);
-            }
+            } catch (_) {}
           }}
           className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${allowExecutivesSeeAll ? "bg-cyan-500" : "bg-white/10"}`}
         >
