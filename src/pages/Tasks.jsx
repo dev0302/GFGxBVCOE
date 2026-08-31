@@ -120,9 +120,8 @@ export default function Tasks() {
     if (user?._id) {
       if (filterTab === "to-me") {
         list = list.filter((t) => String(t.assignedTo?.id || "") === String(user._id));
-      } else if (filterTab === "by-me") {
-        list = list.filter((t) => String(t.assignedBy?.id || "") === String(user._id));
       }
+      // "dept-tasks" tab shows all tasks retrieved from the backend API
     }
     return list.sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt));
   }, [tasks, filterTab, user]);
@@ -141,7 +140,7 @@ export default function Tasks() {
       <div className="flex gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5">
         <button onClick={() => setFilterTab("to-me")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "to-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned to me</button>
         {isPrivileged && (
-          <button onClick={() => setFilterTab("by-me")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "by-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned by me</button>
+          <button onClick={() => setFilterTab("dept-tasks")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "dept-tasks" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>{isCore ? "All Tasks" : "Department Tasks"}</button>
         )}
       </div>
     {isPrivileged && (
