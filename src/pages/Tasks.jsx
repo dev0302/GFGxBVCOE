@@ -119,9 +119,9 @@ export default function Tasks() {
     let list = [...tasks];
     if (user?._id) {
       if (filterTab === "to-me") {
-        list = list.filter((t) => String(t.assignedTo.id) === String(user._id));
+        list = list.filter((t) => String(t.assignedTo?.id || "") === String(user._id));
       } else if (filterTab === "by-me") {
-        list = list.filter((t) => String(t.assignedBy.id) === String(user._id));
+        list = list.filter((t) => String(t.assignedBy?.id || "") === String(user._id));
       }
     }
     return list.sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt));
@@ -162,25 +162,25 @@ export default function Tasks() {
         
         <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/[0.03] text-xs">
           <div className="flex items-center gap-1.5 min-w-0">
-            {task.assignedBy.image ? (
+            {task.assignedBy?.image ? (
               <img src={task.assignedBy.image} alt="" className="h-5 w-5 rounded-full object-cover border border-white/10" />
             ) : (
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[8px] font-bold text-gray-200">
-                {initials(task.assignedBy.name)}
+                {initials(task.assignedBy?.name || "")}
               </span>
             )}
-            <span className="font-semibold text-gray-300 truncate" title={task.assignedBy.name}>{task.assignedBy.name}</span>
+            <span className="font-semibold text-gray-300 truncate" title={task.assignedBy?.name || ""}>{task.assignedBy?.name || "Unknown"}</span>
           </div>
   
           <div className="flex items-center gap-1.5 min-w-0">
-            {task.assignedTo.image ? (
+            {task.assignedTo?.image ? (
               <img src={task.assignedTo.image} alt="" className="h-5 w-5 rounded-full object-cover border border-white/10" />
             ) : (
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[8px] font-bold text-gray-200">
-                {initials(task.assignedTo.name)}
+                {initials(task.assignedTo?.name || "")}
               </span>
             )}
-            <span className="font-semibold text-gray-300 truncate" title={task.assignedTo.name}>{task.assignedTo.name}</span>
+            <span className="font-semibold text-gray-300 truncate" title={task.assignedTo?.name || ""}>{task.assignedTo?.name || "Unknown"}</span>
           </div>
         </div>
         
@@ -190,7 +190,7 @@ export default function Tasks() {
               <CheckCircle size={14}/> Mark complete
             </button>
           )}
-          {isPrivileged && (String(task.assignedBy.id) === String(user?._id) || isCore) && (
+          {isPrivileged && (String(task.assignedBy?.id || "") === String(user?._id) || isCore) && (
             <button onClick={() => setConfirmDeleteId(task._id)} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-500/20 bg-rose-500/10 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/20">
               Delete task
             </button>
