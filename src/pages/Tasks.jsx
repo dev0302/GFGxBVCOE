@@ -196,7 +196,10 @@ export default function Tasks() {
                 {initials(task.assignedBy?.name || "")}
               </span>
             )}
-            <span className="font-semibold text-gray-300 truncate" title={task.assignedBy?.name || ""}>{task.assignedBy?.name || "Unknown"}</span>
+            <span className="font-semibold text-gray-300 truncate animate-fade-in" title={`${task.assignedBy?.name || "Unknown"}${task.assignedBy?.role ? ` (${task.assignedBy.role})` : ""}`}>
+              {task.assignedBy?.name || "Unknown"}
+              {task.assignedBy?.role && <span className="text-[10px] text-gray-400 font-normal ml-1">({task.assignedBy.role})</span>}
+            </span>
           </div>
   
           <div className="flex items-center gap-1.5 min-w-0">
@@ -208,7 +211,10 @@ export default function Tasks() {
                 {initials(task.assignedTo?.name || "")}
               </span>
             )}
-            <span className="font-semibold text-gray-300 truncate" title={task.assignedTo?.name || ""}>{task.assignedTo?.name || "Unknown"}</span>
+            <span className="font-semibold text-gray-300 truncate animate-fade-in" title={`${task.assignedTo?.name || "Unknown"}${task.assignedTo?.role ? ` (${task.assignedTo.role})` : ""}`}>
+              {task.assignedTo?.name || "Unknown"}
+              {task.assignedTo?.role && <span className="text-[10px] text-gray-400 font-normal ml-1">({task.assignedTo.role})</span>}
+            </span>
           </div>
         </div>
         
