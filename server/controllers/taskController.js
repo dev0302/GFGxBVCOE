@@ -251,9 +251,8 @@ exports.createTask = async (req, res) => {
 exports.getTasks = async (req, res) => {
   try {
     const person = await currentPerson(req.user); if (!person) return res.status(401).json({ success:false, message:"Account not found." });
-    const isCore = SOCIETY_ROLES.includes(text(req.user.accountType));
     const privileged = await canAssign(req);
-    const filter = isCore ? {} : privileged ? { department: person.department } : { "assignedTo.id": person.id };
+    const filter = privileged ? {} : { "assignedTo.id": person.id };
     if (text(req.query.status)) filter.status = text(req.query.status);
     const tasks = await Task.find(filter).sort({ createdAt: -1 }).lean();
     res.json({ success:true, tasks });
