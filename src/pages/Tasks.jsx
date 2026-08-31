@@ -88,7 +88,23 @@ export default function Tasks() {
   useEffect(() => { if (!open) return; const timer = setTimeout(async () => { try { setPeople(await getTaskPeople(search)); } catch (e) { toast.error(e.message); } }, 180); return () => clearTimeout(timer); }, [open, search]);
   const invalidDetails = !title.trim() || !description.trim();
   const reset = () => { setOpen(false); setStep(0); setSelected(null); setTitle(""); setDescription(""); setDeadline(""); };
-  const submit = async () => { setLoading(true); try { const data = await createTask({ title, description, priority, deadline: deadline || undefined, assignedToId: selected.id, assignedToDepartment: selected.department }); toast.success(data.message); reset(); load(); } catch (e) { toast.error(e.message); } finally { setLoading(false); } };
+  const submit = async () => {
+    setLoading(true);
+    try {
+      const data = await createTask({ title, description, priority, deadline: deadline || undefined, assignedToId: selected.id, assignedToDepartment: selected.department });
+      if (data.emailSent) {
+        toast.success("Task assigned successfully. Email notification sent to the respective person.");
+      } else {
+        toast.success(data.message || "Task assigned successfully.");
+      }
+      reset();
+      load();
+    } catch (e) {
+      toast.error(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   const handleDownloadExcel = async () => {
     try {
