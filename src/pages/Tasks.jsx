@@ -170,8 +170,9 @@ export default function Tasks() {
           </div>
         </div>
         
-        <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/[0.03] text-xs">
+        <div className="flex flex-col gap-2 pt-2 border-t border-white/[0.03] text-xs">
           <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-[10px] text-gray-500 font-medium shrink-0 w-20">Assigned by:</span>
             {task.assignedBy?.image ? (
               <img src={task.assignedBy.image} alt="" className="h-5 w-5 rounded-full object-cover border border-white/10" />
             ) : (
@@ -183,6 +184,7 @@ export default function Tasks() {
           </div>
   
           <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-[10px] text-gray-500 font-medium shrink-0 w-20">Assigned to:</span>
             {task.assignedTo?.image ? (
               <img src={task.assignedTo.image} alt="" className="h-5 w-5 rounded-full object-cover border border-white/10" />
             ) : (
