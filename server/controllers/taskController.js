@@ -3,6 +3,7 @@ const User = require("../models/User");
 const { getTeamMemberModel } = require("../models/TeamMember");
 const { TEAM_DEPARTMENTS, SOCIETY_ROLES, getDepartmentRankFromPosition } = require("../utils/leadershipPositions");
 const mailSender = require("../utils/mailSender");
+const { taskAssignedTemplate } = require("../mail/templates");
 const XLSX = require("xlsx");
 const ExcelFile = require("../models/ExcelFile");
 
@@ -230,7 +231,16 @@ exports.createTask = async (req, res) => {
     if (assignedTo.email) {
       emailSent = await triggerGithubEmailWorkflow(task, assignedTo, assignedBy);
       if (!emailSent) {
-        const result = await mailSender(assignedTo.email, "New Task Assigned — GFG BVCOE", `<h2>You are assigned to the task</h2><p><strong>Task:</strong> ${escapeHtml(title)}</p><p><strong>Description:</strong><br/>${escapeHtml(description).replace(/\n/g,"<br/>")}</p><p><strong>Assigned by:</strong> ${escapeHtml(assignedBy.name)}</p><p><strong>Department:</strong> ${escapeHtml(assignedTo.department)}</p><p><strong>Deadline:</strong> ${deadline ? deadline.toLocaleString() : "No deadline"}</p>`);
+        const deadlineStr = deadline ? new Date(deadline).toLocaleString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "No deadline";
+        const emailHtml = taskAssignedTemplate({
+          title,
+          description,
+          deadline: deadlineStr,
+          assignerName: assignedBy.name,
+          department: assignedTo.department,
+          websiteUrl: (process.env.FRONTEND_URL || "https://www.gfg-bvcoe.com").replace(/\/$/, "")
+        });
+        const result = await mailSender(assignedTo.email, "New Task Assigned — GFG BVCOE", emailHtml);
         emailSent = Boolean(result);
       }
     }
