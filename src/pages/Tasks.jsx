@@ -76,6 +76,7 @@ export default function Tasks() {
   const [step, setStep] = useState(0), [open, setOpen] = useState(false), [selected, setSelected] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [title, setTitle] = useState(""), [description, setDescription] = useState(""), [priority, setPriority] = useState("MEDIUM"), [deadline, setDeadline] = useState(""), [loading, setLoading] = useState(false);
+  const [successDetails, setSuccessDetails] = useState(null);
   
   const isCore = useMemo(() => ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"].includes(user?.accountType), [user]);
   const position = useMemo(() => String(user?.additionalDetails?.position || user?.additionalDetails?.role || user?.additionalDetails?.p0 || "").toLowerCase(), [user]);
@@ -87,17 +88,17 @@ export default function Tasks() {
   useEffect(() => { load(); }, []);
   useEffect(() => { if (!open) return; const timer = setTimeout(async () => { try { setPeople(await getTaskPeople(search)); } catch (e) { toast.error(e.message); } }, 180); return () => clearTimeout(timer); }, [open, search]);
   const invalidDetails = !title.trim() || !description.trim();
-  const reset = () => { setOpen(false); setStep(0); setSelected(null); setTitle(""); setDescription(""); setDeadline(""); };
+  const reset = () => { setOpen(false); setStep(0); setSelected(null); setTitle(""); setDescription(""); setDeadline(""); setSuccessDetails(null); };
   const submit = async () => {
     setLoading(true);
     try {
       const data = await createTask({ title, description, priority, deadline: deadline || undefined, assignedToId: selected.id, assignedToDepartment: selected.department });
-      if (data.emailSent) {
-        toast.success("Task assigned successfully. Email notification sent to the respective person.");
-      } else {
-        toast.success(data.message || "Task assigned successfully.");
-      }
-      reset();
+      setSuccessDetails({
+        name: selected.name,
+        email: selected.email,
+        emailSent: data.emailSent
+      });
+      setStep(3);
       load();
     } catch (e) {
       toast.error(e.message);
@@ -233,6 +234,121 @@ export default function Tasks() {
       </div>
     </article>
   );
-})}{!ordered.length && <div className="col-span-full rounded-2xl border border-dashed border-white/15 py-16 text-center text-gray-500"><Clipboard className="mx-auto mb-3"/>No tasks yet.</div>}</div></div>{open && <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"><div className="w-full max-w-2xl rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-[#1e1e2f] to-[#101925] p-6 shadow-2xl"><div className="mb-6 flex items-center justify-between"><div><p className="text-xs font-semibold text-cyan-300">STEP {step + 1} OF 3</p><h2 className="text-xl font-bold">{["Select person", "Task details", "Deadline & review"][step]}</h2></div><button onClick={reset} className="text-sm text-gray-400">Cancel</button></div><div className="mb-6 flex gap-2">{[0,1,2].map((n) => <span key={n} className={`h-1 flex-1 rounded ${n <= step ? "bg-cyan-400" : "bg-white/10"}`}/>)}</div>{step === 0 && <><label className="relative block"><Search className="absolute left-3 top-3 text-gray-500" size={17}/><input autoFocus value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search name, department, year, or role" className="w-full rounded-xl border border-white/10 bg-black/20 py-3 pl-10 pr-3 text-sm outline-none focus:border-cyan-400"/></label><div className="mt-3 max-h-72 space-y-2 overflow-y-auto">{people.map((p) => <button key={`${p.department}-${p.id}`} onClick={()=>setSelected(p)} className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left ${selected?.id === p.id ? "border-cyan-400 bg-cyan-500/10" : "border-white/10 hover:bg-white/5"}`}>{p.image ? <img src={p.image} alt="" className="h-10 w-10 rounded-full object-cover"/> : <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 text-xs font-bold">{initials(p.name)}</span>}<span><b className="block text-sm">{p.name}</b><small className="text-gray-400">{[p.year, p.department, p.role].filter(Boolean).join(" • ")}</small></span></button>)}</div></>}{step === 1 && <div className="space-y-4"><label className="block text-sm">Task title<input value={title} onChange={e=>setTitle(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-black/20 p-3 outline-none focus:border-cyan-400"/></label><label className="block text-sm">Description<textarea rows="6" value={description} onChange={e=>setDescription(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-black/20 p-3 outline-none focus:border-cyan-400"/></label><label className="block text-sm">Priority<select value={priority} onChange={e=>setPriority(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-black/20 p-3"><option>LOW</option><option>MEDIUM</option><option>HIGH</option></select></label>{invalidDetails && <p className="text-xs text-rose-300">Title and description are required.</p>}</div>}{step === 2 && <div className="space-y-5"><label className="block text-sm">Deadline <span className="text-gray-500">(optional)</span><input type="datetime-local" value={deadline} onChange={e=>setDeadline(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-black/20 p-3"/></label><div className="rounded-xl bg-white/5 p-4 text-sm"><p>Assigned to: <b>{selected?.name}</b></p><p className="mt-2">Task: <b>{title}</b></p><p className="mt-2">Deadline: <b>{deadline ? new Date(deadline).toLocaleString() : "No deadline"}</b></p></div></div>}<div className="mt-7 flex justify-between"><button disabled={!step} onClick={()=>setStep(step-1)} className="text-sm text-gray-300 disabled:opacity-30">← Back</button>{step < 2 ? <button disabled={(step===0&&!selected)||(step===1&&invalidDetails)} onClick={()=>setStep(step+1)} className="rounded-xl bg-cyan-500 px-4 py-2 text-sm font-bold text-slate-950 disabled:opacity-40">Next →</button> : <button disabled={loading} onClick={submit} className="rounded-xl bg-cyan-500 px-4 py-2 text-sm font-bold text-slate-950 disabled:opacity-40">{loading ? "Assigning…" : "Assign task"}</button>}</div></div></div>}{confirmDeleteId && <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"><div className="w-full max-w-md rounded-2xl border border-rose-500/20 bg-gradient-to-br from-[#1e141a] to-[#100f13] p-6 shadow-2xl"><h3 className="text-lg font-bold text-rose-300">Confirm task deletion</h3><p className="mt-2 text-sm text-gray-400">Are you sure you want to delete this task? This action is permanent and cannot be undone.</p><div className="mt-6 flex justify-end gap-3"><button onClick={()=>setConfirmDeleteId(null)} className="rounded-xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-white/10">Cancel</button><button onClick={async()=>{try{await deleteTask(confirmDeleteId);toast.success("Task deleted successfully");setConfirmDeleteId(null);load();}catch(e){toast.error(e.message);}}} className="rounded-xl bg-rose-500 px-4 py-2.5 text-xs font-semibold text-slate-950 hover:bg-rose-400">Delete task</button></div></div></div>}</section>;
+})}{!ordered.length && <div className="col-span-full rounded-2xl border border-dashed border-white/15 py-16 text-center text-gray-500"><Clipboard className="mx-auto mb-3"/>No tasks yet.</div>}</div></div>{open && (
+  <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+    <div className="w-full max-w-2xl rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-[#1e1e2f] to-[#101925] p-6 shadow-2xl">
+      <div className="mb-6 flex items-center justify-between">
+        {step < 3 ? (
+          <div>
+            <p className="text-xs font-semibold text-cyan-300">STEP {step + 1} OF 3</p>
+            <h2 className="text-xl font-bold">{["Select person", "Task details", "Deadline & review"][step]}</h2>
+          </div>
+        ) : (
+          <div>
+            <p className="text-xs font-semibold text-emerald-400">ASSIGNMENT COMPLETE</p>
+            <h2 className="text-xl font-bold">Confirmation</h2>
+          </div>
+        )}
+        {step < 3 && (
+          <button onClick={reset} className="text-sm text-gray-400 hover:text-gray-200">Cancel</button>
+        )}
+      </div>
+      
+      {step < 3 && (
+        <div className="mb-6 flex gap-2">
+          {[0, 1, 2].map((n) => (
+            <span key={n} className={`h-1 flex-1 rounded ${n <= step ? "bg-cyan-400" : "bg-white/10"}`} />
+          ))}
+        </div>
+      )}
+      
+      {step === 0 && (
+        <>
+          <label className="relative block">
+            <Search className="absolute left-3 top-3 text-gray-500" size={17} />
+            <input autoFocus value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name, department, year, or role" className="w-full rounded-xl border border-white/10 bg-black/20 py-3 pl-10 pr-3 text-sm outline-none focus:border-cyan-400" />
+          </label>
+          <div className="mt-3 max-h-72 space-y-2 overflow-y-auto">
+            {people.map((p) => (
+              <button key={`${p.department}-${p.id}`} onClick={() => setSelected(p)} className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left ${selected?.id === p.id ? "border-cyan-400 bg-cyan-500/10" : "border-white/10 hover:bg-white/5"}`}>
+                {p.image ? (
+                  <img src={p.image} alt="" className="h-10 w-10 rounded-full object-cover" />
+                ) : (
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 text-xs font-bold">{initials(p.name)}</span>
+                )}
+                <span>
+                  <b className="block text-sm">{p.name}</b>
+                  <small className="text-gray-400">{[p.year, p.department, p.role].filter(Boolean).join(" • ")}</small>
+                </span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+      
+      {step === 1 && (
+        <div className="space-y-4">
+          <label className="block text-sm">Task title
+            <input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-black/20 p-3 outline-none focus:border-cyan-400" />
+          </label>
+          <label className="block text-sm">Description
+            <textarea rows="6" value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-black/20 p-3 outline-none focus:border-cyan-400" />
+          </label>
+          <label className="block text-sm">Priority
+            <select value={priority} onChange={(e) => setPriority(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-black/20 p-3">
+              <option>LOW</option>
+              <option>MEDIUM</option>
+              <option>HIGH</option>
+            </select>
+          </label>
+          {invalidDetails && <p className="text-xs text-rose-300">Title and description are required.</p>}
+        </div>
+      )}
+      
+      {step === 2 && (
+        <div className="space-y-5">
+          <label className="block text-sm">Deadline <span className="text-gray-500">(optional)</span>
+            <input type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-black/20 p-3" />
+          </label>
+          <div className="rounded-xl bg-white/5 p-4 text-sm">
+            <p>Assigned to: <b>{selected?.name}</b></p>
+            <p className="mt-2">Task: <b>{title}</b></p>
+            <p className="mt-2">Deadline: <b>{deadline ? new Date(deadline).toLocaleString() : "No deadline"}</b></p>
+          </div>
+        </div>
+      )}
+      
+      {step === 3 && (
+        <div className="flex flex-col items-center text-center py-8">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 mb-6 animate-pulse">
+            <CheckCircle size={36} />
+          </div>
+          <h3 className="text-xl font-bold text-gray-100">Task Assigned Successfully!</h3>
+          <p className="mt-3 text-sm text-gray-400 max-w-md leading-relaxed">
+            {successDetails?.emailSent ? (
+              <>An email notification was successfully sent to <strong className="text-cyan-300">{successDetails.name}</strong> (<span className="text-cyan-300/80">{successDetails.email}</span>).</>
+            ) : (
+              <>The task was assigned to <strong className="text-cyan-300">{successDetails.name}</strong>, but the email notification could not be dispatched.</>
+            )}
+          </p>
+          <button onClick={reset} className="mt-8 rounded-xl bg-cyan-500 px-6 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300 transition-colors shadow-lg shadow-cyan-500/10">
+            Done
+          </button>
+        </div>
+      )}
+      
+      {step < 3 && (
+        <div className="mt-7 flex justify-between">
+          <button disabled={!step} onClick={() => setStep(step - 1)} className="text-sm text-gray-300 disabled:opacity-30">← Back</button>
+          {step < 2 ? (
+            <button disabled={(step === 0 && !selected) || (step === 1 && invalidDetails)} onClick={() => setStep(step + 1)} className="rounded-xl bg-cyan-500 px-4 py-2 text-sm font-bold text-slate-950 disabled:opacity-40">Next →</button>
+          ) : (
+            <button disabled={loading} onClick={submit} className="rounded-xl bg-cyan-500 px-4 py-2 text-sm font-bold text-slate-950 disabled:opacity-40">{loading ? "Assigning…" : "Assign task"}</button>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+)}{confirmDeleteId && <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"><div className="w-full max-w-md rounded-2xl border border-rose-500/20 bg-gradient-to-br from-[#1e141a] to-[#100f13] p-6 shadow-2xl"><h3 className="text-lg font-bold text-rose-300">Confirm task deletion</h3><p className="mt-2 text-sm text-gray-400">Are you sure you want to delete this task? This action is permanent and cannot be undone.</p><div className="mt-6 flex justify-end gap-3"><button onClick={()=>setConfirmDeleteId(null)} className="rounded-xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-white/10">Cancel</button><button onClick={async()=>{try{await deleteTask(confirmDeleteId);toast.success("Task deleted successfully");setConfirmDeleteId(null);load();}catch(e){toast.error(e.message);}}} className="rounded-xl bg-rose-500 px-4 py-2.5 text-xs font-semibold text-slate-950 hover:bg-rose-400">Delete task</button></div></div></div>}</section>;
 }
 
