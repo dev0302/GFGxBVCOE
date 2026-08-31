@@ -792,3 +792,65 @@ exports.blogStatusUpdateTemplate = (data = {}) => {
   `;
   return wrapCard(inner);
 };
+
+/**
+ * Sent to an assignee when a new task is assigned to them.
+ * data: { title, description, deadline, assignerName, department, websiteUrl }
+ */
+exports.taskAssignedTemplate = (data = {}) => {
+  const {
+    title = "New Task",
+    description = "",
+    deadline = "",
+    assignerName = "A Lead/Head",
+    department = "",
+    websiteUrl = "https://www.gfg-bvcoe.com",
+  } = data;
+  
+  const safeDescription = escapeHtml(description).replace(/\r?\n/g, "<br/>");
+  const safeDeadline = deadline ? escapeHtml(deadline) : "No deadline";
+  
+  const inner = `
+    <div style="margin-bottom: 24px;">
+      <div style="display: inline-block; background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 100%); border-radius: 50%; width: 56px; height: 56px; line-height: 56px; font-size: 28px; margin-bottom: 16px; text-align: center;">
+        📋
+      </div>
+    </div>
+    <h1 style="${BASE_STYLES.title}">New Task Assigned</h1>
+    <p style="${BASE_STYLES.body}">
+      Hi, you have been assigned a new task by <strong style="color: #e5e7eb;">${escapeHtml(assignerName)}</strong>
+      for the <strong style="color: #e5e7eb;">${escapeHtml(department)}</strong> department.
+    </p>
+    
+    <div style="${BASE_STYLES.box}; text-align: left;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 10px 0;">Task details</p>
+      <p style="color: #e5e7eb; font-size: 16px; font-weight: bold; margin: 0 0 8px 0;">${escapeHtml(title)}</p>
+      
+      <p style="${BASE_STYLES.body}; margin: 12px 0; border-top: 1px solid #334155; padding-top: 12px; color: #cbd5e1; font-size: 13px; line-height: 1.6;">
+        ${safeDescription}
+      </p>
+      
+      <div style="border-top: 1px solid #334155; padding-top: 12px; margin-top: 12px;">
+        <p style="color: #94a3b8; font-size: 12px; margin: 0 0 4px 0;">
+          <span style="color: #64748b;">Deadline:</span> <strong style="color: #f87171;">${safeDeadline}</strong>
+        </p>
+        <p style="color: #94a3b8; font-size: 12px; margin: 0;">
+          <span style="color: #64748b;">Assigned by:</span> <strong style="color: #22d3ee;">${escapeHtml(assignerName)}</strong> (${escapeHtml(department)})
+        </p>
+      </div>
+    </div>
+    
+    <p style="${BASE_STYLES.body}">
+      Please log in to the GFGxBVCOE dashboard to view all details and mark the task as complete once finished.
+    </p>
+    
+    <div style="margin: 28px 0;">
+      <a href="${websiteUrl}/tasks" style="${BASE_STYLES.button}">View Task →</a>
+    </div>
+    
+    <p style="${BASE_STYLES.footer}">
+      This notification was sent by GFGxBVCOE.
+    </p>
+  `;
+  return wrapCard(inner);
+};
