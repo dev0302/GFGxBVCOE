@@ -204,6 +204,17 @@ async function triggerGithubEmailWorkflow(task, assignee, assignedBy) {
 
 exports.createTask = async (req, res) => {
   try {
+    if (req.body.action === "TOGGLE_CONFIG" || typeof req.body.allowExecutivesSeeAll === "boolean") {
+      const privileged = await canAssign(req);
+      if (!privileged) return res.status(403).json({ success: false, message: "Only Heads, Leads, and society core roles can modify settings." });
+      const config = await TaskConfig.findOneAndUpdate(
+        { configKey: TaskConfig.CONFIG_KEY },
+        { allowExecutivesSeeAll: Boolean(req.body.allowExecutivesSeeAll) },
+        { new: true, upsert: true }
+      );
+      return res.json({ success: true, allowExecutivesSeeAll: config.allowExecutivesSeeAll, message: "Settings updated successfully." });
+    }
+
     const assignedBy = await currentPerson(req.user);
     if (!assignedBy || getRankValue(assignedBy.role) < 40) return res.status(403).json({ success: false, message: "Only Heads, Leads, and society core roles can assign tasks." });
     
@@ -255,17 +266,15 @@ exports.getTasks = async (req, res) => {
     const privileged = await canAssign(req);
     
     let allowSeeAll = false;
-    if (!privileged) {
-      const config = await TaskConfig.findOne({ configKey: TaskConfig.CONFIG_KEY }).lean();
-      if (config) {
-        allowSeeAll = config.allowExecutivesSeeAll;
-      }
+    const config = await TaskConfig.findOne({ configKey: TaskConfig.CONFIG_KEY }).lean();
+    if (config) {
+      allowSeeAll = Boolean(config.allowExecutivesSeeAll);
     }
     
     const filter = (privileged || allowSeeAll) ? {} : { "assignedTo.id": person.id };
     if (text(req.query.status)) filter.status = text(req.query.status);
     const tasks = await Task.find(filter).sort({ createdAt: -1 }).lean();
-    res.json({ success:true, tasks });
+    res.json({ success: true, tasks, allowExecutivesSeeAll: Boolean(allowSeeAll) });
   } catch (error) { res.status(500).json({ success:false, message:"Unable to load tasks.", error:error.message }); }
 };
 
