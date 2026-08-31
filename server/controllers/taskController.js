@@ -6,6 +6,7 @@ const mailSender = require("../utils/mailSender");
 const { taskAssignedTemplate } = require("../mail/templates");
 const XLSX = require("xlsx");
 const ExcelFile = require("../models/ExcelFile");
+const TaskConfig = require("../models/TaskConfig");
 
 const text = (value) => String(value || "").trim();
 const escapeHtml = (value) => text(value).replace(/[&<>'"]/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" }[c]));
@@ -252,7 +253,16 @@ exports.getTasks = async (req, res) => {
   try {
     const person = await currentPerson(req.user); if (!person) return res.status(401).json({ success:false, message:"Account not found." });
     const privileged = await canAssign(req);
-    const filter = privileged ? {} : { "assignedTo.id": person.id };
+    
+    let allowSeeAll = false;
+    if (!privileged) {
+      const config = await TaskConfig.findOne({ configKey: TaskConfig.CONFIG_KEY }).lean();
+      if (config) {
+        allowSeeAll = config.allowExecutivesSeeAll;
+      }
+    }
+    
+    const filter = (privileged || allowSeeAll) ? {} : { "assignedTo.id": person.id };
     if (text(req.query.status)) filter.status = text(req.query.status);
     const tasks = await Task.find(filter).sort({ createdAt: -1 }).lean();
     res.json({ success:true, tasks });
@@ -312,5 +322,38 @@ exports.downloadExcel = async (req, res) => {
     res.send(excel.data);
   } catch (error) {
     res.status(500).json({ success: false, message: "Unable to download Excel record.", error: error.message });
+  }
+};
+
+exports.getTaskConfig = async (req, res) => {
+  try {
+    let config = await TaskConfig.findOne({ configKey: TaskConfig.CONFIG_KEY }).lean();
+    if (!config) {
+      config = await TaskConfig.create({ configKey: TaskConfig.CONFIG_KEY, allowExecutivesSeeAll: false });
+    }
+    res.json({ success: true, allowExecutivesSeeAll: config.allowExecutivesSeeAll });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Unable to retrieve task visibility config.", error: error.message });
+  }
+};
+
+exports.updateTaskConfig = async (req, res) => {
+  try {
+    const privileged = await canAssign(req);
+    if (!privileged) return res.status(403).json({ success: false, message: "Only Heads, Leads, and society core roles can modify settings." });
+    
+    const { allowExecutivesSeeAll } = req.body;
+    if (typeof allowExecutivesSeeAll !== "boolean") {
+      return res.status(400).json({ success: false, message: "allowExecutivesSeeAll must be a boolean." });
+    }
+    
+    const config = await TaskConfig.findOneAndUpdate(
+      { configKey: TaskConfig.CONFIG_KEY },
+      { allowExecutivesSeeAll },
+      { new: true, upsert: true }
+    );
+    res.json({ success: true, allowExecutivesSeeAll: config.allowExecutivesSeeAll, message: "Settings updated successfully." });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Unable to update task visibility config.", error: error.message });
   }
 };

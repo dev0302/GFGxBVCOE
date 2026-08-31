@@ -50,6 +50,24 @@ export async function deleteTask(id) {
   return data;
 }
 
+export async function getTaskConfig() {
+  const res = await authFetch("/api/v1/tasks/config");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to load config");
+  return data;
+}
+
+export async function updateTaskConfig(allowExecutivesSeeAll) {
+  const res = await authFetch("/api/v1/tasks/config", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ allowExecutivesSeeAll })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to update config");
+  return data;
+}
+
 /** Store token after login/signup so requests can use Authorization header. */
 export function setAuthToken(token) {
   try {
