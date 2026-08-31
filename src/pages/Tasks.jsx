@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle, Clipboard, Download, Search, UserPlus } from "react-feather";
-import { completeTask, createTask, getTaskPeople, getTasks, deleteTask, getAuthToken } from "../services/api";
+import { completeTask, createTask, getTaskPeople, getTasks, deleteTask, getAuthToken, getTaskConfig, updateTaskConfig } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 const initials = (name = "") => name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
@@ -77,6 +77,7 @@ export default function Tasks() {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [title, setTitle] = useState(""), [description, setDescription] = useState(""), [priority, setPriority] = useState("MEDIUM"), [deadline, setDeadline] = useState(""), [loading, setLoading] = useState(false);
   const [successDetails, setSuccessDetails] = useState(null);
+  const [allowExecutivesSeeAll, setAllowExecutivesSeeAll] = useState(false);
   
   const isCore = useMemo(() => ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"].includes(user?.accountType), [user]);
   const position = useMemo(() => String(user?.additionalDetails?.position || user?.additionalDetails?.role || user?.additionalDetails?.p0 || "").toLowerCase(), [user]);
@@ -84,7 +85,15 @@ export default function Tasks() {
   const isPrivileged = isCore || isLeadOrHead;
 
   const canAssign = people.length > 0 || open;
-  const load = async () => { try { setTasks(await getTasks()); } catch (e) { toast.error(e.message); } };
+  const load = async () => {
+    try {
+      setTasks(await getTasks());
+      const config = await getTaskConfig();
+      setAllowExecutivesSeeAll(config.allowExecutivesSeeAll);
+    } catch (e) {
+      toast.error(e.message);
+    }
+  };
   useEffect(() => { load(); }, []);
   useEffect(() => { if (!open) return; const timer = setTimeout(async () => { try { setPeople(await getTaskPeople(search)); } catch (e) { toast.error(e.message); } }, 180); return () => clearTimeout(timer); }, [open, search]);
   const invalidDetails = !title.trim() || !description.trim();
@@ -160,8 +169,31 @@ export default function Tasks() {
         {isPrivileged && (
           <button onClick={() => setFilterTab("by-me")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "by-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned by me</button>
         )}
+        {(isPrivileged || allowExecutivesSeeAll) && (
+          <button onClick={() => setFilterTab("all-tasks")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "all-tasks" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>All Tasks</button>
+        )}
       </div>
     {isPrivileged && (
+      <label className="inline-flex items-center gap-2.5 cursor-pointer select-none rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-xs font-bold text-gray-300">
+        <span>Allow Executives to see all tasks</span>
+        <button
+          onClick={async () => {
+            try {
+              const nextVal = !allowExecutivesSeeAll;
+              await updateTaskConfig(nextVal);
+              setAllowExecutivesSeeAll(nextVal);
+              toast.success(`Executives ${nextVal ? "can now" : "can no longer"} see all tasks.`);
+              load();
+            } catch (e) {
+              toast.error(e.message);
+            }
+          }}
+          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${allowExecutivesSeeAll ? "bg-cyan-500" : "bg-white/10"}`}
+        >
+          <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-slate-950 shadow ring-0 transition duration-200 ease-in-out ${allowExecutivesSeeAll ? "translate-x-4" : "translate-x-0"}`} />
+        </button>
+      </label>
+    )}{isPrivileged && (
       <button onClick={handleDownloadExcel} className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-2.5 text-sm font-bold text-cyan-400 hover:bg-cyan-500/10"><Download size={16}/> Download Report</button>
     )}{isPrivileged && (
       <button onClick={() => { setOpen(true); setSearch(""); }} className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300"><UserPlus size={16}/> Assign task</button>
