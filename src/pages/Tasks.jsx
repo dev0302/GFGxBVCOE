@@ -93,17 +93,18 @@ export default function Tasks() {
   const canAssign = people.length > 0 || open;
   const load = async () => {
     try {
-      setTasks(await getTasks());
+      const res = await getTasks();
+      const taskList = Array.isArray(res) ? res : res.tasks || [];
+      setTasks(taskList);
+      if (res.allowExecutivesSeeAll !== undefined) {
+        setAllowExecutivesSeeAll(res.allowExecutivesSeeAll);
+        try {
+          localStorage.setItem("gfg_allow_executives_see_all", String(res.allowExecutivesSeeAll));
+        } catch (_) {}
+      }
     } catch (e) {
       toast.error(e.message);
     }
-    try {
-      const config = await getTaskConfig();
-      if (config?.allowExecutivesSeeAll !== undefined) {
-        setAllowExecutivesSeeAll(config.allowExecutivesSeeAll);
-        localStorage.setItem("gfg_allow_executives_see_all", String(config.allowExecutivesSeeAll));
-      }
-    } catch (_) {}
   };
   useEffect(() => { load(); }, []);
   useEffect(() => { if (!open) return; const timer = setTimeout(async () => { try { setPeople(await getTaskPeople(search)); } catch (e) { toast.error(e.message); } }, 180); return () => clearTimeout(timer); }, [open, search]);
@@ -198,6 +199,7 @@ export default function Tasks() {
             toast.success(`Executives ${nextVal ? "can now" : "can no longer"} see all tasks.`);
             try {
               await updateTaskConfig(nextVal);
+              load();
             } catch (_) {}
           }}
           className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${allowExecutivesSeeAll ? "bg-cyan-500" : "bg-white/10"}`}

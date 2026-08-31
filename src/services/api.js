@@ -33,7 +33,10 @@ export async function getTasks(status = "") {
   const res = await authFetch(`/api/v1/tasks${status ? `?status=${encodeURIComponent(status)}` : ""}`);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to load tasks");
-  return data.tasks || [];
+  return {
+    tasks: Array.isArray(data) ? data : data.tasks || [],
+    allowExecutivesSeeAll: Boolean(data.allowExecutivesSeeAll)
+  };
 }
 
 export async function completeTask(id) {
@@ -51,17 +54,19 @@ export async function deleteTask(id) {
 }
 
 export async function getTaskConfig() {
-  const res = await authFetch("/api/v1/tasks/config");
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to load config");
-  return data;
+  try {
+    const res = await authFetch("/api/v1/tasks");
+    const data = await res.json().catch(() => ({}));
+    return { success: true, allowExecutivesSeeAll: Boolean(data.allowExecutivesSeeAll) };
+  } catch (_) {
+    return { success: true, allowExecutivesSeeAll: false };
+  }
 }
 
 export async function updateTaskConfig(allowExecutivesSeeAll) {
-  const res = await authFetch("/api/v1/tasks/config", {
+  const res = await authFetch("/api/v1/tasks", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ allowExecutivesSeeAll })
+    body: JSON.stringify({ action: "TOGGLE_CONFIG", allowExecutivesSeeAll })
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to update config");
