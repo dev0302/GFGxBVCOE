@@ -6,7 +6,9 @@ import {
   getPublicPosts,
   getPendingPosts,
   getBlogOgMeta,
+  getBlogContributors,
 } from "../../services/blog_api";
+import { cloudinaryOriginalUrl, cloudinaryProfileAvatarUrl } from "../../utils/cloudinary";
 import { setPageMeta, resetPageMeta } from "../../utils/pageMeta";
 import { useAuth } from "../../context/AuthContext";
 import { NativeTypewriter } from "../../components/ui/native-typewriter";
@@ -51,6 +53,7 @@ const BlogSite = () => {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingCount, setPendingCount] = useState(0);
+  const [contributors, setContributors] = useState([]);
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -64,6 +67,12 @@ const BlogSite = () => {
       }
     };
     loadPosts();
+  }, []);
+
+  useEffect(() => {
+    getBlogContributors()
+      .then((data) => setContributors(Array.isArray(data.contributors) ? data.contributors : []))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -392,11 +401,39 @@ const BlogSite = () => {
               <p className="mt-1 font-montserrat text-xs" style={{ color: "rgba(127,168,143,0.6)" }}>Try a different search term or category.</p>
             </div>
           )}
+
+          {contributors.length > 0 && <BlogContributors contributors={contributors} />}
         </div>
       </div>
     </div>
   );
 };
+
+const BlogContributors = ({ contributors }) => (
+  <footer className="mt-20 border-t pt-12 text-center" style={{ borderColor: "rgba(74,222,128,0.16)" }}>
+    <p className="font-montserrat text-[10px] font-bold uppercase tracking-[0.26em]" style={{ color: tokens.accent }}>GFG × BVCOE</p>
+    <h2 className="mt-3 font-audiowide text-2xl sm:text-3xl" style={{ color: "#e4ede7" }}>Blog site contributors</h2>
+    <p className="mx-auto mt-3 max-w-xl font-montserrat text-sm" style={{ color: tokens.textMuted }}>Built with care by the people behind this journal.</p>
+    <div className="mx-auto mt-9 grid max-w-5xl grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
+      {contributors.map((contributor) => {
+        const image = contributor.image?.includes("cloudinary.com")
+          ? cloudinaryProfileAvatarUrl(cloudinaryOriginalUrl(contributor.image))
+          : contributor.image;
+        return (
+          <div key={contributor.id} className="flex flex-col items-center">
+            {image ? (
+              <img src={image} alt={contributor.name} className="h-20 w-20 rounded-full border-2 object-cover sm:h-24 sm:w-24" style={{ borderColor: "rgba(74,222,128,0.35)", boxShadow: "0 0 22px rgba(34,197,94,0.14)" }} />
+            ) : (
+              <span className="flex h-20 w-20 items-center justify-center rounded-full border-2 font-montserrat text-xl font-bold sm:h-24 sm:w-24" style={{ borderColor: "rgba(74,222,128,0.35)", color: tokens.accent, background: "rgba(22,163,74,0.12)" }}>{contributor.name.charAt(0)}</span>
+            )}
+            <p className="mt-3 text-sm font-bold" style={{ color: "#d8f3e2" }}>{contributor.name}</p>
+            <p className="mt-1 text-xs leading-5" style={{ color: tokens.textMuted }}>{contributor.role}</p>
+          </div>
+        );
+      })}
+    </div>
+  </footer>
+);
 
 /* ═══════════════════════════════════════════════════
    BLOG CARD

@@ -1349,6 +1349,34 @@ async function searchTeamMembersInDepartments(departments, q) {
   return combined.slice(0, 20);
 }
 
+// Team-member records are department-scoped, while social links live in the
+// registered user's Profile document. Attach them for the search detail modal.
+async function attachTeamMemberSocials(teamMembers) {
+  const emails = [...new Set(teamMembers
+    .map((member) => member.email?.trim().toLowerCase())
+    .filter(Boolean))];
+  if (!emails.length) return teamMembers;
+
+  const users = await User.find({ email: { $in: emails }, tenureEndedAt: null })
+    .select("email additionalDetails")
+    .populate("additionalDetails", "socials")
+    .lean();
+  const socialsByEmail = new Map(
+    users.map((user) => [user.email?.trim().toLowerCase(), user.additionalDetails?.socials || {}]),
+  );
+
+  return teamMembers.map((member) => {
+    const recordSocials = member.profile?.socials || {};
+    const hasRecordSocials = Object.values(recordSocials).some(Boolean);
+    return {
+      ...member,
+      socials: hasRecordSocials
+        ? recordSocials
+        : socialsByEmail.get(member.email?.trim().toLowerCase()) || {},
+    };
+  });
+}
+
 /**
  * Search people: team members (department-scoped) + users (with profile and predefinedProfile).
  * GET /api/v1/auth/search-people?q=...&department=...
@@ -1364,6 +1392,7 @@ exports.searchPeople = async (req, res) => {
     const searchDepartments = resolveSearchDepartments(req);
     if (searchDepartments.length) {
       teamMembers = await searchTeamMembersInDepartments(searchDepartments, q);
+      teamMembers = await attachTeamMemberSocials(teamMembers);
     }
 
     if (q.length >= 2) {
