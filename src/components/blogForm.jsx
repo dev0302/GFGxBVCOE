@@ -18,7 +18,7 @@ const initialForm = {
 
 const BlogForm = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const fileInputRef = useRef(null);
   const [form, setForm] = useState(initialForm);
   const [coverImage, setCoverImage] = useState(null);
@@ -181,32 +181,6 @@ const BlogForm = () => {
     }
   };
 
-  if (authLoading) {
-    return <div className="min-h-screen bg-[#090d10]" />;
-  }
-
-  if (!user) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#090d10] px-4 py-24 text-richblack-5">
-        <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#11171b] p-8 text-center shadow-2xl shadow-black/40 sm:p-12">
-          <p className="mb-2 font-montserrat text-xs font-bold uppercase tracking-[0.25em] text-cyan-300">
-            Writer access
-          </p>
-          <h1 className="font-audiowide text-3xl">Sign in to write</h1>
-          <p className="mt-4 text-richblack-200">
-            Join the GFG-BVCOE community to share your story.
-          </p>
-          <button
-            onClick={() => navigate("/login")}
-            className="mt-8 w-full rounded-xl bg-cyan-400 px-6 py-3 font-montserrat font-bold text-[#071013] transition hover:bg-cyan-300 sm:w-auto"
-          >
-            Go to login
-          </button>
-        </div>
-      </main>
-    );
-  }
-
   return (
     <main className="min-h-screen bg-[#090d10] px-4 pb-20 pt-24 text-richblack-5 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-6xl">
@@ -349,7 +323,7 @@ const BlogForm = () => {
                         {cat}
                       </option>
                     ))}
-                    <option value="__custom__">＋ Add custom…</option>
+                    {user && <option value="__custom__">＋ Add custom…</option>}
                   </select>
 
                   {showCustomInput && (

@@ -7,9 +7,62 @@ import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
-import { useEffect, useCallback } from "react";
+import { Node, mergeAttributes } from "@tiptap/core";
+import { useEffect, useCallback, useRef, useState } from "react";
+import { ImagePlus, Loader2, Trash2 } from "lucide-react";
+import { uploadBlogInlineImage } from "../../services/blog_api";
 
 const lowlight = createLowlight(common);
+
+const BlogImage = Node.create({
+  name: "blogImage",
+  group: "block",
+  atom: true,
+  selectable: true,
+  addAttributes() {
+    return {
+      src: { default: null },
+      alt: { default: "" },
+      crop: { default: "original" },
+      rounded: { default: true },
+    };
+  },
+  addCommands() {
+    return {
+      setBlogImage:
+        (attributes) =>
+        ({ commands }) =>
+          commands.insertContent({ type: this.name, attrs: attributes }),
+    };
+  },
+  parseHTML() {
+    return [{
+      tag: "figure[data-blog-image]",
+      getAttrs: (element) => {
+        const image = element.querySelector("img");
+        return {
+          src: image?.getAttribute("src"),
+          alt: image?.getAttribute("alt") || "",
+          crop: element.getAttribute("data-crop") || "original",
+          rounded: element.getAttribute("data-rounded") !== "false",
+        };
+      },
+    }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    const { src, alt, crop, rounded } = HTMLAttributes;
+    return [
+      "figure",
+      mergeAttributes({
+        "data-blog-image": "true",
+        "data-crop": crop,
+        "data-rounded": String(rounded),
+        class: `blog-image blog-image--${crop}${rounded ? " is-rounded" : ""}`,
+      }),
+      ["img", { src, alt: alt || "Blog image" }],
+    ];
+  },
+});
 
 // ── Toolbar button helper ─────────────────────────────────────────────────────
 const ToolBtn = ({ onClick, active, title, children, disabled = false }) => (
@@ -35,6 +88,8 @@ const Divider = () => (
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function RichTextEditor({ value, onChange, placeholder = "Start writing here…" }) {
+  const imageInputRef = useRef(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -47,6 +102,7 @@ export default function RichTextEditor({ value, onChange, placeholder = "Start w
       Link.configure({ openOnClick: false, autolink: true }),
       Placeholder.configure({ placeholder }),
       CodeBlockLowlight.configure({ lowlight }),
+      BlogImage,
     ],
     content: value || "",
     onUpdate: ({ editor }) => {
@@ -78,6 +134,38 @@ export default function RichTextEditor({ value, onChange, placeholder = "Start w
       editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
     }
   }, [editor]);
+
+  const uploadImage = useCallback(async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !editor) return;
+    if (!file.type.startsWith("image/")) {
+      window.alert("Please choose an image file.");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      window.alert("Inline images must be smaller than 8 MB.");
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const response = await uploadBlogInlineImage(file);
+      editor.chain().focus().setBlogImage({
+        src: response.image.url,
+        alt: response.image.alt || "",
+        crop: "original",
+        rounded: true,
+      }).run();
+    } catch (error) {
+      window.alert(error.message || "Could not upload the image.");
+    } finally {
+      setUploadingImage(false);
+    }
+  }, [editor]);
+
+  const imageAttrs = editor?.getAttributes("blogImage") || {};
+  const imageSelected = editor?.isActive("blogImage");
 
   if (!editor) return null;
 
@@ -145,6 +233,9 @@ export default function RichTextEditor({ value, onChange, placeholder = "Start w
         <ToolBtn title="Link" active={editor.isActive("link")} onClick={setLink}>
           <span style={{ fontSize: "13px" }}>🔗</span>
         </ToolBtn>
+        <ToolBtn title="Insert image" active={false} disabled={uploadingImage} onClick={() => imageInputRef.current?.click()}>
+          {uploadingImage ? <Loader2 className="animate-spin" size={15} /> : <ImagePlus size={16} />}
+        </ToolBtn>
         <ToolBtn title="Horizontal rule" active={false} onClick={() => editor.chain().focus().setHorizontalRule().run()}>
           <span style={{ fontSize: "13px" }}>—</span>
         </ToolBtn>
@@ -160,6 +251,31 @@ export default function RichTextEditor({ value, onChange, placeholder = "Start w
           <span style={{ fontSize: "13px", textDecoration: "line-through" }}>T</span>
         </ToolBtn>
       </div>
+
+      <input ref={imageInputRef} type="file" accept="image/*" onChange={uploadImage} className="sr-only" />
+
+      {imageSelected && (
+        <div className="flex flex-wrap items-center gap-2 border-b px-3 py-2 text-xs" style={{ borderColor: "rgba(255,255,255,0.08)", background: "#0b1013" }}>
+          <span className="text-slate-400">Selected image</span>
+          <label className="flex items-center gap-2 text-slate-300">
+            Crop
+            <select
+              value={imageAttrs.crop || "original"}
+              onChange={(e) => editor.chain().focus().updateAttributes("blogImage", { crop: e.target.value }).run()}
+              className="rounded border border-white/15 bg-[#121a1f] px-2 py-1 text-slate-200 outline-none"
+            >
+              <option value="original">Original</option>
+              <option value="landscape">Landscape</option>
+              <option value="square">Square</option>
+              <option value="portrait">Portrait</option>
+            </select>
+          </label>
+          <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().updateAttributes("blogImage", { rounded: !imageAttrs.rounded }).run(); }} className="rounded border border-white/15 px-2 py-1 text-slate-200">
+            {imageAttrs.rounded ? "Rounded border: on" : "Rounded border: off"}
+          </button>
+          <button type="button" title="Remove image" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().deleteSelection().run(); }} className="ml-auto rounded border border-rose-300/30 p-1 text-rose-300"><Trash2 size={14} /></button>
+        </div>
+      )}
 
       {/* ── EDITOR AREA ── */}
       <EditorContent

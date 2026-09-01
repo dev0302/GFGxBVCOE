@@ -489,9 +489,9 @@ const BlogCard = ({ post, navigate }) => {
               className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
               style={{ background: "rgba(22,163,74,0.32)", border: `1px solid ${tokens.border}`, color: tokens.accent }}
             >
-              {getAuthorName(post.author).charAt(0)}
+              {getAuthorName(post.author, post.fullName).charAt(0)}
             </div>
-            <span className="truncate" style={{ color: "#6f9682" }}>{getAuthorName(post.author)}</span>
+            <span className="truncate" style={{ color: "#6f9682" }}>{getAuthorName(post.author, post.fullName)}</span>
           </div>
           <span className="shrink-0">{formatPublishedDate(post.createdAt)}</span>
         </div>
@@ -523,7 +523,8 @@ const BlogCard = ({ post, navigate }) => {
   );
 };
 
-const getAuthorName = (author) => {
+const getAuthorName = (author, submittedName = "") => {
+  if (submittedName.trim()) return submittedName.trim();
   if (!author) return "GFG-BVCOE";
   if (typeof author === "string") return author;
   return (`${author.firstName || ''} ${author.lastName || ''}`.trim() || 'GFG-BVCOE');

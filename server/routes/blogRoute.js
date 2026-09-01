@@ -14,12 +14,16 @@ const {
   addCategory,
   getBlogOgMeta,
   getBlogPostOgMeta,
+  uploadInlineImage,
 } = require("../controllers/blogController");
 
 const router = express.Router();
 
-// Author submits a new post (requires user authentication)
-router.post("/submit", auth, submitPost);
+// Anyone can submit a post; it remains pending until a reviewer approves it.
+router.post("/submit", submitPost);
+
+// Upload an image that is embedded within a blog post body.
+router.post("/inline-image", uploadInlineImage);
 
 // Leads/Heads can view a list of all posts pending approval
 router.get("/pending", auth, isLeadOrHead, getPendingPosts);

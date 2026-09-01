@@ -568,8 +568,8 @@ async function notifyBlogSubmission({ post, author }) {
   try {
     // Use the fullName the author typed in the blog form as the display name.
     // Fall back to the account's first+last name if fullName is blank.
-    const accountName = `${author.firstName} ${author.lastName}`.trim();
-    const displayName = (post.fullName && post.fullName.trim()) ? post.fullName.trim() : accountName;
+    const accountName = `${author?.firstName || ""} ${author?.lastName || ""}`.trim();
+    const displayName = (post.fullName && post.fullName.trim()) ? post.fullName.trim() : accountName || "Guest writer";
 
     const notificationTitle = "New Blog Submitted for Review";
     const notificationBody = `${displayName} submitted a blog for review: "${post.title}"`;
@@ -595,7 +595,7 @@ async function notifyBlogSubmission({ post, author }) {
             type: "blog_pending_approval",
             title: notificationTitle,
             body: notificationBody,
-            senderId: author._id.toString(),
+            senderId: author?._id?.toString() || "",
             senderName: displayName,
             senderRole: "author",
             metadata: {
@@ -653,41 +653,29 @@ async function notifyBlogStatusChange({
     const title = `Blog Post ${isApproved ? "Approved" : "Rejected"}`;
     const body = `Your blog post "${post.title}" has been ${statusText} by ${reviewer.firstName} ${reviewer.lastName}.${feedback ? ` Feedback: "${feedback}"` : ""}`;
 
-    // In-app notification for the author
-    const notification = await Notification.create({
-      recipientId: author._id,
-      type: `blog_${statusText}`,
-      title,
-      body,
-      senderId: reviewer._id.toString(),
-      senderName: `${reviewer.firstName} ${reviewer.lastName}`,
-      senderRole: reviewer.accountType || "reviewer",
-      metadata: {
-        postId: post._id.toString(),
-        title: post.title,
-        status: statusText,
-        feedback: feedback || "",
-      },
-    });
+    if (author) {
+      const notification = await Notification.create({
+        recipientId: author._id,
+        type: `blog_${statusText}`,
+        title,
+        body,
+        senderId: reviewer._id.toString(),
+        senderName: `${reviewer.firstName} ${reviewer.lastName}`,
+        senderRole: reviewer.accountType || "reviewer",
+        metadata: { postId: post._id.toString(), title: post.title, status: statusText, feedback: feedback || "" },
+      });
 
-    emitNotification(author._id, {
-      _id: notification._id,
-      type: notification.type,
-      title: notification.title,
-      body: notification.body,
-      metadata: notification.metadata,
-      senderId: notification.senderId,
-      senderName: notification.senderName,
-      senderRole: notification.senderRole,
-      readAt: notification.readAt,
-      createdAt: notification.createdAt,
-      replies: [],
-    });
+      emitNotification(author._id, {
+        _id: notification._id, type: notification.type, title: notification.title, body: notification.body,
+        metadata: notification.metadata, senderId: notification.senderId, senderName: notification.senderName,
+        senderRole: notification.senderRole, readAt: notification.readAt, createdAt: notification.createdAt, replies: [],
+      });
+    }
 
     // Send Brevo email — to the notifyEmail the author entered in the form
-    const recipientEmail = post.notifyEmail || author.email;
+    const recipientEmail = post.notifyEmail || author?.email;
     const reviewerName = `${reviewer.firstName} ${reviewer.lastName}`.trim();
-    const authorName = `${author.firstName} ${author.lastName}`.trim();
+    const authorName = post.fullName?.trim() || `${author?.firstName || ""} ${author?.lastName || ""}`.trim() || "Writer";
 
     const emailHtml = blogStatusUpdateTemplate({
       authorName,
@@ -697,7 +685,7 @@ async function notifyBlogStatusChange({
       reviewerName,
     });
 
-    await mailSender(recipientEmail, title, emailHtml);
+    if (recipientEmail) await mailSender(recipientEmail, title, emailHtml);
   } catch (error) {
     console.error("notifyBlogStatusChange error:", error);
   }
