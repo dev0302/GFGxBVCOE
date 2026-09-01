@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+
 import { Navigate, useNavigate, useLocation } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { useAuth } from "../context/AuthContext";
@@ -8,6 +9,8 @@ import { Trash2, X } from "react-feather";
 import { motion } from "framer-motion";
 import { cloudinaryProfileAvatarUrl } from "../utils/cloudinary";
 import ProfileAvatarFlip from "../components/common/ProfileAvatarFlip";
+import { useDispatch } from "react-redux";
+import { setProfile } from "@/redux/slices/profileSlice";
 
 const Profile = () => {
   const { user, setUser, logout } = useAuth();
@@ -101,6 +104,7 @@ const Profile = () => {
   }, [user, location.pathname]);
 
   // When /profile is opened from any route, perform a background freshness check with backend.
+ let dispatch = useDispatch();
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
@@ -111,6 +115,7 @@ const Profile = () => {
         const fresh = res.user || res;
         if (!user || JSON.stringify(fresh) !== JSON.stringify(user)) {
           setUser(fresh);
+          dispatch(setProfile(fresh.additionalDetails || {}));
         }
       } catch {
         // silent: we already have local/Redux data
