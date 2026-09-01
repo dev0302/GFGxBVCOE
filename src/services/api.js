@@ -53,6 +53,17 @@ export async function deleteTask(id) {
   return data;
 }
 
+export async function getTaskReportData() {
+  const res = await authFetch("/api/v1/tasks/report-data");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const fallbackRes = await authFetch("/api/v1/tasks");
+    const fallbackData = await fallbackRes.json().catch(() => ({}));
+    return Array.isArray(fallbackData) ? fallbackData : fallbackData.tasks || [];
+  }
+  return Array.isArray(data) ? data : data.tasks || [];
+}
+
 export async function getTaskConfig() {
   try {
     const res = await authFetch("/api/v1/tasks");

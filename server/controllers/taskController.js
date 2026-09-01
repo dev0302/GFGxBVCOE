@@ -31,14 +31,18 @@ async function syncTaskExcel() {
   try {
     const tasks = await Task.find({}).lean();
     const rows = tasks.map(task => {
-      const isCompleted = task.status === "COMPLETED";
+      const isDeleted = task.isDeleted || task.status === "DELETED";
+      const isCompleted = !isDeleted && task.status === "COMPLETED";
       const hasDeadline = !!task.deadline;
       const now = new Date();
       
       let computedStatus = task.status;
       let onTime = "N/A";
       
-      if (isCompleted) {
+      if (isDeleted) {
+        computedStatus = "Deleted";
+        onTime = "Deleted";
+      } else if (isCompleted) {
         const completedDate = new Date(task.completedAt || task.updatedAt);
         if (!hasDeadline || completedDate <= new Date(task.deadline)) {
           computedStatus = "Completed";
@@ -60,7 +64,7 @@ async function syncTaskExcel() {
       
       return {
         "Task ID": String(task._id),
-        "Title": task.title || "",
+        "Title": isDeleted ? `(Deleted) ${task.title || ""}` : (task.title || ""),
         "Description": task.description || "",
         "Priority": task.priority || "MEDIUM",
         "Department": task.department || "",
@@ -70,7 +74,7 @@ async function syncTaskExcel() {
         "Assigned To Email": task.assignedTo?.email || "",
         "Assigned Date": task.createdAt ? new Date(task.createdAt).toLocaleString("en-IN") : "",
         "Deadline": task.deadline ? new Date(task.deadline).toLocaleString("en-IN") : "No deadline",
-        "Completion Date": task.completedAt ? new Date(task.completedAt).toLocaleString("en-IN") : "Not completed",
+        "Completion Date": isDeleted ? (task.deletedAt ? `Deleted on ${new Date(task.deletedAt).toLocaleString("en-IN")}` : "Deleted") : (task.completedAt ? new Date(task.completedAt).toLocaleString("en-IN") : "Not completed"),
         "Status": computedStatus,
         "Completed On Time": onTime
       };
@@ -271,7 +275,7 @@ exports.getTasks = async (req, res) => {
       allowSeeAll = Boolean(config.allowExecutivesSeeAll);
     }
     
-    const filter = (privileged || allowSeeAll) ? {} : { "assignedTo.id": person.id };
+    const filter = (privileged || allowSeeAll) ? { isDeleted: { $ne: true } } : { "assignedTo.id": person.id, isDeleted: { $ne: true } };
     if (text(req.query.status)) filter.status = text(req.query.status);
     const tasks = await Task.find(filter).sort({ createdAt: -1 }).lean();
     res.json({ success: true, tasks, allowExecutivesSeeAll: Boolean(allowSeeAll) });
@@ -306,11 +310,30 @@ exports.deleteTask = async (req, res) => {
       return res.status(403).json({ success: false, message: "You can only delete tasks that you have assigned." });
     }
     
-    await Task.findByIdAndDelete(req.params.id);
+    task.isDeleted = true;
+    task.status = "DELETED";
+    task.deletedAt = new Date();
+    task.deletedBy = person;
+    task.history.push({ action: "DELETED", by: person, at: new Date() });
+    await task.save();
+    
     await syncTaskExcel();
     res.json({ success: true, message: "Task deleted successfully." });
   } catch (error) {
     res.status(500).json({ success: false, message: "Unable to delete task.", error: error.message });
+  }
+};
+
+exports.getTaskReportData = async (req, res) => {
+  try {
+    const person = await currentPerson(req.user);
+    if (!person || getRankValue(person.role) < 40) {
+      return res.status(403).json({ success: false, message: "Only Leads, Heads, and Core roles can access this report." });
+    }
+    const tasks = await Task.find({}).sort({ createdAt: -1 }).lean();
+    res.json({ success: true, tasks });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Unable to retrieve report data.", error: error.message });
   }
 };
 

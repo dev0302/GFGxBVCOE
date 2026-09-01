@@ -1,11 +1,12 @@
 const express = require("express");
 const { auth } = require("../middlewares/AuthZ");
-const { getEligiblePeople, createTask, getTasks, completeTask, deleteTask, downloadExcel, getTaskConfig, updateTaskConfig } = require("../controllers/taskController");
+const { getEligiblePeople, createTask, getTasks, completeTask, deleteTask, downloadExcel, getTaskConfig, updateTaskConfig, getTaskReportData } = require("../controllers/taskController");
 const router = express.Router();
 router.use(auth);
 router.get("/config", getTaskConfig);
 router.post("/config", updateTaskConfig);
 router.get("/eligible-people", getEligiblePeople);
+router.get("/report-data", getTaskReportData);
 router.get("/", getTasks);
 router.get("/download-excel", downloadExcel);
 router.post("/", createTask);

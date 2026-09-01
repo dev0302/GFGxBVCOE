@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle, Clipboard, Download, Search, UserPlus } from "react-feather";
-import { completeTask, createTask, getTaskPeople, getTasks, deleteTask, getAuthToken, getTaskConfig, updateTaskConfig } from "../services/api";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { completeTask, createTask, getTaskPeople, getTasks, deleteTask, getAuthToken, getTaskConfig, updateTaskConfig, getTaskReportData } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 const initials = (name = "") => name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
@@ -128,28 +130,156 @@ export default function Tasks() {
     }
   };
   
-  const handleDownloadExcel = async () => {
+  const handleDownloadPDF = async () => {
+    let toastId;
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ""}/api/v1/tasks/download-excel`, {
-        headers: {
-          Authorization: `Bearer ${getAuthToken() || ""}`
+      toastId = toast.loading("Generating PDF table report...");
+      const allTasks = await getTaskReportData();
+      
+      const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "pt",
+        format: "a4"
+      });
+
+      // Header Banner
+      doc.setFillColor(15, 23, 42); // Navy Dark
+      doc.rect(0, 0, 842, 60, "F");
+
+      doc.setTextColor(45, 212, 191); // Cyan #2dd4bf
+      doc.setFontSize(15);
+      doc.setFont("helvetica", "bold");
+      doc.text("GFG BVCOE — TASK DATABASE & ASSIGNMENT RECORDS", 36, 34);
+
+      doc.setTextColor(148, 163, 184); // Slate #94a3b8
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      const generatedDate = new Date().toLocaleString("en-IN", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      });
+      doc.text(`Generated on: ${generatedDate}   |   Total Task Records: ${allTasks.length}`, 36, 48);
+
+      const tableRows = allTasks.map((task, idx) => {
+        const isDeleted = Boolean(task.isDeleted || task.status === "DELETED");
+        const isCompleted = !isDeleted && task.status === "COMPLETED";
+        const hasDeadline = Boolean(task.deadline);
+        const now = new Date();
+
+        let statusText = task.status;
+        let onTime = "N/A";
+
+        if (isDeleted) {
+          statusText = "Deleted";
+          onTime = "Deleted";
+        } else if (isCompleted) {
+          const completedDate = new Date(task.completedAt || task.updatedAt);
+          if (!hasDeadline || completedDate <= new Date(task.deadline)) {
+            statusText = "Completed";
+            onTime = "Yes";
+          } else {
+            statusText = "Completed Late";
+            onTime = "No";
+          }
+        } else {
+          const deadlineDate = hasDeadline ? new Date(task.deadline) : null;
+          if (hasDeadline && now > deadlineDate) {
+            statusText = "Overdue";
+            onTime = "Deadline Missed";
+          } else {
+            statusText = "Ongoing";
+            onTime = "Ongoing";
+          }
+        }
+
+        const titleText = isDeleted ? `(Deleted) ${task.title || ""}` : (task.title || "");
+        const assignedToText = task.assignedTo?.name ? `${task.assignedTo.name} (${task.assignedTo.role || task.department || ""})` : "—";
+        const assignedByText = task.assignedBy?.name ? `${task.assignedBy.name} (${task.assignedBy.role || ""})` : "—";
+        const assignedDateText = task.createdAt ? new Date(task.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+        const deadlineText = task.deadline ? new Date(task.deadline).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "No deadline";
+
+        return [
+          idx + 1,
+          titleText,
+          task.description || "—",
+          task.priority || "MEDIUM",
+          task.department || "General",
+          assignedToText,
+          assignedByText,
+          assignedDateText,
+          deadlineText,
+          statusText,
+          onTime
+        ];
+      });
+
+      autoTable(doc, {
+        startY: 72,
+        head: [["#", "Task Title", "Description", "Priority", "Dept", "Assigned To", "Assigned By", "Assigned", "Deadline", "Status", "On Time"]],
+        body: tableRows,
+        theme: "grid",
+        styles: {
+          fontSize: 7.5,
+          cellPadding: 4,
+          valign: "middle",
+          overflow: "linebreak"
+        },
+        headStyles: {
+          fillColor: [30, 41, 59],
+          textColor: [255, 255, 255],
+          fontStyle: "bold",
+          halign: "left"
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252]
+        },
+        columnStyles: {
+          0: { cellWidth: 20, halign: "center" },
+          1: { cellWidth: 100, fontStyle: "bold" },
+          2: { cellWidth: 120 },
+          3: { cellWidth: 46, halign: "center" },
+          4: { cellWidth: 55 },
+          5: { cellWidth: 105 },
+          6: { cellWidth: 105 },
+          7: { cellWidth: 58, halign: "center" },
+          8: { cellWidth: 58, halign: "center" },
+          9: { cellWidth: 55, halign: "center" },
+          10: { cellWidth: 48, halign: "center" }
+        },
+        didParseCell: (data) => {
+          if (data.section === "body") {
+            const rawRow = allTasks[data.row.index];
+            const isDel = Boolean(rawRow?.isDeleted || rawRow?.status === "DELETED");
+            if (isDel) {
+              if (data.column.index === 1) {
+                data.cell.styles.textColor = [220, 38, 38];
+                data.cell.styles.fontStyle = "bold";
+              }
+              if (data.column.index === 9) {
+                data.cell.styles.textColor = [220, 38, 38];
+              }
+            } else if (rawRow?.status === "COMPLETED") {
+              if (data.column.index === 9) {
+                data.cell.styles.textColor = [16, 185, 129];
+              }
+            }
+          }
+        },
+        didDrawPage: (data) => {
+          const totalPages = doc.internal.getNumberOfPages();
+          const pageStr = `Page ${data.pageNumber} of ${totalPages}`;
+          doc.setFontSize(8);
+          doc.setTextColor(140);
+          doc.text(pageStr, 842 - 70, 580);
         }
       });
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.message || "Failed to download file");
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "Task_Assigining.xlsx";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      toast.success("Excel report downloaded successfully");
+
+      doc.save("Task_Database_Records.pdf");
+      if (toastId) toast.dismiss(toastId);
+      toast.success("Task database PDF report downloaded successfully!");
     } catch (e) {
-      toast.error(e.message || "Error downloading file");
+      if (toastId) toast.dismiss(toastId);
+      toast.error(e.message || "Failed to generate PDF report");
     }
   };
   
@@ -208,7 +338,7 @@ export default function Tasks() {
         </button>
       </label>
     )}{isPrivileged && (
-      <button onClick={handleDownloadExcel} className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-2.5 text-sm font-bold text-cyan-400 hover:bg-cyan-500/10"><Download size={16}/> Download Report</button>
+      <button onClick={handleDownloadPDF} className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-2.5 text-sm font-bold text-cyan-400 hover:bg-cyan-500/10"><Download size={16}/> Download PDF Report</button>
     )}{isPrivileged && (
       <button onClick={() => { setOpen(true); setSearch(""); }} className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300"><UserPlus size={16}/> Assign task</button>
     )}</div></div><div className="grid gap-3 md:grid-cols-3">{ordered.map((task) => {
