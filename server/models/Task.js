@@ -23,9 +23,12 @@ const taskSchema = new mongoose.Schema(
     assignedBy: { type: personSchema, required: true },
     department: { type: String, required: true, trim: true, index: true },
     deadline: { type: Date, default: null, index: true },
-    status: { type: String, enum: ["ONGOING", "COMPLETED"], default: "ONGOING", index: true },
+    status: { type: String, enum: ["ONGOING", "COMPLETED", "DELETED"], default: "ONGOING", index: true },
     completedAt: { type: Date, default: null },
     completedBy: { type: personSchema, default: null },
+    isDeleted: { type: Boolean, default: false, index: true },
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: personSchema, default: null },
     history: [{ action: { type: String, required: true }, at: { type: Date, default: Date.now }, by: personSchema }],
   },
   { timestamps: true }
