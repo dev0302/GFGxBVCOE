@@ -48,6 +48,31 @@ const normalizeTags = (tags) => {
   }
 };
 
+/** Upload a body image before it is inserted into the rich-text document. */
+exports.uploadInlineImage = async (req, res) => {
+  try {
+    const image = req.files?.image;
+    if (!image) {
+      return res.status(400).json({ success: false, message: "Please choose an image to upload." });
+    }
+    if (!image.mimetype?.startsWith("image/")) {
+      return res.status(400).json({ success: false, message: "Only image files can be added to a blog." });
+    }
+    if (image.size > 8 * 1024 * 1024) {
+      return res.status(400).json({ success: false, message: "Inline images must be smaller than 8 MB." });
+    }
+
+    const uploadResult = await imageUpload(image, "blogInlineImages", 80);
+    return res.status(201).json({
+      success: true,
+      image: { url: uploadResult.secure_url, alt: image.name.replace(/\.[^.]+$/, "") },
+    });
+  } catch (error) {
+    console.error("uploadInlineImage error:", error);
+    return res.status(500).json({ success: false, message: error.message || "Failed to upload image." });
+  }
+};
+
 exports.submitPost = async (req, res) => {
   try {
     const { title, content, summary, coverImage, category, notifyEmail, fullName } = req.body;
@@ -166,16 +191,16 @@ exports.submitPost = async (req, res) => {
       coverImage: coverImageUrl,
       category: normalizedCategory || "",
       tags: tags || [],
-      author: req.user.id,
+      author: req.user?.id || null,
       status: "pending_approval",
       qualityAudit,
       fullName: fullName.trim(),
       notifyEmail: notifyEmail.trim(),
     });
 
-    const author = await User.findById(req.user.id).select(
-      "firstName lastName email",
-    );
+    const author = req.user?.id
+      ? await User.findById(req.user.id).select("firstName lastName email")
+      : null;
 
     notifyBlogSubmission({ post, author }).catch((err) =>
       console.error("notifyBlogSubmission background error:", err),
@@ -244,7 +269,7 @@ exports.approvePost = async (req, res) => {
     }
 
     const reviewer = await User.findById(req.user.id);
-    const author = await User.findById(post.author);
+    const author = post.author ? await User.findById(post.author) : null;
 
     if (action === "approve") {
       post.status = "published";
@@ -261,17 +286,15 @@ exports.approvePost = async (req, res) => {
 
     await post.save();
 
-    if (author) {
-      notifyBlogStatusChange({
-        post,
-        author,
-        reviewer,
-        action,
-        feedback: post.feedback,
-      }).catch((err) =>
-        console.error("notifyBlogStatusChange background error:", err),
-      );
-    }
+    notifyBlogStatusChange({
+      post,
+      author,
+      reviewer,
+      action,
+      feedback: post.feedback,
+    }).catch((err) =>
+      console.error("notifyBlogStatusChange background error:", err),
+    );
 
     return res.status(200).json({
       success: true,
@@ -488,7 +511,7 @@ exports.editPost = async (req, res) => {
     }
 
     // Only the author of the post can edit it
-    if (post.author.toString() !== req.user.id) {
+    if (!post.author || post.author.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
         message: "Access denied. Only the author of the post can edit it.",
@@ -697,7 +720,7 @@ exports.deletePost = async (req, res) => {
     }
 
     // Delete access belongs to the author, or editorial leads, heads, and admins.
-    const isAuthor = post.author.toString() === req.user.id;
+    const isAuthor = post.author?.toString() === req.user.id;
     const isLeadOrHeadOrAdmin = await userCanReviewBlog(req.user.id);
 
     if (!isAuthor && !isLeadOrHeadOrAdmin) {

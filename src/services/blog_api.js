@@ -99,6 +99,12 @@ export async function submitPost(postData) {
   });
 }
 
+export async function uploadBlogInlineImage(file) {
+  const formData = new FormData();
+  formData.append("image", file);
+  return request("/inline-image", { method: "POST", body: formData });
+}
+
 export async function getPendingPosts() {
   return request("/pending");
 }
