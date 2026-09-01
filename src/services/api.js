@@ -35,7 +35,7 @@ export async function getTasks(status = "") {
   if (!res.ok) throw new Error(data.message || "Failed to load tasks");
   return {
     tasks: Array.isArray(data) ? data : data.tasks || [],
-    allowExecutivesSeeAll: Boolean(data.allowExecutivesSeeAll)
+    allowExecutivesSeeAll: typeof data.allowExecutivesSeeAll === "boolean" ? data.allowExecutivesSeeAll : undefined
   };
 }
 
@@ -57,9 +57,9 @@ export async function getTaskConfig() {
   try {
     const res = await authFetch("/api/v1/tasks");
     const data = await res.json().catch(() => ({}));
-    return { success: true, allowExecutivesSeeAll: Boolean(data.allowExecutivesSeeAll) };
+    return { success: true, allowExecutivesSeeAll: typeof data.allowExecutivesSeeAll === "boolean" ? data.allowExecutivesSeeAll : undefined };
   } catch (_) {
-    return { success: true, allowExecutivesSeeAll: false };
+    return { success: true, allowExecutivesSeeAll: undefined };
   }
 }
 

@@ -96,7 +96,7 @@ export default function Tasks() {
       const res = await getTasks();
       const taskList = Array.isArray(res) ? res : res.tasks || [];
       setTasks(taskList);
-      if (res.allowExecutivesSeeAll !== undefined) {
+      if (typeof res.allowExecutivesSeeAll === "boolean") {
         setAllowExecutivesSeeAll(res.allowExecutivesSeeAll);
         try {
           localStorage.setItem("gfg_allow_executives_see_all", String(res.allowExecutivesSeeAll));
