@@ -580,6 +580,7 @@ export default function ManageTeam({
         email: row.email,
         contact: row.registered ? u?.contact || "" : "",
         non_tech_society: row.registered ? profile?.non_tech_society || "" : "",
+        photo: row.registered ? u?.image || "" : pre?.image || "",
       };
     });
     const fromMembers = (extraMembers || []).map((m) => ({
@@ -590,6 +591,7 @@ export default function ManageTeam({
       email: m.email || "",
       contact: m.contact || "",
       non_tech_society: m.non_tech_society || "",
+      photo: m.photo || m.image_drive_link || m.image || "",
     }));
     return [...fromRoster, ...fromMembers];
   };
@@ -617,7 +619,7 @@ export default function ManageTeam({
     try {
       // Let overlay paint before sync PDF generation starts.
       await new Promise((resolve) => requestAnimationFrame(() => resolve()));
-      downloadTeamListPDF(
+      await downloadTeamListPDF(
         rosterToExportRows(),
         selectedExportFields,
         LABELS,

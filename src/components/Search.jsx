@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { getSearchPeople, getAccountTypeLabel, sendSignupInvite, getActivityLogs, isSocietyRole } from "../services/api";
 import { driveLinkToImageUrl, avatarPlaceholder, photoPreviewUrl, photoPreviewLargeAvatarUrl, photoProfileModalUrl, photoOriginalUrl, resolvePredefinedImageUrl } from "../utils/teamMemberUtils";
-import { Search as SearchIcon, X, Mail, Activity } from "react-feather";
+import { Search as SearchIcon, X, Mail, Activity, Instagram, Linkedin, GitHub } from "react-feather";
 import "./Search.css";
 import { Spinner } from "./ui/spinner";
 import ProfileAvatarFlip from "./common/ProfileAvatarFlip";
@@ -32,6 +32,40 @@ const TEAM_LABELS = {
   photo: "Photo",
   non_tech_society: "Non-tech society",
 };
+
+function socialUrl(value, platform) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed || trimmed.toLowerCase() === "nil") return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  const handle = trimmed.replace(/^@/, "");
+  const domains = { instagram: "instagram.com/", linkedin: "linkedin.com/in/", github: "github.com/" };
+  return `https://${domains[platform]}${handle}`;
+}
+
+function SocialLinks({ socials = {} }) {
+  const links = [
+    { key: "instagram", label: "Instagram", Icon: Instagram, className: "text-pink-400 hover:border-pink-400/60 hover:bg-pink-400/10" },
+    { key: "linkedin", label: "LinkedIn", Icon: Linkedin, className: "text-[#60a5fa] hover:border-[#60a5fa]/60 hover:bg-blue-400/10" },
+    { key: "github", label: "GitHub", Icon: GitHub, className: "text-gray-200 hover:border-gray-200/60 hover:bg-white/10" },
+  ];
+
+  return (
+    <div className="flex items-center justify-center gap-2" aria-label="Social profiles">
+      {links.map(({ key, label, Icon, className }) => {
+        const href = socialUrl(socials[key], key);
+        return href ? (
+          <a key={key} href={href} target="_blank" rel="noopener noreferrer" title={`Open ${label}`} aria-label={`Open ${label}`} className={`flex h-9 w-9 items-center justify-center rounded-full border border-gray-500/40 transition-colors ${className}`}>
+            <Icon size={17} />
+          </a>
+        ) : (
+          <span key={key} title={`${label} link not provided`} aria-label={`${label} link not provided`} className="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-full border border-gray-500/20 text-gray-600">
+            <Icon size={17} />
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 
 export function MemberDetailModal({ member, onClose }) {
   if (!member) return null;
@@ -78,6 +112,7 @@ export function MemberDetailModal({ member, onClose }) {
             <h3 className="text-xl font-bold text-richblack-25 text-center">
               {member.name || "—"}
             </h3>
+            <SocialLinks socials={member.socials || member.profile?.socials || member.profile || {}} />
             {(member.year || member.branch) && (
               <p className="text-gray-400 text-sm">
                 {[member.year, member.branch].filter(Boolean).join(" • ")}
@@ -551,6 +586,7 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
               }
             />
             <h3 className="text-xl font-bold text-richblack-25 text-center">{fullName}</h3>
+            <SocialLinks socials={profile.socials || {}} />
             {(profile.branch || profile.year || user.accountType) && (
               <p className="text-gray-400 text-sm text-center">
                 {[profile.branch, profile.year].filter(Boolean).join(" • ")}

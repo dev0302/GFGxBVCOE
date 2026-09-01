@@ -6,7 +6,7 @@
 import { jsPDF } from "jspdf";
 import { applyPlugin } from "jspdf-autotable";
 import * as XLSX from "xlsx";
-import { avatarPlaceholder, photoPreviewLargeAvatarUrl } from "./teamMemberUtils";
+import { avatarPlaceholder, photoPdfAvatarUrl } from "./teamMemberUtils";
 
 applyPlugin(jsPDF);
 
@@ -43,10 +43,15 @@ export function buildExportRows(members, columns, labels) {
 /**
  * Download PDF: title page + table with selected columns.
  */
-export function downloadTeamListPDF(members, columns, labels, title) {
+export async function downloadTeamListPDF(members, columns, labels, title, options = {}) {
+  const includePhotos = options.includePhotos !== false;
+  const nameColIndex = columns.indexOf("name");
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const head = columns.map((k) => labels[k] || k);
-  const rows = members.map((m) =>
+  const membersForTable = includePhotos && nameColIndex >= 0
+    ? await attachPdfPhotoData(members)
+    : members;
+  const rows = membersForTable.map((m) =>
     columns.map((k) => {
       const raw = k === "photo" ? m.photo || m.image_drive_link : m[k];
       const v = raw != null && String(raw).trim() !== "" ? String(raw).trim() : "—";
@@ -61,6 +66,14 @@ export function downloadTeamListPDF(members, columns, labels, title) {
   doc.setFontSize(9);
   doc.text(`Generated on ${formatISTDateTime()}`, 14, 32);
 
+  const columnStyles = {};
+  if (includePhotos && nameColIndex >= 0) {
+    columnStyles[nameColIndex] = {
+      cellPadding: { top: 2, right: 2, bottom: 2, left: PDF_MEMBER_PHOTO_MM + 4 },
+      minCellHeight: PDF_MEMBER_PHOTO_CELL_HEIGHT,
+    };
+  }
+
   doc.autoTable({
     head: [head],
     body: rows,
@@ -69,6 +82,16 @@ export function downloadTeamListPDF(members, columns, labels, title) {
     headStyles: { fillColor: [58, 58, 58], textColor: [245, 245, 245] },
     alternateRowStyles: { fillColor: [248, 248, 248] },
     margin: { left: 14, right: 14 },
+    columnStyles,
+    didDrawCell: (data) => {
+      if (!includePhotos || nameColIndex < 0 || data.section !== "body") return;
+      if (data.column.index !== nameColIndex) return;
+      const dataUrl = membersForTable[data.row.index]?._pdfPhotoDataUrl;
+      if (!dataUrl) return;
+      const size = PDF_MEMBER_PHOTO_MM;
+      const y = data.cell.y + Math.max(1.5, (data.cell.height - size) / 2);
+      doc.addImage(dataUrl, "JPEG", data.cell.x + 1.5, y, size, size);
+    },
   });
 
   doc.save(sanitizeFilename(`${title || "member-list"}.pdf`));
@@ -224,7 +247,7 @@ export function downloadAllDepartmentsExcel(departmentMembersMap, columns, label
     );
     const data = [[`Section: ${dept}`, `Count: ${members.length}`], head, ...rows];
     const ws = XLSX.utils.aoa_to_sheet(data);
-    const sheetName = dept.replace(/[\\/*?:\[\]]/g, "").substring(0, 31);
+    const sheetName = dept.replace(/[\\/*?:[\]]/g, "").substring(0, 31);
     XLSX.utils.book_append_sheet(wb, ws, sheetName);
   });
 
@@ -240,7 +263,7 @@ const PDF_MEMBER_PHOTO_CELL_HEIGHT = 12;
 
 function memberPhotoSource(member) {
   const raw = (member?.photo || member?.image_drive_link || member?.image || "").trim();
-  if (raw) return photoPreviewLargeAvatarUrl(raw);
+  if (raw) return photoPdfAvatarUrl(raw);
   return avatarPlaceholder(member?.name || "Member");
 }
 
@@ -274,7 +297,7 @@ function imageUrlToJpegDataUrl(url, options = {}) {
     img.crossOrigin = "anonymous";
     img.onload = () => {
       try {
-        const maxSide = 256;
+        const maxSide = 512;
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         if (!ctx) {

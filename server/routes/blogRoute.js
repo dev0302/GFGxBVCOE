@@ -15,6 +15,7 @@ const {
   getBlogOgMeta,
   getBlogPostOgMeta,
   uploadInlineImage,
+  getBlogContributors,
 } = require("../controllers/blogController");
 
 const router = express.Router();
@@ -39,6 +40,9 @@ router.get("/all", auth, isLeadOrHead, getAllPosts);
 
 // Public feed: view all published posts
 router.get("/public", getPublicPosts);
+
+// Public, allow-listed contributor profiles for the Blog site footer.
+router.get("/contributors", getBlogContributors);
 
 // Open Graph metadata for the blog listing page (first published post)
 router.get("/og-meta", getBlogOgMeta);

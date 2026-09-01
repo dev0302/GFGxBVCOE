@@ -1,5 +1,7 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
+const PredefinedProfile = require("../models/PredefinedProfile");
+const { getTeamMemberModel } = require("../models/TeamMember");
 const {
   ensureCategoryExists,
   findCategoryByName,
@@ -16,6 +18,22 @@ const {
 } = require("../utils/moderation");
 const { imageUpload } = require("../config/cloudinary");
 const { userCanReviewBlog } = require("../utils/leadershipAccess");
+
+const BLOG_CONTRIBUTOR_ROLES = [
+  { name: "Dev Malik", role: "Project Lead", image: "https://res.cloudinary.com/duwmby01d/image/upload/v1786862697/2026-02-20-17-05-37-741_ql5czn.jpg" },
+  { name: "Harpreet", role: "Project Sub-Lead", image: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,f_auto,q_auto/v1786703940/gfg-avatars/ddor7uvmhh4u7me60k3u.jpg" },
+  { name: "Kanishka", role: "Project Sub-Lead", image: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,f_auto,q_auto/v1771680231/membersImages/img_1771680230146_wha5o2b3vn.jpg" },
+  { name: "Riya", role: "Project Sub-Lead", image: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,f_auto,q_auto/v1787410720/membersImages/img_1787410719233_u8zv7t6d2p.jpg" },
+  { name: "Hasan Nawaz", role: "Backend", image: "https://res.cloudinary.com/duwmby01d/image/upload/w_128,h_128,c_fill,f_auto,q_auto/v1771681462/membersImages/img_1771681461415_werr9bmbtk.jpg" },
+  { name: "Tanvi", role: "Backend", image: "https://res.cloudinary.com/duwmby01d/image/upload/w_128,h_128,c_fill,f_auto,q_auto/v1786867542/gfg-avatars/IMG_Tanvi.jpg" },
+  { name: "Utkarsh Jain", role: "Frontend & UI", image: "https://res.cloudinary.com/duwmby01d/image/upload/w_128,h_128,c_fill,f_auto,q_auto/v1771676186/membersImages/img_1771676185815_oaw16hkixr.jpg" },
+  { name: "Harshit", role: "Search Bar", image: "https://res.cloudinary.com/duwmby01d/image/upload/w_128,h_128,c_fill,f_auto,q_auto/v1771690561/membersImages/img_1771690560443_gnbj3x1y4w.jpg" },
+  { name: "Kartik Gupta", role: "Blog Integration" },
+];
+const TEAM_DEPARTMENTS = [
+  "Social Media and Promotion", "Technical", "Event Management", "Design and Creative",
+  "Content and Documentation", "Capture The Event", "Sponsorship and Marketing",
+];
 
 const slugify = (text) => {
   return text
@@ -45,6 +63,39 @@ const normalizeTags = (tags) => {
     return parsedTags;
   } catch {
     return tags;
+  }
+};
+
+/** Public, allow-listed contributor profile details for the blog footer. */
+exports.getBlogContributors = async (req, res) => {
+  try {
+    const contributors = await Promise.all(BLOG_CONTRIBUTOR_ROLES.map(async ({ name, role, image: suppliedImage }) => {
+      const [firstName, ...lastNameParts] = name.split(" ");
+      const query = { firstName: new RegExp(`^${firstName}$`, "i") };
+      if (lastNameParts.length) query.lastName = new RegExp(`^${lastNameParts.join(" ")}$`, "i");
+      const user = await User.findOne(query).select("firstName lastName image").lean();
+      const predefined = user
+        ? null
+        : await PredefinedProfile.findOne({ name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") })
+          .select("name image")
+          .lean();
+      const teamMember = user || predefined
+        ? null
+        : (await Promise.all(TEAM_DEPARTMENTS.map((department) =>
+          getTeamMemberModel(department).findOne({ name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"), deletedAt: null }).select("name photo image_drive_link").lean(),
+        ))).find(Boolean);
+      if (!user && !predefined && !teamMember && !suppliedImage) return null;
+      return {
+        id: String((user || predefined || teamMember)?._id || name),
+        name: user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || name : predefined?.name || teamMember?.name || name,
+        image: suppliedImage || user?.image || predefined?.image || teamMember?.photo || teamMember?.image_drive_link || "",
+        role,
+      };
+    }));
+    return res.status(200).json({ success: true, contributors: contributors.filter(Boolean) });
+  } catch (error) {
+    console.error("getBlogContributors error:", error);
+    return res.status(500).json({ success: false, message: "Failed to retrieve blog contributors." });
   }
 };
 

@@ -53,6 +53,10 @@ export async function getPublicPosts() {
   return request("/public");
 }
 
+export async function getBlogContributors() {
+  return request("/contributors");
+}
+
 export async function getBlogOgMeta() {
   return request("/og-meta");
 }
