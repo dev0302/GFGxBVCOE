@@ -53,6 +53,10 @@ export async function getPublicPosts() {
   return request("/public");
 }
 
+export async function getBlogContributors() {
+  return request("/contributors");
+}
+
 export async function getBlogOgMeta() {
   return request("/og-meta");
 }
@@ -97,6 +101,12 @@ export async function submitPost(postData) {
     method: "POST",
     body: JSON.stringify(payload),
   });
+}
+
+export async function uploadBlogInlineImage(file) {
+  const formData = new FormData();
+  formData.append("image", file);
+  return request("/inline-image", { method: "POST", body: formData });
 }
 
 export async function getPendingPosts() {

@@ -32,13 +32,17 @@ const canReviewPosts = (user) => {
   return position.includes("lead") || position.includes("head");
 };
 
-const getAuthorName = (author) => {
+const getAuthorName = (author, submittedName = "") => {
+  if (submittedName.trim()) return submittedName.trim();
   if (!author) return "Unknown author";
   return (
     `${author.firstName || ""} ${author.lastName || ""}`.trim() ||
     "Unknown author"
   );
 };
+
+const getContentPreview = (content = "") =>
+  content.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 
 const formatDate = (date) => {
   if (!date) return "";
@@ -325,14 +329,14 @@ const BlogApprovalPage = () => {
                     {post.title}
                   </h2>
                   <p className="mt-2.5 line-clamp-3 flex-1 text-[13px] leading-6" style={{ color: "#6f9682" }}>
-                    {post.summary || post.content}
+                    {post.summary || getContentPreview(post.content)}
                   </p>
                   <div
                     className="mt-5 flex items-center justify-between border-t pt-4"
                     style={{ borderColor: "rgba(34,197,94,0.1)" }}
                   >
                     <span className="truncate font-montserrat text-[10px] font-semibold uppercase tracking-[0.6px]" style={{ color: tokens.textMuted }}>
-                      By {getAuthorName(post.author)}
+                      By {getAuthorName(post.author, post.fullName)}
                     </span>
                     <button
                       type="button"
@@ -429,7 +433,7 @@ const BlogApprovalPage = () => {
                         {post.title}
                       </p>
                       <p className="font-montserrat text-xs" style={{ color: tokens.textMuted }}>
-                        By {getAuthorName(post.author)}
+                        By {getAuthorName(post.author, post.fullName)}
                       </p>
                       {post.feedback && !isApproved && (
                         <p className="mt-1 line-clamp-2 text-xs italic" style={{ color: "rgba(252,165,165,0.7)" }}>
@@ -558,7 +562,7 @@ const BlogApprovalPage = () => {
                         </div>
                         <p className="truncate font-semibold" style={{ color: "#d8f3e2" }}>{post.title}</p>
                         <p className="font-montserrat text-xs" style={{ color: tokens.textMuted }}>
-                          By {getAuthorName(post.author)} · {formatDate(post.createdAt)}
+                          By {getAuthorName(post.author, post.fullName)} · {formatDate(post.createdAt)}
                         </p>
                       </div>
 
@@ -644,15 +648,14 @@ const BlogApprovalPage = () => {
                 {selectedPost.title}
               </h2>
               <p className="mt-4 font-montserrat text-sm" style={{ color: tokens.textMuted }}>
-                By {getAuthorName(selectedPost.author)} · {formatDate(selectedPost.createdAt)}
+                By {getAuthorName(selectedPost.author, selectedPost.fullName)} · {formatDate(selectedPost.createdAt)}
               </p>
 
               <div
-                className="mt-7 whitespace-pre-wrap border-t pt-7 font-nunito text-[15px] leading-8 sm:text-base"
+                className="blog-prose mt-7 border-t pt-7 font-nunito text-[15px] leading-8 sm:text-base"
                 style={{ borderColor: "rgba(34,197,94,0.1)", color: "#b7cbc0" }}
-              >
-                {selectedPost.content}
-              </div>
+                dangerouslySetInnerHTML={{ __html: selectedPost.content }}
+              />
 
               <div className="mt-8 border-t pt-6" style={{ borderColor: "rgba(34,197,94,0.1)" }}>
                 <label

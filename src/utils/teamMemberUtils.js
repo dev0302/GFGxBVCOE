@@ -137,6 +137,25 @@ export function photoProfileModalUrl(url) {
   return resolvePredefinedImageUrl(trimmed) || trimmed;
 }
 
+/** A sharp 512px square avatar URL for PDF exports. */
+export function photoPdfAvatarUrl(url) {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+
+  if (/drive\.google\.com/i.test(trimmed) || getDriveFileId(trimmed)) {
+    const id = getDriveFileId(trimmed);
+    if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w512`;
+  }
+
+  if (/cloudinary\.com/i.test(trimmed)) {
+    const original = cloudinaryOriginalUrl(trimmed);
+    return original.replace("/upload/", "/upload/w_512,h_512,c_fill,f_auto,q_auto/");
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return resolvePredefinedImageUrl(trimmed);
+}
+
 /** Placeholder avatar URL when no photo or image fails (initials from name). */
 export function avatarPlaceholder(name) {
   const n = name || "Member";

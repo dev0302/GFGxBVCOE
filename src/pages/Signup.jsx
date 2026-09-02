@@ -1,6 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { sendOTP, getOtpForAutofill, signup, AUTH_DEPARTMENTS, getAccountTypeLabel, enrichProfileSSE, getMe } from "../services/api";
+import {
+  sendOTP,
+  getOtpForAutofill,
+  signup,
+  AUTH_DEPARTMENTS,
+  getAccountTypeLabel,
+  enrichProfileSSE,
+  getMe,
+} from "../services/api";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -86,7 +94,10 @@ const Signup = () => {
   // 5-minute countdown for resend OTP
   useEffect(() => {
     if (step !== 2 || resendCooldown <= 0) return;
-    const t = setInterval(() => setResendCooldown((c) => Math.max(0, c - 1)), 1000);
+    const t = setInterval(
+      () => setResendCooldown((c) => Math.max(0, c - 1)),
+      1000,
+    );
     return () => clearInterval(t);
   }, [step, resendCooldown]);
 
@@ -127,8 +138,10 @@ const Signup = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    if (!firstName.trim() || !lastName.trim() || !password || !confirmPassword || !otp) {
-      toast.error("All required fields must be filled.");
+    if (!firstName.trim() || !password || !confirmPassword || !otp) {
+      toast.error(
+        "First name, password, confirm password, and OTP are required.",
+      );
       return;
     }
     if (password !== confirmPassword) {
@@ -184,14 +197,17 @@ const Signup = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] border border-gray-500/30 rounded-2xl p-8 shadow-xl flex flex-col items-center gap-4 min-w-[280px]">
             <SpinnerCustom />
-            <p className="text-gray-300 text-sm text-center">{enrichStatusText}</p>
+            <p className="text-gray-300 text-sm text-center">
+              {enrichStatusText}
+            </p>
           </div>
         </div>
       )}
       <div className="w-full max-w-md bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] border border-gray-500/30 rounded-2xl p-8 shadow-xl">
         <h1 className="text-2xl font-bold text-richblack-25 mb-2">Sign up</h1>
         <p className="text-gray-400 text-sm mb-6">
-          Only allowed emails can register. Choose your department and verify with OTP.
+          Only allowed emails can register. Choose your department and verify
+          with OTP.
         </p>
 
         {step === 1 ? (
@@ -209,7 +225,10 @@ const Signup = () => {
                 type="email"
                 value={email}
                 onChange={(e) => !prefillEmail && setEmail(e.target.value)}
-                className={inputClass + (prefillEmail ? " opacity-80 cursor-default" : "")}
+                className={
+                  inputClass +
+                  (prefillEmail ? " opacity-80 cursor-default" : "")
+                }
                 placeholder="you@example.com"
                 readOnly={!!prefillEmail}
                 required
@@ -227,7 +246,9 @@ const Signup = () => {
               {prefillDepartment ? (
                 <input
                   type="text"
-                  value={getAccountTypeLabel(prefillDepartment) || prefillDepartment}
+                  value={
+                    getAccountTypeLabel(prefillDepartment) || prefillDepartment
+                  }
                   className={inputClass + " opacity-80 cursor-default"}
                   readOnly
                 />
@@ -259,11 +280,21 @@ const Signup = () => {
           <form onSubmit={handleSignup} className="space-y-4">
             <div>
               <label className={labelClass}>Email</label>
-              <input type="email" value={email} className={inputClass + " opacity-80"} readOnly />
+              <input
+                type="email"
+                value={email}
+                className={inputClass + " opacity-80"}
+                readOnly
+              />
             </div>
             <div>
               <label className={labelClass}>Department</label>
-              <input type="text" value={getAccountTypeLabel(department) || department} className={inputClass + " opacity-80"} readOnly />
+              <input
+                type="text"
+                value={getAccountTypeLabel(department) || department}
+                className={inputClass + " opacity-80"}
+                readOnly
+              />
             </div>
             {/* OTP input with Resend and Autofill */}
             <div>
@@ -305,7 +336,11 @@ const Signup = () => {
                               scale: otp.length > i ? 1 : 0.5,
                               opacity: otp.length > i ? 1 : 0.4,
                             }}
-                            transition={{ type: "spring", stiffness: 400, damping: 22 }}
+                            transition={{
+                              type: "spring",
+                              stiffness: 400,
+                              damping: 22,
+                            }}
                             className="w-9 h-11 sm:w-10 sm:h-12 rounded-xl bg-cyan-500/40 border border-cyan-400/60 flex items-center justify-center text-xl font-bold text-richblack-25 shadow-lg"
                           >
                             {otp[i] || ""}
@@ -351,13 +386,15 @@ const Signup = () => {
                 />
               </div>
               <div>
-                <label className={labelClass}>Last name *</label>
+                <label className={labelClass}>
+                  Last name{" "}
+                  <span className="text-gray-500 font-normal">(optional)</span>
+                </label>
                 <input
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   className={inputClass}
-                  required
                 />
               </div>
             </div>
@@ -397,9 +434,15 @@ const Signup = () => {
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-richblack-25 transition-colors"
-                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
                 >
-                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showConfirmPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
                 </button>
               </div>
             </div>
@@ -424,7 +467,10 @@ const Signup = () => {
 
         <p className="mt-6 text-center text-gray-400 text-sm">
           Already have an account?{" "}
-          <Link to="/login" className="text-cyan-400 hover:text-cyan-300 font-medium">
+          <Link
+            to="/login"
+            className="text-cyan-400 hover:text-cyan-300 font-medium"
+          >
             Log in
           </Link>
         </p>

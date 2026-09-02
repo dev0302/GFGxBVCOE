@@ -6,6 +6,7 @@ import { SocketProvider } from "./context/SocketProvider";
 import { NotificationsProvider } from "./context/NotificationsContext";
 import { GlobalModalProvider } from "./context/GlobalModalProvider";
 import { UploadTransferProvider } from "./context/UploadTransferContext";
+import { TaskAlertProvider } from "./context/TaskAlertContext";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Events from "./pages/Events";
@@ -102,8 +103,9 @@ function App() {
     <AuthProvider>
       <SocketProvider>
         <NotificationsProvider>
-          <GlobalModalProvider>
-            <UploadTransferProvider>
+          <TaskAlertProvider>
+            <GlobalModalProvider>
+              <UploadTransferProvider>
               <div className="min-h-screen flex flex-col overflow-x-hidden">
                 <Toaster
                   position="top-right"
@@ -303,8 +305,9 @@ function App() {
                   </motion.main>
                 </AnimatePresence>
               </div>
-            </UploadTransferProvider>
-          </GlobalModalProvider>
+              </UploadTransferProvider>
+            </GlobalModalProvider>
+          </TaskAlertProvider>
         </NotificationsProvider>
       </SocketProvider>
     </AuthProvider>

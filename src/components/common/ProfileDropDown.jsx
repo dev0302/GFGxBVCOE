@@ -28,6 +28,7 @@ import {
   Users,
 } from "react-feather";
 import { useSocketContext } from "../../context/SocketProvider";
+import { useTaskAlert } from "../../context/TaskAlertContext";
 import { AiOutlineCaretDown } from "react-icons/ai";
 
 function formatLastSeenLabel(iso) {
@@ -152,6 +153,7 @@ function ProfileDropDown({
   const navigate = useNavigate();
   const { user } = useAuth();
   const { hasActiveLeadershipSession } = useSocketContext();
+  const { hasAssignedTasks } = useTaskAlert();
   const [open, setOpen] = useState(false);
   const [deptFlyoutOpen, setDeptFlyoutOpen] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -418,6 +420,12 @@ function ProfileDropDown({
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500 border border-[#1e1e2f]"></span>
               </span>
             )}
+            {hasAssignedTasks && (
+              <span className="absolute -bottom-0.5 -right-0.5 z-40 flex h-2.5 w-2.5" title="You have an assigned task">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-300 opacity-80" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full border border-[#1e1e2f] bg-amber-400" />
+              </span>
+            )}
             {tenureEnding && sessionHoursLeft != null && (
               <SessionHoursBadge hoursLeft={sessionHoursLeft} compact />
             )}
@@ -434,6 +442,12 @@ function ProfileDropDown({
               <span className="absolute top-0 right-0 z-30 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500 border border-[#1e1e2f]"></span>
+              </span>
+            )}
+            {hasAssignedTasks && (
+              <span className="absolute -bottom-0.5 -right-0.5 z-40 flex h-2.5 w-2.5" title="You have an assigned task">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-300 opacity-80" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full border border-[#1e1e2f] bg-amber-400" />
               </span>
             )}
             {tenureEnding && sessionHoursLeft != null && (
@@ -635,8 +649,9 @@ function ProfileDropDown({
                 }}
                 className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+                <span className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
                   <Clipboard className="h-4 w-4" />
+                  {hasAssignedTasks && <span className="absolute -right-1 -top-1 flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-300 opacity-80" /><span className="relative h-2 w-2 rounded-full border border-[#1e1e2f] bg-amber-400" /></span>}
                 </span>
                 <span className="flex-1">
                   <span className="block text-xs font-medium">Task Management</span>
