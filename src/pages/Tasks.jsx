@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle, Clipboard, Download, Search, UserPlus } from "react-feather";
 import jsPDF from "jspdf";
@@ -10,16 +10,48 @@ const initials = (name = "") => name.split(/\s+/).filter(Boolean).slice(0, 2).ma
 
 function ExpandableDescription({ text }) {
   const [expanded, setExpanded] = useState(false);
-  const words = useMemo(() => String(text || "").split(/\s+/).filter(Boolean), [text]);
-  const isLong = words.length > 40;
-  if (!isLong) return <p className="mt-2 text-sm text-gray-400 whitespace-pre-wrap">{text}</p>;
-  const displayText = expanded ? text : words.slice(0, 40).join(" ") + "...";
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const textRef = useRef(null);
+
+  const isLong = useMemo(() => {
+    if (!text) return false;
+    const str = String(text).trim();
+    return str.length > 90 || str.includes("\n") || str.split(/\s+/).filter(Boolean).length > 16;
+  }, [text]);
+
+  useEffect(() => {
+    if (textRef.current) {
+      const hasOverflow = textRef.current.scrollHeight > textRef.current.clientHeight + 2;
+      setIsOverflowing(hasOverflow || isLong);
+    } else {
+      setIsOverflowing(isLong);
+    }
+  }, [text, expanded, isLong]);
+
+  if (!text) return null;
+
   return (
     <div className="mt-2 text-sm text-gray-400">
-      <p className="whitespace-pre-wrap inline">{displayText}</p>
-      <button onClick={() => setExpanded(!expanded)} className="ml-1 text-cyan-400 hover:text-cyan-300 font-semibold focus:outline-none">
-        {expanded ? "Read less" : "Read more"}
-      </button>
+      <p
+        ref={textRef}
+        className={`whitespace-pre-wrap break-words transition-all duration-200 ${
+          !expanded ? "line-clamp-3" : ""
+        }`}
+      >
+        {text}
+      </p>
+      {(isOverflowing || isLong) && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setExpanded(!expanded);
+          }}
+          className="mt-1 inline-flex items-center text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer"
+        >
+          {expanded ? "Read less" : "Read more"}
+        </button>
+      )}
     </div>
   );
 }
