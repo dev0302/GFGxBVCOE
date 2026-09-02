@@ -286,7 +286,14 @@ exports.completeTask = async (req, res) => {
   try {
     const person = await currentPerson(req.user); const task = await Task.findById(req.params.id);
     if (!person || !task) return res.status(404).json({ success:false, message:"Task not found." });
-    if (String(task.assignedTo.id) !== String(person.id)) return res.status(403).json({ success:false, message:"Only the assignee can complete this task." });
+    
+    const isCore = SOCIETY_ROLES.includes(text(req.user.accountType));
+    const isAssigner = String(task.assignedBy?.id || "") === String(person.id);
+    const isAssignee = String(task.assignedTo?.id || "") === String(person.id);
+    if (!isAssignee && !isAssigner && !isCore) {
+      return res.status(403).json({ success:false, message:"You do not have permission to mark this task as complete." });
+    }
+    
     if (task.status === "COMPLETED") return res.json({ success:true, task, message:"Task is already completed." });
     task.status = "COMPLETED"; task.completedAt = new Date(); task.completedBy = person; task.history.push({ action:"COMPLETED", by:person }); await task.save();
     await syncTaskExcel();
