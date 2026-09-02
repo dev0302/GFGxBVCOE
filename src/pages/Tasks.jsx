@@ -396,6 +396,12 @@ export default function Tasks() {
       <button onClick={() => { setOpen(true); setSearch(""); }} className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300"><UserPlus size={16}/> Assign task</button>
     )}</div></div><div className="grid gap-3 md:grid-cols-3">{ordered.map((task) => {
   const taskState = getTaskState(task);
+  const isAssignee = String(task.assignedTo?.id || "") === String(user?._id || "") ||
+    (Boolean(task.assignedTo?.email && user?.email) && task.assignedTo.email.toLowerCase() === user.email.toLowerCase());
+  const isAssigner = String(task.assignedBy?.id || "") === String(user?._id || "");
+  const canComplete = task.status === "ONGOING" && (isAssignee || (isPrivileged && (isCore || isAssigner)));
+  const canDelete = isPrivileged && (isAssigner || isCore);
+
   return (
     <article key={task._id} className={`rounded-2xl border p-4 flex flex-col justify-between transition-all duration-300 ${taskState.cardClass}`}>
       <div>
@@ -449,18 +455,20 @@ export default function Tasks() {
           </div>
         </div>
         
-        <div className="flex gap-2 mt-2">
-          {task.status === "ONGOING" && (
-            <button onClick={() => setConfirmCompleteTask(task)} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20">
-              <CheckCircle size={14}/> Mark complete
-            </button>
-          )}
-          {isPrivileged && (String(task.assignedBy?.id || "") === String(user?._id) || isCore) && (
-            <button onClick={() => setConfirmDeleteId(task._id)} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-500/20 bg-rose-500/10 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/20">
-              Delete task
-            </button>
-          )}
-        </div>
+        {(canComplete || canDelete) && (
+          <div className="flex gap-2 mt-2">
+            {canComplete && (
+              <button onClick={() => setConfirmCompleteTask(task)} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20">
+                <CheckCircle size={14}/> Mark complete
+              </button>
+            )}
+            {canDelete && (
+              <button onClick={() => setConfirmDeleteId(task._id)} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-500/20 bg-rose-500/10 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/20">
+                Delete task
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </article>
   );
