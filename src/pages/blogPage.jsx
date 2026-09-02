@@ -5,7 +5,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getPostBySlug } from "../services/blog_api";
 import { setPageMeta, resetPageMeta } from "../utils/pageMeta";
 
-const getAuthorName = (author) => {
+const getAuthorName = (author, submittedName = "") => {
+  if (submittedName.trim()) return submittedName.trim();
   if (!author) return "GFG-BVCOE";
   return (`${author.firstName || ''} ${author.lastName || ''}`.trim() || 'GFG-BVCOE');
 };
@@ -242,10 +243,10 @@ const BlogPage = () => {
                     color: "#4ade80",
                   }}
                 >
-                  {getAuthorName(post.author).charAt(0)}
+                  {getAuthorName(post.author, post.fullName).charAt(0)}
                 </span>
                 <UserRound size={13} className="text-[#22c55e]" />
-                <span style={{ color: "#6b8f78" }}>{getAuthorName(post.author)}</span>
+                <span style={{ color: "#6b8f78" }}>{getAuthorName(post.author, post.fullName)}</span>
               </span>
               <span className="inline-flex items-center gap-2">
                 <CalendarDays size={13} className="text-[#22c55e]" />

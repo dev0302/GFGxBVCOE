@@ -90,12 +90,16 @@ async function memberAsUser(memberDoc, department) {
       non_tech_society:
         profile.non_tech_society || member.non_tech_society || "",
     },
-    dashboardAccess: Object.values(dashboardConfig?.memberSectionAccess || {}).some(Boolean) || dashboardConfig?.departmentMembersEnabled
-      ? [department]
-      : [],
+    dashboardAccess:
+      Object.values(dashboardConfig?.memberSectionAccess || {}).some(Boolean) ||
+      dashboardConfig?.departmentMembersEnabled
+        ? [department]
+        : [],
     departmentDashboardSections: {
       [department]: ["generate-qr", "documents"].filter(
-        (section) => dashboardConfig?.memberSectionAccess?.[section] ?? dashboardConfig?.departmentMembersEnabled,
+        (section) =>
+          dashboardConfig?.memberSectionAccess?.[section] ??
+          dashboardConfig?.departmentMembersEnabled,
       ),
     },
     canManageEvents: false,
@@ -322,7 +326,6 @@ exports.signup = async (req, res) => {
 
     if (
       !firstName ||
-      !lastName ||
       !email ||
       !password ||
       !confirmPassword ||
@@ -331,7 +334,7 @@ exports.signup = async (req, res) => {
     ) {
       return res.status(403).json({
         success: false,
-        message: "All fields are required.",
+        message: "All required fields are required.",
       });
     }
 
@@ -378,6 +381,7 @@ exports.signup = async (req, res) => {
     }
 
     const hashPassword = await bcrypt.hash(password, 10);
+    const safeLastName = (lastName || "").trim();
 
     // A department-member record is the source of truth. Never duplicate it
     // into `users` or create a separate Profile document.
@@ -386,7 +390,7 @@ exports.signup = async (req, res) => {
       member.password = hashPassword;
       member.signedIn = true;
       if (!member.name?.trim())
-        member.name = `${firstName.trim()} ${lastName.trim()}`.trim();
+        member.name = `${firstName.trim()} ${safeLastName}`.trim();
       await member.save();
       const token = memberToken(member, departmentMember.department);
       return res
@@ -409,13 +413,13 @@ exports.signup = async (req, res) => {
 
     const newUser = await User.create({
       firstName: firstName.trim(),
-      lastName: lastName.trim(),
+      lastName: safeLastName,
       email: emailNorm,
       password: hashPassword,
       contact: "",
       accountType: accountType.trim(),
       additionalDetails: profileDetails._id,
-      image: `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(firstName + " " + lastName)}`,
+      image: `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(`${firstName.trim()} ${safeLastName}`.trim())}`,
     });
 
     const payload = {
@@ -868,13 +872,11 @@ exports.me = async (req, res) => {
         currentMember.member,
         currentMember.department,
       );
-      return res
-        .status(200)
-        .json({
-          success: true,
-          user,
-          token: memberToken(currentMember.member, currentMember.department),
-        });
+      return res.status(200).json({
+        success: true,
+        user,
+        token: memberToken(currentMember.member, currentMember.department),
+      });
     }
     const userDoc = await User.findById(req.user.id)
       .populate("additionalDetails")
@@ -1027,13 +1029,11 @@ exports.updateProfile = async (req, res) => {
       if (non_tech_society !== undefined)
         member.non_tech_society = (non_tech_society || "").trim();
       await member.save();
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "Profile updated.",
-          data: await memberAsUser(member, currentMember.department),
-        });
+      return res.status(200).json({
+        success: true,
+        message: "Profile updated.",
+        data: await memberAsUser(member, currentMember.department),
+      });
     }
 
     const user = await User.findById(userId).populate("additionalDetails");
@@ -1130,16 +1130,14 @@ exports.updateAvatar = async (req, res) => {
     if (currentMember) {
       currentMember.member.photo = result.secure_url;
       await currentMember.member.save();
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "Display picture updated.",
-          data: await memberAsUser(
-            currentMember.member,
-            currentMember.department,
-          ),
-        });
+      return res.status(200).json({
+        success: true,
+        message: "Display picture updated.",
+        data: await memberAsUser(
+          currentMember.member,
+          currentMember.department,
+        ),
+      });
     }
     const user = await User.findByIdAndUpdate(
       userId,
@@ -1351,6 +1349,34 @@ async function searchTeamMembersInDepartments(departments, q) {
   return combined.slice(0, 20);
 }
 
+// Team-member records are department-scoped, while social links live in the
+// registered user's Profile document. Attach them for the search detail modal.
+async function attachTeamMemberSocials(teamMembers) {
+  const emails = [...new Set(teamMembers
+    .map((member) => member.email?.trim().toLowerCase())
+    .filter(Boolean))];
+  if (!emails.length) return teamMembers;
+
+  const users = await User.find({ email: { $in: emails }, tenureEndedAt: null })
+    .select("email additionalDetails")
+    .populate("additionalDetails", "socials")
+    .lean();
+  const socialsByEmail = new Map(
+    users.map((user) => [user.email?.trim().toLowerCase(), user.additionalDetails?.socials || {}]),
+  );
+
+  return teamMembers.map((member) => {
+    const recordSocials = member.profile?.socials || {};
+    const hasRecordSocials = Object.values(recordSocials).some(Boolean);
+    return {
+      ...member,
+      socials: hasRecordSocials
+        ? recordSocials
+        : socialsByEmail.get(member.email?.trim().toLowerCase()) || {},
+    };
+  });
+}
+
 /**
  * Search people: team members (department-scoped) + users (with profile and predefinedProfile).
  * GET /api/v1/auth/search-people?q=...&department=...
@@ -1366,6 +1392,7 @@ exports.searchPeople = async (req, res) => {
     const searchDepartments = resolveSearchDepartments(req);
     if (searchDepartments.length) {
       teamMembers = await searchTeamMembersInDepartments(searchDepartments, q);
+      teamMembers = await attachTeamMemberSocials(teamMembers);
     }
 
     if (q.length >= 2) {
@@ -1573,22 +1600,18 @@ exports.sendSignupInvite = async (req, res) => {
 
     const predefined = await findPredefinedByEmail(emailNorm);
     if (!predefined) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "No predefined profile found for this email.",
-        });
+      return res.status(404).json({
+        success: false,
+        message: "No predefined profile found for this email.",
+      });
     }
 
     const existingUser = await User.findOne({ email: emailNorm }).lean();
     if (existingUser) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "This person is already registered.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "This person is already registered.",
+      });
     }
 
     console.log(process.env.FRONTEND_URL);
@@ -1633,13 +1656,11 @@ exports.deleteAccount = async (req, res) => {
         .json({ success: false, message: "Not authenticated." });
     }
     if (req.user?.isDepartmentMember) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message:
-            "Department-member records are managed by the department and cannot be deleted here.",
-        });
+      return res.status(403).json({
+        success: false,
+        message:
+          "Department-member records are managed by the department and cannot be deleted here.",
+      });
     }
 
     const userDoc = await User.findById(userId)

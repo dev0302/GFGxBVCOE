@@ -196,6 +196,29 @@
   color: #6ee7b7;
 }
 
+/* Inline blog images are saved with their crop and border preferences. */
+.rich-editor-content .blog-image,
+.blog-prose .blog-image {
+  display: block;
+  width: min(100%, 760px);
+  margin: 1.5rem auto;
+  overflow: hidden;
+  border: 1px solid rgba(74, 222, 128, 0.22);
+  background: rgba(2, 11, 6, 0.65);
+}
+.rich-editor-content .blog-image.is-rounded,
+.blog-prose .blog-image.is-rounded { border-radius: 1rem; }
+.rich-editor-content .blog-image img,
+.blog-prose .blog-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.rich-editor-content .blog-image--original img,
+.blog-prose .blog-image--original img { height: auto; object-fit: contain; }
+.rich-editor-content .blog-image--landscape,
+.blog-prose .blog-image--landscape { aspect-ratio: 16 / 9; }
+.rich-editor-content .blog-image--square,
+.blog-prose .blog-image--square { aspect-ratio: 1; }
+.rich-editor-content .blog-image--portrait,
+.blog-prose .blog-image--portrait { aspect-ratio: 4 / 5; }
+
 /* Text alignment utilities written by TipTap */
 .rich-editor-content [style*="text-align: center"],
 .blog-prose [style*="text-align: center"] { text-align: center; }

@@ -5,6 +5,8 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { completeTask, createTask, getTaskPeople, getTasks, deleteTask, getAuthToken, getTaskConfig, updateTaskConfig, getTaskReportData } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { useTaskAlert } from "../context/TaskAlertContext";
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 
 const initials = (name = "") => name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
 
@@ -105,10 +107,13 @@ function getTaskState(task) {
 
 export default function Tasks() {
   const { user } = useAuth();
+  const { refreshTaskAlert } = useTaskAlert();
   const [filterTab, setFilterTab] = useState("to-me");
   const [tasks, setTasks] = useState([]), [people, setPeople] = useState([]), [search, setSearch] = useState("");
   const [step, setStep] = useState(0), [open, setOpen] = useState(false), [selected, setSelected] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [confirmCompleteTask, setConfirmCompleteTask] = useState(null);
+  const [completingTask, setCompletingTask] = useState(false);
   const [title, setTitle] = useState(""), [description, setDescription] = useState(""), [priority, setPriority] = useState("MEDIUM"), [deadline, setDeadline] = useState(""), [loading, setLoading] = useState(false);
   const [successDetails, setSuccessDetails] = useState(null);
   const [allowExecutivesSeeAll, setAllowExecutivesSeeAll] = useState(() => {
@@ -130,6 +135,7 @@ export default function Tasks() {
       const res = await getTasks();
       const taskList = Array.isArray(res) ? res : res.tasks || [];
       setTasks(taskList);
+      refreshTaskAlert();
       if (typeof res.allowExecutivesSeeAll === "boolean") {
         setAllowExecutivesSeeAll(res.allowExecutivesSeeAll);
         try {
@@ -143,6 +149,21 @@ export default function Tasks() {
   useEffect(() => { load(); }, []);
   useEffect(() => { if (!open) return; const timer = setTimeout(async () => { try { setPeople(await getTaskPeople(search)); } catch (e) { toast.error(e.message); } }, 180); return () => clearTimeout(timer); }, [open, search]);
   const invalidDetails = !title.trim() || !description.trim();
+  const pendingAssignedCount = tasks.filter((task) => task.status === "ONGOING" && String(task.assignedTo?.id || "") === String(user?._id)).length;
+  const confirmTaskComplete = async () => {
+    if (!confirmCompleteTask) return;
+    setCompletingTask(true);
+    try {
+      await completeTask(confirmCompleteTask._id);
+      toast.success("Task marked complete");
+      setConfirmCompleteTask(null);
+      await load();
+    } catch (e) {
+      toast.error(e.message);
+    } finally {
+      setCompletingTask(false);
+    }
+  };
   const reset = () => { setOpen(false); setStep(0); setSelected(null); setTitle(""); setDescription(""); setDeadline(""); setSuccessDetails(null); };
   const submit = async () => {
     setLoading(true);
@@ -339,7 +360,7 @@ export default function Tasks() {
     `}</style>
     <div className="mx-auto max-w-6xl"><div className="mb-8 flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-cyan-300">GFG BVCOE workspace</p><h1 className="mt-2 text-3xl font-bold">Task management</h1><p className="mt-1 text-sm text-gray-400">Track assignments, deadlines, and permanent task history.</p></div><div className="flex items-center gap-3 flex-wrap">
       <div className="flex gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5">
-        <button onClick={() => setFilterTab("to-me")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "to-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned to me</button>
+        <button onClick={() => setFilterTab("to-me")} className={`relative px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "to-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned to me{pendingAssignedCount > 0 && <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-300 opacity-80" /><span className="relative h-2.5 w-2.5 rounded-full border border-[#0c0c18] bg-amber-400" /></span>}</button>
         {isPrivileged && (
           <button onClick={() => setFilterTab("by-me")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "by-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned by me</button>
         )}
@@ -430,7 +451,7 @@ export default function Tasks() {
         
         <div className="flex gap-2 mt-2">
           {task.status === "ONGOING" && (
-            <button onClick={async () => { try { await completeTask(task._id); toast.success("Task marked complete"); load(); } catch(e) { toast.error(e.message); } }} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20">
+            <button onClick={() => setConfirmCompleteTask(task)} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20">
               <CheckCircle size={14}/> Mark complete
             </button>
           )}
@@ -558,6 +579,6 @@ export default function Tasks() {
       )}
     </div>
   </div>
-)}{confirmDeleteId && <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"><div className="w-full max-w-md rounded-2xl border border-rose-500/20 bg-gradient-to-br from-[#1e141a] to-[#100f13] p-6 shadow-2xl"><h3 className="text-lg font-bold text-rose-300">Confirm task deletion</h3><p className="mt-2 text-sm text-gray-400">Are you sure you want to delete this task? This action is permanent and cannot be undone.</p><div className="mt-6 flex justify-end gap-3"><button onClick={()=>setConfirmDeleteId(null)} className="rounded-xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-white/10">Cancel</button><button onClick={async()=>{try{await deleteTask(confirmDeleteId);toast.success("Task deleted successfully");setConfirmDeleteId(null);load();}catch(e){toast.error(e.message);}}} className="rounded-xl bg-rose-500 px-4 py-2.5 text-xs font-semibold text-slate-950 hover:bg-rose-400">Delete task</button></div></div></div>}</section>;
+)}{confirmDeleteId && <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"><div className="w-full max-w-md rounded-2xl border border-rose-500/20 bg-gradient-to-br from-[#1e141a] to-[#100f13] p-6 shadow-2xl"><h3 className="text-lg font-bold text-rose-300">Confirm task deletion</h3><p className="mt-2 text-sm text-gray-400">Are you sure you want to delete this task? This action is permanent and cannot be undone.</p><div className="mt-6 flex justify-end gap-3"><button onClick={()=>setConfirmDeleteId(null)} className="rounded-xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-white/10">Cancel</button><button onClick={async()=>{try{await deleteTask(confirmDeleteId);toast.success("Task deleted successfully");setConfirmDeleteId(null);load();}catch(e){toast.error(e.message);}}} className="rounded-xl bg-rose-500 px-4 py-2.5 text-xs font-semibold text-slate-950 hover:bg-rose-400">Delete task</button></div></div></div>}<ConfirmDeleteModal open={Boolean(confirmCompleteTask)} title="Mark task as complete?" description={`Mark “${confirmCompleteTask?.title || "this task"}” as complete? This will clear its pending-task alert.`} confirmLabel="Mark complete" loading={completingTask} onClose={() => !completingTask && setConfirmCompleteTask(null)} onConfirm={confirmTaskComplete} /></section>;
 }
 

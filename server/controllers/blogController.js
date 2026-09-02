@@ -1,5 +1,7 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
+const PredefinedProfile = require("../models/PredefinedProfile");
+const { getTeamMemberModel } = require("../models/TeamMember");
 const {
   ensureCategoryExists,
   findCategoryByName,
@@ -16,6 +18,22 @@ const {
 } = require("../utils/moderation");
 const { imageUpload } = require("../config/cloudinary");
 const { userCanReviewBlog } = require("../utils/leadershipAccess");
+
+const BLOG_CONTRIBUTOR_ROLES = [
+  { name: "Dev Malik", role: "Project Lead", image: "https://res.cloudinary.com/duwmby01d/image/upload/v1786862697/2026-02-20-17-05-37-741_ql5czn.jpg" },
+  { name: "Harpreet", role: "Project Sub-Lead", image: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,f_auto,q_auto/v1786703940/gfg-avatars/ddor7uvmhh4u7me60k3u.jpg" },
+  { name: "Kanishka", role: "Project Sub-Lead", image: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,f_auto,q_auto/v1771680231/membersImages/img_1771680230146_wha5o2b3vn.jpg" },
+  { name: "Riya", role: "Project Sub-Lead", image: "https://res.cloudinary.com/duwmby01d/image/upload/w_256,h_256,c_fill,f_auto,q_auto/v1787410720/membersImages/img_1787410719233_u8zv7t6d2p.jpg" },
+  { name: "Hasan Nawaz", role: "Backend", image: "https://res.cloudinary.com/duwmby01d/image/upload/w_128,h_128,c_fill,f_auto,q_auto/v1771681462/membersImages/img_1771681461415_werr9bmbtk.jpg" },
+  { name: "Tanvi", role: "Backend", image: "https://res.cloudinary.com/duwmby01d/image/upload/w_128,h_128,c_fill,f_auto,q_auto/v1786867542/gfg-avatars/IMG_Tanvi.jpg" },
+  { name: "Utkarsh Jain", role: "Frontend & UI", image: "https://res.cloudinary.com/duwmby01d/image/upload/w_128,h_128,c_fill,f_auto,q_auto/v1771676186/membersImages/img_1771676185815_oaw16hkixr.jpg" },
+  { name: "Harshit", role: "Search Bar", image: "https://res.cloudinary.com/duwmby01d/image/upload/w_128,h_128,c_fill,f_auto,q_auto/v1771690561/membersImages/img_1771690560443_gnbj3x1y4w.jpg" },
+  { name: "Kartik Gupta", role: "Blog Integration" },
+];
+const TEAM_DEPARTMENTS = [
+  "Social Media and Promotion", "Technical", "Event Management", "Design and Creative",
+  "Content and Documentation", "Capture The Event", "Sponsorship and Marketing",
+];
 
 const slugify = (text) => {
   return text
@@ -45,6 +63,64 @@ const normalizeTags = (tags) => {
     return parsedTags;
   } catch {
     return tags;
+  }
+};
+
+/** Public, allow-listed contributor profile details for the blog footer. */
+exports.getBlogContributors = async (req, res) => {
+  try {
+    const contributors = await Promise.all(BLOG_CONTRIBUTOR_ROLES.map(async ({ name, role, image: suppliedImage }) => {
+      const [firstName, ...lastNameParts] = name.split(" ");
+      const query = { firstName: new RegExp(`^${firstName}$`, "i") };
+      if (lastNameParts.length) query.lastName = new RegExp(`^${lastNameParts.join(" ")}$`, "i");
+      const user = await User.findOne(query).select("firstName lastName image").lean();
+      const predefined = user
+        ? null
+        : await PredefinedProfile.findOne({ name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") })
+          .select("name image")
+          .lean();
+      const teamMember = user || predefined
+        ? null
+        : (await Promise.all(TEAM_DEPARTMENTS.map((department) =>
+          getTeamMemberModel(department).findOne({ name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"), deletedAt: null }).select("name photo image_drive_link").lean(),
+        ))).find(Boolean);
+      if (!user && !predefined && !teamMember && !suppliedImage) return null;
+      return {
+        id: String((user || predefined || teamMember)?._id || name),
+        name: user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || name : predefined?.name || teamMember?.name || name,
+        image: suppliedImage || user?.image || predefined?.image || teamMember?.photo || teamMember?.image_drive_link || "",
+        role,
+      };
+    }));
+    return res.status(200).json({ success: true, contributors: contributors.filter(Boolean) });
+  } catch (error) {
+    console.error("getBlogContributors error:", error);
+    return res.status(500).json({ success: false, message: "Failed to retrieve blog contributors." });
+  }
+};
+
+/** Upload a body image before it is inserted into the rich-text document. */
+exports.uploadInlineImage = async (req, res) => {
+  try {
+    const image = req.files?.image;
+    if (!image) {
+      return res.status(400).json({ success: false, message: "Please choose an image to upload." });
+    }
+    if (!image.mimetype?.startsWith("image/")) {
+      return res.status(400).json({ success: false, message: "Only image files can be added to a blog." });
+    }
+    if (image.size > 8 * 1024 * 1024) {
+      return res.status(400).json({ success: false, message: "Inline images must be smaller than 8 MB." });
+    }
+
+    const uploadResult = await imageUpload(image, "blogInlineImages", 80);
+    return res.status(201).json({
+      success: true,
+      image: { url: uploadResult.secure_url, alt: image.name.replace(/\.[^.]+$/, "") },
+    });
+  } catch (error) {
+    console.error("uploadInlineImage error:", error);
+    return res.status(500).json({ success: false, message: error.message || "Failed to upload image." });
   }
 };
 
@@ -166,16 +242,16 @@ exports.submitPost = async (req, res) => {
       coverImage: coverImageUrl,
       category: normalizedCategory || "",
       tags: tags || [],
-      author: req.user.id,
+      author: req.user?.id || null,
       status: "pending_approval",
       qualityAudit,
       fullName: fullName.trim(),
       notifyEmail: notifyEmail.trim(),
     });
 
-    const author = await User.findById(req.user.id).select(
-      "firstName lastName email",
-    );
+    const author = req.user?.id
+      ? await User.findById(req.user.id).select("firstName lastName email")
+      : null;
 
     notifyBlogSubmission({ post, author }).catch((err) =>
       console.error("notifyBlogSubmission background error:", err),
@@ -244,7 +320,7 @@ exports.approvePost = async (req, res) => {
     }
 
     const reviewer = await User.findById(req.user.id);
-    const author = await User.findById(post.author);
+    const author = post.author ? await User.findById(post.author) : null;
 
     if (action === "approve") {
       post.status = "published";
@@ -261,17 +337,15 @@ exports.approvePost = async (req, res) => {
 
     await post.save();
 
-    if (author) {
-      notifyBlogStatusChange({
-        post,
-        author,
-        reviewer,
-        action,
-        feedback: post.feedback,
-      }).catch((err) =>
-        console.error("notifyBlogStatusChange background error:", err),
-      );
-    }
+    notifyBlogStatusChange({
+      post,
+      author,
+      reviewer,
+      action,
+      feedback: post.feedback,
+    }).catch((err) =>
+      console.error("notifyBlogStatusChange background error:", err),
+    );
 
     return res.status(200).json({
       success: true,
@@ -488,7 +562,7 @@ exports.editPost = async (req, res) => {
     }
 
     // Only the author of the post can edit it
-    if (post.author.toString() !== req.user.id) {
+    if (!post.author || post.author.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
         message: "Access denied. Only the author of the post can edit it.",
@@ -697,7 +771,7 @@ exports.deletePost = async (req, res) => {
     }
 
     // Delete access belongs to the author, or editorial leads, heads, and admins.
-    const isAuthor = post.author.toString() === req.user.id;
+    const isAuthor = post.author?.toString() === req.user.id;
     const isLeadOrHeadOrAdmin = await userCanReviewBlog(req.user.id);
 
     if (!isAuthor && !isLeadOrHeadOrAdmin) {

@@ -9,7 +9,7 @@ const profileSlice = createSlice({
   initialState,
   reducers: {
     setProfile(state, action) {
-      state.profile = action.payload || null;
+      state.profile = action.payload;
     },
     clearProfile(state) {
       state.profile = null;

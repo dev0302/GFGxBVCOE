@@ -489,7 +489,7 @@ export default function ManageSociety() {
       const roster = rosterRes.data || [];
       const members = membersRes.data || [];
       const list = buildDepartmentExportRows(roster, members, dept);
-      downloadTeamListPDF(
+      await downloadTeamListPDF(
         list,
         EXPORT_COLS,
         EXPORT_LABELS,
