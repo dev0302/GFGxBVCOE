@@ -177,10 +177,6 @@ async function removeChangeFromDraft(user, changeId) {
     (c) => String(c._id) !== String(changeId)
   );
 
-  if (session.pendingChanges.length === 0) {
-    return discardDraft(user, "All pending changes removed.");
-  }
-
   await session.save();
   emitDraftUpdated(session);
   return session;
@@ -307,30 +303,6 @@ async function discardDraft(user, reason = "Draft discarded.") {
       reason,
     }, session._id, "LeadershipDraftSession");
   }
-
-  emitDraftDiscarded(session.sessionId, reason);
-  return session;
-}
-
-async function forceDiscardDraft(sessionId, reason = "Draft abandoned.") {
-  const session = await LeadershipDraftSession.findOne({
-    sessionId,
-    status: { $in: ACTIVE_STATUSES },
-  });
-  if (!session) return null;
-
-  if (session.status === "APPROVAL_PENDING" || session.status === "READY_TO_APPLY") {
-    return session;
-  }
-
-  session.status = "DISCARDED";
-  session.discardReason = reason;
-  await session.save();
-
-  await logActivity(null, "leadership_draft_abandoned", "leadership_transition", {
-    sessionId: session.sessionId,
-    reason,
-  }, session._id, "LeadershipDraftSession");
 
   emitDraftDiscarded(session.sessionId, reason);
   return session;
@@ -487,7 +459,6 @@ module.exports = {
   addApproval,
   removeApproval,
   discardDraft,
-  forceDiscardDraft,
   applyDraftChanges,
   serializeSessionForClient,
   serializeApprovalStatus,

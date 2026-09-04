@@ -392,23 +392,6 @@ export default function Promotions() {
   }, [loadData, loadDraft]);
 
   const hasActiveDraft = draft && ["DRAFT", "APPROVAL_PENDING", "READY_TO_APPLY"].includes(draft.status);
-  const shouldWarnLeave =
-    hasActiveDraft &&
-    (draft.status === "DRAFT" ||
-      (draft.status === "APPROVAL_PENDING" && !approvalStatus?.complete));
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (shouldWarnLeave) {
-        e.preventDefault();
-        e.returnValue =
-          "You are currently participating in an active Leadership Change Session. Leaving now may discard pending changes if no approver remains.";
-        return e.returnValue;
-      }
-    };
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, [shouldWarnLeave]);
 
   const filteredPeople = useMemo(() => {
     const q = search.trim().toLowerCase();

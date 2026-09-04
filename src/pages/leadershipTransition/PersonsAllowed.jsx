@@ -208,8 +208,8 @@ export default function PersonsAllowed() {
           </h1>
           <p className="mt-2 text-sm text-gray-400">
             Faculty Incharge, Chairperson, Vice-Chairperson, Treasurer, and every Department
-            Lead automatically have access. Add other registered members to delegate
-            access.
+            Lead automatically have access. Everyone with Leadership Transition access can
+            add or remove other registered members here.
           </p>
         </div>
 

@@ -1012,7 +1012,7 @@ export async function sendSignupInvite(email) {
   return data;
 }
 
-/** All users (society role only). For Manage Society "Show list". */
+/** All users for Leadership Transition's allow-list picker and Manage Society. */
 export async function getAllUsers() {
   const res = await authFetch("/api/v1/auth/all-users");
   const data = await res.json().catch(() => ({}));
