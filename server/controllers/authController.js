@@ -1474,7 +1474,7 @@ exports.searchPeople = async (req, res) => {
 };
 
 /**
- * Get all users (society role only). For Manage Society "Show list".
+ * Get all users for the Leadership Transition allow-list picker and Manage Society.
  * GET /api/v1/auth/all-users
  */
 exports.getAllUsers = async (req, res) => {

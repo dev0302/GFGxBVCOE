@@ -1,7 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Clock, Users, TrendingUp } from "react-feather";
-import { useAuth } from "../../context/AuthContext";
-import { isSocietyRole } from "../../services/api";
 import { useSocketContext } from "../../context/SocketProvider";
 
 const sidebarLinks = [
@@ -11,13 +9,11 @@ const sidebarLinks = [
     name: "Persons allowed",
     path: "/leadership-transition/persons-allowed",
     icon: Users,
-    societyOnly: true,
   },
 ];
 
 export default function LeadershipTransitionSidebar() {
   const location = useLocation();
-  const { user } = useAuth();
   const { hasActiveLeadershipSession } = useSocketContext();
 
   const matchRoute = (path) => {
@@ -40,7 +36,6 @@ export default function LeadershipTransitionSidebar() {
       </div>
       <div className="flex flex-col gap-0.5 px-2 md:px-4">
         {sidebarLinks.map((link) => {
-          if (link.societyOnly && !isSocietyRole(user?.accountType)) return null;
           const Icon = link.icon;
           const isActive = matchRoute(link.path);
           return (

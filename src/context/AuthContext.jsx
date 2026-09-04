@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getMe, login as apiLogin, logout as apiLogout, setAuthToken, sendPresenceHeartbeat } from "../services/api";
 import { setUser as setUserInStore } from "../redux/slices/authSlice.jsx";
 import { connectPresenceSocket, disconnectPresenceSocket } from "../services/presenceSocket";
-import { subscribeTenureEnded } from "../services/socket";
+import { subscribeLeadershipUpdates, subscribeTenureEnded } from "../services/socket";
 
 const AuthContext = createContext(null);
 
@@ -61,6 +61,22 @@ export function AuthProvider({ children }) {
         if (res?.token) setAuthToken(res.token);
         const freshUser = res.user || res;
         dispatch(setUserInStore(freshUser));
+      } catch (_) {}
+    });
+  }, [user?._id, dispatch]);
+
+  // Allow-list changes can grant or revoke Leadership Transition access for any
+  // signed-in user. Refresh the server-computed access flag immediately so the
+  // menu and route guard reflect the new permission without a page refresh.
+  useEffect(() => {
+    if (!user?._id) return undefined;
+
+    return subscribeLeadershipUpdates(async (payload) => {
+      if (payload?.type !== "config-updated") return;
+      try {
+        const res = await getMe();
+        if (res?.token) setAuthToken(res.token);
+        dispatch(setUserInStore(res.user || res));
       } catch (_) {}
     });
   }, [user?._id, dispatch]);
