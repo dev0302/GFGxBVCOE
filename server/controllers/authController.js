@@ -1020,6 +1020,11 @@ exports.updateProfile = async (req, res) => {
           profile.socials[key] = req.body[key] || "";
       });
       member.profile = profile;
+      // `profile` is a Schema.Types.Mixed field. Mongoose does not track
+      // mutations below Mixed fields, so without explicitly marking it dirty
+      // the response can contain the edited values while `save()` leaves the
+      // stored profile unchanged. That made edits disappear after a refresh.
+      member.markModified("profile");
       // Sync profile fields back to top-level TeamMember fields so the team
       // list table (which reads m.year / m.branch / m.section / m.non_tech_society)
       // stays current when a member updates their /profile page.
