@@ -1,7 +1,10 @@
 require("dotenv").config();
 const path = require("path");
 if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
-  process.env.PLAYWRIGHT_BROWSERS_PATH = path.join(__dirname, ".playwright-browsers");
+  process.env.PLAYWRIGHT_BROWSERS_PATH = path.join(
+    __dirname,
+    ".playwright-browsers",
+  );
 }
 const express = require("express");
 const http = require("http");
@@ -33,6 +36,8 @@ const notificationRoutes = require("./routes/notificationRoute");
 const vaultRoutes = require("./routes/vaultRoute");
 const cloudinaryRoutes = require("./routes/cloudinaryRoute");
 const taskRoutes = require("./routes/taskRoute");
+const osProjectRoutes = require("./routes/osProjectRoute");
+const osContributorRoutes = require("./routes/osContributorRoute");
 
 const blogRoutes = require("./routes/blogRoute");
 
@@ -44,8 +49,6 @@ const {
   handleLeaveLeadershipPromotions,
 } = require("./utils/leadershipPromotionsSocket");
 
-
-
 const app = express();
 const httpServer = http.createServer(app);
 const PORT = process.env.PORT || 8080;
@@ -55,16 +58,21 @@ const PORT = process.env.PORT || 8080;
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
-app.use(fileUpload({
-  useTempFiles: true,
-  tempFileDir: "/tmp",
-  limits: { fileSize: 200 * 1024 * 1024 },
-  abortOnLimit: true,
-}));
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: "/tmp",
+    limits: { fileSize: 200 * 1024 * 1024 },
+    abortOnLimit: true,
+  }),
+);
 
 // ✅ Routes second
 app.get("/", (req, res) => {
-  return res.json({ success: true, message: "Your Server is up and running...." });
+  return res.json({
+    success: true,
+    message: "Your Server is up and running....",
+  });
 });
 
 app.use("/api/v1/events", eventRoutes);
@@ -80,6 +88,8 @@ app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/vault", vaultRoutes);
 app.use("/api/v1/cloudinary", cloudinaryRoutes);
 app.use("/api/v1/tasks", taskRoutes);
+app.use("/api/v1/open-source/projects", osProjectRoutes);
+app.use("/api/v1/open-source/contributors", osContributorRoutes);
 
 app.use("/api/v1/blog", blogRoutes);
 
@@ -148,7 +158,7 @@ io.use(async (socket, next) => {
       ? rawAuthHeader.slice(7)
       : null;
     const cookieToken = getTokenFromCookieHeader(
-      socket.handshake.headers?.cookie || ""
+      socket.handshake.headers?.cookie || "",
     );
     const token = socket.handshake.auth?.token || headerToken || cookieToken;
     if (!token) {
@@ -158,9 +168,14 @@ io.use(async (socket, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (decoded.isDepartmentMember) {
       const department = String(decoded.memberDepartment || "").trim();
-      if (!TEAM_DEPARTMENTS.includes(department)) return next(new Error("Unauthorized"));
+      if (!TEAM_DEPARTMENTS.includes(department))
+        return next(new Error("Unauthorized"));
       const member = await getTeamMemberModel(department)
-        .findOne({ _id: decoded.id, email: decoded.email, $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] })
+        .findOne({
+          _id: decoded.id,
+          email: decoded.email,
+          $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+        })
         .select("name email photo")
         .lean();
       if (!member) return next(new Error("User not found"));
@@ -205,10 +220,15 @@ io.on("connection", (socket) => {
 
   if (socket.user.isDepartmentMember) {
     getTeamMemberModel(socket.user.department)
-      .updateOne({ _id: id }, { $set: { lastSeen: new Date(), signedIn: true } })
+      .updateOne(
+        { _id: id },
+        { $set: { lastSeen: new Date(), signedIn: true } },
+      )
       .catch(() => {});
   } else {
-    User.updateOne({ _id: id }, { $set: { lastSeen: new Date() } }).catch(() => {});
+    User.updateOne({ _id: id }, { $set: { lastSeen: new Date() } }).catch(
+      () => {},
+    );
   }
 
   emitOnlineUsers();
@@ -304,13 +324,13 @@ io.on("connection", (socket) => {
 
   socket.on("join-leadership-promotions", () => {
     handleJoinLeadershipPromotions(socket, io).catch((err) =>
-      console.error("join-leadership-promotions error:", err)
+      console.error("join-leadership-promotions error:", err),
     );
   });
 
   socket.on("leave-leadership-promotions", () => {
     handleLeaveLeadershipPromotions(socket, io).catch((err) =>
-      console.error("leave-leadership-promotions error:", err)
+      console.error("leave-leadership-promotions error:", err),
     );
   });
 
@@ -333,7 +353,8 @@ dbConnect()
     const runTenureCleanup = async () => {
       try {
         const removed = await cleanupExpiredTenureUsers();
-        if (removed) console.log(`Removed ${removed} expired tenure account(s).`);
+        if (removed)
+          console.log(`Removed ${removed} expired tenure account(s).`);
       } catch (error) {
         console.error("Expired tenure cleanup failed:", error);
       }
@@ -341,12 +362,14 @@ dbConnect()
     runTenureCleanup();
     setInterval(runTenureCleanup, 15 * 60 * 1000);
     httpServer.listen(PORT, () =>
-      console.log(`Server running on port: ${PORT}`)
+      console.log(`Server running on port: ${PORT}`),
     );
     setImmediate(() => {
       migrateDepartmentNames()
         .then(() => console.log("Department names migrated."))
-        .catch((error) => console.error("Department name migration failed:", error));
+        .catch((error) =>
+          console.error("Department name migration failed:", error),
+        );
     });
   })
   .catch((err) => {
