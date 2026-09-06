@@ -89,6 +89,8 @@ const Divider = () => (
 // ── Main component ────────────────────────────────────────────────────────────
 export default function RichTextEditor({ value, onChange, placeholder = "Start writing here…" }) {
   const imageInputRef = useRef(null);
+  const pasteImageHandlerRef = useRef(null);
+  const dropImageHandlerRef = useRef(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const editor = useEditor({
     extensions: [
@@ -112,6 +114,8 @@ export default function RichTextEditor({ value, onChange, placeholder = "Start w
       attributes: {
         class: "rich-editor-content focus:outline-none",
       },
+      handlePaste: (_view, event) => pasteImageHandlerRef.current?.(event) ?? false,
+      handleDrop: (view, event) => dropImageHandlerRef.current?.(view, event) ?? false,
     },
   });
 
@@ -135,34 +139,72 @@ export default function RichTextEditor({ value, onChange, placeholder = "Start w
     }
   }, [editor]);
 
-  const uploadImage = useCallback(async (event) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file || !editor) return;
-    if (!file.type.startsWith("image/")) {
-      window.alert("Please choose an image file.");
+  const insertImages = useCallback(async (files, position = null) => {
+    if (!editor || !files.length) return;
+
+    const invalidFile = files.find((file) => !file.type.startsWith("image/"));
+    if (invalidFile) {
+      window.alert("Only image files can be inserted into a blog post.");
       return;
     }
-    if (file.size > 8 * 1024 * 1024) {
+    const oversizedFile = files.find((file) => file.size > 8 * 1024 * 1024);
+    if (oversizedFile) {
       window.alert("Inline images must be smaller than 8 MB.");
       return;
     }
 
     setUploadingImage(true);
     try {
-      const response = await uploadBlogInlineImage(file);
-      editor.chain().focus().setBlogImage({
-        src: response.image.url,
-        alt: response.image.alt || "",
-        crop: "original",
-        rounded: true,
-      }).run();
+      for (const file of files) {
+        const response = await uploadBlogInlineImage(file);
+        const attributes = {
+          src: response.image.url,
+          alt: response.image.alt || file.name.replace(/\.[^.]+$/, ""),
+          crop: "original",
+          rounded: true,
+        };
+        const chain = editor.chain().focus();
+        if (typeof position === "number") {
+          chain.insertContentAt(position, { type: "blogImage", attrs: attributes }).run();
+        } else {
+          chain.setBlogImage(attributes).run();
+        }
+      }
     } catch (error) {
       window.alert(error.message || "Could not upload the image.");
     } finally {
       setUploadingImage(false);
     }
   }, [editor]);
+
+  const uploadImage = useCallback((event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (file) void insertImages([file]);
+  }, [insertImages]);
+
+  // Keep image uploads on the same server-backed path whether they come from
+  // the toolbar, the clipboard, or a file dragged from the desktop.
+  pasteImageHandlerRef.current = (event) => {
+    const files = Array.from(event.clipboardData?.files || []).filter((file) =>
+      file.type.startsWith("image/")
+    );
+    if (!files.length) return false;
+    event.preventDefault();
+    void insertImages(files);
+    return true;
+  };
+
+  dropImageHandlerRef.current = (view, event) => {
+    const files = Array.from(event.dataTransfer?.files || []).filter((file) =>
+      file.type.startsWith("image/")
+    );
+    if (!files.length) return false;
+    event.preventDefault();
+    const position = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos;
+    void insertImages(files, position);
+    return true;
+  };
 
   const imageAttrs = editor?.getAttributes("blogImage") || {};
   const imageSelected = editor?.isActive("blogImage");
@@ -283,6 +325,9 @@ export default function RichTextEditor({ value, onChange, placeholder = "Start w
         className="rich-editor-wrapper"
         style={{ minHeight: "360px", maxHeight: "600px", overflowY: "auto", padding: "18px 20px" }}
       />
+      <p className="border-t px-4 py-2 text-xs text-slate-500" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+        Paste an image from your clipboard or drag one here to insert it. Maximum 8 MB per image.
+      </p>
     </div>
   );
 }

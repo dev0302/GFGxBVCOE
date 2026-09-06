@@ -7,7 +7,6 @@ const {
 const {
   getActiveDraftSession,
   upsertCollaborator,
-  forceDiscardDraft,
   serializeSessionForClient,
 } = require("../services/leadershipDraftService");
 const { getUserApprovalInfo, resolveUserRoleLabel } = require("./leadershipApproval");
@@ -79,12 +78,9 @@ async function handleLeaveLeadershipPromotions(socket, io) {
   emitPresenceToRoom(io);
   emitCollaboratorLeft(getPresenceList());
 
-  if (promotionsPresence.size === 0) {
-    const session = await getActiveDraftSession();
-    if (session && session.status === "DRAFT") {
-      await forceDiscardDraft(session.sessionId, "Draft abandoned — no collaborators remain.");
-    }
-  }
+  // Presence is informational only. An active draft is shared state and must
+  // remain available after every collaborator leaves; only an explicit discard
+  // action may end it.
 }
 
 module.exports = {
