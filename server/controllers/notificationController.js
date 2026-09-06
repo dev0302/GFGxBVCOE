@@ -3,6 +3,7 @@ const NotificationReply = require("../models/NotificationReply");
 const User = require("../models/User");
 const { getTeamMemberModel } = require("../models/TeamMember");
 const { sendBroadcastToAllUsers, sendBroadcastToAllMembers, sendBroadcastToDepartmentMembers, sendBroadcastToAll, getBroadcastAudienceCounts, emitNotification } = require("../utils/notificationService");
+const { userCanReviewBlog } = require("../utils/leadershipAccess");
 
 const BROADCAST_TYPES = ["broadcast_users", "broadcast_members", "broadcast_department"];
 
@@ -384,8 +385,8 @@ exports.broadcastToUsers = async (req, res) => {
     if (!title || !body) {
       return res.status(400).json({ success: false, message: "Title and body are required." });
     }
-    if (title.length > 120 || body.length > 500) {
-      return res.status(400).json({ success: false, message: "Title (max 120) or body (max 500) is too long." });
+    if (title.length > 300 || body.length > 2000) {
+      return res.status(400).json({ success: false, message: "Title (max 300) or body (max 2000) is too long." });
     }
     const senderRole = String(req.user?.accountType || "Society").trim();
     const senderId   = String(req.user?.id || req.user?._id || "").trim();
@@ -412,8 +413,8 @@ exports.broadcastToMembers = async (req, res) => {
     if (!title || !body) {
       return res.status(400).json({ success: false, message: "Title and body are required." });
     }
-    if (title.length > 120 || body.length > 500) {
-      return res.status(400).json({ success: false, message: "Title (max 120) or body (max 500) is too long." });
+    if (title.length > 300 || body.length > 2000) {
+      return res.status(400).json({ success: false, message: "Title (max 300) or body (max 2000) is too long." });
     }
     const senderRole = String(req.user?.accountType || "Society").trim();
     const senderId   = String(req.user?.id || req.user?._id || "").trim();
@@ -448,8 +449,8 @@ exports.broadcastToDepartment = async (req, res) => {
     if (!department) {
       return res.status(400).json({ success: false, message: "Department is required." });
     }
-    if (title.length > 120 || body.length > 500) {
-      return res.status(400).json({ success: false, message: "Title (max 120) or body (max 500) is too long." });
+    if (title.length > 300 || body.length > 2000) {
+      return res.status(400).json({ success: false, message: "Title (max 300) or body (max 2000) is too long." });
     }
     const senderRole = String(req.user?.accountType || "Society").trim();
     const senderId   = String(req.user?.id || req.user?._id || "").trim();
@@ -496,16 +497,16 @@ exports.broadcastToAll = async (req, res) => {
       return res.status(400).json({ success: false, message: "Title and body are required." });
     }
     if (!department) {
-      const allowed = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
-      if (!allowed.includes(String(req.user?.accountType || "").trim())) {
+      const canBroadcast = await userCanReviewBlog(req.user?.id);
+      if (!canBroadcast) {
         return res.status(403).json({
           success: false,
-          message: "Society-wide broadcast is restricted to society core roles.",
+          message: "Society-wide broadcast is restricted to society core, department heads, and department leads.",
         });
       }
     }
-    if (title.length > 120 || body.length > 500) {
-      return res.status(400).json({ success: false, message: "Title (max 120) or body (max 500) is too long." });
+    if (title.length > 300 || body.length > 2000) {
+      return res.status(400).json({ success: false, message: "Title (max 300) or body (max 2000) is too long." });
     }
     const senderRole = String(req.user?.accountType || "Society").trim();
     const senderId = String(req.user?.id || req.user?._id || "").trim();

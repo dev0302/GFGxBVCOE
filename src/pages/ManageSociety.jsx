@@ -762,12 +762,12 @@ export default function ManageSociety() {
                       type="text"
                       value={notifForm.title}
                       onChange={(e) => setNotifForm((p) => ({ ...p, title: e.target.value }))}
-                      maxLength={120}
+                      maxLength={300}
                       placeholder="e.g. Important Announcement"
                       className="w-full rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm text-richblack-25 outline-none transition placeholder:text-gray-500 focus:border-pink-400/40 focus:bg-white/[0.055]"
                       disabled={notifSending}
                     />
-                    <p className="mt-1 text-right text-[10px] text-gray-500">{notifForm.title.length}/120</p>
+                    <p className="mt-1 text-right text-[10px] text-gray-500">{notifForm.title.length}/300</p>
                   </div>
 
                   <div>
@@ -777,13 +777,13 @@ export default function ManageSociety() {
                     <textarea
                       value={notifForm.body}
                       onChange={(e) => setNotifForm((p) => ({ ...p, body: e.target.value }))}
-                      maxLength={500}
+                      maxLength={2000}
                       rows={4}
                       placeholder="Write your notification message…"
                       className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm leading-6 text-richblack-25 outline-none transition placeholder:text-gray-500 focus:border-pink-400/40 focus:bg-white/[0.055]"
                       disabled={notifSending}
                     />
-                    <p className="mt-1 text-right text-[10px] text-gray-500">{notifForm.body.length}/500</p>
+                    <p className="mt-1 text-right text-[10px] text-gray-500">{notifForm.body.length}/2000</p>
                   </div>
                 </div>
 

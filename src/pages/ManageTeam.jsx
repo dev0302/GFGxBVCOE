@@ -324,6 +324,18 @@ export default function ManageTeam({
   const [societyBroadcastAudience, setSocietyBroadcastAudience] = useState(null);
 
   const department = isSociety ? propDepartment : user?.accountType;
+  const notificationPosition = String(
+    user?.additionalDetails?.position ||
+      user?.additionalDetails?.p0 ||
+      user?.position ||
+      user?.p0 ||
+      "",
+  ).toLowerCase();
+  const canNotifyWholeSociety =
+    !user?.isDepartmentMember &&
+    (isSocietyRole(user?.accountType) ||
+      notificationPosition.includes("head") ||
+      notificationPosition.includes("lead"));
   // console.log(department);
 
   const getCroppedImg = (imageEl, cropPx) => {
@@ -924,14 +936,14 @@ export default function ManageTeam({
   }, [displayDepartment]);
 
   useEffect(() => {
-    if (!isSocietyRole(user?.accountType)) {
+    if (!canNotifyWholeSociety) {
       setSocietyBroadcastAudience(null);
       return;
     }
     getNotificationBroadcastAudience()
       .then((res) => setSocietyBroadcastAudience(res?.data || null))
       .catch(() => setSocietyBroadcastAudience(null));
-  }, [user?.accountType]);
+  }, [canNotifyWholeSociety]);
 
   const fetchActiveInviteLink = async () => {
     setInviteLinkFetching(true);
@@ -1216,7 +1228,7 @@ export default function ManageTeam({
   Send notification to all
   {deptBroadcastAudience?.total != null ? ` (${deptBroadcastAudience.total})` : ""}
 </button>
-                {isSocietyRole(user?.accountType) && (
+                {canNotifyWholeSociety && (
                   <button
                     type="button"
                     onClick={() => {
@@ -3004,12 +3016,12 @@ export default function ManageTeam({
                     type="text"
                     value={deptNotifForm.title}
                     onChange={(e) => setDeptNotifForm((p) => ({ ...p, title: e.target.value }))}
-                    maxLength={120}
+                    maxLength={300}
                     placeholder="e.g. Department Meeting"
                     className="w-full rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm text-richblack-25 outline-none transition placeholder:text-gray-500 focus:border-pink-400/40 focus:bg-white/[0.055]"
                     disabled={deptNotifSending}
                   />
-                  <p className="mt-1 text-right text-[10px] text-gray-500">{deptNotifForm.title.length}/120</p>
+                  <p className="mt-1 text-right text-[10px] text-gray-500">{deptNotifForm.title.length}/300</p>
                 </div>
 
                 <div>
@@ -3019,13 +3031,13 @@ export default function ManageTeam({
                   <textarea
                     value={deptNotifForm.body}
                     onChange={(e) => setDeptNotifForm((p) => ({ ...p, body: e.target.value }))}
-                    maxLength={500}
+                    maxLength={2000}
                     rows={4}
                     placeholder="Write your notification message…"
                     className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2.5 text-sm leading-6 text-richblack-25 outline-none transition placeholder:text-gray-500 focus:border-pink-400/40 focus:bg-white/[0.055]"
                     disabled={deptNotifSending}
                   />
-                  <p className="mt-1 text-right text-[10px] text-gray-500">{deptNotifForm.body.length}/500</p>
+                  <p className="mt-1 text-right text-[10px] text-gray-500">{deptNotifForm.body.length}/2000</p>
                 </div>
               </div>
 

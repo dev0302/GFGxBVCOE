@@ -288,13 +288,18 @@ export default function NotificationsButton({
 
   const bColor = badgeColor(notifications);
 
-  const handleToggle = () => {
+  const handleToggle = async () => {
     onBeforeToggle?.();
     dismissBubble();
     const next = !open;
     setOpen(next);
     if (!next) setReplyingTo(null);
-    if (next) refresh();
+    if (next) {
+      // Opening the panel counts as seeing its contents. Refresh first so the
+      // list and server state include notifications received while it was closed.
+      await refresh();
+      await markAllRead();
+    }
   };
 
   // Panel placement
