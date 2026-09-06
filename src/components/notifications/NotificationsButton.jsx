@@ -288,17 +288,21 @@ export default function NotificationsButton({
 
   const bColor = badgeColor(notifications);
 
-  const handleToggle = async () => {
+  const handleClose = () => {
+    setOpen(false);
+    setReplyingTo(null);
+    markAllRead();
+  };
+
+  const handleToggle = () => {
     onBeforeToggle?.();
     dismissBubble();
     const next = !open;
-    setOpen(next);
-    if (!next) setReplyingTo(null);
     if (next) {
-      // Opening the panel counts as seeing its contents. Refresh first so the
-      // list and server state include notifications received while it was closed.
-      await refresh();
-      await markAllRead();
+      setOpen(true);
+      refresh();
+    } else {
+      handleClose();
     }
   };
 
@@ -442,7 +446,7 @@ export default function NotificationsButton({
                   transition={{ duration: 0.22, ease: "easeOut" }}
                   className="pointer-events-auto fixed inset-0 z-[300] bg-black/35"
                   data-notifications-panel
-                  onClick={() => { setOpen(false); setReplyingTo(null); }}
+                  onClick={handleClose}
                 />
                 <motion.div
                   key="notifications-panel"
@@ -492,7 +496,7 @@ export default function NotificationsButton({
                         )}
                         <button
                           type="button"
-                          onClick={() => { setOpen(false); setReplyingTo(null); }}
+                          onClick={handleClose}
                           className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-medium text-gray-300 transition hover:bg-white/10"
                         >
                           Close
@@ -558,7 +562,7 @@ export default function NotificationsButton({
                           const handleItemClick = () => {
                             if (isUnread) markRead(n._id);
                             if (n.metadata?.link) {
-                              setOpen(false);
+                              handleClose();
                               navigate(n.metadata.link);
                             }
                           };
