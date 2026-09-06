@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle, Clipboard, Download, Search, UserPlus } from "react-feather";
+import { CheckCircle, Clipboard, Download, Search, UserPlus, AlertTriangle, AlertCircle } from "react-feather";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { completeTask, createTask, getTaskPeople, getTasks, deleteTask, getAuthToken, getTaskConfig, updateTaskConfig, getTaskReportData } from "../services/api";
@@ -628,7 +628,61 @@ export default function Tasks() {
       )}
     </div>
   </div>
-)}{confirmDeleteId && <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"><div className="w-full max-w-md rounded-2xl border border-rose-500/20 bg-gradient-to-br from-[#1e141a] to-[#100f13] p-6 shadow-2xl"><h3 className="text-lg font-bold text-rose-300">Confirm task deletion</h3><p className="mt-2 text-sm text-gray-400">Are you sure you want to delete this task? This action is permanent and cannot be undone.</p><div className="mt-6 flex justify-end gap-3"><button onClick={()=>setConfirmDeleteId(null)} className="rounded-xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-white/10">Cancel</button><button onClick={async()=>{try{await deleteTask(confirmDeleteId);toast.success("Task deleted successfully");setConfirmDeleteId(null);load();}catch(e){toast.error(e.message);}}} className="rounded-xl bg-rose-500 px-4 py-2.5 text-xs font-semibold text-slate-950 hover:bg-rose-400">Delete task</button></div></div></div>}<ConfirmDeleteModal open={Boolean(confirmCompleteTask)} title="Mark task as complete?" description={`Mark “${confirmCompleteTask?.title || "this task"}” as complete? This will clear its pending-task alert.`} confirmLabel="Mark complete" loading={completingTask} onClose={() => !completingTask && setConfirmCompleteTask(null)} onConfirm={confirmTaskComplete} /></section>
+)}{confirmDeleteId && <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"><div className="w-full max-w-md rounded-2xl border border-rose-500/20 bg-gradient-to-br from-[#1e141a] to-[#100f13] p-6 shadow-2xl"><h3 className="text-lg font-bold text-rose-300">Confirm task deletion</h3><p className="mt-2 text-sm text-gray-400">Are you sure you want to delete this task? This action is permanent and cannot be undone.</p><div className="mt-6 flex justify-end gap-3"><button onClick={()=>setConfirmDeleteId(null)} className="rounded-xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-white/10">Cancel</button><button onClick={async()=>{try{await deleteTask(confirmDeleteId);toast.success("Task deleted successfully");setConfirmDeleteId(null);load();}catch(e){toast.error(e.message);}}} className="rounded-xl bg-rose-500 px-4 py-2.5 text-xs font-semibold text-slate-950 hover:bg-rose-400">Delete task</button></div></div></div>}{Boolean(confirmCompleteTask) && (
+  <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/75 p-3 sm:p-4 backdrop-blur-sm">
+    <div className="w-full max-w-lg rounded-2xl border border-amber-500/30 bg-gradient-to-br from-[#1c1815] via-[#13131d] to-[#0d0e17] p-5 sm:p-6 shadow-2xl">
+      <div className="flex items-start gap-3.5">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+          <AlertTriangle className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-bold text-gray-100">
+            Confirm Task Completion
+          </h3>
+          <p className="mt-1 text-sm text-gray-300">
+            Mark <span className="font-semibold text-cyan-300">“{confirmCompleteTask.title}”</span> as complete? This will notify your assigner and clear the pending alert.
+          </p>
+        </div>
+      </div>
+
+      {/* Strict Warning Alert Box */}
+      <div className="mt-4 rounded-xl border border-rose-500/40 bg-rose-500/10 p-4 text-xs text-rose-200">
+        <div className="flex items-center gap-2 font-bold text-rose-300 uppercase tracking-wider text-[11px] mb-2">
+          <AlertCircle size={15} className="shrink-0 text-rose-400" />
+          <span>Strict Warning & Rules</span>
+        </div>
+        <p className="leading-relaxed text-gray-300">
+          If you click <strong className="text-white">“Mark complete”</strong> without actually completing your assigned task, strict departmental rules will be enforced:
+        </p>
+        <ul className="mt-2.5 space-y-1.5 list-disc list-inside text-rose-300 font-medium">
+          <li>You will <strong className="text-white">not be considered for any certificates</strong>.</li>
+          <li>It will still be <strong className="text-white">compulsory to participate</strong> in all departmental activities without receiving any certificate.</li>
+          <li>If you still do not comply or complete the assigned task, you will be <strong className="text-rose-400 underline">kicked out / removed from the department</strong>.</li>
+        </ul>
+      </div>
+
+      <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
+        <button
+          type="button"
+          disabled={completingTask}
+          onClick={() => setConfirmCompleteTask(null)}
+          className="w-full sm:w-auto rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-white/10 disabled:opacity-50 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          disabled={completingTask}
+          onClick={confirmTaskComplete}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-50 transition-colors shadow-lg shadow-emerald-500/20 cursor-pointer"
+        >
+          <CheckCircle size={14} />
+          {completingTask ? "Marking complete…" : "Yes, Mark Complete"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}</section>
   );
 }
 

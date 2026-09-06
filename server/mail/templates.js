@@ -854,3 +854,76 @@ exports.taskAssignedTemplate = (data = {}) => {
   `;
   return wrapCard(inner);
 };
+
+/**
+ * Sent to the task assigner when an assignee marks their task complete.
+ * data: { title, description, assigneeName, assigneeRole, assignerName, department, completedAt, deadline, websiteUrl }
+ */
+exports.taskCompletedTemplate = (data = {}) => {
+  const {
+    title = "Task",
+    description = "",
+    assigneeName = "The Assignee",
+    assigneeRole = "",
+    assignerName = "Lead/Head",
+    department = "",
+    completedAt = "",
+    deadline = "",
+    websiteUrl = "https://www.gfg-bvcoe.com",
+  } = data;
+  
+  const safeDescription = escapeHtml(description).replace(/\r?\n/g, "<br/>");
+  const safeDeadline = deadline ? escapeHtml(deadline) : "No deadline specified";
+  const safeCompletedAt = completedAt ? escapeHtml(completedAt) : new Date().toLocaleString("en-IN");
+  const roleText = assigneeRole ? ` (${escapeHtml(assigneeRole)})` : "";
+  
+  const inner = `
+    <div style="margin-bottom: 24px;">
+      <div style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; width: 56px; height: 56px; line-height: 56px; font-size: 28px; margin-bottom: 16px; text-align: center;">
+        ✅
+      </div>
+    </div>
+    <h1 style="${BASE_STYLES.title}">Task Marked as Completed</h1>
+    <p style="${BASE_STYLES.body}">
+      Hi <strong style="color: #e5e7eb;">${escapeHtml(assignerName)}</strong>,
+      the task you assigned has been marked as complete by <strong style="color: #10b981;">${escapeHtml(assigneeName)}</strong>${roleText}.
+    </p>
+    
+    <div style="${BASE_STYLES.box}; text-align: left;">
+      <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 10px 0;">Task summary</p>
+      <p style="color: #e5e7eb; font-size: 16px; font-weight: bold; margin: 0 0 8px 0;">${escapeHtml(title)}</p>
+      
+      <p style="${BASE_STYLES.body}; margin: 12px 0; border-top: 1px solid #334155; padding-top: 12px; color: #cbd5e1; font-size: 13px; line-height: 1.6;">
+        ${safeDescription}
+      </p>
+      
+      <div style="border-top: 1px solid #334155; padding-top: 12px; margin-top: 12px;">
+        <p style="color: #94a3b8; font-size: 12px; margin: 0 0 4px 0;">
+          <span style="color: #64748b;">Completed by:</span> <strong style="color: #10b981;">${escapeHtml(assigneeName)}</strong>${roleText}
+        </p>
+        <p style="color: #94a3b8; font-size: 12px; margin: 0 0 4px 0;">
+          <span style="color: #64748b;">Completion Time:</span> <strong style="color: #e5e7eb;">${safeCompletedAt}</strong>
+        </p>
+        <p style="color: #94a3b8; font-size: 12px; margin: 0 0 4px 0;">
+          <span style="color: #64748b;">Deadline:</span> <strong style="color: #cbd5e1;">${safeDeadline}</strong>
+        </p>
+        <p style="color: #94a3b8; font-size: 12px; margin: 0;">
+          <span style="color: #64748b;">Department:</span> <strong style="color: #22d3ee;">${escapeHtml(department)}</strong>
+        </p>
+      </div>
+    </div>
+    
+    <p style="${BASE_STYLES.body}">
+      You can review this task and verify the completed work in your task workspace.
+    </p>
+    
+    <div style="margin: 28px 0;">
+      <a href="${websiteUrl}/tasks" style="${BASE_STYLES.button}">View in Workspace →</a>
+    </div>
+    
+    <p style="${BASE_STYLES.footer}">
+      This notification was sent by GFGxBVCOE.
+    </p>
+  `;
+  return wrapCard(inner);
+};
