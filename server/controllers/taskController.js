@@ -41,9 +41,25 @@ async function syncTaskExcel() {
       let computedStatus = task.status;
       let onTime = "N/A";
       
+      let priorStatus = task.previousStatus;
+      if (!priorStatus) {
+        const hadCompleted = Boolean(
+          task.completedAt ||
+          (Array.isArray(task.history) && task.history.some(h => h.action === "COMPLETED"))
+        );
+        if (hadCompleted) {
+          priorStatus = "Completed";
+        } else if (hasDeadline && (task.deletedAt ? new Date(task.deletedAt) : now) > new Date(task.deadline)) {
+          priorStatus = "Missed";
+        } else {
+          priorStatus = "Ongoing";
+        }
+      }
+      priorStatus = String(priorStatus).charAt(0).toUpperCase() + String(priorStatus).slice(1).toLowerCase();
+
       if (isDeleted) {
-        computedStatus = "Deleted";
-        onTime = "Deleted";
+        computedStatus = `Deleted (${priorStatus})`;
+        onTime = `Deleted (${priorStatus})`;
       } else if (isCompleted) {
         const completedDate = new Date(task.completedAt || task.updatedAt);
         if (!hasDeadline || completedDate <= new Date(task.deadline)) {
@@ -66,7 +82,7 @@ async function syncTaskExcel() {
       
       return {
         "Task ID": String(task._id),
-        "Title": isDeleted ? `(Deleted) ${task.title || ""}` : (task.title || ""),
+        "Title": isDeleted ? `(Deleted - ${priorStatus}) ${task.title || ""}` : (task.title || ""),
         "Description": task.description || "",
         "Priority": task.priority || "MEDIUM",
         "Department": task.department || "",
@@ -490,11 +506,24 @@ exports.deleteTask = async (req, res) => {
       return res.status(403).json({ success: false, message: "You can only delete tasks that you have assigned." });
     }
     
+    let priorStatus = "Ongoing";
+    if (task.status === "COMPLETED") {
+      priorStatus = "Completed";
+    } else {
+      const now = new Date();
+      if (task.deadline && now > new Date(task.deadline)) {
+        priorStatus = "Missed";
+      } else {
+        priorStatus = "Ongoing";
+      }
+    }
+    task.previousStatus = priorStatus;
+
     task.isDeleted = true;
     task.status = "DELETED";
     task.deletedAt = new Date();
     task.deletedBy = person;
-    task.history.push({ action: "DELETED", by: person, at: new Date() });
+    task.history.push({ action: "DELETED", by: person, at: new Date(), previousStatus: priorStatus });
     await task.save();
     
     await syncTaskExcel();

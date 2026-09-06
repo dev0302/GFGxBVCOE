@@ -27,6 +27,7 @@ const taskSchema = new mongoose.Schema(
     completedAt: { type: Date, default: null },
     completedBy: { type: personSchema, default: null },
     isDeleted: { type: Boolean, default: false, index: true },
+    previousStatus: { type: String, default: "" },
     deletedAt: { type: Date, default: null },
     deletedBy: { type: personSchema, default: null },
     history: [{ action: { type: String, required: true }, at: { type: Date, default: Date.now }, by: personSchema }],

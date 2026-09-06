@@ -219,12 +219,28 @@ export default function Tasks() {
         const hasDeadline = Boolean(task.deadline);
         const now = new Date();
 
+        let priorStatus = task.previousStatus;
+        if (!priorStatus) {
+          const hadCompleted = Boolean(
+            task.completedAt ||
+            (Array.isArray(task.history) && task.history.some(h => h.action === "COMPLETED"))
+          );
+          if (hadCompleted) {
+            priorStatus = "Completed";
+          } else if (hasDeadline && (task.deletedAt ? new Date(task.deletedAt) : now) > new Date(task.deadline)) {
+            priorStatus = "Missed";
+          } else {
+            priorStatus = "Ongoing";
+          }
+        }
+        priorStatus = String(priorStatus).charAt(0).toUpperCase() + String(priorStatus).slice(1).toLowerCase();
+
         let statusText = task.status;
         let onTime = "N/A";
 
         if (isDeleted) {
-          statusText = "Deleted";
-          onTime = "Deleted";
+          statusText = `Deleted (${priorStatus})`;
+          onTime = `Deleted (${priorStatus})`;
         } else if (isCompleted) {
           const completedDate = new Date(task.completedAt || task.updatedAt);
           if (!hasDeadline || completedDate <= new Date(task.deadline)) {
@@ -245,7 +261,7 @@ export default function Tasks() {
           }
         }
 
-        const titleText = isDeleted ? `(Deleted) ${task.title || ""}` : (task.title || "");
+        const titleText = isDeleted ? `(Deleted - ${priorStatus}) ${task.title || ""}` : (task.title || "");
         const assignedToText = task.assignedTo?.name ? `${task.assignedTo.name} (${task.assignedTo.role || task.department || ""})` : "—";
         const assignedByText = task.assignedBy?.name ? `${task.assignedBy.name} (${task.assignedBy.role || ""})` : "—";
         const assignedDateText = task.createdAt ? new Date(task.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
