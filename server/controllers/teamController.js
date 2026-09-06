@@ -77,12 +77,22 @@ function resolveDepartment(req) {
   return dept;
 }
 
+/**
+ * Authenticated users can read any department's roster and member list. This is
+ * intentionally separate from resolveDepartment, which continues to protect
+ * all team-management mutations from cross-department access.
+ */
+function resolveReadableDepartment(req) {
+  const requestedDepartment = req.query?.department;
+  if (requestedDepartment && TEAM_DEPARTMENTS.includes(requestedDepartment)) {
+    return requestedDepartment;
+  }
+  const accountType = req.user?.accountType;
+  return TEAM_DEPARTMENTS.includes(accountType) ? accountType : null;
+}
+
 exports.getDepartments = async (req, res) => {
   try {
-    const accountType = req.user?.accountType;
-    if (!SOCIETY_ROLES.includes(accountType)) {
-      return res.status(403).json({ success: false, message: "Not authorized." });
-    }
     return res.status(200).json({ success: true, data: TEAM_DEPARTMENTS });
   } catch (error) {
     console.error("getDepartments error:", error);
@@ -92,13 +102,11 @@ exports.getDepartments = async (req, res) => {
 
 exports.getMyTeamMembers = async (req, res) => {
   try {
-    const department = resolveDepartment(req);
+    const department = resolveReadableDepartment(req);
     if (!department) {
       return res.status(400).json({
         success: false,
-        message: SOCIETY_ROLES.includes(req.user?.accountType)
-          ? "Department query required (e.g. ?department=Technical)."
-          : "Department not found.",
+        message: "A valid department query is required (e.g. ?department=Technical).",
       });
     }
     const Model = getTeamMemberModel(department);
@@ -117,13 +125,11 @@ exports.getMyTeamMembers = async (req, res) => {
  */
 exports.getDepartmentRoster = async (req, res) => {
   try {
-    const department = resolveDepartment(req);
+    const department = resolveReadableDepartment(req);
     if (!department) {
       return res.status(400).json({
         success: false,
-        message: SOCIETY_ROLES.includes(req.user?.accountType)
-          ? "Department query required (e.g. ?department=Technical)."
-          : "Department not found.",
+        message: "A valid department query is required (e.g. ?department=Technical).",
       });
     }
     const departmentKeys = departmentLookupKeys(department);

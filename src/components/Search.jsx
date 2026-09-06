@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { getSearchPeople, getAccountTypeLabel, sendSignupInvite, getActivityLogs, isSocietyRole } from "../services/api";
 import { driveLinkToImageUrl, avatarPlaceholder, photoPreviewUrl, photoPreviewLargeAvatarUrl, photoProfileModalUrl, photoOriginalUrl, resolvePredefinedImageUrl } from "../utils/teamMemberUtils";
-import { Search as SearchIcon, X, Mail, Activity, Instagram, Linkedin, GitHub } from "react-feather";
+import { Search as SearchIcon, X, Mail, Activity, Instagram, Linkedin, GitHub, ExternalLink } from "react-feather";
 import "./Search.css";
 import { Spinner } from "./ui/spinner";
 import ProfileAvatarFlip from "./common/ProfileAvatarFlip";
@@ -113,6 +113,17 @@ export function MemberDetailModal({ member, onClose }) {
               {member.name || "—"}
             </h3>
             <SocialLinks socials={member.socials || member.profile?.socials || member.profile || {}} />
+            {(member.department || member.position) && (
+              <div className="text-center text-sm text-gray-400 space-y-1">
+                {member.department && (
+                  <p>Department: <span className="text-cyan-400">{getAccountTypeLabel(member.department) || member.department}</span></p>
+                )}
+                <p>Current position: <span className="text-gray-200">{member.position || "Member"}</span></p>
+                {member.non_tech_society && (
+                  <p>Non-tech society: <span className="text-gray-200">{member.non_tech_society}</span></p>
+                )}
+              </div>
+            )}
             {(member.year || member.branch) && (
               <p className="text-gray-400 text-sm">
                 {[member.year, member.branch].filter(Boolean).join(" • ")}
@@ -158,16 +169,14 @@ export function MemberDetailModal({ member, onClose }) {
           </dl>
           {(member.photo || member.image_drive_link) && (
             <div className="pt-2 border-t border-gray-500/20">
-              <span className="text-xs text-gray-500 uppercase tracking-wider">
-                Photo link
-              </span>
               <a
-                href={member.photo || member.image_drive_link}
+                href={originalPhotoUrl || member.photo || member.image_drive_link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block text-cyan-400 text-sm mt-1 truncate hover:underline"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 text-sm font-medium transition-colors"
               >
-                {member.photo || member.image_drive_link}
+                <ExternalLink className="h-4 w-4" />
+                Open photo
               </a>
             </div>
           )}
@@ -357,6 +366,17 @@ export function PredefinedOnlyDetailModal({ predefined, onClose }) {
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/40">
               Not registered yet
             </span>
+            {(pre.department || pre.position || pre.p0) && (
+              <div className="text-center text-sm text-gray-400 space-y-1">
+                {pre.department && (
+                  <p>Department: <span className="text-cyan-400">{getAccountTypeLabel(pre.department) || pre.department}</span></p>
+                )}
+                <p>Current position: <span className="text-gray-200">{pre.position || pre.p0 || "Member"}</span></p>
+                {pre.non_tech_society && (
+                  <p>Non-tech society: <span className="text-gray-200">{pre.non_tech_society}</span></p>
+                )}
+              </div>
+            )}
             {(pre.branch || pre.year) && (
               <p className="text-gray-400 text-sm text-center">
                 {[pre.branch, pre.year].filter(Boolean).join(" • ")}
@@ -373,6 +393,7 @@ export function PredefinedOnlyDetailModal({ predefined, onClose }) {
               <DetailRow label="Branch" value={pre.branch} />
               <DetailRow label="Year" value={pre.year} />
               <DetailRow label="Position" value={pre.position} />
+              <DetailRow label="Non-tech society" value={pre.non_tech_society} />
               <DetailRow label="P0" value={pre.p0} />
               <DetailRow label="P1" value={pre.p1} />
               <DetailRow label="P2" value={pre.p2} />
@@ -383,7 +404,17 @@ export function PredefinedOnlyDetailModal({ predefined, onClose }) {
               />
               <DetailRow label="LinkedIn" value={pre.linkedinLink} link={pre.linkedinLink || undefined} />
               {pre.image && (
-                <DetailRow label="Image URL" value={pre.image} link={pre.image} />
+                <div className="pt-2">
+                  <a
+                    href={originalSrc || pre.image}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 text-sm font-medium transition-colors"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Open photo
+                  </a>
+                </div>
               )}
               {Array.isArray(pre.timeline) && pre.timeline.length > 0 && (
                 <div className="pt-2">
@@ -587,6 +618,15 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
             />
             <h3 className="text-xl font-bold text-richblack-25 text-center">{fullName}</h3>
             <SocialLinks socials={profile.socials || {}} />
+            <div className="text-center text-sm text-gray-400 space-y-1">
+              {user.accountType && (
+                <p>Department: <span className="text-cyan-400">{getAccountTypeLabel(user.accountType) || user.accountType}</span></p>
+              )}
+              <p>Current position: <span className="text-gray-200">{profile.position || profile.p0 || "Member"}</span></p>
+              {profile.non_tech_society && (
+                <p>Non-tech society: <span className="text-gray-200">{profile.non_tech_society}</span></p>
+              )}
+            </div>
             {(profile.branch || profile.year || user.accountType) && (
               <p className="text-gray-400 text-sm text-center">
                 {[profile.branch, profile.year].filter(Boolean).join(" • ")}
@@ -635,6 +675,7 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
               <DetailRow label="Branch" value={profile.branch} />
               <DetailRow label="Year" value={profile.year} />
               <DetailRow label="Position" value={profile.position} />
+              <DetailRow label="Non-tech society" value={profile.non_tech_society} />
               <DetailRow label="P0" value={profile.p0} />
               <DetailRow label="P1" value={profile.p1} />
               <DetailRow label="P2" value={profile.p2} />

@@ -42,6 +42,9 @@ import {
   Phone,
   RotateCcw,
   Bell,
+  Instagram,
+  Linkedin,
+  GitHub,
 } from "react-feather";
 import {
   driveLinkToImageUrl,
@@ -52,6 +55,8 @@ import {
 import {
   downloadTeamListPDF,
   downloadTeamListExcel,
+  downloadAllDepartmentsPDF,
+  downloadAllDepartmentsExcel,
 } from "../utils/teamListExport";
 import Search from "../components/Search";
 import {
@@ -113,7 +118,64 @@ const YEAR_OPTIONS = ["1st", "2nd", "3rd", "4th"];
 const BRANCH_OPTIONS = ["CSE", "AIML", "IT", "EEE", "ECE", "ICE"];
 const ORG_NAME = "GFG BVCOE";
 const EXPORT_COLS = COLS.filter((k) => k !== "photo");
+const ALL_DEPARTMENTS_EXPORT_COLS = ["name", "department", ...EXPORT_COLS];
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
+
+function socialUrl(value, platform) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed || trimmed.toLowerCase() === "nil") return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  const handle = trimmed.replace(/^@/, "");
+  const domains = {
+    instagram: "instagram.com/",
+    linkedin: "linkedin.com/in/",
+    github: "github.com/",
+  };
+  return `https://${domains[platform]}${handle}`;
+}
+
+function SocialMediaLinks({ socials = {} }) {
+  const links = [
+    { key: "instagram", label: "Instagram", className: "text-pink-400 hover:text-pink-300 hover:bg-pink-500/15" },
+    { key: "linkedin", label: "LinkedIn", className: "text-blue-400 hover:text-blue-300 hover:bg-blue-500/15" },
+    { key: "github", label: "GitHub", className: "text-gray-300 hover:text-white hover:bg-white/10" },
+  ];
+
+  return (
+    <div className="flex items-center gap-1" data-profile-detail-ignore>
+      {links.map(({ key, label, className }) => {
+        const href = socialUrl(socials[key], key);
+        const icon = key === "instagram"
+          ? <Instagram className="h-4 w-4" />
+          : key === "linkedin"
+            ? <Linkedin className="h-4 w-4" />
+            : <GitHub className="h-4 w-4" />;
+        return href ? (
+          <a
+            key={key}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`Open ${label}`}
+            aria-label={`Open ${label}`}
+            className={`p-1.5 rounded-lg transition-colors ${className}`}
+          >
+            {icon}
+          </a>
+        ) : (
+          <span
+            key={key}
+            title={`${label} not provided`}
+            aria-label={`${label} not provided`}
+            className="p-1.5 text-gray-600 cursor-not-allowed"
+          >
+            {icon}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 
 const iosRowVariants = {
   hidden: {
@@ -242,6 +304,11 @@ export default function ManageTeam({
     ...EXPORT_COLS,
   ]);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [printAllModalOpen, setPrintAllModalOpen] = useState(false);
+  const [printAllSelectedFields, setPrintAllSelectedFields] = useState([
+    ...ALL_DEPARTMENTS_EXPORT_COLS,
+  ]);
+  const [printAllLoading, setPrintAllLoading] = useState(false);
   const imgCropRef = useRef(null);
   const cropPxRef = useRef(null);
 
@@ -655,7 +722,194 @@ export default function ManageTeam({
     }
   };
 
+  const togglePrintAllField = (field) => {
+    setPrintAllSelectedFields((previous) =>
+      previous.includes(field)
+        ? previous.filter((item) => item !== field)
+        : [...previous, field],
+    );
+  };
+
+  const buildAllDepartmentsExportSections = async () => {
+    const departments = (await getTeamDepartments()).data || [];
+    const departmentRows = {};
+
+    await Promise.all(
+      departments.map(async (dept) => {
+        const [rosterRes, membersRes] = await Promise.all([
+          getDepartmentRoster(dept),
+          getTeamMembers(dept),
+        ]);
+        const rosterData = (rosterRes.data || []).filter(
+          (row) => row.registered && row.user,
+        );
+        const rosterEmails = new Set(
+          rosterData.map((row) => (row.email || "").trim().toLowerCase()),
+        );
+        const fromRoster = rosterData.map((row) => {
+          const userData = row.user;
+          const profile = userData?.additionalDetails || {};
+          const predefined = row.predefinedProfile || {};
+          return {
+            name: row.registered
+              ? [userData?.firstName, userData?.lastName].filter(Boolean).join(" ").trim() || row.email
+              : predefined.name || row.email,
+            department: dept,
+            year: row.registered ? profile.year || profile.yearOfStudy || "" : predefined.year || "",
+            branch: row.registered ? profile.branch || "" : predefined.branch || "",
+            section: row.registered ? profile.section || "" : "",
+            email: row.email || "",
+            contact: row.registered ? userData?.contact || "" : "",
+            non_tech_society: row.registered ? profile.non_tech_society || "" : "",
+            accountType: userData?.accountType || "",
+            role: profile.position || profile.p0 || userData?.accountType || "Member",
+            photo: row.registered ? userData?.image || "" : predefined.image || "",
+          };
+        });
+        const extraMembers = (membersRes.data || [])
+          .filter((member) => !rosterEmails.has((member.email || "").trim().toLowerCase()))
+          .map((member) => ({
+            name: member.name || "",
+            department: dept,
+            year: member.year || "",
+            branch: member.branch || "",
+            section: member.section || "",
+            email: member.email || "",
+            contact: member.contact || "",
+            non_tech_society: member.non_tech_society || "",
+            accountType: "",
+            role: member.position || "Member",
+            photo: member.photo || member.image_drive_link || member.image || "",
+          }));
+        departmentRows[dept] = [...fromRoster, ...extraMembers];
+      }),
+    );
+
+    const buildUserExportRow = (userData) => {
+      const profile = userData?.additionalDetails || {};
+      return {
+        name: [userData?.firstName, userData?.lastName].filter(Boolean).join(" ").trim() || userData?.email || "",
+        department: userData?.accountType || "",
+        year: profile.year || profile.yearOfStudy || "",
+        branch: profile.branch || "",
+        section: profile.section || "",
+        email: userData?.email || "",
+        contact: userData?.contact || "",
+        non_tech_society: profile.non_tech_society || "",
+        accountType: userData?.accountType || "",
+        role: profile.position || profile.p0 || userData?.accountType || "Member",
+        photo: userData?.image || "",
+      };
+    };
+    const uniqueRows = (rows) => {
+      const seen = new Set();
+      return rows.filter((row) => {
+        const key = String(row.email || row.name || "").trim().toLowerCase();
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    };
+    const isTestingAccount = (row) =>
+      String(row.email || "").trim().toLowerCase() === "geeksforgeeksbvp@gmail.com";
+    const isFacultyIncharge = (row) => {
+      const role = String(row.role || "").toLowerCase();
+      const accountType = String(row.accountType || "").toLowerCase();
+      return accountType === "admin" || role.includes("faculty incharge");
+    };
+    const isCoreTeam = (row) => {
+      if (isTestingAccount(row) || isFacultyIncharge(row)) return false;
+      const role = String(row.role || "").toLowerCase();
+      const accountType = String(row.accountType || "").toLowerCase();
+      return ["chairperson", "vice-chairperson", "treasurer"].includes(accountType) ||
+        ["chairperson", "vice-chairperson", "treasurer"].includes(role) || role.includes("lead");
+    };
+    const isDepartmentHead = (row) =>
+      !isFacultyIncharge(row) && String(row.role || "").toLowerCase().includes("head");
+
+    const allPeopleRes = await getAllPeople();
+    const activeUserRows = (allPeopleRes.data || [])
+      .filter((item) => item.type === "user")
+      .map((item) => buildUserExportRow(item.data));
+    const leadershipRows = uniqueRows([
+      ...activeUserRows,
+      ...Object.values(departmentRows).flat(),
+    ]);
+    const facultyIncharge = leadershipRows.filter(isFacultyIncharge);
+    const testingAccounts = leadershipRows.filter(isTestingAccount);
+    const coreTeam = leadershipRows.filter(isCoreTeam);
+    const departmentHeads = leadershipRows.filter(
+      (row) => !isCoreTeam(row) && !isTestingAccount(row) && isDepartmentHead(row),
+    );
+    const leadershipEmails = new Set(
+      [...facultyIncharge, ...testingAccounts, ...coreTeam, ...departmentHeads]
+        .map((row) => String(row.email || "").trim().toLowerCase())
+        .filter(Boolean),
+    );
+    const sections = {};
+    if (facultyIncharge.length) sections["Faculty Incharge"] = facultyIncharge;
+    sections["Core Team"] = coreTeam;
+    sections["Department Heads"] = departmentHeads;
+    departments.forEach((dept) => {
+      sections[dept] = (departmentRows[dept] || []).filter(
+        (row) => !leadershipEmails.has(String(row.email || "").trim().toLowerCase()),
+      );
+    });
+    if (testingAccounts.length) sections["Testing Accounts"] = testingAccounts;
+    return sections;
+  };
+
+  const handlePrintAllPDF = async () => {
+    if (!printAllSelectedFields.length) {
+      toast.error("Select at least one column to include");
+      return;
+    }
+    setPrintAllLoading(true);
+    try {
+      await downloadAllDepartmentsPDF(
+        await buildAllDepartmentsExportSections(),
+        printAllSelectedFields,
+        { ...LABELS, department: "Department" },
+        `${ORG_NAME} - Society Member List (All Departments)`,
+        { includePhotos: true },
+      );
+      toast.success("PDF downloaded");
+    } catch (error) {
+      toast.error(error.message || "PDF download failed");
+    } finally {
+      setPrintAllLoading(false);
+    }
+  };
+
+  const handlePrintAllExcel = async () => {
+    if (!printAllSelectedFields.length) {
+      toast.error("Select at least one column to include");
+      return;
+    }
+    setPrintAllLoading(true);
+    try {
+      downloadAllDepartmentsExcel(
+        await buildAllDepartmentsExportSections(),
+        printAllSelectedFields,
+        { ...LABELS, department: "Department" },
+        `${ORG_NAME} - Society Member List (All Departments)`,
+      );
+      toast.success("Excel downloaded");
+    } catch (error) {
+      toast.error(error.message || "Excel download failed");
+    } finally {
+      setPrintAllLoading(false);
+    }
+  };
+
   const displayDepartment = department || user?.accountType || "";
+
+  const openDetailsFromEmptyCell = (event, detailItem) => {
+    // Only the unused space in a table cell opens details. Text, avatars, and
+    // action controls retain their existing interactions.
+    if (event.target.closest("[data-profile-detail-ignore], button, a, img")) return;
+    setSelectedDetailItem(detailItem);
+  };
 
   useEffect(() => {
     if (!displayDepartment) {
@@ -910,6 +1164,14 @@ export default function ManageTeam({
                 <Printer className="h-4 w-4" />
                 Print / Export list
               </button>
+              <button
+                type="button"
+                onClick={() => setPrintAllModalOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-200 hover:bg-cyan-500/25 hover:border-cyan-400/50 transition-colors text-sm font-medium"
+              >
+                <Printer className="h-4 w-4" />
+                Print whole list (all departments)
+              </button>
               {(isSociety || !isReadOnly) && (
                 <>
                 <button
@@ -1123,6 +1385,9 @@ export default function ManageTeam({
                             {LABELS[k] || k}
                           </th>
                         ))}
+                        <th className="px-4 py-3 text-gray-300 font-semibold whitespace-nowrap">
+                          Social media
+                        </th>
                         {!isReadOnly && <th className="px-4 py-3 text-gray-300 font-semibold whitespace-nowrap">
                           Actions
                         </th>}
@@ -1142,7 +1407,13 @@ export default function ManageTeam({
                               {LIST_COLS.map((k) => (
                                 <td
                                   key={k}
-                                  className="px-4 py-3 text-gray-200 max-w-[200px] truncate align-middle"
+                                  className="px-4 py-3 text-gray-200 max-w-[200px] truncate align-middle cursor-pointer"
+                                  onClick={(event) =>
+                                    openDetailsFromEmptyCell(event, {
+                                      type: "teamMember",
+                                      data: { ...m, department: m.department || displayDepartment },
+                                    })
+                                  }
                                   title={
                                     k === "photo"
                                       ? m.photo || m.image_drive_link
@@ -1151,8 +1422,8 @@ export default function ManageTeam({
                                 >
                                   {k === "name" ? (
                                     <div className="flex flex-col gap-1">
-                                      <span className="truncate">{name}</span>
-                                      <span className="inline-flex w-fit items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                                      <span data-profile-detail-ignore className="truncate">{name}</span>
+                                      <span data-profile-detail-ignore className="inline-flex w-fit items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
                                         Team member
                                       </span>
                                     </div>
@@ -1179,10 +1450,15 @@ export default function ManageTeam({
                                       }}
                                     />
                                   ) : (
-                                    m[k] || "—"
+                                    <span data-profile-detail-ignore>{m[k] || "—"}</span>
                                   )}
                                 </td>
                               ))}
+                              <td className="px-4 py-3 align-middle">
+                                <SocialMediaLinks
+                                  socials={m.socials || m.profile?.socials || m.profile || {}}
+                                />
+                              </td>
                               {!isReadOnly && <td className="px-4 py-3 align-middle">
                                 <span className="inline-flex items-center gap-2">
                                   <button
@@ -1251,22 +1527,34 @@ export default function ManageTeam({
                             {LIST_COLS.map((k) => (
                               <td
                                 key={k}
-                                className="px-4 py-3 text-gray-200 max-w-[200px] align-middle"
+                                className="px-4 py-3 text-gray-200 max-w-[200px] align-middle cursor-pointer"
+                                onClick={(event) =>
+                                  openDetailsFromEmptyCell(event, {
+                                    type: row.registered ? "user" : "predefinedOnly",
+                                    data: row.registered
+                                      ? row.user
+                                      : {
+                                          ...(row.predefinedProfile || {}),
+                                          email: row.email,
+                                          department: displayDepartment,
+                                        },
+                                  })
+                                }
                                 title={
                                   k === "photo" ? photoUrl || "" : undefined
                                 }
                               >
                                 {k === "name" ? (
                                   <div className="flex flex-col gap-1">
-                                    <span className="truncate">
+                                    <span data-profile-detail-ignore className="truncate">
                                       {cell(k) || "—"}
                                     </span>
                                     {tagLabel != null && tagLabel !== "" ? (
-                                      <span className="inline-flex w-fit items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                                      <span data-profile-detail-ignore className="inline-flex w-fit items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
                                         {tagLabel}
                                       </span>
                                     ) : !row.registered ? (
-                                      <span className="inline-flex w-fit items-center px-2 py-0.5 rounded text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/40">
+                                      <span data-profile-detail-ignore className="inline-flex w-fit items-center px-2 py-0.5 rounded text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/40">
                                         Not registered yet
                                       </span>
                                     ) : null}
@@ -1294,15 +1582,26 @@ export default function ManageTeam({
                                      }}
                                    />
                                 ) : (
-                                  <span className="truncate block">
+                                  <span data-profile-detail-ignore className="truncate block">
                                     {cell(k) || "—"}
                                   </span>
                                 )}
                               </td>
                             ))}
-                            <td className="px-4 py-3 align-middle text-gray-500">
-                              —
+                            <td className="px-4 py-3 align-middle">
+                              <SocialMediaLinks
+                                socials={
+                                  row.registered
+                                    ? profile.socials || {}
+                                    : {
+                                        instagram: pre.instaLink,
+                                        linkedin: pre.linkedinLink,
+                                        github: pre.githubLink || pre.github,
+                                      }
+                                }
+                              />
                             </td>
+                            {!isReadOnly && <td className="px-4 py-3 align-middle text-gray-500">—</td>}
                           </tr>
                         );
                       })}
@@ -1494,6 +1793,91 @@ export default function ManageTeam({
                 >
                   <Download className="h-4 w-4" />
                   Generate & Download Excel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {printAllModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => !printAllLoading && setPrintAllModalOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="print-all-departments-title"
+        >
+          <div
+            className="darkthemebg rounded-2xl border border-gray-500/30 w-full max-w-md overflow-hidden"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-gray-500/30">
+              <h2 id="print-all-departments-title" className="text-lg font-bold text-richblack-25 flex items-center gap-2">
+                <Printer className="h-5 w-5 text-cyan-400" />
+                Print whole list (all departments)
+              </h2>
+              <button
+                type="button"
+                onClick={() => setPrintAllModalOpen(false)}
+                disabled={printAllLoading}
+                className="p-2 rounded-lg text-gray-400 hover:text-richblack-25 hover:bg-gray-500/30 disabled:opacity-50"
+                aria-label="Close"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <p className="text-sm text-gray-400">
+                Select columns to include. Export will list all departments with their members.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPrintAllSelectedFields([...ALL_DEPARTMENTS_EXPORT_COLS])}
+                  className="px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 text-sm font-medium"
+                >
+                  Select all
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPrintAllSelectedFields([])}
+                  className="px-3 py-1.5 rounded-lg border border-gray-500/50 text-gray-400 hover:bg-gray-500/20 text-sm"
+                >
+                  Deselect all
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {ALL_DEPARTMENTS_EXPORT_COLS.map((field) => (
+                  <label key={field} className="flex items-center gap-2 cursor-pointer text-sm text-gray-200 hover:text-richblack-25">
+                    <input
+                      type="checkbox"
+                      checked={printAllSelectedFields.includes(field)}
+                      onChange={() => togglePrintAllField(field)}
+                      className="rounded border-gray-500 bg-[#252536] text-cyan-500 focus:ring-cyan-500"
+                    />
+                    {field === "department" ? "Department" : LABELS[field] || field}
+                  </label>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-500/30">
+                <button
+                  type="button"
+                  onClick={handlePrintAllPDF}
+                  disabled={printAllLoading || !printAllSelectedFields.length}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-richblack-25 font-medium text-sm disabled:opacity-50"
+                >
+                  <FileText className="h-4 w-4" />
+                  {printAllLoading ? "Generating…" : "Generate & Download PDF"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePrintAllExcel}
+                  disabled={printAllLoading || !printAllSelectedFields.length}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-richblack-25 font-medium text-sm disabled:opacity-50"
+                >
+                  <Download className="h-4 w-4" />
+                  {printAllLoading ? "Generating…" : "Generate & Download Excel"}
                 </button>
               </div>
             </div>
