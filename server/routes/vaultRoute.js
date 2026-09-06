@@ -6,9 +6,11 @@ const { optionalAuth } = require("../middlewares/AuthZ");
 router.get("/items", optionalAuth, vaultController.getVaultItems);
 router.get("/share/:shareToken", vaultController.getPublicShareItems);
 router.post("/folders", optionalAuth, vaultController.createFolder);
+router.put("/folders/:id", optionalAuth, vaultController.renameFolder);
 router.delete("/folders/:id", optionalAuth, vaultController.deleteFolder);
 router.put("/folders/:id/lock", optionalAuth, vaultController.toggleFolderLock);
 router.post("/upload", optionalAuth, vaultController.uploadDocument);
+router.put("/documents/:id", optionalAuth, vaultController.renameDocument);
 router.delete("/documents/:id", optionalAuth, vaultController.deleteDocument);
 router.put("/documents/:id/lock", optionalAuth, vaultController.toggleDocumentLock);
 

@@ -39,6 +39,13 @@ export async function getTasks(status = "") {
   };
 }
 
+export async function markAssignedTasksViewed() {
+  const res = await authFetch("/api/v1/tasks/mark-viewed", { method: "POST" });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to mark tasks as viewed");
+  return data;
+}
+
 export async function completeTask(id) {
   const res = await authFetch(`/api/v1/tasks/${id}/complete`, { method: "PATCH" });
   const data = await res.json().catch(() => ({}));
@@ -1720,6 +1727,17 @@ export async function deleteVaultFolder(id) {
   return data;
 }
 
+export async function renameVaultFolder(id, name) {
+  const res = await authFetch(`/api/v1/vault/folders/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to rename folder");
+  return data;
+}
+
 export async function uploadVaultDocument(formData) {
   const token = getAuthToken();
   const headers = {};
@@ -1741,6 +1759,17 @@ export async function deleteVaultDocument(id) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to delete document");
+  return data;
+}
+
+export async function renameVaultDocument(id, name) {
+  const res = await authFetch(`/api/v1/vault/documents/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to rename document");
   return data;
 }
 

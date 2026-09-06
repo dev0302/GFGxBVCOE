@@ -1,7 +1,9 @@
 const VaultFolder = require("../models/VaultFolder");
 const VaultDocument = require("../models/VaultDocument");
 const User = require("../models/User");
+const Notification = require("../models/Notification");
 const { cloudinary } = require("../config/cloudinary");
+const { emitNotification, getAllLeadershipRecipients } = require("../utils/notificationService");
 
 function formatBytes(bytes, decimals = 1) {
   if (!bytes || bytes === 0) return "0 B";
@@ -224,6 +226,48 @@ exports.uploadDocument = async (req, res) => {
       createdDocs.push(sanitizeItem(newDoc));
     }
 
+    // Keep core members and department Heads/Leads informed of every new vault document.
+    // Notification failures must not make an otherwise successful upload fail.
+    try {
+      const recipientIds = await getAllLeadershipRecipients();
+      const senderId = String(req.user?.id || req.user?._id || "");
+      for (const document of createdDocs) {
+        for (const recipientId of recipientIds) {
+          const notification = await Notification.create({
+            recipientId,
+            type: "vault_document_uploaded",
+            title: "Document uploaded to Vault",
+            body: `${uploaderName} uploaded a document: "${document.name}" in the Document Vault.`,
+            metadata: {
+              documentId: String(document._id),
+              documentName: document.name,
+              department: document.department || "all",
+              link: "/em-dashboard/documents",
+              color: "cyan",
+            },
+            senderId,
+            senderName: uploaderName,
+            senderRole: req.user?.accountType || "Member",
+          });
+          emitNotification(String(recipientId), {
+            _id: notification._id,
+            type: notification.type,
+            title: notification.title,
+            body: notification.body,
+            metadata: notification.metadata,
+            senderId: notification.senderId,
+            senderName: notification.senderName,
+            senderRole: notification.senderRole,
+            readAt: notification.readAt,
+            createdAt: notification.createdAt,
+            replies: [],
+          });
+        }
+      }
+    } catch (notificationError) {
+      console.error("Document vault upload notification error:", notificationError.message);
+    }
+
     return res.status(201).json({
       success: true,
       document: createdDocs.length === 1 ? createdDocs[0] : undefined,
@@ -270,6 +314,35 @@ exports.deleteDocument = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+async function renameVaultItem(req, res, Model, itemLabel, responseKey) {
+  try {
+    const item = await Model.findById(req.params.id);
+    if (!item) return res.status(404).json({ success: false, message: `${itemLabel} not found.` });
+    if (item.isLocked) {
+      return res.status(403).json({ success: false, message: `This ${itemLabel.toLowerCase()} is locked and cannot be renamed.` });
+    }
+    const name = String(req.body?.name || "").trim();
+    if (!name) return res.status(400).json({ success: false, message: "A name is required." });
+
+    const { name: currentUserName, email: currentUserEmail } = await getUserDetails(req, "Event Management Member");
+    if (!isSameUser(currentUserEmail, currentUserName, item.createdByEmail, item.createdBy)) {
+      return res.status(403).json({
+        success: false,
+        message: `Only the person who created/uploaded this ${itemLabel.toLowerCase()} can rename it.`,
+      });
+    }
+    item.name = name;
+    await item.save();
+    return res.json({ success: true, message: `${itemLabel} renamed.`, [responseKey]: sanitizeItem(item) });
+  } catch (error) {
+    console.error(`rename ${itemLabel} error:`, error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+exports.renameFolder = (req, res) => renameVaultItem(req, res, VaultFolder, "Folder", "folder");
+exports.renameDocument = (req, res) => renameVaultItem(req, res, VaultDocument, "Document", "document");
 
 // 6. Toggle Folder Lock Status (Requires matching creator email)
 exports.toggleFolderLock = async (req, res) => {

@@ -63,6 +63,7 @@ import BlogForm from "./components/blogForm";
 import BlogPage from "./pages/blogPage";
 import BlogApprovalPage from "./pages/blogApprovalPage";
 import Tasks from "./pages/Tasks";
+import TaskAssignmentPrompt from "./components/TaskAssignmentPrompt";
 
 function App() {
   const location = useLocation();
@@ -122,6 +123,7 @@ function App() {
                   closeButton
                 />
                 {!hideNavbar && <Navbar />}
+                <TaskAssignmentPrompt />
                 <AirdropAnimationLayer />
                 <IncomingUploadModal />
                 <AnimatePresence mode="wait">

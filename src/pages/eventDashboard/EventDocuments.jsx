@@ -24,6 +24,7 @@ import {
   Info,
   Lock,
   Unlock,
+  Edit3,
 } from "react-feather";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -34,6 +35,8 @@ import {
   deleteVaultFolder,
   uploadVaultDocument,
   deleteVaultDocument,
+  renameVaultFolder,
+  renameVaultDocument,
   toggleVaultFolderLock,
   toggleVaultDocumentLock,
 } from "../../services/api";
@@ -248,6 +251,9 @@ export default function EventDocuments() {
   const [infoTarget, setInfoTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [renameTarget, setRenameTarget] = useState(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [isRenaming, setIsRenaming] = useState(false);
 
   // New folder state
   const [newFolderName, setNewFolderName] = useState("");
@@ -283,6 +289,45 @@ export default function EventDocuments() {
       }
     } catch (err) {
       toast.error(err.message || "Failed to update lock status");
+    }
+  };
+
+  const openRename = (type, item, e) => {
+    if (e?.stopPropagation) e.stopPropagation();
+    if (item.isLocked) {
+      toast.error(`Unlock this ${type === "folder" ? "folder" : "document"} before renaming it.`);
+      return;
+    }
+    setRenameTarget({ type, item });
+    setRenameValue(item.name || "");
+  };
+
+  const handleRename = async (event) => {
+    event.preventDefault();
+    if (!renameTarget || !renameValue.trim()) return;
+    const itemId = renameTarget.item._id || renameTarget.item.id;
+    try {
+      setIsRenaming(true);
+      const response = renameTarget.type === "folder"
+        ? await renameVaultFolder(itemId, renameValue.trim())
+        : await renameVaultDocument(itemId, renameValue.trim());
+      const renamedItem = renameTarget.type === "folder" ? response.folder : response.document;
+      if (renameTarget.type === "folder") {
+        setFolders((previous) => previous.map((item) =>
+          item._id === itemId || item.id === itemId ? renamedItem : item,
+        ));
+      } else {
+        setDocuments((previous) => previous.map((item) =>
+          item._id === itemId || item.id === itemId ? renamedItem : item,
+        ));
+        if (previewDoc?._id === itemId || previewDoc?.id === itemId) setPreviewDoc(renamedItem);
+      }
+      toast.success(response.message || "Renamed successfully.");
+      setRenameTarget(null);
+    } catch (error) {
+      toast.error(error.message || "Failed to rename item");
+    } finally {
+      setIsRenaming(false);
     }
   };
 
@@ -702,6 +747,7 @@ export default function EventDocuments() {
                           <Folder className="h-5 w-5 fill-cyan-400/20" />
                         </div>
                         <div className="flex items-center gap-1 opacity-100 transition-opacity">
+                          <button type="button" onClick={(e) => openRename("folder", folder, e)} className="p-1 rounded-lg text-gray-400 hover:text-amber-300 hover:bg-amber-500/20" title="Rename Folder"><Edit3 className="h-3.5 w-3.5" /></button>
                           <button
                             type="button"
                             onClick={(e) => handleShareClick("folder", folder, e)}
@@ -817,6 +863,7 @@ export default function EventDocuments() {
                         </div>
 
                         <div className="flex items-center gap-1 opacity-100 transition-opacity">
+                          <button type="button" onClick={(e) => openRename("doc", doc, e)} className="p-1 rounded-lg text-gray-400 hover:text-amber-300 hover:bg-amber-500/20" title="Rename Document"><Edit3 className="h-3.5 w-3.5" /></button>
                           <button
                             type="button"
                             onClick={(e) => {
@@ -945,6 +992,7 @@ export default function EventDocuments() {
                     </td>
                     <td className="p-3 pr-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        <button type="button" onClick={(e) => openRename("folder", folder, e)} className="p-1 rounded-md text-gray-400 hover:text-amber-300 hover:bg-amber-500/20" title="Rename Folder"><Edit3 className="h-3.5 w-3.5" /></button>
                         <button
                           type="button"
                           onClick={(e) => handleShareClick("folder", folder, e)}
@@ -1029,6 +1077,7 @@ export default function EventDocuments() {
                     </td>
                     <td className="p-3 pr-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        <button type="button" onClick={(e) => openRename("doc", doc, e)} className="p-1 rounded-md text-gray-400 hover:text-amber-300 hover:bg-amber-500/20" title="Rename Document"><Edit3 className="h-3.5 w-3.5" /></button>
                         <button
                           type="button"
                           onClick={(e) => {
@@ -1088,6 +1137,32 @@ export default function EventDocuments() {
           </table>
         </div>
       )}
+
+      {renameTarget &&
+        createPortal(
+          <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" onClick={() => !isRenaming && setRenameTarget(null)}>
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="w-full max-w-md rounded-2xl border border-white/15 bg-[#161622] p-5 shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 text-amber-300"><Edit3 className="h-5 w-5" /></span>
+                <div><h3 className="font-bold text-richblack-25">Rename {renameTarget.type === "folder" ? "folder" : "document"}</h3><p className="text-xs text-gray-400">Choose a new display name.</p></div>
+              </div>
+              <form onSubmit={handleRename} className="mt-5 space-y-4">
+                <input autoFocus required value={renameValue} onChange={(event) => setRenameValue(event.target.value)} className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2.5 text-sm text-gray-100 outline-none focus:border-cyan-400" />
+                <div className="flex justify-end gap-2">
+                  <button type="button" disabled={isRenaming} onClick={() => setRenameTarget(null)} className="rounded-xl px-4 py-2 text-sm text-gray-300 hover:bg-white/10 disabled:opacity-50">Cancel</button>
+                  <button type="submit" disabled={isRenaming || !renameValue.trim()} className="rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500 disabled:opacity-50">{isRenaming ? "Renaming…" : "Rename"}</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>,
+          document.body,
+        )}
 
       {/* ============================================================== */}
       {/* MAC OS STYLED MODAL 1: CREATE NEW FOLDER MODAL                  */}

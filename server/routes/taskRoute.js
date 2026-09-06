@@ -1,6 +1,6 @@
 const express = require("express");
 const { auth } = require("../middlewares/AuthZ");
-const { getEligiblePeople, createTask, getTasks, completeTask, deleteTask, downloadExcel, getTaskConfig, updateTaskConfig, getTaskReportData } = require("../controllers/taskController");
+const { getEligiblePeople, createTask, getTasks, markAssignedTasksViewed, completeTask, deleteTask, downloadExcel, getTaskConfig, updateTaskConfig, getTaskReportData } = require("../controllers/taskController");
 const router = express.Router();
 router.use(auth);
 router.get("/config", getTaskConfig);
@@ -10,6 +10,7 @@ router.get("/report-data", getTaskReportData);
 router.get("/", getTasks);
 router.get("/download-excel", downloadExcel);
 router.post("/", createTask);
+router.post("/mark-viewed", markAssignedTasksViewed);
 router.patch("/:id/complete", completeTask);
 router.delete("/:id", deleteTask);
 module.exports = router;

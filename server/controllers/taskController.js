@@ -388,6 +388,69 @@ exports.getTasks = async (req, res) => {
   } catch (error) { res.status(500).json({ success:false, message:"Unable to load tasks.", error:error.message }); }
 };
 
+/** Mark every currently active task assigned to the visitor as viewed once. */
+exports.markAssignedTasksViewed = async (req, res) => {
+  try {
+    const person = await currentPerson(req.user);
+    if (!person) return res.status(401).json({ success: false, message: "Account not found." });
+
+    const tasks = await Task.find({
+      "assignedTo.id": person.id,
+      status: "ONGOING",
+      isDeleted: { $ne: true },
+      viewedAt: null,
+    });
+    if (!tasks.length) return res.json({ success: true, viewedTaskIds: [] });
+
+    const viewedAt = new Date();
+    const notifiedAssignerIds = new Set();
+    for (const task of tasks) {
+      task.viewedAt = viewedAt;
+      task.history.push({ action: "VIEWED", at: viewedAt, by: person });
+      await task.save();
+
+      const assignerId = String(task.assignedBy?.id || "");
+      if (!assignerId || notifiedAssignerIds.has(`${assignerId}:${task._id}`)) continue;
+      notifiedAssignerIds.add(`${assignerId}:${task._id}`);
+      const siteNotification = await Notification.create({
+        recipientId: assignerId,
+        type: "task_viewed",
+        title: "Task Viewed",
+        body: `${person.name} viewed the task "${task.title}".`,
+        metadata: {
+          taskId: String(task._id),
+          title: task.title,
+          viewedByName: person.name,
+          viewedById: String(person.id),
+          viewedAt: viewedAt.toISOString(),
+          department: task.department,
+          link: "/tasks",
+          color: "cyan",
+        },
+        senderId: String(person.id),
+        senderName: person.name,
+        senderRole: person.role || "Member",
+      });
+      emitNotification(assignerId, {
+        _id: siteNotification._id,
+        type: siteNotification.type,
+        title: siteNotification.title,
+        body: siteNotification.body,
+        metadata: siteNotification.metadata,
+        senderId: siteNotification.senderId,
+        senderName: siteNotification.senderName,
+        senderRole: siteNotification.senderRole,
+        readAt: siteNotification.readAt,
+        createdAt: siteNotification.createdAt,
+        replies: [],
+      });
+    }
+    res.json({ success: true, viewedTaskIds: tasks.map((task) => String(task._id)), viewedAt });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Unable to mark tasks as viewed.", error: error.message });
+  }
+};
+
 exports.completeTask = async (req, res) => {
   try {
     const person = await currentPerson(req.user); const task = await Task.findById(req.params.id);

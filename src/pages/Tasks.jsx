@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { CheckCircle, Clipboard, Download, Search, UserPlus, AlertTriangle, AlertCircle } from "react-feather";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { completeTask, createTask, getTaskPeople, getTasks, deleteTask, getAuthToken, getTaskConfig, updateTaskConfig, getTaskReportData } from "../services/api";
+import { completeTask, createTask, getTaskPeople, getTasks, deleteTask, getAuthToken, getTaskConfig, updateTaskConfig, getTaskReportData, markAssignedTasksViewed } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { useTaskAlert } from "../context/TaskAlertContext";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
@@ -134,7 +134,11 @@ export default function Tasks() {
     try {
       const res = await getTasks();
       const taskList = Array.isArray(res) ? res : res.tasks || [];
-      setTasks(taskList);
+      const viewed = await markAssignedTasksViewed().catch(() => null);
+      const viewedIds = new Set(viewed?.viewedTaskIds || []);
+      setTasks(taskList.map((task) =>
+        viewedIds.has(String(task._id)) ? { ...task, viewedAt: viewed.viewedAt } : task,
+      ));
       refreshTaskAlert();
       if (typeof res.allowExecutivesSeeAll === "boolean") {
         setAllowExecutivesSeeAll(res.allowExecutivesSeeAll);
@@ -449,6 +453,7 @@ export default function Tasks() {
             const isAssigner = String(task.assignedBy?.id || "") === String(user?._id || "");
             const canComplete = task.status === "ONGOING" && (isAssignee || (isPrivileged && (isCore || isAssigner)));
             const canDelete = isPrivileged && (isAssigner || isCore);
+            const canViewAssigneeStatus = isAssigner || isCore;
 
             return (
               <article
@@ -508,6 +513,17 @@ export default function Tasks() {
                         {task.assignedTo?.role && <span className="text-[9px] sm:text-[10px] text-gray-400 font-normal ml-1 truncate shrink-0">({task.assignedTo.role})</span>}
                       </div>
                     </div>
+                    {canViewAssigneeStatus && (
+                      <div className={`rounded-lg border px-2 py-1.5 text-[10px] sm:text-[11px] ${
+                        task.viewedAt
+                          ? "border-cyan-400/20 bg-cyan-500/10 text-cyan-200"
+                          : "border-amber-400/20 bg-amber-500/10 text-amber-200"
+                      }`}>
+                        {task.assignedTo?.name || "Assignee"} visited task: {task.viewedAt
+                          ? `Viewed on ${new Date(task.viewedAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}`
+                          : "Not yet viewed"}
+                      </div>
+                    )}
                   </div>
                   
                   {(canComplete || canDelete) && (

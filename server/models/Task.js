@@ -26,6 +26,7 @@ const taskSchema = new mongoose.Schema(
     status: { type: String, enum: ["ONGOING", "COMPLETED", "DELETED"], default: "ONGOING", index: true },
     completedAt: { type: Date, default: null },
     completedBy: { type: personSchema, default: null },
+    viewedAt: { type: Date, default: null },
     isDeleted: { type: Boolean, default: false, index: true },
     previousStatus: { type: String, default: "" },
     deletedAt: { type: Date, default: null },

@@ -6,8 +6,44 @@ import { getMe, updateProfile, updateAvatar, changePassword, deleteAccount } fro
 import { toast } from "sonner";
 import { Trash2, X } from "react-feather";
 import { motion } from "framer-motion";
+import confetti from "canvas-confetti";
 import { cloudinaryProfileAvatarUrl } from "../utils/cloudinary";
 import ProfileAvatarFlip from "../components/common/ProfileAvatarFlip";
+
+function getProfileCompletionPercent(formData, hasAvatar, isFacultyIncharge) {
+  let score = 0;
+  const total = isFacultyIncharge ? 10 : 13;
+  if (formData.firstName && formData.lastName) score++;
+  if (hasAvatar) score++;
+  if (formData.gender) score++;
+  if (formData.dob) score++;
+  if (formData.about) score++;
+  if (formData.contact) score++;
+  if (isFacultyIncharge) {
+    if (formData.position) score++;
+  } else {
+    if (formData.yearOfStudy) score++;
+    if (formData.branch) score++;
+    if (formData.section) score++;
+    if (formData.non_tech_society) score++;
+  }
+  if (formData.instagram) score++;
+  if (formData.linkedin) score++;
+  if (formData.github) score++;
+  return Math.round((score / total) * 100);
+}
+
+function playProfileCompletionCelebration() {
+  const endAt = Date.now() + 2600;
+  const colors = ["#22d3ee", "#34d399", "#fbbf24", "#a78bfa", "#f472b6"];
+  const frame = () => {
+    if (Date.now() > endAt) return;
+    confetti({ particleCount: 3, angle: 58, spread: 58, startVelocity: 52, origin: { x: 0, y: 0.55 }, colors });
+    confetti({ particleCount: 3, angle: 122, spread: 58, startVelocity: 52, origin: { x: 1, y: 0.55 }, colors });
+    requestAnimationFrame(frame);
+  };
+  frame();
+}
 
 const Profile = () => {
   const { user, setUser, logout } = useAuth();
@@ -48,6 +84,7 @@ const Profile = () => {
   const [savingPassword, setSavingPassword] = useState(false);
   // Snapshot of formData at last save/load — used to detect unsaved changes.
   const savedSnapshot = useRef(null);
+  const savedCompletionPercent = useRef(0);
   const [isDirty, setIsDirty] = useState(false);
 
   // Populate profile UI from Redux-backed auth user whenever we land on /profile.
@@ -97,6 +134,26 @@ const Profile = () => {
       linkedin: profile.socials?.linkedin || "",
       github: profile.socials?.github || "",
     };
+    savedCompletionPercent.current = getProfileCompletionPercent(
+      {
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        gender: profile.gender || "",
+        dob: profile.dob || "",
+        about: profile.about || "",
+        contact: profile.phoneNumber || user.contact || "",
+        yearOfStudy: profile.yearOfStudy || "",
+        branch: profile.branch || "",
+        section: profile.section || "",
+        non_tech_society: profile.non_tech_society || "",
+        position: profile.position || "",
+        instagram: profile.socials?.instagram || "",
+        linkedin: profile.socials?.linkedin || "",
+        github: profile.socials?.github || "",
+      },
+      Boolean(user.image),
+      user.accountType === "ADMIN",
+    );
     setIsDirty(false);
   }, [user, location.pathname]);
 
@@ -135,6 +192,12 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const willBeComplete = getProfileCompletionPercent(
+      formData,
+      Boolean(avatarPreview),
+      isFacultyIncharge,
+    ) === 100;
+    const shouldCelebrate = savedCompletionPercent.current < 100 && willBeComplete;
     setSaving(true);
     try {
       const payload = {
@@ -159,8 +222,12 @@ const Profile = () => {
       const res = await updateProfile(payload);
       if (res.data) setUser(res.data);
       savedSnapshot.current = { ...formData };
+      savedCompletionPercent.current = willBeComplete ? 100 : getProfileCompletionPercent(formData, Boolean(avatarPreview), isFacultyIncharge);
       setIsDirty(false);
       toast.success("Profile updated");
+      if (shouldCelebrate) {
+        window.setTimeout(playProfileCompletionCelebration, 220);
+      }
     } catch (err) {
       toast.error(err.message || "Failed to update profile");
     } finally {
@@ -249,26 +316,7 @@ const Profile = () => {
 
   // profile bar
   const completionPercent = (() => {
-    let score = 0;
-    const total = isFacultyIncharge ? 10 : 14;
-    if (formData.firstName && formData.lastName) score++;
-    if (avatarPreview) score++;
-    if (formData.gender) score++;
-    if (formData.dob) score++;
-    if (formData.about) score++;
-    if (formData.contact) score++;
-    if (isFacultyIncharge) {
-      if (formData.position) score++;
-    } else {
-      if (formData.yearOfStudy) score++;
-      if (formData.branch) score++;
-      if (formData.section) score++;
-      if (formData.non_tech_society) score++;
-    }
-    if (formData.instagram) score++;
-    if (formData.linkedin) score++;
-    if (formData.github) score++;
-    return Math.round((score / total) * 100);
+    return getProfileCompletionPercent(formData, Boolean(avatarPreview), isFacultyIncharge);
   })();
 
   const getCompletionColor = (percent) => {
