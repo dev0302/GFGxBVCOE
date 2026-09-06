@@ -33,11 +33,11 @@ function ExpandableDescription({ text }) {
   if (!text) return null;
 
   return (
-    <div className="mt-2 text-sm text-gray-400">
+    <div className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-gray-400 min-w-0">
       <p
         ref={textRef}
         className={`whitespace-pre-wrap break-words transition-all duration-200 ${
-          !expanded ? "line-clamp-3" : ""
+          !expanded ? "line-clamp-2 sm:line-clamp-3" : ""
         }`}
       >
         {text}
@@ -49,7 +49,7 @@ function ExpandableDescription({ text }) {
             e.stopPropagation();
             setExpanded(!expanded);
           }}
-          className="mt-1 inline-flex items-center text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer"
+          className="mt-1 inline-flex items-center text-[11px] sm:text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors focus:outline-none cursor-pointer"
         >
           {expanded ? "Read less" : "Read more"}
         </button>
@@ -348,131 +348,172 @@ export default function Tasks() {
     return list.sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt));
   }, [tasks, filterTab, user]);
 
-  return <section className="min-h-screen bg-[#0c0c18] px-4 py-24 text-gray-100 sm:px-8">
-    <style>{`
-      @keyframes borderPulse {
-        0%, 100% { border-color: rgba(245, 158, 11, 0.35); box-shadow: 0 0 4px rgba(245, 158, 11, 0.05); }
-        50% { border-color: rgba(245, 158, 11, 0.85); box-shadow: 0 0 16px rgba(245, 158, 11, 0.2); }
-      }
-      .task-pulse {
-        animation: borderPulse 2.5s infinite ease-in-out;
-      }
-    `}</style>
-    <div className="mx-auto max-w-6xl"><div className="mb-8 flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-cyan-300">GFG BVCOE workspace</p><h1 className="mt-2 text-3xl font-bold">Task management</h1><p className="mt-1 text-sm text-gray-400">Track assignments, deadlines, and permanent task history.</p></div><div className="flex items-center gap-3 flex-wrap">
-      <div className="flex gap-1.5 bg-white/5 p-1 rounded-xl border border-white/5">
-        <button onClick={() => setFilterTab("to-me")} className={`relative px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "to-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned to me{pendingAssignedCount > 0 && <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-300 opacity-80" /><span className="relative h-2.5 w-2.5 rounded-full border border-[#0c0c18] bg-amber-400" /></span>}</button>
-        {isPrivileged && (
-          <button onClick={() => setFilterTab("by-me")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "by-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>Assigned by me</button>
-        )}
-        {(isPrivileged || allowExecutivesSeeAll) && (
-          <button onClick={() => setFilterTab("all-tasks")} className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${filterTab === "all-tasks" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>All Tasks</button>
-        )}
-      </div>
-    {isPrivileged && (
-      <label className="inline-flex items-center gap-2.5 cursor-pointer select-none rounded-xl border border-white/5 bg-white/5 px-4 py-2.5 text-xs font-bold text-gray-300">
-        <span>Allow Executives to see all tasks</span>
-        <button
-          type="button"
-          onClick={async () => {
-            const nextVal = !allowExecutivesSeeAll;
-            setAllowExecutivesSeeAll(nextVal);
-            try {
-              localStorage.setItem("gfg_allow_executives_see_all", String(nextVal));
-            } catch (_) {}
-            toast.success(`Executives ${nextVal ? "can now" : "can no longer"} see all tasks.`);
-            try {
-              await updateTaskConfig(nextVal);
-              load();
-            } catch (_) {}
-          }}
-          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${allowExecutivesSeeAll ? "bg-cyan-500" : "bg-white/10"}`}
-        >
-          <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-slate-950 shadow ring-0 transition duration-200 ease-in-out ${allowExecutivesSeeAll ? "translate-x-4" : "translate-x-0"}`} />
-        </button>
-      </label>
-    )}{isPrivileged && (
-      <button onClick={handleDownloadPDF} className="inline-flex items-center gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-4 py-2.5 text-sm font-bold text-cyan-400 hover:bg-cyan-500/10"><Download size={16}/> Download PDF Report</button>
-    )}{isPrivileged && (
-      <button onClick={() => { setOpen(true); setSearch(""); }} className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300"><UserPlus size={16}/> Assign task</button>
-    )}</div></div><div className="grid gap-3 md:grid-cols-3">{ordered.map((task) => {
-  const taskState = getTaskState(task);
-  const isAssignee = String(task.assignedTo?.id || "") === String(user?._id || "") ||
-    (Boolean(task.assignedTo?.email && user?.email) && task.assignedTo.email.toLowerCase() === user.email.toLowerCase());
-  const isAssigner = String(task.assignedBy?.id || "") === String(user?._id || "");
-  const canComplete = task.status === "ONGOING" && (isAssignee || (isPrivileged && (isCore || isAssigner)));
-  const canDelete = isPrivileged && (isAssigner || isCore);
-
   return (
-    <article key={task._id} className={`rounded-2xl border p-4 flex flex-col justify-between transition-all duration-300 ${taskState.cardClass}`}>
-      <div>
-        <div className="flex items-start justify-between gap-3">
-          <h2 className="font-semibold">{task.title}</h2>
-          <span className={`rounded-full px-2 py-1 text-[10px] font-bold ${taskState.statusColor}`}>{taskState.badge}</span>
-        </div>
-        <ExpandableDescription text={task.description}/>
-      </div>
-      
-      <div className="mt-4 pt-3 border-t border-white/5 space-y-3">
-        <div className="flex flex-col text-[11px] text-gray-400 gap-1.5">
-          <div className="flex items-center justify-between">
-            <span>Assigned: {new Date(task.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
-            {task.deadline && <span>Limit: {new Date(task.deadline).toLocaleDateString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>}
+    <section className="min-h-screen bg-[#0c0c18] px-3 sm:px-8 py-20 sm:py-24 text-gray-100 overflow-x-hidden">
+      <style>{`
+        @keyframes borderPulse {
+          0%, 100% { border-color: rgba(245, 158, 11, 0.35); box-shadow: 0 0 4px rgba(245, 158, 11, 0.05); }
+          50% { border-color: rgba(245, 158, 11, 0.85); box-shadow: 0 0 16px rgba(245, 158, 11, 0.2); }
+        }
+        .task-pulse {
+          animation: borderPulse 2.5s infinite ease-in-out;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+      <div className="mx-auto max-w-6xl w-full">
+        <div className="mb-6 sm:mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[.2em] text-cyan-300">GFG BVCOE workspace</p>
+            <h1 className="mt-1.5 sm:mt-2 text-2xl sm:text-3xl font-bold">Task management</h1>
+            <p className="mt-1 text-xs sm:text-sm text-gray-400">Track assignments, deadlines, and permanent task history.</p>
           </div>
-          <div className="text-gray-300 font-semibold text-center bg-white/[0.03] py-1 px-2 rounded border border-white/5 text-[10.5px]">
-            {taskState.statusText}
-          </div>
-        </div>
-        
-        <div className="flex flex-col gap-2 pt-2 border-t border-white/[0.03] text-xs">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[10px] text-gray-500 font-medium shrink-0 w-20">Assigned by:</span>
-            {task.assignedBy?.image ? (
-              <img src={task.assignedBy.image} alt="" className="h-5 w-5 rounded-full object-cover border border-white/10" />
-            ) : (
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[8px] font-bold text-gray-200">
-                {initials(task.assignedBy?.name || "")}
-              </span>
-            )}
-            <span className="font-semibold text-gray-300 truncate animate-fade-in" title={`${task.assignedBy?.name || "Unknown"}${task.assignedBy?.role ? ` (${task.assignedBy.role})` : ""}`}>
-              {task.assignedBy?.name || "Unknown"}
-              {task.assignedBy?.role && <span className="text-[10px] text-gray-400 font-normal ml-1">({task.assignedBy.role})</span>}
-            </span>
-          </div>
-  
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[10px] text-gray-500 font-medium shrink-0 w-20">Assigned to:</span>
-            {task.assignedTo?.image ? (
-              <img src={task.assignedTo.image} alt="" className="h-5 w-5 rounded-full object-cover border border-white/10" />
-            ) : (
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[8px] font-bold text-gray-200">
-                {initials(task.assignedTo?.name || "")}
-              </span>
-            )}
-            <span className="font-semibold text-gray-300 truncate animate-fade-in" title={`${task.assignedTo?.name || "Unknown"}${task.assignedTo?.role ? ` (${task.assignedTo.role})` : ""}`}>
-              {task.assignedTo?.name || "Unknown"}
-              {task.assignedTo?.role && <span className="text-[10px] text-gray-400 font-normal ml-1">({task.assignedTo.role})</span>}
-            </span>
-          </div>
-        </div>
-        
-        {(canComplete || canDelete) && (
-          <div className="flex gap-2 mt-2">
-            {canComplete && (
-              <button onClick={() => setConfirmCompleteTask(task)} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 py-2 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20">
-                <CheckCircle size={14}/> Mark complete
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 flex-wrap">
+            <div className="flex gap-1 bg-white/5 p-1 rounded-xl border border-white/5 max-w-full overflow-x-auto no-scrollbar">
+              <button onClick={() => setFilterTab("to-me")} className={`relative px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${filterTab === "to-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>
+                Assigned to me
+                {pendingAssignedCount > 0 && <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-300 opacity-80" /><span className="relative h-2.5 w-2.5 rounded-full border border-[#0c0c18] bg-amber-400" /></span>}
               </button>
+              {isPrivileged && (
+                <button onClick={() => setFilterTab("by-me")} className={`px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${filterTab === "by-me" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>
+                  Assigned by me
+                </button>
+              )}
+              {(isPrivileged || allowExecutivesSeeAll) && (
+                <button onClick={() => setFilterTab("all-tasks")} className={`px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${filterTab === "all-tasks" ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10" : "text-gray-400 hover:text-gray-200"}`}>
+                  All Tasks
+                </button>
+              )}
+            </div>
+            {isPrivileged && (
+              <label className="inline-flex items-center justify-between sm:justify-start gap-2.5 cursor-pointer select-none rounded-xl border border-white/5 bg-white/5 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold text-gray-300">
+                <span className="truncate">Allow Executives to see all tasks</span>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const nextVal = !allowExecutivesSeeAll;
+                    setAllowExecutivesSeeAll(nextVal);
+                    try {
+                      localStorage.setItem("gfg_allow_executives_see_all", String(nextVal));
+                    } catch (_) {}
+                    toast.success(`Executives ${nextVal ? "can now" : "can no longer"} see all tasks.`);
+                    try {
+                      await updateTaskConfig(nextVal);
+                      load();
+                    } catch (_) {}
+                  }}
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${allowExecutivesSeeAll ? "bg-cyan-500" : "bg-white/10"}`}
+                >
+                  <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-slate-950 shadow ring-0 transition duration-200 ease-in-out ${allowExecutivesSeeAll ? "translate-x-4" : "translate-x-0"}`} />
+                </button>
+              </label>
             )}
-            {canDelete && (
-              <button onClick={() => setConfirmDeleteId(task._id)} className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-500/20 bg-rose-500/10 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/20">
-                Delete task
-              </button>
+            {isPrivileged && (
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button onClick={handleDownloadPDF} className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-cyan-400 hover:bg-cyan-500/10">
+                  <Download size={15}/> Download PDF Report
+                </button>
+                <button onClick={() => { setOpen(true); setSearch(""); }} className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-cyan-500 px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-slate-950 hover:bg-cyan-300">
+                  <UserPlus size={15}/> Assign task
+                </button>
+              </div>
             )}
           </div>
-        )}
-      </div>
-    </article>
-  );
-})}{!ordered.length && <div className="col-span-full rounded-2xl border border-dashed border-white/15 py-16 text-center text-gray-500"><Clipboard className="mx-auto mb-3"/>No tasks yet.</div>}</div></div>{open && (
+        </div>
+        <div className="grid grid-cols-1 gap-2.5 sm:gap-3 md:grid-cols-3 w-full">
+          {ordered.map((task) => {
+            const taskState = getTaskState(task);
+            const isAssignee = String(task.assignedTo?.id || "") === String(user?._id || "") ||
+              (Boolean(task.assignedTo?.email && user?.email) && task.assignedTo.email.toLowerCase() === user.email.toLowerCase());
+            const isAssigner = String(task.assignedBy?.id || "") === String(user?._id || "");
+            const canComplete = task.status === "ONGOING" && (isAssignee || (isPrivileged && (isCore || isAssigner)));
+            const canDelete = isPrivileged && (isAssigner || isCore);
+
+            return (
+              <article
+                key={task._id}
+                className={`rounded-xl sm:rounded-2xl border p-3 sm:p-4 flex flex-col justify-between transition-all duration-300 w-full max-w-full min-w-0 overflow-hidden ${taskState.cardClass}`}
+              >
+                <div className="min-w-0">
+                  <div className="flex items-start justify-between gap-2 sm:gap-3 min-w-0">
+                    <h2 className="font-semibold text-sm sm:text-base text-gray-100 break-words line-clamp-2 min-w-0 flex-1">{task.title}</h2>
+                    <span className={`rounded-full px-2 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold shrink-0 tracking-wide ${taskState.statusColor}`}>{taskState.badge}</span>
+                  </div>
+                  <ExpandableDescription text={task.description}/>
+                </div>
+                
+                <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-white/5 space-y-2 sm:space-y-3 min-w-0">
+                  <div className="flex flex-col text-[10px] sm:text-[11px] text-gray-400 gap-1 sm:gap-1.5 min-w-0">
+                    <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-1 min-w-0">
+                      <span className="truncate">Assigned: {new Date(task.createdAt).toLocaleDateString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                      {task.deadline && <span className="truncate">Limit: {new Date(task.deadline).toLocaleDateString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>}
+                    </div>
+                    <div className="text-gray-300 font-semibold text-center bg-white/[0.03] py-0.5 sm:py-1 px-2 rounded border border-white/5 text-[10px] sm:text-[10.5px] truncate">
+                      {taskState.statusText}
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col gap-1.5 sm:gap-2 pt-2 border-t border-white/[0.03] text-xs min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0 w-full overflow-hidden">
+                      <span className="text-[9px] sm:text-[10px] text-gray-500 font-medium shrink-0 w-16 sm:w-20">Assigned by:</span>
+                      {task.assignedBy?.image ? (
+                        <img src={task.assignedBy.image} alt="" className="h-4 w-4 sm:h-5 sm:w-5 rounded-full object-cover border border-white/10 shrink-0" />
+                      ) : (
+                        <span className="flex h-4 w-4 sm:h-5 sm:w-5 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[8px] font-bold text-gray-200">
+                          {initials(task.assignedBy?.name || "")}
+                        </span>
+                      )}
+                      <div className="flex items-center min-w-0 flex-1 truncate text-[11px] sm:text-xs">
+                        <span className="font-semibold text-gray-300 truncate" title={`${task.assignedBy?.name || "Unknown"}${task.assignedBy?.role ? ` (${task.assignedBy.role})` : ""}`}>
+                          {task.assignedBy?.name || "Unknown"}
+                        </span>
+                        {task.assignedBy?.role && <span className="text-[9px] sm:text-[10px] text-gray-400 font-normal ml-1 truncate shrink-0">({task.assignedBy.role})</span>}
+                      </div>
+                    </div>
+            
+                    <div className="flex items-center gap-1.5 min-w-0 w-full overflow-hidden">
+                      <span className="text-[9px] sm:text-[10px] text-gray-500 font-medium shrink-0 w-16 sm:w-20">Assigned to:</span>
+                      {task.assignedTo?.image ? (
+                        <img src={task.assignedTo.image} alt="" className="h-4 w-4 sm:h-5 sm:w-5 rounded-full object-cover border border-white/10 shrink-0" />
+                      ) : (
+                        <span className="flex h-4 w-4 sm:h-5 sm:w-5 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[8px] font-bold text-gray-200">
+                          {initials(task.assignedTo?.name || "")}
+                        </span>
+                      )}
+                      <div className="flex items-center min-w-0 flex-1 truncate text-[11px] sm:text-xs">
+                        <span className="font-semibold text-gray-300 truncate" title={`${task.assignedTo?.name || "Unknown"}${task.assignedTo?.role ? ` (${task.assignedTo.role})` : ""}`}>
+                          {task.assignedTo?.name || "Unknown"}
+                        </span>
+                        {task.assignedTo?.role && <span className="text-[9px] sm:text-[10px] text-gray-400 font-normal ml-1 truncate shrink-0">({task.assignedTo.role})</span>}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {(canComplete || canDelete) && (
+                    <div className="flex gap-1.5 sm:gap-2 mt-2 min-w-0">
+                      {canComplete && (
+                        <button onClick={() => setConfirmCompleteTask(task)} className="flex-1 inline-flex items-center justify-center gap-1 sm:gap-1.5 rounded-lg sm:rounded-xl border border-emerald-500/20 bg-emerald-500/10 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold text-emerald-300 hover:bg-emerald-500/20">
+                          <CheckCircle size={13}/> Mark complete
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button onClick={() => setConfirmDeleteId(task._id)} className="flex-1 inline-flex items-center justify-center gap-1 sm:gap-1.5 rounded-lg sm:rounded-xl border border-rose-500/20 bg-rose-500/10 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold text-rose-300 hover:bg-rose-500/20">
+                          Delete task
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </article>
+            );
+          })}{!ordered.length && <div className="col-span-full rounded-xl sm:rounded-2xl border border-dashed border-white/15 py-12 sm:py-16 text-center text-gray-500"><Clipboard className="mx-auto mb-3"/>No tasks yet.</div>}
+        </div>
+      </div>{open && (
   <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
     <div className="w-full max-w-2xl rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-[#1e1e2f] to-[#101925] p-6 shadow-2xl">
       <div className="mb-6 flex items-center justify-between">
@@ -587,6 +628,7 @@ export default function Tasks() {
       )}
     </div>
   </div>
-)}{confirmDeleteId && <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"><div className="w-full max-w-md rounded-2xl border border-rose-500/20 bg-gradient-to-br from-[#1e141a] to-[#100f13] p-6 shadow-2xl"><h3 className="text-lg font-bold text-rose-300">Confirm task deletion</h3><p className="mt-2 text-sm text-gray-400">Are you sure you want to delete this task? This action is permanent and cannot be undone.</p><div className="mt-6 flex justify-end gap-3"><button onClick={()=>setConfirmDeleteId(null)} className="rounded-xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-white/10">Cancel</button><button onClick={async()=>{try{await deleteTask(confirmDeleteId);toast.success("Task deleted successfully");setConfirmDeleteId(null);load();}catch(e){toast.error(e.message);}}} className="rounded-xl bg-rose-500 px-4 py-2.5 text-xs font-semibold text-slate-950 hover:bg-rose-400">Delete task</button></div></div></div>}<ConfirmDeleteModal open={Boolean(confirmCompleteTask)} title="Mark task as complete?" description={`Mark “${confirmCompleteTask?.title || "this task"}” as complete? This will clear its pending-task alert.`} confirmLabel="Mark complete" loading={completingTask} onClose={() => !completingTask && setConfirmCompleteTask(null)} onConfirm={confirmTaskComplete} /></section>;
+)}{confirmDeleteId && <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"><div className="w-full max-w-md rounded-2xl border border-rose-500/20 bg-gradient-to-br from-[#1e141a] to-[#100f13] p-6 shadow-2xl"><h3 className="text-lg font-bold text-rose-300">Confirm task deletion</h3><p className="mt-2 text-sm text-gray-400">Are you sure you want to delete this task? This action is permanent and cannot be undone.</p><div className="mt-6 flex justify-end gap-3"><button onClick={()=>setConfirmDeleteId(null)} className="rounded-xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-white/10">Cancel</button><button onClick={async()=>{try{await deleteTask(confirmDeleteId);toast.success("Task deleted successfully");setConfirmDeleteId(null);load();}catch(e){toast.error(e.message);}}} className="rounded-xl bg-rose-500 px-4 py-2.5 text-xs font-semibold text-slate-950 hover:bg-rose-400">Delete task</button></div></div></div>}<ConfirmDeleteModal open={Boolean(confirmCompleteTask)} title="Mark task as complete?" description={`Mark “${confirmCompleteTask?.title || "this task"}” as complete? This will clear its pending-task alert.`} confirmLabel="Mark complete" loading={completingTask} onClose={() => !completingTask && setConfirmCompleteTask(null)} onConfirm={confirmTaskComplete} /></section>
+  );
 }
 
