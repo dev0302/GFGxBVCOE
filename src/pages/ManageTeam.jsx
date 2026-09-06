@@ -23,6 +23,7 @@ import {
   broadcastNotificationToDepartment,
   broadcastNotificationToAll,
   getNotificationBroadcastAudience,
+  isSocietyRole,
 } from "../services/api";
 import { toast } from "sonner";
 import {
@@ -318,8 +319,9 @@ export default function ManageTeam({
   const [deptNotifError, setDeptNotifError] = useState("");
   const [deptNotifSuccess, setDeptNotifSuccess] = useState("");
   const [deptNotifForm, setDeptNotifForm] = useState({ title: "", body: "" });
-  const [deptNotifTarget, setDeptNotifTarget] = useState("members"); // "members" | "all"
+  const [deptNotifTarget, setDeptNotifTarget] = useState("members"); // "members" | "all" | "society"
   const [deptBroadcastAudience, setDeptBroadcastAudience] = useState(null);
+  const [societyBroadcastAudience, setSocietyBroadcastAudience] = useState(null);
 
   const department = isSociety ? propDepartment : user?.accountType;
   // console.log(department);
@@ -921,6 +923,16 @@ export default function ManageTeam({
       .catch(() => setDeptBroadcastAudience(null));
   }, [displayDepartment]);
 
+  useEffect(() => {
+    if (!isSocietyRole(user?.accountType)) {
+      setSocietyBroadcastAudience(null);
+      return;
+    }
+    getNotificationBroadcastAudience()
+      .then((res) => setSocietyBroadcastAudience(res?.data || null))
+      .catch(() => setSocietyBroadcastAudience(null));
+  }, [user?.accountType]);
+
   const fetchActiveInviteLink = async () => {
     setInviteLinkFetching(true);
     try {
@@ -1204,6 +1216,25 @@ export default function ManageTeam({
   Send notification to all
   {deptBroadcastAudience?.total != null ? ` (${deptBroadcastAudience.total})` : ""}
 </button>
+                {isSocietyRole(user?.accountType) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeptNotifTarget("society");
+                      setDeptNotifForm({ title: "", body: "" });
+                      setDeptNotifError("");
+                      setDeptNotifSuccess("");
+                      setDeptNotifModalOpen(true);
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-pink-500/15 border border-pink-500/30 text-pink-200 hover:bg-pink-500/25 hover:border-pink-400/50 transition-colors text-sm font-medium"
+                  >
+                    <Bell className="h-4 w-4" />
+                    Notify whole society
+                    {societyBroadcastAudience?.total != null
+                      ? ` (${societyBroadcastAudience.total})`
+                      : ""}
+                  </button>
+                )}
                 </>
               )}
               {!isReadOnly && <button
@@ -2926,14 +2957,18 @@ export default function ManageTeam({
                   </span>
                   <div>
                     <h2 id="dept-notif-modal-title" className="text-sm font-bold text-richblack-25">
-                      {deptNotifTarget === "all"
-                        ? "Notify Everyone"
-                        : "Notify Department Members"}
+                      {deptNotifTarget === "society"
+                        ? "Notify Whole Society"
+                        : deptNotifTarget === "all"
+                          ? "Notify Everyone"
+                          : "Notify Department Members"}
                     </h2>
                     <p className="text-[10px] text-pink-300 font-medium">
-                      {deptNotifTarget === "all"
-                        ? `→ All ${displayDepartment} members + heads/leads/core${deptBroadcastAudience?.total != null ? ` (${deptBroadcastAudience.total})` : ""}`
-                        : `→ ${displayDepartment} members only (heads/leads/core get a copy tagged “Sent to members only”)`}
+                      {deptNotifTarget === "society"
+                        ? `→ All department members + heads/leads/core${societyBroadcastAudience?.total != null ? ` (${societyBroadcastAudience.total})` : ""}`
+                        : deptNotifTarget === "all"
+                          ? `→ All ${displayDepartment} members + heads/leads/core${deptBroadcastAudience?.total != null ? ` (${deptBroadcastAudience.total})` : ""}`
+                          : `→ ${displayDepartment} members only (heads/leads/core get a copy tagged “Sent to members only”)`}
                     </p>
                   </div>
                 </div>
@@ -3018,12 +3053,14 @@ export default function ManageTeam({
                       setDeptNotifSuccess("");
                       try {
                         const payload = {
-                          department: displayDepartment,
                           title: deptNotifForm.title.trim(),
                           body: deptNotifForm.body.trim(),
                         };
+                        if (deptNotifTarget !== "society") {
+                          payload.department = displayDepartment;
+                        }
                         const result =
-                          deptNotifTarget === "all"
+                          deptNotifTarget === "society" || deptNotifTarget === "all"
                             ? await broadcastNotificationToAll(payload)
                             : await broadcastNotificationToDepartment(payload);
                         setDeptNotifSuccess(result.message || "Notification sent!");
@@ -3041,9 +3078,11 @@ export default function ManageTeam({
                     <Bell className="h-3.5 w-3.5" />
                     {deptNotifSending
                       ? "Sending…"
-                      : deptNotifTarget === "all"
-                        ? `Send to all${deptBroadcastAudience?.total != null ? ` (${deptBroadcastAudience.total})` : ""}`
-                        : "Send to members"}
+                      : deptNotifTarget === "society"
+                        ? `Send to society${societyBroadcastAudience?.total != null ? ` (${societyBroadcastAudience.total})` : ""}`
+                        : deptNotifTarget === "all"
+                          ? `Send to all${deptBroadcastAudience?.total != null ? ` (${deptBroadcastAudience.total})` : ""}`
+                          : "Send to members"}
                   </button>
                 </div>
               </div>
