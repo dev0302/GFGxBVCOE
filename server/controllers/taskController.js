@@ -1,9 +1,11 @@
 const Task = require("../models/Task");
 const User = require("../models/User");
+const Notification = require("../models/Notification");
 const { getTeamMemberModel } = require("../models/TeamMember");
 const { TEAM_DEPARTMENTS, SOCIETY_ROLES, getDepartmentRankFromPosition } = require("../utils/leadershipPositions");
 const mailSender = require("../utils/mailSender");
-const { taskAssignedTemplate } = require("../mail/templates");
+const { taskAssignedTemplate, taskCompletedTemplate } = require("../mail/templates");
+const { emitNotification } = require("../utils/notificationService");
 const XLSX = require("xlsx");
 const ExcelFile = require("../models/ExcelFile");
 const TaskConfig = require("../models/TaskConfig");
@@ -206,6 +208,39 @@ async function triggerGithubEmailWorkflow(task, assignee, assignedBy) {
   }
 }
 
+async function triggerGithubTaskCompletedWorkflow(task, assignee, assigner) {
+  try {
+    const token = process.env.GITHUB_TOKEN;
+    if (!token) return false;
+    const repoUrl = "https://api.github.com/repos/dev0302/GFGxBVCOE/dispatches";
+    const response = await fetch(repoUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `token ${token}`,
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "GFGxBVCOE-Backend"
+      },
+      body: JSON.stringify({
+        event_type: "task-completed",
+        client_payload: {
+          title: task.title,
+          description: task.description ? task.description.replace(/\n/g, "<br/>") : "",
+          assignee_name: assignee.name,
+          assignee_role: assignee.role || "",
+          assigner_name: assigner.name,
+          assigner_email: assigner.email,
+          department: task.department,
+          completed_at: task.completedAt ? new Date(task.completedAt).toLocaleString("en-IN") : new Date().toLocaleString("en-IN"),
+          deadline: task.deadline ? new Date(task.deadline).toLocaleString("en-IN") : "No deadline"
+        }
+      })
+    });
+    return response.ok;
+  } catch (_) {
+    return false;
+  }
+}
+
 exports.createTask = async (req, res) => {
   try {
     if (req.body.action === "TOGGLE_CONFIG" || typeof req.body.allowExecutivesSeeAll === "boolean") {
@@ -260,7 +295,62 @@ exports.createTask = async (req, res) => {
         emailSent = Boolean(result);
       }
     }
-    res.status(201).json({ success: true, task, emailSent, message: emailSent ? "Task assigned successfully. Email notification sent." : "Task assigned successfully. Email notification could not be sent." });
+
+    // In-app site notification to the assignee
+    try {
+      const deadlineFormatted = deadline
+        ? new Date(deadline).toLocaleString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+        : "No deadline";
+
+      const notifTitle = "New Task Assigned";
+      const notifBody = `${assignedBy.name} assigned you a task: "${task.title}". Deadline: ${deadlineFormatted}`;
+
+      const recipientIds = new Set([String(assignedTo.id)]);
+      if (assignedTo.email) {
+        const userDoc = await User.findOne({ email: assignedTo.email.toLowerCase() }).select("_id").lean();
+        if (userDoc) recipientIds.add(String(userDoc._id));
+      }
+
+      for (const recipientId of recipientIds) {
+        const siteNotification = await Notification.create({
+          recipientId,
+          type: "task_assigned",
+          title: notifTitle,
+          body: notifBody,
+          metadata: {
+            taskId: String(task._id),
+            title: task.title,
+            priority: task.priority,
+            deadline: deadline ? deadline.toISOString() : null,
+            assignedByName: assignedBy.name,
+            department: assignedTo.department || task.department,
+            link: "/tasks",
+            color: "cyan"
+          },
+          senderId: String(assignedBy.id || ""),
+          senderName: assignedBy.name,
+          senderRole: assignedBy.role || "Lead/Head"
+        });
+
+        emitNotification(String(recipientId), {
+          _id: siteNotification._id,
+          type: siteNotification.type,
+          title: siteNotification.title,
+          body: siteNotification.body,
+          metadata: siteNotification.metadata,
+          senderId: siteNotification.senderId,
+          senderName: siteNotification.senderName,
+          senderRole: siteNotification.senderRole,
+          readAt: siteNotification.readAt,
+          createdAt: siteNotification.createdAt,
+          replies: []
+        });
+      }
+    } catch (notifErr) {
+      console.error("[tasks] Error emitting site notification for new task:", notifErr.message);
+    }
+
+    res.status(201).json({ success: true, task, emailSent, message: emailSent ? "Task assigned successfully. Email and site notifications sent." : "Task assigned successfully. Site notification sent." });
   } catch (error) { res.status(500).json({ success: false, message: "Unable to assign task.", error: error.message }); }
 };
 
@@ -297,6 +387,89 @@ exports.completeTask = async (req, res) => {
     if (task.status === "COMPLETED") return res.json({ success:true, task, message:"Task is already completed." });
     task.status = "COMPLETED"; task.completedAt = new Date(); task.completedBy = person; task.history.push({ action:"COMPLETED", by:person }); await task.save();
     await syncTaskExcel();
+
+    // 1. Send email notification to the assigner
+    let assignerEmail = task.assignedBy?.email;
+    if (!assignerEmail && task.assignedBy?.id) {
+      const userAccount = await User.findById(task.assignedBy.id).select("email").lean();
+      if (userAccount?.email) assignerEmail = userAccount.email;
+    }
+
+    if (assignerEmail) {
+      const completedAtStr = task.completedAt
+        ? new Date(task.completedAt).toLocaleString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+        : new Date().toLocaleString("en-IN");
+      const deadlineStr = task.deadline
+        ? new Date(task.deadline).toLocaleString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+        : "No deadline specified";
+
+      triggerGithubTaskCompletedWorkflow(task, person, { ...task.assignedBy, email: assignerEmail }).then((sent) => {
+        if (!sent) {
+          const emailHtml = taskCompletedTemplate({
+            title: task.title,
+            description: task.description,
+            assigneeName: person.name,
+            assigneeRole: person.role,
+            assignerName: task.assignedBy?.name || "Lead/Head",
+            department: task.department || task.assignedTo?.department || "GFG BVCOE",
+            completedAt: completedAtStr,
+            deadline: deadlineStr,
+            websiteUrl: (process.env.FRONTEND_URL || "https://www.gfg-bvcoe.com").replace(/\/$/, "")
+          });
+          mailSender(assignerEmail, `Task Completed: ${task.title} — GFG BVCOE`, emailHtml).catch((err) =>
+            console.error("[tasks] Failed to send completion email to assigner:", err.message)
+          );
+        }
+      }).catch((err) => console.error("[tasks] Error in completion workflow:", err.message));
+    }
+
+    // 2. Send in-app site notification to the assigner
+    try {
+      const assignerRecipientIds = new Set();
+      if (task.assignedBy?.id) assignerRecipientIds.add(String(task.assignedBy.id));
+      if (assignerEmail) {
+        const assignerUser = await User.findOne({ email: assignerEmail.toLowerCase() }).select("_id").lean();
+        if (assignerUser) assignerRecipientIds.add(String(assignerUser._id));
+      }
+
+      for (const recipientId of assignerRecipientIds) {
+        const siteNotification = await Notification.create({
+          recipientId,
+          type: "task_completed",
+          title: "Task Completed",
+          body: `${person.name} marked the task "${task.title}" as completed.`,
+          metadata: {
+            taskId: String(task._id),
+            title: task.title,
+            completedByName: person.name,
+            completedById: String(person.id),
+            department: task.department,
+            link: "/tasks",
+            color: "green"
+          },
+          senderId: String(person.id || ""),
+          senderName: person.name,
+          senderRole: person.role || "Member"
+        });
+
+        emitNotification(String(recipientId), {
+          _id: siteNotification._id,
+          type: siteNotification.type,
+          title: siteNotification.title,
+          body: siteNotification.body,
+          metadata: siteNotification.metadata,
+          senderId: siteNotification.senderId,
+          senderName: siteNotification.senderName,
+          senderRole: siteNotification.senderRole,
+          readAt: siteNotification.readAt,
+          createdAt: siteNotification.createdAt,
+          replies: []
+        });
+      }
+    } catch (notifErr) {
+      console.error("[tasks] Error emitting site notification for completed task:", notifErr.message);
+    }
+
     res.json({ success:true, task, message:"Task marked as completed." });
   } catch (error) { res.status(500).json({ success:false, message:"Unable to complete task.", error:error.message }); }
 };

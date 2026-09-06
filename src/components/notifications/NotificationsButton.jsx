@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, UserPlus, Radio, CornerUpLeft, Send, ChevronDown, ChevronUp, MessageCircle, Trash2 } from "react-feather";
+import { Bell, UserPlus, Radio, CornerUpLeft, Send, ChevronDown, ChevronUp, MessageCircle, Trash2, Clipboard, CheckCircle } from "react-feather";
+import { useNavigate } from "react-router-dom";
 import { useNotifications } from "../../context/NotificationsContext";
 import { useAuth } from "../../context/AuthContext";
 
@@ -22,9 +23,11 @@ function formatRelativeTime(dateStr) {
   });
 }
 
-/** Resolve per-notification colour theme: pink for broadcasts, green for others */
+/** Resolve per-notification colour theme: pink for broadcasts, cyan for tasks, green for others */
 function notifColor(n) {
-  return n?.metadata?.color === "pink" ? "pink" : "green";
+  if (n?.metadata?.color === "cyan" || n?.type === "task_assigned") return "cyan";
+  if (n?.metadata?.color === "pink") return "pink";
+  return "green";
 }
 
 function isBroadcast(n) {
@@ -278,6 +281,7 @@ export default function NotificationsButton({
   const { notifications, unreadCount, loading, refresh, markRead, markAllRead, bubble, dismissBubble, replyToNotification, deleteReplyFromNotification } =
     useNotifications();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Gate all portals until after first mount (avoids SSR / hydration mismatch)
   useEffect(() => { setIsMounted(true); }, []);
@@ -515,26 +519,44 @@ export default function NotificationsButton({
 
                           // Per-notification colour tokens
                           const borderCls = isUnread
-                            ? color === "pink"
-                              ? "border-pink-300/25 bg-pink-500/8 hover:bg-pink-500/10"
-                              : "border-green-300/25 bg-green-500/8 hover:bg-green-500/10"
+                            ? color === "cyan"
+                              ? "border-cyan-300/25 bg-cyan-500/8 hover:bg-cyan-500/10 cursor-pointer"
+                              : color === "pink"
+                              ? "border-pink-300/25 bg-pink-500/8 hover:bg-pink-500/10 cursor-pointer"
+                              : "border-green-300/25 bg-green-500/8 hover:bg-green-500/10 cursor-pointer"
+                            : n.metadata?.link
+                            ? "border-white/5 bg-white/[0.02] hover:bg-white/[0.05] cursor-pointer"
                             : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04]";
 
                           const iconBgCls = isUnread
-                            ? color === "pink"
+                            ? color === "cyan"
+                              ? "bg-cyan-500/20 text-cyan-300"
+                              : color === "pink"
                               ? "bg-pink-500/20 text-pink-300"
                               : "bg-green-500/20 text-green-300"
                             : "bg-white/5 text-gray-400";
 
                           const dotCls = isUnread
-                            ? color === "pink"
+                            ? color === "cyan"
+                              ? "bg-cyan-400"
+                              : color === "pink"
                               ? "bg-pink-400"
                               : "bg-green-400"
                             : "";
 
                           const replyBtnCls = color === "pink"
                             ? "text-blue-300/70 hover:text-pink-300 hover:bg-pink-500/10"
+                            : color === "cyan"
+                            ? "text-cyan-400/70 hover:text-cyan-300 hover:bg-cyan-500/10"
                             : "text-green-400/70 hover:text-green-300 hover:bg-green-500/10";
+
+                          const handleItemClick = () => {
+                            if (isUnread) markRead(n._id);
+                            if (n.metadata?.link) {
+                              setOpen(false);
+                              navigate(n.metadata.link);
+                            }
+                          };
 
                           return (
                             <li key={n._id}>
@@ -544,11 +566,16 @@ export default function NotificationsButton({
                                 <div className="flex items-start gap-2">
                                   <span
                                     className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${iconBgCls}`}
+                                    onClick={handleItemClick}
                                   >
                                     {isReply ? (
                                       <CornerUpLeft className="h-3 w-3" />
                                     ) : broadcast ? (
                                       <Radio className="h-3 w-3" />
+                                    ) : n.type === "task_assigned" ? (
+                                      <Clipboard className="h-3 w-3 text-cyan-400" />
+                                    ) : n.type === "task_completed" ? (
+                                      <CheckCircle className="h-3 w-3 text-emerald-400" />
                                     ) : (
                                       <UserPlus className="h-3 w-3" />
                                     )}
@@ -556,9 +583,9 @@ export default function NotificationsButton({
                                   <div className="min-w-0 flex-1">
                                     {n.title && (
                                       <p
-                                        className={`text-[10px] font-bold leading-snug mb-0.5 ${isUnread ? (color === "pink" ? "text-pink-200" : "text-green-200") : "text-gray-400"}`}
-                                        onClick={() => { if (isUnread) markRead(n._id); }}
-                                        style={{ cursor: isUnread ? "pointer" : "default" }}
+                                        className={`text-[10px] font-bold leading-snug mb-0.5 ${isUnread ? (color === "cyan" ? "text-cyan-200" : color === "pink" ? "text-pink-200" : "text-green-200") : "text-gray-400"}`}
+                                        onClick={handleItemClick}
+                                        style={{ cursor: isUnread || n.metadata?.link ? "pointer" : "default" }}
                                       >
                                         {n.title}
                                       </p>
@@ -568,7 +595,7 @@ export default function NotificationsButton({
                                         isUnread ? "font-semibold text-gray-100" : "text-gray-300"
                                       }`}
                                       style={{ whiteSpace: "pre-wrap" }}
-                                      onClick={() => { if (isUnread) markRead(n._id); }}
+                                      onClick={handleItemClick}
                                     >
                                       {n.body}
                                     </p>
