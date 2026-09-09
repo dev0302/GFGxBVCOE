@@ -89,7 +89,7 @@ function NewCard({ person }) {
                   src={image}
                   loading="eager"
                   alt={name}
-                  className="block h-full w-full object-fill transition-transform duration-300 group-hover:scale-105"
+                  className="block h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   style={{ objectPosition: "center" }}
                 />
               </div>
