@@ -12,7 +12,7 @@ Official production platform for the GeeksforGeeks BVCOE student chapter, built 
 ![Realtime](https://img.shields.io/badge/realtime-Socket.IO-111111?style=flat-square)
 ![Last Commit](https://img.shields.io/github/last-commit/dev0302/GFGxBVCOE?style=flat-square)
 
-**Live Site:** [https://gfg-bvcoe.com](https://gfg-bvcoe.com)<br>
+**Live Site:** [https://gfg-bvcoe.in](https://gfg-bvcoe.in)<br>
 **Repository:** [https://github.com/dev0302/GFGxBVCOE](https://github.com/dev0302/GFGxBVCOE)
 
 ## Table of Contents
