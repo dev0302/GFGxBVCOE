@@ -342,7 +342,7 @@ const Profile = () => {
       <div className="container mx-auto px-4 max-w-2xl">
         <div className="mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-richblack-25 mb-2">My profile</h1>
-          <p className="text-gray-400 text-sm">Manage your details and display picture.</p>
+          <p className="text-gray-400 text-sm">Manage your details and display picture..</p>
         </div>
 
         <motion.div
