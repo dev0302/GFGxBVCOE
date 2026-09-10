@@ -13,6 +13,9 @@ Official production platform for the GeeksforGeeks BVCOE student chapter, built 
 ![Last Commit](https://img.shields.io/github/last-commit/dev0302/GFGxBVCOE?style=flat-square)
 
 **Live Site:** [https://gfg-bvcoe.in](https://gfg-bvcoe.in)<br>
+
+**Live Site Fallback:** [https://gfg-bvcoe.vercel.app](https://gfg-bvcoe.vercel.app)<br>
+
 **Repository:** [https://github.com/dev0302/GFGxBVCOE](https://github.com/dev0302/GFGxBVCOE)
 
 ## Table of Contents
