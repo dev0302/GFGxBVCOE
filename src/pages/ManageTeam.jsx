@@ -1134,7 +1134,7 @@ export default function ManageTeam({
   return (
     <div className="min-h-screen darkthemebg pt-24 pb-16">
       <PrintingLoader isPrinting={isPrinting} />
-      <div className="container mx-auto px-4 max-w-6xl">
+      <div className="container mx-auto px-4 max-w-11/12">
         <div className="flex flex-col gap-4 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -1148,12 +1148,16 @@ export default function ManageTeam({
                   Back to departments
                 </button>
               )}
-              <h1 className="text-2xl md:text-3xl font-bold text-richblack-25 flex items-center gap-2">
-                <Users className="h-10 w-10 text-cyan-400" />
-                {isSociety
-                  ? `Manage society › ${displayDepartment}`
-                  : isReadOnly ? "View your team" : "Manage your team"}
-              </h1>
+             <h1 className="text-2xl md:text-3xl font-bold text-richblack-25 flex items-start gap-2 max-w-[900px]">
+  <Users className="h-10 w-10 text-cyan-400 shrink-0 mt-1" />
+  <span>
+    {isSociety
+      ? `Manage society › ${displayDepartment}`
+      : isReadOnly
+        ? "View your team"
+        : "Manage your team"}
+  </span>
+</h1>
               <p className="text-gray-400 text-sm mt-1">
                 Department:{" "}
                 <span className="text-cyan-300 font-medium">
@@ -1191,7 +1195,7 @@ export default function ManageTeam({
               <button
                 type="button"
                 onClick={() => setPrintAllModalOpen(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-200 hover:bg-cyan-500/25 hover:border-cyan-400/50 transition-colors text-sm font-medium"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl   bg-gray-600/40 border border-gray-500/40 text-gray-200 hover:bg-gray-500/40 transition-colors text-sm font-medium"
               >
                 <Printer className="h-4 w-4" />
                 Print whole list (all departments)
@@ -1207,7 +1211,7 @@ export default function ManageTeam({
     setDeptNotifSuccess("");
     setDeptNotifModalOpen(true);
   }}
-  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-200 hover:bg-sky-500/25 hover:border-sky-400/50 transition-colors text-sm font-medium"
+  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl  bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 hover:bg-emerald-500/25 hover:border-emerald-400/50 transition-colors text-sm font-medium"
 >
   <Bell className="h-4 w-4" />
   Notify {displayDepartment} Members
@@ -1238,7 +1242,7 @@ export default function ManageTeam({
                       setDeptNotifSuccess("");
                       setDeptNotifModalOpen(true);
                     }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-pink-500/15 border border-pink-500/30 text-pink-200 hover:bg-pink-500/25 hover:border-pink-400/50 transition-colors text-sm font-medium"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl   bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 hover:bg-emerald-500/25 hover:border-emerald-400/50 transition-colors text-sm font-medium"
                   >
                     <Bell className="h-4 w-4" />
                     Notify whole society
@@ -1314,6 +1318,56 @@ export default function ManageTeam({
               </div>}
             </div>
           </div>
+
+{displayDepartment?.trim().toLowerCase() === "technical" && (
+  <div className="relative w-fit max-w-full overflow-hidden rounded-lg border border-blue-400/15 px-3 py-1.5">
+    {/* Moving light sweep */}
+    <div className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-blue-400/45 to-transparent blur-md animate-[quoteSweep_5.5s_ease-in-out_infinite]" />
+
+    <p className="relative text-gray-300 text-sm md:text-base italic leading-relaxed">
+      “The amount you can get done in a day if you never stop working, never
+      stop thinking, never stop flirting, texting, organizing, vibing, etc. is
+      ridiculously insane.”
+      <br />
+      <span className="text-blue-400/80 font-medium">
+        ~ Welcome to the technical team of BVCOE
+      </span>
+    </p>
+  </div>
+)}
+
+{displayDepartment?.trim().toLowerCase() === "design and creative" && (
+  <div className="relative w-fit max-w-full overflow-hidden rounded-lg border border-pink-300/15 px-3 py-1.5">
+    {/* Moving light sweep */}
+    <div className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-pink-300/45 to-transparent blur-md animate-[quoteSweep_2.5s_ease-in-out_infinite]" />
+
+    <p className="relative text-gray-300 text-sm md:text-base italic leading-relaxed">
+      “Pixels, palettes, questionable ideas, and way too many revisions -
+      somehow, we make it look intentional.”
+      <br />
+      <span className="text-pink-300/80 font-medium">
+        ~ Welcome to the Design & Creative team of BVCOE
+      </span>
+    </p>
+  </div>
+)}
+
+{displayDepartment?.trim().toLowerCase() === "social media and promotion" && (
+  <div className="relative w-fit max-w-full overflow-hidden rounded-lg border border-pink-300/15 px-3 py-1.5">
+    {/* Moving light sweep */}
+    <div className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-pink-300/45 to-transparent blur-md animate-[quoteSweep_2.5s_ease-in-out_infinite]" />
+
+    <p className="relative text-gray-300 text-sm md:text-base italic leading-relaxed">
+      “Posting at the right time, chasing the right trend, and pretending the
+      algorithm was always on our side.”
+      <br />
+      <span className="text-pink-300/80 font-medium">
+        ~ Welcome to the Social Media and Promotion team of BVCOE
+      </span>
+    </p>
+  </div>
+)}
+ 
           <div className="flex items-center gap-2 w-full max-w-md">
             <div className="flex-1 min-w-0 i-fonts">
               <Search variant="manage-team" placeholder="Search members…" department={department} />
@@ -1416,8 +1470,8 @@ export default function ManageTeam({
               }
 
               return (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
+                <div className="w-full overflow-x-auto">
+                  <table className="w-full min-w-max text-left text-sm">
                     <thead>
                       <tr className="border-b border-gray-500/30 bg-[#252536]/80">
                         {LIST_COLS.map((k) => (

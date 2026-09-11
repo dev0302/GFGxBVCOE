@@ -77,6 +77,20 @@ body {
   }
 }
 
+@keyframes quoteSweep {
+  0% {
+    transform: translateX(-150%);
+  }
+
+  45% {
+    transform: translateX(450%);
+  }
+
+  100% {
+    transform: translateX(450%);
+  }
+}
+
 .i-fonts {
   font-family:
     var(--font-figtree),

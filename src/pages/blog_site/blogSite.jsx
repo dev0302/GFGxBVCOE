@@ -146,6 +146,21 @@ const BlogSite = () => {
       return post.title?.toLowerCase().includes(query) || post.summary?.toLowerCase().includes(query);
     });
 
+    const [quoteIndex, setQuoteIndex] = useState(0);
+
+const quotes = [
+  "Share your journey in words - because stories inspire change.",
+  "“Seek knowledge with an open mind, speak with courage, and leave behind words that outlive you.”",
+];
+
+useEffect(() => {
+  const timer = setInterval(() => {
+    setQuoteIndex((prev) => (prev + 1) % quotes.length);
+  }, 8000);
+
+  return () => clearInterval(timer);
+}, []);
+
   return (
     <div
       className="relative min-h-screen overflow-x-hidden"
@@ -204,17 +219,23 @@ const BlogSite = () => {
             </span>
           </h1>
 
-          <p className="i-fonts mt-5 max-w-lg font-nunito text-base leading-relaxed sm:text-lg" style={{ color: tokens.textMuted }}>
-            <NativeTypewriter
-              content="Share your journey in words - because stories inspire change."
-              speed={45}
-              deleteSpeed={25}
-              pauseMs={5000}
-              loop
-              cursor
-              style={{ color: tokens.textMuted }}
-            />
-          </p>
+          <p
+  className="i-fonts mt-5 max-w-lg font-nunito text-base leading-relaxed sm:text-lg"
+  style={{ color: tokens.textMuted }}
+>
+  <NativeTypewriter
+    content={[
+      "Share your journey in words - because stories inspire change.",
+      "“Seek knowledge with an open mind, speak with courage, and leave behind words that outlive you.”",
+    ]}
+    speed={45}
+    deleteSpeed={25}
+    pauseMs={5000}
+    loop
+    cursor
+    style={{ color: tokens.textMuted }}
+  />
+</p>
 
           <div
             className="mt-9 h-px w-32 rounded-full"

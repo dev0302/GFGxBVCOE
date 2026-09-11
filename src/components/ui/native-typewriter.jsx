@@ -1,16 +1,6 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
-/**
- * Types out content character by character with an optional blinking cursor.
- * @param {string} content      - Full text to type
- * @param {string} [className]  - Tailwind/style classes for the text
- * @param {number} [speed=40]   - Delay in ms between typed characters
- * @param {boolean} [cursor=true] - Show blinking cursor
- * @param {boolean} [loop=false]  - Loop indefinitely (type → pause → delete → repeat)
- * @param {number} [deleteSpeed=30] - Delay in ms between deleted characters
- * @param {number} [pauseMs=1800]   - Pause in ms after fully typed before deleting
- */
 export function NativeTypewriter({
   content = "",
   className,
@@ -21,51 +11,72 @@ export function NativeTypewriter({
   pauseMs = 1800,
   ...props
 }) {
+  const contents = Array.isArray(content) ? content : [content];
+
+  const [quoteIndex, setQuoteIndex] = useState(0);
   const [displayed, setDisplayed] = useState("");
-  const [index, setIndex] = useState(0);
-  // phase: "typing" | "pausing" | "deleting" | "restarting"
   const [phase, setPhase] = useState("typing");
+
+  const currentContent = contents[quoteIndex] || "";
 
   useEffect(() => {
     if (!loop) {
-      // Original one-shot behaviour
-      if (index >= content.length) return;
-      const t = setTimeout(() => {
-        setDisplayed((prev) => prev + content[index]);
-        setIndex((i) => i + 1);
+      if (displayed.length >= currentContent.length) return;
+
+      const timer = setTimeout(() => {
+        setDisplayed(currentContent.slice(0, displayed.length + 1));
       }, speed);
-      return () => clearTimeout(t);
+
+      return () => clearTimeout(timer);
     }
 
-    // ── Looping behaviour ──
+    // TYPE
     if (phase === "typing") {
-      if (index >= content.length) {
-        // Finished typing — pause before deleting
-        const t = setTimeout(() => setPhase("deleting"), pauseMs);
-        return () => clearTimeout(t);
+      if (displayed.length < currentContent.length) {
+        const timer = setTimeout(() => {
+          setDisplayed(currentContent.slice(0, displayed.length + 1));
+        }, speed);
+
+        return () => clearTimeout(timer);
       }
-      const t = setTimeout(() => {
-        setDisplayed((prev) => prev + content[index]);
-        setIndex((i) => i + 1);
-      }, speed);
-      return () => clearTimeout(t);
+
+      // Finished typing → wait
+      const timer = setTimeout(() => {
+        setPhase("deleting");
+      }, pauseMs);
+
+      return () => clearTimeout(timer);
     }
 
+    // DELETE
     if (phase === "deleting") {
-      if (displayed.length === 0) {
-        // Finished deleting — brief pause then restart
-        const t = setTimeout(() => {
-          setIndex(0);
-          setPhase("typing");
-        }, speed * 3);
-        return () => clearTimeout(t);
+      if (displayed.length > 0) {
+        const timer = setTimeout(() => {
+          setDisplayed((prev) => prev.slice(0, -1));
+        }, deleteSpeed);
+
+        return () => clearTimeout(timer);
       }
-      const t = setTimeout(() => {
-        setDisplayed((prev) => prev.slice(0, -1));
-      }, deleteSpeed);
-      return () => clearTimeout(t);
+
+      // Finished deleting → next quote
+      const timer = setTimeout(() => {
+        setQuoteIndex((prev) => (prev + 1) % contents.length);
+        setPhase("typing");
+      }, 300);
+
+      return () => clearTimeout(timer);
     }
-  }, [index, displayed, phase, content, speed, deleteSpeed, pauseMs, loop]);
+  }, [
+    displayed,
+    phase,
+    quoteIndex,
+    currentContent,
+    speed,
+    deleteSpeed,
+    pauseMs,
+    loop,
+    contents.length,
+  ]);
 
   return (
     <span className={cn("inline", className)} {...props}>
