@@ -1,11 +1,13 @@
 const mongoose = require("mongoose");
 
 const projectCategories = [
-  "Core Engine",
-  "Backend Services",
-  "DevTools & MCP",
-  "UI Components",
-  "Documentation",
+  "Web Development",
+  "App Development",
+  "Blockchain & Web3",
+  "Systems & Backend",
+  "Cybersecurity",
+  "Cloud, DevOps & Infrastructure",
+  "Developer Tools",
 ];
 const difficultyLevels = ["beginner", "intermediate", "advanced"];
 

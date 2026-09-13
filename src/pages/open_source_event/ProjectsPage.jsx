@@ -2,28 +2,28 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "../../context/AuthContext";
-import { getOSGithubOAuthUrl, getOSProjects } from "../../services/api";
+import { getOSProjects } from "../../services/api";
 import {
-  CheckCircle2,
+  ChevronLeft,
   ChevronRight,
   ExternalLink,
   Github,
   Linkedin,
-  LoaderCircle,
   Mail,
   Upload,
   Search,
   SlidersHorizontal,
-  X,
 } from "lucide-react";
 
 const categories = [
   "All",
-  "Core Engine",
-  "Backend Services",
-  "DevTools & MCP",
-  "UI Components",
-  "Documentation",
+  "Web Development",
+  "App Development",
+  "Blockchain & Web3",
+  "Systems & Backend",
+  "Cybersecurity",
+  "Cloud, DevOps & Infrastructure",
+  "Developer Tools",
 ];
 
 export const canUploadProjects = (user) => {
@@ -58,8 +58,6 @@ const getRepositoryUrl = (repository) => {
 const getProjectKey = (project) =>
   project._id || project.repository || project.name;
 
-const OS_CONTRIBUTOR_STORAGE_KEY = "gfg_open_source_contributor";
-
 function ProjectsPage() {
   const { user } = useAuth();
   const [query, setQuery] = useState("");
@@ -70,74 +68,8 @@ function ProjectsPage() {
   const [loadError, setLoadError] = useState("");
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
   const [descriptionOverflow, setDescriptionOverflow] = useState({});
-  const [githubModalOpen, setGithubModalOpen] = useState(false);
-  const [connectedContributor, setConnectedContributor] = useState(() => {
-    try {
-      const storedContributor = JSON.parse(
-        localStorage.getItem(OS_CONTRIBUTOR_STORAGE_KEY) || "null",
-      );
-      return storedContributor?.github_name ? storedContributor : null;
-    } catch {
-      return null;
-    }
-  });
-  const [githubConnecting, setGithubConnecting] = useState(false);
-  const [githubError, setGithubError] = useState("");
-  const githubPopupRef = useRef(null);
   const descriptionRefs = useRef({});
-
-  const handleGithubConnect = (event) => {
-    event.preventDefault();
-    setGithubError("");
-    setGithubConnecting(true);
-    githubPopupRef.current = window.open(
-      getOSGithubOAuthUrl(),
-      "gfg-github-login",
-      "width=560,height=720,menubar=no,toolbar=no,location=yes,resizable=yes",
-    );
-    if (!githubPopupRef.current) {
-      setGithubConnecting(false);
-      setGithubError("Please allow popups to connect GitHub.");
-    }
-  };
-
-  useEffect(() => {
-    const handleGithubMessage = (event) => {
-      const apiOrigin = new URL(
-        import.meta.env.VITE_API_BASE_URL || window.location.origin,
-        window.location.origin,
-      ).origin;
-      if (
-        event.source !== githubPopupRef.current ||
-        ![window.location.origin, apiOrigin].includes(event.origin) ||
-        event.data?.type !== "GFG_GITHUB_RESULT"
-      )
-        return;
-
-      githubPopupRef.current = null;
-      setGithubConnecting(false);
-      if (event.data.success) {
-        const contributor = {
-          github_name: event.data.github_name,
-          github_profile_url: event.data.github_profile_url,
-          total_contributions: event.data.total_contributions,
-          points: event.data.points,
-        };
-        setConnectedContributor(contributor);
-        localStorage.setItem(
-          OS_CONTRIBUTOR_STORAGE_KEY,
-          JSON.stringify(contributor),
-        );
-        setGithubModalOpen(false);
-        toast.success(`Connected GitHub: @${event.data.github_name}`);
-      } else {
-        setGithubError(event.data.message || "Unable to connect GitHub");
-      }
-    };
-
-    window.addEventListener("message", handleGithubMessage);
-    return () => window.removeEventListener("message", handleGithubMessage);
-  }, []);
+  const categoryScrollerRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -240,21 +172,6 @@ function ProjectsPage() {
               >
                 Leaderboard
               </Link>
-              <button
-                type="button"
-                disabled={Boolean(connectedContributor?.github_name)}
-                onClick={() => {
-                  if (connectedContributor?.github_name) return;
-                  setGithubError("");
-                  setGithubModalOpen(true);
-                }}
-                className="flex h-12 items-center justify-center gap-2 rounded-xl border border-emerald-300/30 bg-[#10291f] px-5 text-sm font-semibold text-emerald-200 transition hover:border-emerald-300/60 hover:bg-[#153b28] disabled:cursor-default disabled:opacity-100 sm:min-w-[170px]"
-              >
-                <Github size={17} />
-                {connectedContributor?.github_name
-                  ? "Connected"
-                  : "Connect GitHub"}
-              </button>
               {canUploadProjects(user) && (
                 <Link
                   to="/open-source/upload"
@@ -284,20 +201,51 @@ function ProjectsPage() {
           </div>
         </section>
 
-        <nav
-          className="mx-auto mt-9 flex max-w-[1210px] gap-2 overflow-x-auto border-b border-white/[0.1] pb-3"
-          aria-label="Project categories"
-        >
-          {categories.map((item) => (
-            <button
-              key={item}
-              onClick={() => setCategory(item)}
-              className={`shrink-0 rounded-full border px-5 py-2.5 text-sm transition ${category === item ? "border-[#f8e7b6] bg-[#f8e7b6] font-semibold text-[#242435]" : "border-white/[0.1] bg-[#1b1b2a]/60 text-[#a9a8bc] hover:border-white/25 hover:text-white"}`}
-            >
-              {item}
-            </button>
-          ))}
-        </nav>
+        <div className="mx-auto mt-9 flex max-w-[1210px] items-center gap-2 border-b border-white/[0.1] pb-3">
+          <button
+            type="button"
+            onClick={() =>
+              categoryScrollerRef.current?.scrollBy({
+                left: -220,
+                behavior: "smooth",
+              })
+            }
+            aria-label="Scroll categories left"
+            title="Scroll categories left"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/[0.1] bg-[#1b1b2a] text-[#a9a8bc] transition hover:border-emerald-300/50 hover:text-white"
+          >
+            <ChevronLeft size={17} />
+          </button>
+          <nav
+            ref={categoryScrollerRef}
+            className="flex min-w-0 flex-1 gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            aria-label="Project categories"
+          >
+            {categories.map((item) => (
+              <button
+                key={item}
+                onClick={() => setCategory(item)}
+                className={`shrink-0 rounded-full border px-5 py-2.5 text-sm transition ${category === item ? "border-[#f8e7b6] bg-[#f8e7b6] font-semibold text-[#242435]" : "border-white/[0.1] bg-[#1b1b2a]/60 text-[#a9a8bc] hover:border-white/25 hover:text-white"}`}
+              >
+                {item}
+              </button>
+            ))}
+          </nav>
+          <button
+            type="button"
+            onClick={() =>
+              categoryScrollerRef.current?.scrollBy({
+                left: 220,
+                behavior: "smooth",
+              })
+            }
+            aria-label="Scroll categories right"
+            title="Scroll categories right"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/[0.1] bg-[#1b1b2a] text-[#a9a8bc] transition hover:border-emerald-300/50 hover:text-white"
+          >
+            <ChevronRight size={17} />
+          </button>
+        </div>
 
         <section
           className="mx-auto mt-7 grid max-w-[1210px] items-start gap-5 md:grid-cols-2 xl:grid-cols-3"
@@ -462,100 +410,6 @@ function ProjectsPage() {
           More specifications are being reviewed <ChevronRight size={14} />
         </p>
       </main>
-      {githubModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setGithubModalOpen(false);
-          }}
-        >
-          <section
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="connect-github-title"
-            className="w-full max-w-md rounded-2xl border border-white/10 bg-[#1b1b2a] p-6 shadow-2xl"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400/80">
-                  Open source profile
-                </p>
-                <h2
-                  id="connect-github-title"
-                  className="mt-2 text-2xl font-semibold text-[#fffaf0]"
-                >
-                  Connect GitHub
-                </h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setGithubModalOpen(false)}
-                aria-label="Close GitHub connection dialog"
-                className="text-[#77768b] transition hover:text-white"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <p className="mt-3 text-sm leading-6 text-[#a9a8bc]">
-              Sign in with GitHub to connect your username with the open-source
-              program. This does not change your GFG website login.
-            </p>
-            <form onSubmit={handleGithubConnect} className="mt-6">
-              <button
-                type="submit"
-                disabled={githubConnecting}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-[#16161f] transition hover:bg-[#e8f8ed] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {githubConnecting && (
-                  <LoaderCircle size={17} className="animate-spin" />
-                )}
-                <Github size={17} />
-                {githubConnecting
-                  ? "Waiting for GitHub..."
-                  : "Continue with GitHub"}
-              </button>
-            </form>
-            {githubError && (
-              <p className="mt-3 text-sm text-red-300">{githubError}</p>
-            )}
-            {connectedContributor && (
-              <div className="mt-5 rounded-xl border border-emerald-300/20 bg-[#10291f] p-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-emerald-200">
-                  <CheckCircle2 size={17} /> @{connectedContributor.github_name}
-                </div>
-                <div className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-                  <div>
-                    <p className="text-[#77768b]">Points</p>
-                    <p className="mt-1 font-semibold text-white">
-                      {connectedContributor.points}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[#77768b]">Beginner</p>
-                    <p className="mt-1 font-semibold text-white">
-                      {connectedContributor.total_contributions?.beginner || 0}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[#77768b]">Intermediate</p>
-                    <p className="mt-1 font-semibold text-white">
-                      {connectedContributor.total_contributions?.intermediate ||
-                        0}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[#77768b]">Advanced</p>
-                    <p className="mt-1 font-semibold text-white">
-                      {connectedContributor.total_contributions?.advanced || 0}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </section>
-        </div>
-      )}
     </div>
   );
 }

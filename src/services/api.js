@@ -38,31 +38,12 @@ export async function getOSProjects({ manage = false, category = "" } = {}) {
   return data.data || [];
 }
 
-export function getOSGithubOAuthUrl() {
-  return `${BASE}/api/v1/open-source/contributors/github/start`;
-}
-
-export async function getOSContributorLeaderboard(githubName = "") {
-  const query = githubName
-    ? `?github_name=${encodeURIComponent(githubName)}`
-    : "";
-  const res = await authFetch(
-    `/api/v1/open-source/contributors/leaderboard${query}`,
-  );
+export async function getOSContributorLeaderboard() {
+  const res = await authFetch("/api/v1/open-source/contributors/leaderboard");
   const data = await res.json().catch(() => ({}));
   if (!res.ok)
     throw new Error(data.message || "Failed to load contributor leaderboard");
   return data.data || [];
-}
-
-export async function syncOSContributor(githubName) {
-  const res = await authFetch(
-    `/api/v1/open-source/contributors/sync/${encodeURIComponent(githubName)}`,
-    { method: "POST" },
-  );
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to sync contributor");
-  return data.data;
 }
 
 export async function createOSProject(payload) {

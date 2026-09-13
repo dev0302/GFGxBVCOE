@@ -7,11 +7,13 @@ import { canUploadProjects } from "./ProjectsPage";
 import { createOSProject } from "../../services/api";
 
 const categories = [
-  "Core Engine",
-  "Backend Services",
-  "DevTools & MCP",
-  "UI Components",
-  "Documentation",
+  "Web Development",
+  "App Development",
+  "Blockchain & Web3",
+  "Systems & Backend",
+  "Cybersecurity",
+  "Cloud, DevOps & Infrastructure",
+  "Developer Tools",
 ];
 const difficultyLevels = [
   { value: "beginner", label: "Beginner" },

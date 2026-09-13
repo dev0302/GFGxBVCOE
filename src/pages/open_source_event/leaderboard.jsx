@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -7,10 +7,7 @@ import {
   RefreshCw,
   Trophy,
 } from "lucide-react";
-import {
-  getOSContributorLeaderboard,
-  syncOSContributor,
-} from "../../services/api";
+import { getOSContributorLeaderboard } from "../../services/api";
 
 const medalStyles = {
   1: "border-amber-300/50 bg-amber-300/10 text-amber-200",
@@ -23,28 +20,11 @@ function OpenSourceLeaderboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const getStoredGithubName = () => {
-    try {
-      return (
-        JSON.parse(
-          localStorage.getItem("gfg_open_source_contributor") || "null",
-        )?.github_name || ""
-      );
-    } catch {
-      return "";
-    }
-  };
-
-  const loadLeaderboard = () => {
+  const loadLeaderboard = useCallback(() => {
     setLoading(true);
     setError("");
     let active = true;
-    const storedGithubName = getStoredGithubName();
-    const syncPromise = storedGithubName
-      ? syncOSContributor(storedGithubName)
-      : Promise.resolve();
-    syncPromise
-      .then(() => getOSContributorLeaderboard())
+    getOSContributorLeaderboard()
       .then((data) => {
         if (active) setContributors(data);
       })
@@ -58,9 +38,9 @@ function OpenSourceLeaderboard() {
     return () => {
       active = false;
     };
-  };
+  }, []);
 
-  useEffect(() => loadLeaderboard(), []);
+  useEffect(() => loadLeaderboard(), [loadLeaderboard]);
 
   return (
     <div className="min-h-screen bg-[#242435] px-5 pb-20 pt-24 text-[#f8f4e9] sm:px-8 lg:px-12">
