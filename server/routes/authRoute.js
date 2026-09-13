@@ -5,6 +5,7 @@ const {
   getOtpForAutofill,
   signup,
   login,
+  loginProfilePreview,
   changePassword,
   forgotPassword,
   resetPassword,
@@ -40,6 +41,7 @@ router.get("/allow-autofill", allowAutofill);
 router.get("/otp-for-autofill", getOtpForAutofill);
 router.post("/signup", signup);
 router.post("/login", login);
+router.get("/login-profile-preview", loginProfilePreview);
 router.post("/logout", logout);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);

@@ -64,6 +64,7 @@ import BlogPage from "./pages/blogPage";
 import BlogApprovalPage from "./pages/blogApprovalPage";
 import Tasks from "./pages/Tasks";
 import TaskAssignmentPrompt from "./components/TaskAssignmentPrompt";
+import SpotlightSearch from "./components/SpotlightSearch";
 
 function App() {
   const location = useLocation();
@@ -124,6 +125,7 @@ function App() {
                 />
                 {!hideNavbar && <Navbar />}
                 <TaskAssignmentPrompt />
+                <SpotlightSearch />
                 <AirdropAnimationLayer />
                 <IncomingUploadModal />
                 <AnimatePresence mode="wait">

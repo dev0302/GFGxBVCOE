@@ -593,6 +593,31 @@ exports.login = async (req, res) => {
   }
 };
 
+// A deliberately minimal pre-login lookup used only to personalize the login
+// form. It never exposes an account name, role, or whether a password exists.
+exports.loginProfilePreview = async (req, res) => {
+  try {
+    const email = String(req.query.email || "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(200).json({ success: true, image: "" });
+    }
+
+    const user = await User.findOne({ email }).select("image").lean();
+    if (user?.image) return res.status(200).json({ success: true, image: user.image });
+
+    const departmentMember = await findDepartmentMemberByEmail(email);
+    if (departmentMember?.member?.photo) {
+      return res.status(200).json({ success: true, image: departmentMember.member.photo });
+    }
+
+    const predefined = await findPredefinedByEmail(email);
+    return res.status(200).json({ success: true, image: predefined?.image || "" });
+  } catch (_) {
+    // Login remains fully usable if the optional cosmetic preview is unavailable.
+    return res.status(200).json({ success: true, image: "" });
+  }
+};
+
 const RESET_TOKEN_EXPIRY_MS = 60 * 60 * 1000;
 
 exports.forgotPassword = async (req, res) => {

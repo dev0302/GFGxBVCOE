@@ -800,3 +800,9 @@ body {
 .profile-float-border-pulse {
   animation: borderPulse 2s ease-in-out infinite;
 }
+
+@keyframes login-progress {
+  0% { transform: translateX(-115%); }
+  50% { transform: translateX(110%); }
+  100% { transform: translateX(220%); }
+}

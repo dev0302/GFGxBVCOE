@@ -69,6 +69,33 @@ function SocialLinks({ socials = {} }) {
 
 export function MemberDetailModal({ member, onClose }) {
   if (!member) return null;
+  const profile = member.additionalDetails || member.profile?.additionalDetails ||
+    (member.profile && typeof member.profile === "object" ? member.profile : {});
+  const socials = member.socials || profile.socials || {};
+  const fieldValue = (key) => {
+    if (key === "name") {
+      return member.name || [member.firstName || profile.firstName, member.lastName || profile.lastName]
+        .filter(Boolean).join(" ");
+    }
+    if (key === "year") return member.year || profile.year || profile.yearOfStudy;
+    if (key === "branch") return member.branch || profile.branch;
+    if (key === "section") return member.section || profile.section;
+    if (key === "contact") return member.contact || profile.contact;
+    if (key === "non_tech_society") return member.non_tech_society || profile.non_tech_society;
+    return member[key] || profile[key];
+  };
+  const profileFields = [
+    ["First name", member.firstName || profile.firstName],
+    ["Last name", member.lastName || profile.lastName],
+    ["Gender", profile.gender],
+    ["Date of birth", profile.dob ? new Date(profile.dob).toLocaleDateString() : null],
+    ["About", profile.about || profile.bio || profile.description],
+    ["Year of study", profile.yearOfStudy],
+    ["Skills", Array.isArray(profile.skills) ? profile.skills.join(", ") : profile.skills],
+    ["P0", profile.p0],
+    ["P1", profile.p1],
+    ["P2", profile.p2],
+  ].filter(([, value]) => value != null && String(value).trim() !== "");
   const rawPhoto = member.photo || member.image_drive_link;
   const previewSrc = rawPhoto
     ? photoPreviewLargeAvatarUrl(rawPhoto)
@@ -112,7 +139,7 @@ export function MemberDetailModal({ member, onClose }) {
             <h3 className="text-xl font-bold text-richblack-25 text-center">
               {member.name || "—"}
             </h3>
-            <SocialLinks socials={member.socials || member.profile?.socials || member.profile || {}} />
+            <SocialLinks socials={socials} />
             {(member.department || member.position) && (
               <div className="text-center text-sm text-gray-400 space-y-1">
                 {member.department && (
@@ -132,7 +159,7 @@ export function MemberDetailModal({ member, onClose }) {
           </div>
           <dl className="grid gap-3">
             {TEAM_FIELDS.filter((k) => k !== "photo").map((key) => {
-              const value = member[key];
+              const value = fieldValue(key);
               const isEmpty = value == null || String(value).trim() === "";
               return (
                 <div
@@ -166,7 +193,24 @@ export function MemberDetailModal({ member, onClose }) {
                 </div>
               );
             })}
+            <DetailRow label="Department" value={member.department} />
+            <DetailRow label="Position" value={member.position} />
           </dl>
+          {(profileFields.length > 0 || Object.values(socials).some(Boolean)) && (
+            <section>
+              <h4 className="text-sm font-semibold text-cyan-400 uppercase tracking-wider mb-3 border-b border-gray-500/30 pb-1">
+                Profile information
+              </h4>
+              <dl className="grid gap-2">
+                {profileFields.map(([label, value]) => (
+                  <DetailRow key={label} label={label} value={value} />
+                ))}
+                <DetailRow label="Instagram" value={socials.instagram} link={socials.instagram ? socialUrl(socials.instagram, "instagram") : undefined} />
+                <DetailRow label="LinkedIn" value={socials.linkedin} link={socials.linkedin ? socialUrl(socials.linkedin, "linkedin") : undefined} />
+                <DetailRow label="GitHub" value={socials.github} link={socials.github ? socialUrl(socials.github, "github") : undefined} />
+              </dl>
+            </section>
+          )}
           {(member.photo || member.image_drive_link) && (
             <div className="pt-2 border-t border-gray-500/20">
               <a
@@ -674,6 +718,7 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
               <DetailRow label="Year of study" value={profile.yearOfStudy} />
               <DetailRow label="Branch" value={profile.branch} />
               <DetailRow label="Year" value={profile.year} />
+              <DetailRow label="Section" value={profile.section} />
               <DetailRow label="Position" value={profile.position} />
               <DetailRow label="Non-tech society" value={profile.non_tech_society} />
               <DetailRow label="P0" value={profile.p0} />
@@ -684,17 +729,17 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
                   <DetailRow
                     label="Instagram"
                     value={profile.socials.instagram}
-                    link={profile.socials.instagram || undefined}
+                    link={profile.socials.instagram ? socialUrl(profile.socials.instagram, "instagram") : undefined}
                   />
                   <DetailRow
                     label="LinkedIn"
                     value={profile.socials.linkedin}
-                    link={profile.socials.linkedin || undefined}
+                    link={profile.socials.linkedin ? socialUrl(profile.socials.linkedin, "linkedin") : undefined}
                   />
                   <DetailRow
                     label="GitHub"
                     value={profile.socials.github}
-                    link={profile.socials.github || undefined}
+                    link={profile.socials.github ? socialUrl(profile.socials.github, "github") : undefined}
                   />
                 </>
               )}
