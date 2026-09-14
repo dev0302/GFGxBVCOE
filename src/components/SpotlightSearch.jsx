@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CalendarDays, Command, Search, UserRound, Users, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { getAllPeople, getEvents } from "../services/api";
+import { getEvents, getSearchPeople } from "../services/api";
 import { avatarPlaceholder, photoPreviewUrl } from "../utils/teamMemberUtils";
 import { MemberDetailModal, PredefinedOnlyDetailModal, UserDetailModal } from "./Search";
 import siteEvents from "../data/eventData";
@@ -18,6 +18,19 @@ const EXAMPLES = ["Search a person", "year:3rd", "branch:cse", "section:cse-4", 
 const overlayTransition = { duration: 0.28, ease: [0.22, 1, 0.36, 1] };
 const panelTransition = { type: "spring", stiffness: 380, damping: 30, mass: 0.85 };
 const contentTransition = { duration: 0.22, ease: [0.22, 1, 0.36, 1], delay: 0.06 };
+
+const mapSearchPeople = (result) => [
+  ...(result.teamMembers || []).map((member) => ({
+    type: "teamMember",
+    data: member,
+    department: member.department,
+  })),
+  ...(result.users || []).map((user) => ({ type: "user", data: user })),
+  ...(result.predefinedOnly || []).map((profile) => ({
+    type: "predefinedOnly",
+    data: profile,
+  })),
+];
 
 const personName = (item) => {
   const data = item.data || item;
@@ -97,7 +110,6 @@ export default function SpotlightSearch() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const inputRef = useRef(null);
-  const hasLoadedRef = useRef(false);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [people, setPeople] = useState([]);
@@ -111,7 +123,10 @@ export default function SpotlightSearch() {
   openRef.current = open;
   selectedRef.current = selected;
 
-  const show = () => setOpen(true);
+  const show = () => {
+    if (!user) return;
+    setOpen(true);
+  };
   const close = () => {
     setOpen(false);
     setQuery("");
@@ -119,6 +134,10 @@ export default function SpotlightSearch() {
   };
 
   useEffect(() => {
+    if (!user) {
+      if (openRef.current) close();
+      return undefined;
+    }
     const onKeyDown = (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
@@ -143,9 +162,10 @@ export default function SpotlightSearch() {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener(SPOTLIGHT_OPEN_EVENT, onOpenEvent);
     };
-  }, []);
+  }, [user]);
 
   useEffect(() => {
+    if (!user) return undefined;
     const points = [];
     let tracking = false;
     let last = null;
@@ -202,36 +222,62 @@ export default function SpotlightSearch() {
       window.removeEventListener("touchend", onEnd);
       window.removeEventListener("touchcancel", reset);
     };
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    if (!open) return undefined;
+    if (!open || !user) return undefined;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const focusTimer = window.setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 180);
-    if (hasLoadedRef.current) {
-      return () => {
-        document.body.style.overflow = previousOverflow;
-        window.clearTimeout(focusTimer);
-      };
-    }
-    hasLoadedRef.current = true;
-    setLoading(true);
-    const peopleRequest = user ? getAllPeople() : Promise.resolve({ data: [] });
-    Promise.all([peopleRequest, getEvents()])
-      .then(([peopleResult, eventsResult]) => {
-        setPeople(peopleResult.data || []);
+    getEvents()
+      .then((eventsResult) => {
         setEvents([...(eventsResult.data || []), ...siteEvents]);
       })
       .catch(() => {
         setEvents((current) => (current.length ? current : [...siteEvents]));
-      })
-      .finally(() => setLoading(false));
+      });
     return () => {
       document.body.style.overflow = previousOverflow;
       window.clearTimeout(focusTimer);
     };
   }, [open, user]);
+
+  useEffect(() => {
+    if (!open || !user) return undefined;
+    const value = query.trim();
+    const matched = value.match(/^(year|branch|section|event)\s*:\s*(.*)$/i);
+    const field = matched?.[1]?.toLowerCase() || "name";
+    const term = (matched?.[2] ?? value).trim();
+    if (field === "event") {
+      setPeople([]);
+      setLoading(false);
+      return undefined;
+    }
+    if (term.length < 2) {
+      setPeople([]);
+      setLoading(false);
+      return undefined;
+    }
+    let cancelled = false;
+    setLoading(true);
+    const timer = window.setTimeout(() => {
+      getSearchPeople(term, undefined, true)
+        .then((result) => {
+          if (cancelled) return;
+          setPeople(mapSearchPeople(result));
+        })
+        .catch(() => {
+          if (!cancelled) setPeople([]);
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    }, 200);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [open, user, query]);
 
   const { peopleResults, eventResults, mode } = useMemo(() => {
     const value = query.trim();
@@ -329,40 +375,27 @@ export default function SpotlightSearch() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={contentTransition}
                 >
-                  {loading && !people.length && !query.trim() ? (
-                    <p className="p-8 text-center text-sm text-white/45">Searching records…</p>
-                  ) : !query.trim() ? (
-                    people.length ? (
-                      <>
-                        <ResultLabel label="People" count={peopleResults.length} />
-                        {peopleResults.map((item) => (
-                          <PersonRow
-                            key={`${item.type}-${(item.data || {})._id || (item.data || {}).email}`}
-                            item={item}
-                            onOpen={openPerson}
-                          />
-                        ))}
-                      </>
-                    ) : (
-                      <div className="p-3">
-                        <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/35">
-                          Try a search
-                        </p>
-                        {EXAMPLES.map((example) => (
-                          <button
-                            key={example}
-                            type="button"
-                            onClick={() => setQuery(example)}
-                            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-white/75 transition hover:bg-white/8"
-                          >
-                            <Command size={15} className="text-white/35" />
-                            {example}
-                          </button>
-                        ))}
-                      </div>
-                    )
+                  {!query.trim() ? (
+                    <div className="p-3">
+                      <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/35">
+                        Try a search
+                      </p>
+                      {EXAMPLES.map((example) => (
+                        <button
+                          key={example}
+                          type="button"
+                          onClick={() => setQuery(example)}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-white/75 transition hover:bg-white/8"
+                        >
+                          <Command size={15} className="text-white/35" />
+                          {example}
+                        </button>
+                      ))}
+                    </div>
                   ) : loading ? (
                     <p className="p-8 text-center text-sm text-white/45">Searching records…</p>
+                  ) : query.trim().length < 2 && mode !== "event" ? (
+                    <p className="p-8 text-center text-sm text-white/45">Type at least 2 characters.</p>
                   ) : (
                     <>
                       {mode === "event" ? (
