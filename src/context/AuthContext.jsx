@@ -4,6 +4,7 @@ import { getMe, login as apiLogin, logout as apiLogout, setAuthToken, sendPresen
 import { setUser as setUserInStore } from "../redux/slices/authSlice.jsx";
 import { connectPresenceSocket, disconnectPresenceSocket } from "../services/presenceSocket";
 import { subscribeLeadershipUpdates, subscribeTenureEnded } from "../services/socket";
+import LogoutTransition from "../components/LogoutTransition";
 
 const AuthContext = createContext(null);
 
@@ -11,6 +12,7 @@ export function AuthProvider({ children }) {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const [loading, setLoading] = useState(true);
+  const [logoutPhase, setLogoutPhase] = useState("idle");
 
   useEffect(() => {
     let cancelled = false;
@@ -127,10 +129,16 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
+    if (logoutPhase !== "idle") return;
+    setLogoutPhase("loading");
+    const minimumTransition = new Promise((resolve) => setTimeout(resolve, 700));
     try {
-      await apiLogout();
+      await Promise.all([apiLogout(), minimumTransition]);
     } catch (_) {}
     dispatch(setUserInStore(null));
+    setLogoutPhase("complete");
+    await new Promise((resolve) => setTimeout(resolve, 1100));
+    setLogoutPhase("idle");
   };
 
   return (
@@ -142,9 +150,10 @@ export function AuthProvider({ children }) {
         logout,
         setUser: (value) => dispatch(setUserInStore(value)),
       }}
-    >
-      {children}
-    </AuthContext.Provider>
+      >
+        {children}
+        {logoutPhase !== "idle" && <LogoutTransition phase={logoutPhase} />}
+      </AuthContext.Provider>
   );
 }
 

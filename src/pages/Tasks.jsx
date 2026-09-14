@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import { CheckCircle, Clipboard, Download, Search, UserPlus, AlertTriangle, AlertCircle } from "react-feather";
 import jsPDF from "jspdf";
@@ -32,16 +33,67 @@ function ExpandableDescription({ text }) {
 
   if (!text) return null;
 
+  const copyLink = async (url) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied");
+    } catch {
+      toast.error("Could not copy the link");
+    }
+  };
+
+  const renderDescription = (value) => {
+    const urlPattern = /(https?:\/\/[^\s<>"']+|www\.[^\s<>"']+)/gi;
+    const trailingPunctuation = /[.,!?;:)}\]]+$/;
+    const parts = String(value).split(urlPattern);
+
+    return parts.map((part, index) => {
+      if (!part || !/^(https?:\/\/|www\.)/i.test(part)) return part;
+
+      // Keep sentence punctuation outside the URL so it is not included when opened or copied.
+      const url = part.replace(trailingPunctuation, "");
+      const punctuation = part.slice(url.length);
+      const href = url.startsWith("http") ? url : `https://${url}`;
+
+      return (
+        <span key={`${url}-${index}`} className="inline-flex max-w-full items-center gap-1 align-baseline">
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`Open ${url}`}
+            className="min-w-0 break-all text-cyan-300 underline decoration-cyan-400/60 underline-offset-2 hover:text-cyan-200"
+          >
+            {url}
+          </a>
+          <button
+            type="button"
+            aria-label={`Copy ${url}`}
+            title="Copy link"
+            onClick={(event) => {
+              event.stopPropagation();
+              copyLink(url);
+            }}
+            className="inline-flex shrink-0 items-center rounded p-0.5 text-cyan-300 hover:bg-cyan-400/10 hover:text-cyan-100 focus:outline-none focus:ring-1 focus:ring-cyan-300"
+          >
+            <Clipboard size={13} aria-hidden="true" />
+          </button>
+          {punctuation}
+        </span>
+      );
+    });
+  };
+
   return (
     <div className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-gray-400 min-w-0">
-      <p
+      <div
         ref={textRef}
         className={`whitespace-pre-wrap break-words transition-all duration-200 ${
           !expanded ? "line-clamp-2 sm:line-clamp-3" : ""
         }`}
       >
-        {text}
-      </p>
+        {renderDescription(text)}
+      </div>
       {(isOverflowing || isLong) && (
         <button
           type="button"
@@ -545,9 +597,33 @@ export default function Tasks() {
             );
           })}{!ordered.length && <div className="col-span-full rounded-xl sm:rounded-2xl border border-dashed border-white/15 py-12 sm:py-16 text-center text-gray-500"><Clipboard className="mx-auto mb-3"/>No tasks yet.</div>}
         </div>
-      </div>{open && (
-  <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-    <div className="w-full max-w-2xl rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-[#1e1e2f] to-[#101925] p-6 shadow-2xl">
+      </div><AnimatePresence>
+      {open && (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.18 }}
+    className="fixed inset-0 z-[500] flex items-center justify-center bg-black/65 px-4 py-6 sm:py-8 backdrop-blur-md"
+  >
+    <motion.div
+      initial={{ opacity: 0, scale: 0.94, y: 18 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.97, y: 8 }}
+      transition={{ type: "spring", stiffness: 420, damping: 30, mass: 0.8 }}
+      className="no-scrollbar max-h-[calc(100dvh-3rem)] w-full max-w-2xl overflow-y-auto rounded-3xl border border-white/15 bg-gradient-to-br from-[#24243a]/95 via-[#182433]/95 to-[#101925]/95 p-6 shadow-[0_28px_80px_rgba(0,0,0,0.55)] sm:max-h-[calc(100dvh-4rem)]"
+    >
+      <button
+        type="button"
+        onClick={reset}
+        aria-label="Cancel task assignment"
+        title="Cancel task assignment"
+        className="mb-5 flex items-center gap-1.5 rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-300/80"
+      >
+        <span className="h-3 w-3 rounded-full bg-[#ff5f57] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)]" />
+        <span className="h-3 w-3 rounded-full bg-[#febc2e] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)]" />
+        <span className="h-3 w-3 rounded-full bg-[#28c840] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)]" />
+      </button>
       <div className="mb-6 flex items-center justify-between">
         {step < 3 ? (
           <div>
@@ -579,19 +655,43 @@ export default function Tasks() {
             <Search className="absolute left-3 top-3 text-gray-500" size={17} />
             <input autoFocus value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name, department, year, or role" className="w-full rounded-xl border border-white/10 bg-black/20 py-3 pl-10 pr-3 text-sm outline-none focus:border-cyan-400" />
           </label>
-          <div className="mt-3 max-h-72 space-y-2 overflow-y-auto">
+          <div className="no-scrollbar mt-3 max-h-72 space-y-2 overflow-y-auto">
             {people.map((p) => (
-              <button key={`${p.department}-${p.id}`} onClick={() => setSelected(p)} className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left ${selected?.id === p.id ? "border-cyan-400 bg-cyan-500/10" : "border-white/10 hover:bg-white/5"}`}>
+              <div
+                key={`${p.department}-${p.id}`}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelected(p)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setSelected(p);
+                  }
+                }}
+                className={`flex w-full cursor-pointer items-center gap-3 rounded-xl border p-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 ${selected?.id === p.id ? "border-cyan-400 bg-cyan-500/10" : "border-white/10 hover:bg-white/5"}`}
+              >
                 {p.image ? (
                   <img src={p.image} alt="" className="h-10 w-10 rounded-full object-cover" />
                 ) : (
                   <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 text-xs font-bold">{initials(p.name)}</span>
                 )}
-                <span>
+                <span className="min-w-0 flex-1">
                   <b className="block text-sm">{p.name}</b>
-                  <small className="text-gray-400">{[p.year, p.department, p.role].filter(Boolean).join(" • ")}</small>
+                  <small className="block truncate text-gray-400">{[p.year, p.department, p.role].filter(Boolean).join(" • ")}</small>
                 </span>
-              </button>
+                {selected?.id === p.id && (
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setStep(1);
+                    }}
+                    className="shrink-0 rounded-lg bg-cyan-400 px-3 py-1.5 text-xs font-bold text-slate-950 transition-colors hover:bg-cyan-300"
+                  >
+                    Next →
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         </>
@@ -658,9 +758,10 @@ export default function Tasks() {
           )}
         </div>
       )}
-    </div>
-  </div>
-)}{confirmDeleteId && <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"><div className="w-full max-w-md rounded-2xl border border-rose-500/20 bg-gradient-to-br from-[#1e141a] to-[#100f13] p-6 shadow-2xl"><h3 className="text-lg font-bold text-rose-300">Confirm task deletion</h3><p className="mt-2 text-sm text-gray-400">Are you sure you want to delete this task? This action is permanent and cannot be undone.</p><div className="mt-6 flex justify-end gap-3"><button onClick={()=>setConfirmDeleteId(null)} className="rounded-xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-white/10">Cancel</button><button onClick={async()=>{try{await deleteTask(confirmDeleteId);toast.success("Task deleted successfully");setConfirmDeleteId(null);load();}catch(e){toast.error(e.message);}}} className="rounded-xl bg-rose-500 px-4 py-2.5 text-xs font-semibold text-slate-950 hover:bg-rose-400">Delete task</button></div></div></div>}{Boolean(confirmCompleteTask) && (
+    </motion.div>
+  </motion.div>
+      )}
+      </AnimatePresence>{confirmDeleteId && <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"><div className="w-full max-w-md rounded-2xl border border-rose-500/20 bg-gradient-to-br from-[#1e141a] to-[#100f13] p-6 shadow-2xl"><h3 className="text-lg font-bold text-rose-300">Confirm task deletion</h3><p className="mt-2 text-sm text-gray-400">Are you sure you want to delete this task? This action is permanent and cannot be undone.</p><div className="mt-6 flex justify-end gap-3"><button onClick={()=>setConfirmDeleteId(null)} className="rounded-xl bg-white/5 px-4 py-2.5 text-xs font-semibold text-gray-300 hover:bg-white/10">Cancel</button><button onClick={async()=>{try{await deleteTask(confirmDeleteId);toast.success("Task deleted successfully");setConfirmDeleteId(null);load();}catch(e){toast.error(e.message);}}} className="rounded-xl bg-rose-500 px-4 py-2.5 text-xs font-semibold text-slate-950 hover:bg-rose-400">Delete task</button></div></div></div>}{Boolean(confirmCompleteTask) && (
   <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/75 p-3 sm:p-4 backdrop-blur-sm">
     <div className="w-full max-w-lg rounded-2xl border border-amber-500/30 bg-gradient-to-br from-[#1c1815] via-[#13131d] to-[#0d0e17] p-5 sm:p-6 shadow-2xl">
       <div className="flex items-start gap-3.5">

@@ -7,8 +7,13 @@ import { toast } from "sonner";
 import { Trash2, X } from "react-feather";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
+import loadImage from "blueimp-load-image";
+import ReactCrop, { centerCrop, makeAspectCrop } from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css";
 import { cloudinaryProfileAvatarUrl } from "../utils/cloudinary";
 import ProfileAvatarFlip from "../components/common/ProfileAvatarFlip";
+
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
 function getProfileCompletionPercent(formData, hasAvatar, isFacultyIncharge) {
   let score = 0;
@@ -80,6 +85,13 @@ const Profile = () => {
   });
   const [avatarPreview, setAvatarPreview] = useState("");
   const [avatarFile, setAvatarFile] = useState(null);
+  const [cropImageSrc, setCropImageSrc] = useState(null);
+  const [crop, setCrop] = useState(null);
+  const imgCropRef = useRef(null);
+  const cropPxRef = useRef(null);
+  const avatarInputRef = useRef(null);
+  const avatarObjectUrlRef = useRef(null);
+  const pendingAvatarRef = useRef(false);
   const [passwordForm, setPasswordForm] = useState({ oldPassword: "", newPassword: "", confirmPassword: "" });
   const [savingPassword, setSavingPassword] = useState(false);
   // Snapshot of formData at last save/load — used to detect unsaved changes.
@@ -116,7 +128,7 @@ const Profile = () => {
       p2: profile.p2 || "",
       timeline: Array.isArray(profile.timeline) ? profile.timeline : [],
     });
-    setAvatarPreview(user.image || "");
+    if (!pendingAvatarRef.current) setAvatarPreview(user.image || "");
     // Take a snapshot so we can detect changes later.
     savedSnapshot.current = {
       firstName: user.firstName || "",
@@ -156,6 +168,12 @@ const Profile = () => {
     );
     setIsDirty(false);
   }, [user, location.pathname]);
+
+  useEffect(() => {
+    return () => {
+      if (avatarObjectUrlRef.current) URL.revokeObjectURL(avatarObjectUrlRef.current);
+    };
+  }, []);
 
   // When /profile is opened from any route, perform a background freshness check with backend.
   useEffect(() => {
@@ -235,11 +253,121 @@ const Profile = () => {
     }
   };
 
-  const handleAvatarChange = (e) => {
+  const getCroppedImg = (imageEl, cropPx) => {
+    if (!imageEl || !cropPx?.width || !cropPx?.height) return Promise.resolve(null);
+    const scaleX = imageEl.naturalWidth / imageEl.width;
+    const scaleY = imageEl.naturalHeight / imageEl.height;
+    const outW = Math.round(cropPx.width * scaleX);
+    const outH = Math.round(cropPx.height * scaleY);
+    if (outW <= 0 || outH <= 0) return Promise.resolve(null);
+    const canvas = document.createElement("canvas");
+    canvas.width = outW;
+    canvas.height = outH;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return Promise.resolve(null);
+    ctx.drawImage(
+      imageEl,
+      cropPx.x * scaleX,
+      cropPx.y * scaleY,
+      cropPx.width * scaleX,
+      cropPx.height * scaleY,
+      0,
+      0,
+      outW,
+      outH,
+    );
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.9);
+    });
+  };
+
+  const normalizeImageForCrop = (file) => {
+    return new Promise((resolve, reject) => {
+      loadImage(
+        file,
+        (img) => {
+          if (img?.type === "error") {
+            reject(new Error("Failed to load image"));
+            return;
+          }
+          if (img?.tagName === "CANVAS" && img.toBlob) {
+            img.toBlob((blob) => resolve(blob || file), "image/jpeg", 0.95);
+          } else {
+            resolve(file);
+          }
+        },
+        { orientation: true, canvas: true },
+      );
+    });
+  };
+
+  const closeCropModal = () => {
+    if (cropImageSrc) URL.revokeObjectURL(cropImageSrc);
+    setCropImageSrc(null);
+    setCrop(null);
+    cropPxRef.current = null;
+    if (avatarInputRef.current) avatarInputRef.current.value = "";
+  };
+
+  const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-    setAvatarFile(file);
-    setAvatarPreview(URL.createObjectURL(file));
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file (JPG, PNG, etc.)");
+      return;
+    }
+    if (file.size > MAX_AVATAR_BYTES) {
+      toast.error(`Image must be under 5MB (current: ${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+      return;
+    }
+    try {
+      const normalized = await normalizeImageForCrop(file);
+      const blob = normalized instanceof Blob ? normalized : new Blob([normalized], { type: file.type });
+      if (cropImageSrc) URL.revokeObjectURL(cropImageSrc);
+      setCropImageSrc(URL.createObjectURL(blob));
+      setCrop(null);
+    } catch (err) {
+      toast.error(err.message || "Failed to process image");
+    }
+  };
+
+  const onCropImageLoad = (e) => {
+    const { width, height } = e.currentTarget;
+    setCrop(centerCrop(makeAspectCrop({ unit: "%", width: 90 }, 1, width, height), width, height));
+  };
+
+  const handleCropApply = async () => {
+    if (!imgCropRef.current || !crop?.width || !cropImageSrc) return;
+    const imageEl = imgCropRef.current;
+    const px = cropPxRef.current;
+    const dw = imageEl.width;
+    const dh = imageEl.height;
+    const cropPx =
+      px && px.width && px.height
+        ? { x: px.x, y: px.y, width: px.width, height: px.height }
+        : crop.unit === "px"
+          ? { x: crop.x, y: crop.y, width: crop.width, height: crop.height }
+          : {
+              x: (crop.x / 100) * dw,
+              y: (crop.y / 100) * dh,
+              width: (crop.width / 100) * dw,
+              height: (crop.height / 100) * dh,
+            };
+    try {
+      const blob = await getCroppedImg(imageEl, cropPx);
+      if (!blob) return;
+      const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
+      if (avatarObjectUrlRef.current) URL.revokeObjectURL(avatarObjectUrlRef.current);
+      const previewUrl = URL.createObjectURL(file);
+      avatarObjectUrlRef.current = previewUrl;
+      pendingAvatarRef.current = true;
+      setAvatarFile(file);
+      setAvatarPreview(previewUrl);
+      closeCropModal();
+    } catch (err) {
+      toast.error(err.message || "Failed to crop image");
+    }
   };
 
   const handleAvatarSave = async () => {
@@ -253,6 +381,11 @@ const Profile = () => {
       if (res.data) setUser(res.data);
       setAvatarPreview(res.data?.image || avatarPreview);
       setAvatarFile(null);
+      pendingAvatarRef.current = false;
+      if (avatarObjectUrlRef.current) {
+        URL.revokeObjectURL(avatarObjectUrlRef.current);
+        avatarObjectUrlRef.current = null;
+      }
       toast.success("Display picture updated");
     } catch (err) {
       toast.error(err.message || "Failed to update picture");
@@ -365,12 +498,16 @@ const Profile = () => {
                 </p>
                 <p className="text-xs text-gray-400 truncate">{user.email}</p>
                 <div className="flex flex-wrap gap-2 items-center">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    className="text-xs text-gray-400 file:mr-2 file:rounded-lg file:border-0 file:bg-cyan-600 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-richblack-25 hover:file:bg-cyan-500"
-                  />
+                  <label className="px-3 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-richblack-25 text-sm font-medium cursor-pointer">
+                    Choose picture
+                    <input
+                      ref={avatarInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      className="hidden"
+                    />
+                  </label>
                   <button
                     type="button"
                     onClick={handleAvatarSave}
@@ -379,6 +516,7 @@ const Profile = () => {
                   >
                     {savingAvatar ? "Saving…" : "Save picture"}
                   </button>
+                  <span className="text-xs text-gray-500">Max 5MB · then crop</span>
                 </div>
               </div>
             </div>
@@ -998,6 +1136,54 @@ const Profile = () => {
                 </span>
               </button>
             </div>
+          </div>
+        </div>
+      </div>,
+      document.body
+    )}
+    {cropImageSrc && createPortal(
+      <div
+        className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/80"
+        onClick={closeCropModal}
+      >
+        <div
+          className="bg-[#1e1e2f] rounded-2xl border border-gray-500/30 p-4 max-w-lg w-full max-h-[90vh] overflow-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h3 className="text-richblack-25 font-semibold mb-3">Crop photo</h3>
+          <ReactCrop
+            crop={crop}
+            onChange={(pixelCrop) => {
+              cropPxRef.current = pixelCrop;
+              setCrop(pixelCrop);
+            }}
+            aspect={1}
+            circularCrop
+            className="max-h-[50vh]"
+          >
+            <img
+              ref={imgCropRef}
+              src={cropImageSrc}
+              alt="Crop"
+              style={{ maxHeight: "50vh", width: "auto" }}
+              onLoad={onCropImageLoad}
+            />
+          </ReactCrop>
+          <div className="flex gap-2 mt-3">
+            <button
+              type="button"
+              onClick={closeCropModal}
+              className="flex-1 py-2 rounded-xl border border-gray-500/50 text-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleCropApply}
+              className="flex-1 py-2 rounded-xl bg-cyan-600 text-richblack-25 font-medium"
+            >
+              Apply crop
+            </button>
           </div>
         </div>
       </div>,

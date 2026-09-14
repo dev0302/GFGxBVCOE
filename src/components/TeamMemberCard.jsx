@@ -7,6 +7,7 @@ export default function TeamMemberCard({
   openEdit,
   onRequestDelete,
   onOpenPhotoModal,
+  onOpenDetails,
   readOnly = false,
 }) {
   const isTeamMember = row.type === "teamMember";
@@ -57,8 +58,21 @@ export default function TeamMemberCard({
       ? u?.contact || "—"
       : "—";
 
+  const detailItem = isTeamMember
+    ? { type: "teamMember", data: m }
+    : row.registered
+      ? { type: "user", data: u }
+      : {
+          type: "predefinedOnly",
+          data: { ...pre, email: row.email, department: row.department },
+        };
+
   return (
-    <div className="rounded-lg sm:rounded-[20px] border border-gray-500/20 bg-[#212130] p-1.5 sm:p-4 flex flex-col justify-between hover:border-gray-500/40 transition-colors shadow-lg min-w-0">
+    <div
+      onClick={() => onOpenDetails?.(detailItem)}
+      className="cursor-pointer rounded-lg sm:rounded-[20px] border border-gray-500/20 bg-[#212130] p-1.5 sm:p-4 flex flex-col justify-between hover:border-cyan-400/50 hover:bg-[#252536] transition-colors shadow-lg min-w-0"
+      title="View profile"
+    >
       <div className="flex flex-col items-center text-center sm:items-start sm:text-left gap-1 sm:gap-2 min-w-0">
         <img
           src={photoUrl ? photoPreviewUrl(photoUrl) : avatarPlaceholder(name)}
@@ -67,8 +81,8 @@ export default function TeamMemberCard({
             photoUrl ? "cursor-pointer hover:scale-105 hover:border-cyan-400 transition-all" : ""
           }`}
           onClick={(e) => {
-            if (!photoUrl) return;
             e.stopPropagation();
+            if (!photoUrl) return;
             onOpenPhotoModal?.(photoUrl, name);
           }}
           title={photoUrl ? `Click to view photo of ${name}` : name}
@@ -114,7 +128,10 @@ export default function TeamMemberCard({
         <div className="grid grid-cols-2 gap-1 sm:gap-2 mt-1.5 sm:mt-3 pt-1.5 sm:pt-3 border-t border-gray-500/10 w-full">
           <button
             type="button"
-            onClick={() => openEdit(m)}
+            onClick={(event) => {
+              event.stopPropagation();
+              openEdit(m);
+            }}
             className="flex items-center justify-center py-1 sm:py-2 rounded-md sm:rounded-xl text-gray-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors bg-[#252536] border border-gray-500/20"
             title="Edit"
           >
@@ -122,7 +139,10 @@ export default function TeamMemberCard({
           </button>
           <button
             type="button"
-            onClick={() => onRequestDelete?.(m)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onRequestDelete?.(m);
+            }}
             className="flex items-center justify-center py-1 sm:py-2 rounded-md sm:rounded-xl text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors bg-[#252536] border border-gray-500/20"
             title="Delete"
           >

@@ -8,9 +8,11 @@ import {
   getAccountTypeLabel,
   enrichProfileSSE,
   getMe,
+  getLoginProfilePreview,
+  lookupSignupDepartment,
 } from "../services/api";
 import { toast } from "sonner";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useAuth } from "../context/AuthContext";
@@ -42,6 +44,11 @@ const Signup = () => {
   const [autofillAnimating, setAutofillAnimating] = useState(false);
   const [enriching, setEnriching] = useState(false);
   const [enrichStatusText, setEnrichStatusText] = useState("Fetching details…");
+  const [profileImage, setProfileImage] = useState("");
+  const [deptModalOpen, setDeptModalOpen] = useState(false);
+  const [deptLookupEmail, setDeptLookupEmail] = useState("");
+  const [deptLookupLoading, setDeptLookupLoading] = useState(false);
+  const [deptLookupResult, setDeptLookupResult] = useState(null);
   const pollRef = useRef(null);
   const navigate = useNavigate();
   const { setUser } = useAuth();
@@ -90,6 +97,36 @@ const Signup = () => {
       pollRef.current = null;
     };
   }, [step, pollToken, autofillAnimating]);
+
+  useEffect(() => {
+    const normalizedEmail = email.trim().toLowerCase();
+    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+    setProfileImage("");
+    if (!validEmail) return undefined;
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      try {
+        const image = await getLoginProfilePreview(normalizedEmail, controller.signal);
+        if (!controller.signal.aborted) setProfileImage(image);
+      } catch (error) {
+        if (error.name !== "AbortError") setProfileImage("");
+      }
+    }, 320);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [email]);
+
+  useEffect(() => {
+    if (!deptModalOpen) return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") setDeptModalOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [deptModalOpen]);
 
   // 5-minute countdown for resend OTP
   useEffect(() => {
@@ -204,7 +241,19 @@ const Signup = () => {
         </div>
       )}
       <div className="w-full max-w-md bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] border border-gray-500/30 rounded-2xl p-8 shadow-xl">
-        <h1 className="text-2xl font-bold text-richblack-25 mb-2">Sign up</h1>
+        <div className="mb-2 flex h-9 items-center gap-3">
+          <h1 className="text-2xl font-bold leading-none text-richblack-25">Sign up</h1>
+          <div className="h-9 w-9 shrink-0" aria-hidden={!profileImage}>
+            {profileImage && (
+              <img
+                src={profileImage}
+                alt=""
+                onError={() => setProfileImage("")}
+                className="h-full w-full rounded-full border border-white/30 object-cover shadow-[0_3px_12px_rgba(0,0,0,0.28)] animate-in fade-in zoom-in-75 duration-200"
+              />
+            )}
+          </div>
+        </div>
         <p className="text-gray-400 text-sm mb-6">
           Only allowed emails can register. Choose your department and verify
           with OTP.
@@ -474,7 +523,138 @@ const Signup = () => {
             Log in
           </Link>
         </p>
+        <p className="mt-3 text-center text-gray-400 text-sm">
+          Want to know your department?{" "}
+          <button
+            type="button"
+            onClick={() => {
+              setDeptLookupEmail(email.trim());
+              setDeptLookupResult(null);
+              setDeptModalOpen(true);
+            }}
+            className="text-cyan-400 hover:text-cyan-300 font-medium"
+          >
+            Find it here
+          </button>
+        </p>
       </div>
+
+      <AnimatePresence>
+        {deptModalOpen && (
+          <motion.div
+            key="dept-lookup-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[80] flex items-center justify-center p-4"
+            onClick={() => setDeptModalOpen(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="dept-lookup-title"
+          >
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 10 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-md rounded-2xl border border-gray-500/30 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] p-6 shadow-xl"
+            >
+              <button
+                type="button"
+                onClick={() => setDeptModalOpen(false)}
+                className="absolute right-3.5 top-3.5 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+              <h2 id="dept-lookup-title" className="pr-8 text-lg font-semibold text-richblack-25">
+                Find your department
+              </h2>
+              <p className="mt-1 text-sm text-gray-400">
+                Enter your email id to see which department you can sign up with.
+              </p>
+              <form
+                className="mt-5 space-y-4"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const lookupEmail = deptLookupEmail.trim().toLowerCase();
+                  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lookupEmail)) {
+                    toast.error("Enter a valid email id.");
+                    return;
+                  }
+                  setDeptLookupLoading(true);
+                  setDeptLookupResult(null);
+                  try {
+                    const data = await lookupSignupDepartment(lookupEmail);
+                    setDeptLookupResult(data);
+                  } catch {
+                    setDeptLookupResult({ department: "", departmentLabel: "" });
+                  } finally {
+                    setDeptLookupLoading(false);
+                  }
+                }}
+              >
+                <div>
+                  <label className={labelClass}>Email *</label>
+                  <input
+                    type="email"
+                    value={deptLookupEmail}
+                    onChange={(e) => {
+                      setDeptLookupEmail(e.target.value);
+                      setDeptLookupResult(null);
+                    }}
+                    className={inputClass}
+                    placeholder="you@example.com"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={deptLookupLoading}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 text-richblack-25 font-semibold disabled:opacity-50"
+                >
+                  {deptLookupLoading ? "Looking up…" : "Show department"}
+                </button>
+              </form>
+              {deptLookupResult && (
+                <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] p-3.5">
+                  {deptLookupResult.departmentLabel ? (
+                    <>
+                      <p className="text-sm text-gray-300">
+                        You are registered in the{" "}
+                        <span className="font-semibold text-cyan-300">
+                          {deptLookupResult.departmentLabel}
+                        </span>{" "}
+                        department.
+                      </p>
+                      {step === 1 && !prefillDepartment && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDepartment(deptLookupResult.department);
+                            if (!prefillEmail && deptLookupEmail.trim()) {
+                              setEmail(deptLookupEmail.trim());
+                            }
+                            setDeptModalOpen(false);
+                          }}
+                          className="mt-3 text-sm font-medium text-cyan-400 hover:text-cyan-300"
+                        >
+                          Use this department
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-300">
+                      No user registered with this email id.
+                    </p>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -138,6 +138,30 @@ function escapeRegex(value) {
   return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function departmentDisplayName(department) {
+  const trimmed = String(department || "").trim();
+  if (trimmed === "ADMIN") return "Faculty Incharge";
+  return trimmed;
+}
+
+function emailNotInDepartmentMessage(department) {
+  const deptName = departmentDisplayName(department) || "the selected";
+  return `No user registered with this email id in ${deptName} department`;
+}
+
+async function findSignupDepartmentByEmail(emailNorm) {
+  const departmentMember = await findDepartmentMemberByEmail(emailNorm);
+  if (departmentMember?.department) return departmentMember.department;
+
+  const config = await SignupConfig.findOne({ allowedEmails: emailNorm })
+    .select("department")
+    .lean();
+  if (config?.department) return config.department;
+
+  const user = await User.findOne({ email: emailNorm }).select("accountType").lean();
+  return user?.accountType || "";
+}
+
 function normalizeUserProfileFields(user) {
   if (!user) return user;
   const next = {
@@ -187,8 +211,7 @@ exports.sendOTP = async (req, res) => {
     if (!config && !departmentMember) {
       return res.status(403).json({
         success: false,
-        message:
-          "This email is not allowed to sign up for the selected department.",
+        message: emailNotInDepartmentMessage(deptTrim),
       });
     }
 
@@ -365,8 +388,7 @@ exports.signup = async (req, res) => {
     if (!config && !departmentMember) {
       return res.status(403).json({
         success: false,
-        message:
-          "This email is not allowed to sign up for the selected department.",
+        message: emailNotInDepartmentMessage(accountType.trim()),
       });
     }
 
@@ -590,6 +612,46 @@ exports.login = async (req, res) => {
       message: "Login failed.",
       error: error.message,
     });
+  }
+};
+
+// A deliberately minimal pre-login lookup used only to personalize the login
+// form. It never exposes an account name, role, or whether a password exists.
+exports.loginProfilePreview = async (req, res) => {
+  try {
+    const email = String(req.query.email || "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(200).json({ success: true, image: "" });
+    }
+
+    const user = await User.findOne({ email }).select("image").lean();
+    if (user?.image) return res.status(200).json({ success: true, image: user.image });
+
+    const departmentMember = await findDepartmentMemberByEmail(email);
+    if (departmentMember?.member?.photo) {
+      return res.status(200).json({ success: true, image: departmentMember.member.photo });
+    }
+
+    const predefined = await findPredefinedByEmail(email);
+    return res.status(200).json({ success: true, image: predefined?.image || "" });
+  } catch (_) {
+    // Login remains fully usable if the optional cosmetic preview is unavailable.
+    return res.status(200).json({ success: true, image: "" });
+  }
+};
+
+exports.lookupSignupDepartment = async (req, res) => {
+  try {
+    const email = String(req.query.email || "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(200).json({ success: true, department: "", departmentLabel: "" });
+    }
+
+    const department = await findSignupDepartmentByEmail(email);
+    const departmentLabel = department ? departmentDisplayName(department) : "";
+    return res.status(200).json({ success: true, department, departmentLabel });
+  } catch (_) {
+    return res.status(200).json({ success: true, department: "", departmentLabel: "" });
   }
 };
 
@@ -1316,8 +1378,9 @@ function filterTeamMembersByQuery(members, q) {
 }
 
 function resolveSearchDepartments(req) {
+  if (!req.user) return [];
   const accountType = normalizeDepartmentName(req.user?.accountType);
-  if (!accountType) return [];
+  const memberDepartment = normalizeDepartmentName(req.user?.memberDepartment);
   const isSociety = SOCIETY_ROLES.includes(accountType);
   const scopeDepartment = normalizeDepartmentName(req.query?.department);
   const allDepartments = req.query?.allDepartments === "true";
@@ -1325,15 +1388,18 @@ function resolveSearchDepartments(req) {
   if (scopeDepartment) {
     if (!TEAM_DEPARTMENTS.includes(scopeDepartment)) return [];
     if (isSociety) return [scopeDepartment];
-    if (scopeDepartment === accountType) return [scopeDepartment];
+    if (scopeDepartment === accountType || scopeDepartment === memberDepartment) {
+      return [scopeDepartment];
+    }
     return [];
   }
 
-  // When allDepartments flag is set (e.g. from navbar search), return all depts for any logged-in user
+  // Navbar / Spotlight: any signed-in account can search every department.
   if (allDepartments) return TEAM_DEPARTMENTS;
   if (isSociety) return TEAM_DEPARTMENTS;
   if (TEAM_DEPARTMENTS.includes(accountType)) return [accountType];
-  return [];
+  if (TEAM_DEPARTMENTS.includes(memberDepartment)) return [memberDepartment];
+  return TEAM_DEPARTMENTS;
 }
 
 async function searchTeamMembersInDepartments(departments, q) {
@@ -1385,6 +1451,7 @@ async function attachTeamMemberSocials(teamMembers) {
 /**
  * Search people: team members (department-scoped) + users (with profile and predefinedProfile).
  * GET /api/v1/auth/search-people?q=...&department=...
+ * Any authenticated user may search. Department scope only applies when `department` is set.
  */
 exports.searchPeople = async (req, res) => {
   try {
@@ -1417,6 +1484,36 @@ exports.searchPeople = async (req, res) => {
         .populate("additionalDetails")
         .limit(20)
         .lean();
+
+      const profileMatches = await Profile.find({
+        $or: [
+          { year: regex },
+          { yearOfStudy: regex },
+          { branch: regex },
+          { section: regex },
+          { position: regex },
+        ],
+      })
+        .select("_id")
+        .limit(30)
+        .lean();
+      if (profileMatches.length) {
+        const byProfile = await User.find({
+          tenureEndedAt: null,
+          additionalDetails: { $in: profileMatches.map((profile) => profile._id) },
+        })
+          .select("-password")
+          .populate("additionalDetails")
+          .limit(20)
+          .lean();
+        const seen = new Set(userDocs.map((u) => u._id.toString()));
+        for (const u of byProfile) {
+          if (seen.has(u._id.toString())) continue;
+          userDocs.push(u);
+          seen.add(u._id.toString());
+        }
+        userDocs = userDocs.slice(0, 20);
+      }
 
       if (q.includes(" ")) {
         const firstToken = q.split(/\s+/)[0];
@@ -1461,6 +1558,30 @@ exports.searchPeople = async (req, res) => {
           (u) => normalizeDepartmentName(u.accountType) === scopeDepartment,
         );
       }
+
+      const registeredEmails = new Set(
+        [
+          ...users.map((u) => (u.email || "").trim().toLowerCase()),
+          ...teamMembers.map((m) => (m.email || "").trim().toLowerCase()),
+        ].filter(Boolean),
+      );
+      const profileDocs = await PredefinedProfile.find({
+        $or: [
+          { name: regex },
+          { email: regex },
+          { branch: regex },
+          { year: regex },
+          { position: regex },
+        ],
+      })
+        .limit(20)
+        .lean();
+      predefinedOnly = profileDocs
+        .filter((profile) => {
+          const email = (profile.email || "").trim().toLowerCase();
+          return email && !registeredEmails.has(email);
+        })
+        .map((profile) => normalizeProfileTextFields(profile));
     }
 
     return res.status(200).json({

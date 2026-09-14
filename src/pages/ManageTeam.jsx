@@ -949,9 +949,9 @@ export default function ManageTeam({
   const displayDepartment = department || user?.accountType || "";
 
   const openDetailsFromEmptyCell = (event, detailItem) => {
-    // Only the unused space in a table cell opens details. Text, avatars, and
-    // action controls retain their existing interactions.
-    if (event.target.closest("[data-profile-detail-ignore], button, a, img")) return;
+    // Profile is available from the complete list row. Dedicated controls
+    // (photo preview, social links, edit/delete) keep their own behavior.
+    if (event.target.closest("button, a, img")) return;
     setSelectedDetailItem(detailItem);
   };
 
@@ -1491,6 +1491,19 @@ export default function ManageTeam({
                           openEdit={openEdit}
                           onRequestDelete={(member) => setDeleteConfirmMember(member)}
                           onOpenPhotoModal={(photoUrl, name) => setPhotoModalData({ src: photoUrl, name })}
+                          onOpenDetails={(detailItem) =>
+                            setSelectedDetailItem(
+                              detailItem.type === "teamMember"
+                                ? {
+                                    ...detailItem,
+                                    data: {
+                                      ...detailItem.data,
+                                      department: detailItem.data.department || displayDepartment,
+                                    },
+                                  }
+                                : detailItem,
+                            )
+                          }
                           readOnly={isReadOnly}
                         />
                       );
@@ -1530,17 +1543,17 @@ export default function ManageTeam({
                             <tr
                               key={`tm-${m._id}`}
                               className="border-b border-gray-500/20 hover:bg-gray-500/10"
+                              onClick={(event) =>
+                                openDetailsFromEmptyCell(event, {
+                                  type: "teamMember",
+                                  data: { ...m, department: m.department || displayDepartment },
+                                })
+                              }
                             >
                               {LIST_COLS.map((k) => (
                                 <td
                                   key={k}
                                   className="px-4 py-3 text-gray-200 max-w-[200px] truncate align-middle cursor-pointer"
-                                  onClick={(event) =>
-                                    openDetailsFromEmptyCell(event, {
-                                      type: "teamMember",
-                                      data: { ...m, department: m.department || displayDepartment },
-                                    })
-                                  }
                                   title={
                                     k === "photo"
                                       ? m.photo || m.image_drive_link
@@ -1650,23 +1663,23 @@ export default function ManageTeam({
                           <tr
                             key={`roster-${row.email}`}
                             className="border-b border-gray-500/20 hover:bg-gray-500/10"
+                            onClick={(event) =>
+                              openDetailsFromEmptyCell(event, {
+                                type: row.registered ? "user" : "predefinedOnly",
+                                data: row.registered
+                                  ? row.user
+                                  : {
+                                      ...(row.predefinedProfile || {}),
+                                      email: row.email,
+                                      department: displayDepartment,
+                                    },
+                              })
+                            }
                           >
                             {LIST_COLS.map((k) => (
                               <td
                                 key={k}
                                 className="px-4 py-3 text-gray-200 max-w-[200px] align-middle cursor-pointer"
-                                onClick={(event) =>
-                                  openDetailsFromEmptyCell(event, {
-                                    type: row.registered ? "user" : "predefinedOnly",
-                                    data: row.registered
-                                      ? row.user
-                                      : {
-                                          ...(row.predefinedProfile || {}),
-                                          email: row.email,
-                                          department: displayDepartment,
-                                        },
-                                  })
-                                }
                                 title={
                                   k === "photo" ? photoUrl || "" : undefined
                                 }

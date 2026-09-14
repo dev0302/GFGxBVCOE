@@ -239,6 +239,7 @@ export default function EventDocuments() {
   const [loading, setLoading] = useState(true);
 
   const [currentFolderId, setCurrentFolderId] = useState(null);
+  const [folderNavigationDirection, setFolderNavigationDirection] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("grid");
 
@@ -263,6 +264,14 @@ export default function EventDocuments() {
 
   // Copy share link state
   const [copiedLink, setCopiedLink] = useState(false);
+
+  const navigateFolder = (folderId) => {
+    if (folderId === currentFolderId) return;
+    const destination = folders.find((folder) => (folder._id || folder.id) === folderId);
+    const movingDeeper = destination && (destination.parentId || null) === (currentFolderId || null);
+    setFolderNavigationDirection(movingDeeper ? 1 : -1);
+    setCurrentFolderId(folderId);
+  };
 
   // Toggle Lock Handler
   const handleToggleLock = async (type, item, e) => {
@@ -618,7 +627,7 @@ export default function EventDocuments() {
         <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto text-xs font-medium text-gray-300 py-1">
           <button
             type="button"
-            onClick={() => setCurrentFolderId(null)}
+            onClick={() => navigateFolder(null)}
             className={`px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1.5 ${
               currentFolderId === null
                 ? "bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/30"
@@ -636,7 +645,7 @@ export default function EventDocuments() {
                 <ChevronRight className="h-3.5 w-3.5 text-gray-500" />
                 <button
                   type="button"
-                  onClick={() => setCurrentFolderId(bId)}
+                  onClick={() => navigateFolder(bId)}
                   className={`px-2.5 py-1 rounded-lg transition-colors ${
                     currentFolderId === bId
                       ? "bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/30"
@@ -689,6 +698,15 @@ export default function EventDocuments() {
       </div>
 
       {/* Main Contents Area */}
+      <div className="overflow-hidden">
+      <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={currentFolderId || "root-vault"}
+        initial={{ opacity: 0, x: folderNavigationDirection * 34, scale: 0.985, filter: "blur(3px)" }}
+        animate={{ opacity: 1, x: 0, scale: 1, filter: "blur(0px)" }}
+        exit={{ opacity: 0, x: folderNavigationDirection * -20, scale: 0.99, filter: "blur(2px)" }}
+        transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+      >
       {loading ? (
         <div className="flex flex-col items-center justify-center p-16 rounded-2xl bg-[#161622]/60 border border-white/10 gap-3">
           <Spinner className="size-8 text-gray-400" />
@@ -738,7 +756,7 @@ export default function EventDocuments() {
                       key={folderId}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => setCurrentFolderId(folderId)}
+                      onClick={() => navigateFolder(folderId)}
                       className="group relative p-3.5 rounded-2xl bg-[#1a1a29]/90 border border-white/10 hover:border-cyan-400/40 hover:bg-[#1e1e32] cursor-pointer transition-all shadow-md flex flex-col justify-between"
                     >
                       <div className="flex items-start justify-between gap-2">
@@ -968,7 +986,7 @@ export default function EventDocuments() {
                 return (
                   <tr
                     key={folderId}
-                    onClick={() => setCurrentFolderId(folderId)}
+                    onClick={() => navigateFolder(folderId)}
                     className="hover:bg-white/5 cursor-pointer transition-colors"
                   >
                     <td className="p-3 pl-4 font-semibold text-gray-200 flex items-center gap-2.5">
@@ -1137,6 +1155,9 @@ export default function EventDocuments() {
           </table>
         </div>
       )}
+      </motion.div>
+      </AnimatePresence>
+      </div>
 
       {renameTarget &&
         createPortal(
