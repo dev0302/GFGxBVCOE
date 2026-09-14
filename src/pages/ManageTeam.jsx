@@ -113,12 +113,15 @@ const LABELS = {
   contact: "Contact",
   photo: "Photo",
   non_tech_society: "Non-tech society",
+  github: "Github Link",
+  instagram: "Instagram Link",
+  linkedin: "Linkedin Link",
 };
 // lets see whats going on
 const YEAR_OPTIONS = ["1st", "2nd", "3rd", "4th"];
 const BRANCH_OPTIONS = ["CSE", "AIML", "IT", "EEE", "ECE", "ICE"];
 const ORG_NAME = "GFG BVCOE";
-const EXPORT_COLS = COLS.filter((k) => k !== "photo");
+const EXPORT_COLS = [...COLS.filter((k) => k !== "photo"), "github", "instagram", "linkedin"];
 const ALL_DEPARTMENTS_EXPORT_COLS = ["name", "department", ...EXPORT_COLS];
 const PREDEFINED_IMAGE_BASE = "https://www.gfg-bvcoe.com";
 
@@ -662,6 +665,15 @@ export default function ManageTeam({
         contact: row.registered ? u?.contact || "" : "",
         non_tech_society: row.registered ? profile?.non_tech_society || "" : "",
         photo: row.registered ? u?.image || "" : pre?.image || "",
+        github: row.registered
+          ? socialUrl(profile?.socials?.github, "github")
+          : "",
+        instagram: row.registered
+          ? socialUrl(profile?.socials?.instagram, "instagram")
+          : socialUrl(pre?.instaLink, "instagram"),
+        linkedin: row.registered
+          ? socialUrl(profile?.socials?.linkedin, "linkedin")
+          : socialUrl(pre?.linkedinLink, "linkedin"),
       };
     });
     const fromMembers = (extraMembers || []).map((m) => ({
@@ -673,6 +685,9 @@ export default function ManageTeam({
       contact: m.contact || "",
       non_tech_society: m.non_tech_society || "",
       photo: m.photo || m.image_drive_link || m.image || "",
+      github: socialUrl(m.socials?.github || m.profile?.socials?.github, "github"),
+      instagram: socialUrl(m.socials?.instagram || m.profile?.socials?.instagram, "instagram"),
+      linkedin: socialUrl(m.socials?.linkedin || m.profile?.socials?.linkedin, "linkedin"),
     }));
     return [...fromRoster, ...fromMembers];
   };
@@ -778,6 +793,15 @@ export default function ManageTeam({
             accountType: userData?.accountType || "",
             role: profile.position || profile.p0 || userData?.accountType || "Member",
             photo: row.registered ? userData?.image || "" : predefined.image || "",
+            github: row.registered
+              ? socialUrl(profile?.socials?.github, "github")
+              : "",
+            instagram: row.registered
+              ? socialUrl(profile?.socials?.instagram, "instagram")
+              : socialUrl(predefined?.instaLink, "instagram"),
+            linkedin: row.registered
+              ? socialUrl(profile?.socials?.linkedin, "linkedin")
+              : socialUrl(predefined?.linkedinLink, "linkedin"),
           };
         });
         const extraMembers = (membersRes.data || [])
@@ -794,6 +818,9 @@ export default function ManageTeam({
             accountType: "",
             role: member.position || "Member",
             photo: member.photo || member.image_drive_link || member.image || "",
+            github: socialUrl(member.socials?.github || member.profile?.socials?.github, "github"),
+            instagram: socialUrl(member.socials?.instagram || member.profile?.socials?.instagram, "instagram"),
+            linkedin: socialUrl(member.socials?.linkedin || member.profile?.socials?.linkedin, "linkedin"),
           }));
         departmentRows[dept] = [...fromRoster, ...extraMembers];
       }),
@@ -813,6 +840,9 @@ export default function ManageTeam({
         accountType: userData?.accountType || "",
         role: profile.position || profile.p0 || userData?.accountType || "Member",
         photo: userData?.image || "",
+        github: socialUrl(profile?.socials?.github, "github"),
+        instagram: socialUrl(profile?.socials?.instagram, "instagram"),
+        linkedin: socialUrl(profile?.socials?.linkedin, "linkedin"),
       };
     };
     const uniqueRows = (rows) => {
