@@ -138,6 +138,30 @@ function escapeRegex(value) {
   return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function departmentDisplayName(department) {
+  const trimmed = String(department || "").trim();
+  if (trimmed === "ADMIN") return "Faculty Incharge";
+  return trimmed;
+}
+
+function emailNotInDepartmentMessage(department) {
+  const deptName = departmentDisplayName(department) || "the selected";
+  return `No user registered with this email id in ${deptName} department`;
+}
+
+async function findSignupDepartmentByEmail(emailNorm) {
+  const departmentMember = await findDepartmentMemberByEmail(emailNorm);
+  if (departmentMember?.department) return departmentMember.department;
+
+  const config = await SignupConfig.findOne({ allowedEmails: emailNorm })
+    .select("department")
+    .lean();
+  if (config?.department) return config.department;
+
+  const user = await User.findOne({ email: emailNorm }).select("accountType").lean();
+  return user?.accountType || "";
+}
+
 function normalizeUserProfileFields(user) {
   if (!user) return user;
   const next = {
@@ -187,8 +211,7 @@ exports.sendOTP = async (req, res) => {
     if (!config && !departmentMember) {
       return res.status(403).json({
         success: false,
-        message:
-          "This email is not allowed to sign up for the selected department.",
+        message: emailNotInDepartmentMessage(deptTrim),
       });
     }
 
@@ -365,8 +388,7 @@ exports.signup = async (req, res) => {
     if (!config && !departmentMember) {
       return res.status(403).json({
         success: false,
-        message:
-          "This email is not allowed to sign up for the selected department.",
+        message: emailNotInDepartmentMessage(accountType.trim()),
       });
     }
 
@@ -615,6 +637,21 @@ exports.loginProfilePreview = async (req, res) => {
   } catch (_) {
     // Login remains fully usable if the optional cosmetic preview is unavailable.
     return res.status(200).json({ success: true, image: "" });
+  }
+};
+
+exports.lookupSignupDepartment = async (req, res) => {
+  try {
+    const email = String(req.query.email || "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(200).json({ success: true, department: "", departmentLabel: "" });
+    }
+
+    const department = await findSignupDepartmentByEmail(email);
+    const departmentLabel = department ? departmentDisplayName(department) : "";
+    return res.status(200).json({ success: true, department, departmentLabel });
+  } catch (_) {
+    return res.status(200).json({ success: true, department: "", departmentLabel: "" });
   }
 };
 

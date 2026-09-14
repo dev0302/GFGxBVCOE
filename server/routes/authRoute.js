@@ -6,6 +6,7 @@ const {
   signup,
   login,
   loginProfilePreview,
+  lookupSignupDepartment,
   changePassword,
   forgotPassword,
   resetPassword,
@@ -42,6 +43,7 @@ router.get("/otp-for-autofill", getOtpForAutofill);
 router.post("/signup", signup);
 router.post("/login", login);
 router.get("/login-profile-preview", loginProfilePreview);
+router.get("/signup-department", lookupSignupDepartment);
 router.post("/logout", logout);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);

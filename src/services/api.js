@@ -1734,6 +1734,19 @@ export async function getLoginProfilePreview(email, signal) {
   return data.image || "";
 }
 
+/** Public lookup of the department tied to a signup-allowed email. */
+export async function lookupSignupDepartment(email, signal) {
+  const res = await fetch(
+    `${BASE}/api/v1/auth/signup-department?email=${encodeURIComponent(email)}`,
+    { signal },
+  );
+  const data = await res.json().catch(() => ({}));
+  return {
+    department: data.department || "",
+    departmentLabel: data.departmentLabel || "",
+  };
+}
+
 export async function renameVaultFolder(id, name) {
   const res = await authFetch(`/api/v1/vault/folders/${id}`, {
     method: "PUT",

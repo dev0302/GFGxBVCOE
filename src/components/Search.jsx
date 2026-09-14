@@ -620,7 +620,7 @@ export function UserDetailModal({ user, onClose, onViewLogs }) {
 
   return (
     <div
-      className=" fixed inset-0 z-[100] flex min-h-full items-center justify-center overflow-hidden overscroll-none p-4 py-8 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex min-h-full items-center justify-center overflow-hidden overscroll-none p-4 py-8 bg-black/60 backdrop-blur-sm"
       onClick={onClose}
       role="dialog"
       aria-modal="true"

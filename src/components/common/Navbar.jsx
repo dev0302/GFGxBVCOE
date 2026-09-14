@@ -9,10 +9,11 @@ import { SaxCalendarTickTwotone } from "@meysam213/iconsax-react";
 import { SaxUserTwotone } from "@meysam213/iconsax-react";
 import { SaxGalleryLinear } from "@meysam213/iconsax-react";
 import { SaxStickynoteLinear } from "@meysam213/iconsax-react";
-import { Settings } from "react-feather";
+import { Search as SearchIcon, Settings } from "react-feather";
 import ProfileDropDown from "./ProfileDropDown";
 import NotificationsButton from "../notifications/NotificationsButton";
 import Search from "../Search";
+import { openSpotlight } from "../SpotlightSearch";
 import { isSocietyRole } from "../../services/api";
 
 function Navbar() {
@@ -132,6 +133,17 @@ function Navbar() {
           </div>
 
           <nav className="hidden sm:flex items-center gap-4">
+            <button
+              type="button"
+              onClick={openSpotlight}
+              aria-label="Open spotlight search"
+              title="Spotlight search (Ctrl+K)"
+              className="flex items-center gap-1.5 rounded-full border border-green-300/25 bg-green-300/5 px-2.5 py-1.5 text-[12px] font-medium text-green-100 transition hover:border-green-300/45 hover:bg-green-300/10"
+            >
+              <SearchIcon className="h-3.5 w-3.5" />
+              <span className="hidden lg:inline">Spotlight</span>
+              <kbd className="rounded border border-white/15 px-1 py-px text-[10px] text-white/55">Ctrl K</kbd>
+            </button>
             {user && (
               <Search
                 variant="navbar"
@@ -245,6 +257,29 @@ function Navbar() {
 
           {/* MOBILE RIGHT SIDE */}
           <div className="sm:hidden z-50 flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                if (isMenuOpen) setIsMenuOpen(false);
+                openSpotlight();
+              }}
+              aria-label="Open spotlight search"
+              title="Search"
+              className="
+        flex items-center justify-center
+        h-9 w-9
+        rounded-full
+        text-green-100
+        border border-green-300/20
+        bg-green-300/5
+        transition-all duration-200
+        hover:bg-green-300/10
+        hover:text-green-300
+        shrink-0
+      "
+            >
+              <SearchIcon className="h-[17px] w-[17px]" />
+            </button>
             {/* SETTINGS + PROFILE CLUSTER */}
             {!authLoading && user && (
               <div
@@ -437,6 +472,19 @@ function Navbar() {
   `}
       >
         <ul className="flex flex-col ml-8 mt-8 justify-center h-full gap-8">
+          <li>
+            <button
+              type="button"
+              className={`${mobileNavLinkClass({ isActive: false })} flex items-center gap-2`}
+              onClick={() => {
+                setIsMenuOpen(false);
+                openSpotlight();
+              }}
+            >
+              <SearchIcon className="h-5 w-5" />
+              Search
+            </button>
+          </li>
           <li>
             <NavLink
               to="/"

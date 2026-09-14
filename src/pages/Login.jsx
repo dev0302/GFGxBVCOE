@@ -75,8 +75,8 @@ const Login = () => {
   return (
     <div className="min-h-screen darkthemebg pt-24 pb-16 flex items-center justify-center px-4 text-white">
       <div className="w-full max-w-md bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] border border-gray-500/30 rounded-2xl p-8 shadow-xl">
-        <div className="mb-2 flex items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-[-0.03em]">Welcome back</h1>
+        <div className="mb-2 flex h-9 items-center gap-3">
+          <h1 className="text-2xl font-semibold leading-none tracking-[-0.03em]">Welcome back</h1>
           <div className="h-9 w-9 shrink-0" aria-hidden={!profileImage}>
             {profileImage && (
             <img
