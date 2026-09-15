@@ -304,14 +304,14 @@ export default function ManageTeam({
   const [crop, setCrop] = useState(null);
   const [photoUploading, setPhotoUploading] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
-  const [selectedExportFields, setSelectedExportFields] = useState([
-    ...EXPORT_COLS,
-  ]);
+  const [selectedExportFields, setSelectedExportFields] = useState(
+    EXPORT_COLS.filter((k) => k !== "github" && k !== "instagram" && k !== "linkedin"),
+  );
   const [isPrinting, setIsPrinting] = useState(false);
   const [printAllModalOpen, setPrintAllModalOpen] = useState(false);
-  const [printAllSelectedFields, setPrintAllSelectedFields] = useState([
-    ...ALL_DEPARTMENTS_EXPORT_COLS,
-  ]);
+  const [printAllSelectedFields, setPrintAllSelectedFields] = useState(
+    ALL_DEPARTMENTS_EXPORT_COLS.filter((k) => k !== "github" && k !== "instagram" && k !== "linkedin"),
+  );
   const [printAllLoading, setPrintAllLoading] = useState(false);
   const imgCropRef = useRef(null);
   const cropPxRef = useRef(null);
@@ -1915,7 +1915,7 @@ export default function ManageTeam({
                   onClick={handleExportPDF}
                   disabled={
                     isPrinting ||
-                    members.length === 0 ||
+                    (roster.length === 0 && members.length === 0) ||
                     selectedExportFields.length === 0
                   }
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-richblack-25 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1927,7 +1927,7 @@ export default function ManageTeam({
                   type="button"
                   onClick={handleExportExcel}
                   disabled={
-                    members.length === 0 || selectedExportFields.length === 0
+                    (roster.length === 0 && members.length === 0) || selectedExportFields.length === 0
                   }
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-richblack-25 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
