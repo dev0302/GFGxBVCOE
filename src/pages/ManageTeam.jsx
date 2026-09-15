@@ -18,7 +18,7 @@ import {
   createTeamInviteLink,
   getActiveTeamInviteLink,
   suspendTeamInviteLink,
-  getAccountTypeLabel,
+  getTeamRosterRoleLabel,
   sendSignupInvite,
   broadcastNotificationToDepartment,
   broadcastNotificationToAll,
@@ -1632,10 +1632,7 @@ export default function ManageTeam({
                               .trim() || row.email
                           : pre?.name || row.email;
                         const tagLabel = row.registered
-                          ? profile?.position ||
-                            getAccountTypeLabel(u?.accountType) ||
-                            u?.accountType ||
-                            ""
+                          ? getTeamRosterRoleLabel(u)
                           : null;
                         const photoUrl = row.registered
                           ? u?.image
@@ -2579,15 +2576,7 @@ export default function ManageTeam({
                         const src = u.image
                           ? photoPreviewUrl(u.image)
                           : avatarPlaceholder(name);
-                        const position =
-                          u.additionalDetails?.position &&
-                          String(u.additionalDetails.position).trim();
-                        const roleLabel =
-                          position ||
-                          item.department ||
-                          getAccountTypeLabel(u.accountType) ||
-                          u.accountType ||
-                          "Member";
+                        const roleLabel = getTeamRosterRoleLabel(u);
 
                         content = (
                           <button
@@ -2697,10 +2686,10 @@ export default function ManageTeam({
                         const src = photoUrl
                           ? photoPreviewUrl(photoUrl)
                           : avatarPlaceholder(name);
-                        const tagLabel =
-                          (m.position && String(m.position).trim()) ||
-                          item.department ||
-                          "Team";
+                        const tagLabel = getTeamRosterRoleLabel({
+                          ...m,
+                          accountType: item.department,
+                        });
 
                         content = (
                           <button
@@ -2817,15 +2806,7 @@ export default function ManageTeam({
                         const src = u.image
                           ? photoPreviewLargeAvatarUrl(u.image)
                           : avatarPlaceholder(name);
-                        const position =
-                          u.additionalDetails?.position &&
-                          String(u.additionalDetails.position).trim();
-                        const roleLabel =
-                          position ||
-                          item.department ||
-                          getAccountTypeLabel(u.accountType) ||
-                          u.accountType ||
-                          "Member";
+                        const roleLabel = getTeamRosterRoleLabel(u);
                         content = (
                           <button
                             type="button"
@@ -2932,10 +2913,10 @@ export default function ManageTeam({
                         const src = photoUrl
                           ? photoPreviewLargeAvatarUrl(photoUrl)
                           : avatarPlaceholder(name);
-                        const tagLabel =
-                          (m.position && String(m.position).trim()) ||
-                          dept ||
-                          "Team";
+                        const tagLabel = getTeamRosterRoleLabel({
+                          ...m,
+                          accountType: dept,
+                        });
                         content = (
                           <button
                             type="button"
