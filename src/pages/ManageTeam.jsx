@@ -2806,7 +2806,7 @@ export default function ManageTeam({
                         const src = u.image
                           ? photoPreviewLargeAvatarUrl(u.image)
                           : avatarPlaceholder(name);
-                        const roleLabel = getTeamRosterRoleLabel(u);
+                        const roleLabel = getTeamRosterRoleLabel(u, "Team member");
                         content = (
                           <button
                             type="button"
@@ -2916,7 +2916,7 @@ export default function ManageTeam({
                         const tagLabel = getTeamRosterRoleLabel({
                           ...m,
                           accountType: dept,
-                        });
+                        }, "Team member");
                         content = (
                           <button
                             type="button"

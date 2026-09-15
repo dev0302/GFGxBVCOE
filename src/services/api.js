@@ -702,7 +702,7 @@ export function getAccountTypeLabel(accountType) {
 }
 
 /** Label shown in team rosters: leadership keeps its title; everyone else is a team member. */
-export function getTeamRosterRoleLabel(user = {}) {
+export function getTeamRosterRoleLabel(user = {}, memberLabel = "Team Members") {
   const accountType = String(user.accountType || "").trim();
   if (isSocietyRole(accountType)) {
     return getAccountTypeLabel(accountType) || accountType;
@@ -723,7 +723,7 @@ export function getTeamRosterRoleLabel(user = {}) {
     .map((value) => String(value || "").trim())
     .find((value) => /\b(head|lead)\b/i.test(value));
 
-  return leadershipRole || "Team Members";
+  return leadershipRole || memberLabel;
 }
 
 /** Full role label for history/emails — e.g. Technical → Technical Member */

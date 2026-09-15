@@ -1645,6 +1645,11 @@ exports.getAllPeople = async (req, res) => {
         .lean();
       for (const m of members) {
         teamMembers.push({ type: "teamMember", data: m, department: dept });
+        // Department members sign up on their department document rather than
+        // the main User collection. Do not also render their predefined profile
+        // as an unregistered person in the whole-society list.
+        const memberEmail = (m.email || "").trim().toLowerCase();
+        if (m.signedIn && memberEmail) registeredEmails.add(memberEmail);
       }
 
       // The clients already render `predefinedOnly`; include configured and
