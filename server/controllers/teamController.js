@@ -40,6 +40,34 @@ const activeTeamMemberFilter = {
   $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
 };
 
+function departmentMemberAsRosterUser(member, department) {
+  const nameParts = String(member.name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  const profile = member.profile || {};
+
+  return {
+    _id: member._id,
+    firstName: nameParts[0] || member.email || "Member",
+    lastName: nameParts.slice(1).join(" "),
+    email: member.email,
+    contact: member.contact || "",
+    image: member.photo || "",
+    accountType: department,
+    isDepartmentMember: true,
+    additionalDetails: {
+      ...profile,
+      year: profile.year || profile.yearOfStudy || member.year || "",
+      yearOfStudy: profile.yearOfStudy || profile.year || member.year || "",
+      branch: profile.branch || member.branch || "",
+      section: profile.section || member.section || "",
+      non_tech_society:
+        profile.non_tech_society || member.non_tech_society || "",
+    },
+  };
+}
+
 async function purgeExpiredDeletedTeamMembers(Model) {
   const cutoff = new Date(Date.now() - TEAM_MEMBER_SOFT_RETENTION_DAYS * 24 * 60 * 60 * 1000);
   const expired = await Model.find({
@@ -151,6 +179,19 @@ exports.getDepartmentRoster = async (req, res) => {
     const userByEmail = new Map(
       departmentUsers.map((user) => [(user.email || "").trim().toLowerCase(), user])
     );
+    // Department members authenticate against their department collection
+    // rather than `users`. Include only members who completed that signup.
+    const MemberModel = getTeamMemberModel(department);
+    const signedInMembers = await MemberModel.find({
+      ...activeTeamMemberFilter,
+      signedIn: true,
+    }).lean();
+    const signedInMemberByEmail = new Map(
+      signedInMembers.map((member) => [
+        (member.email || "").trim().toLowerCase(),
+        member,
+      ])
+    );
     for (const email of userByEmail.keys()) {
       if (email) allowedEmails.push(email);
     }
@@ -167,16 +208,22 @@ exports.getDepartmentRoster = async (req, res) => {
       const predefined = await PredefinedProfile.findOne({
         email: { $regex: new RegExp(`^${emailEscaped}$`, "i") },
       }).lean();
-      const registered = !!userDoc && departmentKeys.includes(userDoc.accountType);
+      const signedInMember = signedInMemberByEmail.get(emailNorm);
+      const registeredUser = !!userDoc && departmentKeys.includes(userDoc.accountType);
+      const registered = registeredUser || !!signedInMember;
       const normalizedPredefined = predefined ? normalizeProfileTextFields(predefined) : null;
-      const normalizedUser = userDoc
+      const normalizedUser = registeredUser
         ? {
             ...userDoc,
             additionalDetails: userDoc.additionalDetails
               ? normalizeProfileTextFields(userDoc.additionalDetails)
               : userDoc.additionalDetails,
           }
-        : null;
+        : signedInMember
+          ? normalizeProfileTextFields(
+              departmentMemberAsRosterUser(signedInMember, department)
+            )
+          : null;
       roster.push({
         email: emailNorm,
         registered,

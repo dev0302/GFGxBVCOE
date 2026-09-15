@@ -701,6 +701,31 @@ export function getAccountTypeLabel(accountType) {
   return ACCOUNT_TYPE_LABELS[accountType] ?? accountType ?? "";
 }
 
+/** Label shown in team rosters: leadership keeps its title; everyone else is a team member. */
+export function getTeamRosterRoleLabel(user = {}, memberLabel = "Team Members") {
+  const accountType = String(user.accountType || "").trim();
+  if (isSocietyRole(accountType)) {
+    return getAccountTypeLabel(accountType) || accountType;
+  }
+
+  const profile = user.additionalDetails || user.profile || {};
+  const roleValues = [
+    profile.position,
+    profile.p0,
+    profile.p1,
+    profile.p2,
+    user.position,
+    user.p0,
+    user.p1,
+    user.p2,
+  ];
+  const leadershipRole = roleValues
+    .map((value) => String(value || "").trim())
+    .find((value) => /\b(head|lead)\b/i.test(value));
+
+  return leadershipRole || memberLabel;
+}
+
 /** Full role label for history/emails — e.g. Technical → Technical Member */
 export function formatLeadershipRoleLabel(value) {
   if (!value) return "Member";

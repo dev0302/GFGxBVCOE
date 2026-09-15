@@ -1,6 +1,6 @@
 import { Mail, Phone, Edit3, Trash2 } from "react-feather";
 import { photoPreviewUrl, avatarPlaceholder } from "../utils/teamMemberUtils";
-import { getAccountTypeLabel } from "../services/api";
+import { getTeamRosterRoleLabel } from "../services/api";
 
 export default function TeamMemberCard({
   row,
@@ -33,9 +33,9 @@ export default function TeamMemberCard({
         : null;
 
   const tagLabel = isTeamMember
-    ? "Team member"
+    ? getTeamRosterRoleLabel({ ...m, accountType: row.department })
     : row.registered
-      ? profile?.position || getAccountTypeLabel(u?.accountType) || u?.accountType || ""
+      ? getTeamRosterRoleLabel(u)
       : "Not registered yet";
 
   const year = isTeamMember
