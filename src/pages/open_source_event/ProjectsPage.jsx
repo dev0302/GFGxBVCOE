@@ -13,6 +13,7 @@ import {
   Upload,
   Search,
   SlidersHorizontal,
+  X,
 } from "lucide-react";
 
 const categories = [
@@ -58,11 +59,26 @@ const getRepositoryUrl = (repository) => {
 const getProjectKey = (project) =>
   project._id || project.repository || project.name;
 
+const difficultyDisplayMap = {
+  beginner: "easy",
+  intermediate: "medium",
+  advanced: "high",
+};
+
+const normalizeDifficulty = (level) => {
+  const raw = String(level || "").trim().toLowerCase();
+  return difficultyDisplayMap[raw] || raw;
+};
+
 function ProjectsPage() {
   const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [selectedStack, setSelectedStack] = useState("");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("");
+  const [draftStack, setDraftStack] = useState("");
+  const [draftDifficulty, setDraftDifficulty] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -88,10 +104,73 @@ function ProjectsPage() {
     };
   }, []);
 
-  const stacks = [
-    ...new Set(projects.flatMap((project) => project.stacks)),
-    "Python",
-  ];
+  const stacks = useMemo(
+    () => [...new Set(projects.flatMap((project) => project.stacks || []))],
+    [projects],
+  );
+
+  const difficulties = useMemo(() => {
+    if (!Array.isArray(projects)) return [];
+    return Array.from(
+      new Set(
+        projects
+          .map((project) => normalizeDifficulty(project.difficultyLevel))
+          .filter(Boolean),
+      ),
+    ).sort((left, right) => left.localeCompare(right));
+  }, [projects]);
+
+  const difficultyOptions = useMemo(() => {
+    const levels =
+      Array.isArray(difficulties) && difficulties.length
+        ? difficulties
+        : ["easy", "medium", "high"];
+
+    const difficultyOrder = {
+      easy: 1,
+      medium: 2,
+      high: 3,
+    };
+
+    return Array.from(
+      new Set(
+        levels
+          .map((level) => String(level).trim().toLowerCase())
+          .filter(Boolean),
+      ),
+    )
+      .map((level) => ({
+        value: level,
+        label: level[0].toUpperCase() + level.slice(1),
+      }))
+      .sort(
+        (left, right) =>
+          (difficultyOrder[left.value] || 999) -
+          (difficultyOrder[right.value] || 999),
+      );
+  }, [difficulties]);
+  const hasActiveFilters = Boolean(selectedStack || selectedDifficulty);
+
+  const openFilterPanel = () => {
+    setDraftStack(selectedStack);
+    setDraftDifficulty(selectedDifficulty);
+    setIsFilterOpen(true);
+  };
+
+  const applyFilters = () => {
+    setSelectedStack(draftStack);
+    setSelectedDifficulty(draftDifficulty);
+    setIsFilterOpen(false);
+  };
+
+  const resetFilters = () => {
+    setSelectedStack("");
+    setSelectedDifficulty("");
+    setDraftStack("");
+    setDraftDifficulty("");
+    setIsFilterOpen(false);
+  };
+
   const filteredProjects = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return projects.filter((project) => {
@@ -107,10 +186,15 @@ function ProjectsPage() {
       return (
         (!normalizedQuery || searchable.includes(normalizedQuery)) &&
         (category === "All" || project.category === category) &&
-        (!selectedStack || project.stacks.includes(selectedStack))
+        (!selectedStack ||
+          project.stacks.some(
+            (stack) => stack.toLowerCase() === selectedStack.toLowerCase(),
+          )) &&
+        (!selectedDifficulty ||
+          normalizeDifficulty(project.difficultyLevel) === selectedDifficulty)
       );
     });
-  }, [category, projects, query, selectedStack]);
+  }, [category, projects, query, selectedStack, selectedDifficulty]);
 
   useEffect(() => {
     const measureDescriptions = () => {
@@ -184,20 +268,98 @@ function ProjectsPage() {
             </div>
           </div>
           <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-white/[0.07] pt-5">
-            <span className="mr-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#77768b]">
-              <SlidersHorizontal size={14} /> Stack filters
-            </span>
-            {stacks.map((stack) => (
+            <div className="relative">
               <button
-                key={stack}
-                onClick={() =>
-                  setSelectedStack(selectedStack === stack ? "" : stack)
-                }
-                className={`rounded-lg border px-3 py-1.5 text-xs transition ${selectedStack === stack ? "border-emerald-300/60 bg-gradient-to-r from-emerald-400 to-lime-300 text-[#16231d]" : "border-white/[0.08] bg-[#10101a] text-[#a9a8bc] hover:border-white/20 hover:text-white"}`}
+                type="button"
+                onClick={openFilterPanel}
+                className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
+                  hasActiveFilters
+                    ? "border-emerald-300/60 bg-gradient-to-r from-emerald-400 to-lime-300 text-[#16231d] shadow-[0_0_18px_rgba(74,222,128,0.35)]"
+                    : "border-white/[0.08] bg-[#10101a] text-[#a9a8bc] hover:border-emerald-300/40 hover:text-white"
+                }`}
               >
-                {stack}
+                <SlidersHorizontal size={16} />
+                Stack Filters
               </button>
-            ))}
+
+              {isFilterOpen && (
+                <div className="absolute left-0 top-[calc(100%+12px)] z-30 w-[min(420px,calc(100vw-40px))] rounded-[22px] border border-emerald-300/20 bg-[#171724] p-4 shadow-2xl shadow-black/50">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400">
+                        Stack Filters
+                      </p>
+                      <h3 className="mt-1 text-base font-semibold text-[#fffaf0]">
+                        Filter Projects
+                      </h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsFilterOpen(false)}
+                      aria-label="Close filters"
+                      className="grid h-8 w-8 place-items-center rounded-full border border-white/[0.08] bg-[#10101a] text-[#a9a8bc] transition hover:border-emerald-300/50 hover:text-white"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#a9a8bc]">
+                        Tech Stack
+                      </label>
+                      <input
+                        list="os-project-stacks"
+                        value={draftStack}
+                        onChange={(event) => setDraftStack(event.target.value)}
+                        placeholder="Type or select a stack"
+                        className="h-11 w-full rounded-xl border border-white/[0.08] bg-[#10101a] px-4 text-sm text-white outline-none transition placeholder:text-[#666579] focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
+                      />
+                      <datalist id="os-project-stacks">
+                        {stacks.map((stack) => (
+                          <option key={stack} value={stack} />
+                        ))}
+                      </datalist>
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-[#a9a8bc]">
+                        Difficulty Level
+                      </label>
+                      <select
+                        value={draftDifficulty}
+                        onChange={(event) => setDraftDifficulty(event.target.value)}
+                        className="h-11 w-full rounded-xl border border-white/[0.08] bg-[#10101a] px-4 text-sm text-white outline-none transition focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
+                      >
+                        <option value="">All levels</option>
+                        {difficultyOptions.map((level) => (
+                          <option key={level.value} value={level.value}>
+                            {level.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={resetFilters}
+                      className="rounded-xl border border-white/[0.1] bg-transparent px-4 py-2 text-sm font-semibold text-[#d0ced8] transition hover:border-emerald-300/40 hover:text-white"
+                    >
+                      Reset Filters
+                    </button>
+                    <button
+                      type="button"
+                      onClick={applyFilters}
+                      className="rounded-xl bg-gradient-to-r from-emerald-400 to-lime-300 px-4 py-2 text-sm font-semibold text-[#16231d] transition hover:from-green-300 hover:to-emerald-200"
+                    >
+                      Apply Filters
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
