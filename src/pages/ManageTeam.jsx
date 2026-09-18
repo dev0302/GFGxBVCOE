@@ -1355,9 +1355,8 @@ export default function ManageTeam({
     <div className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-blue-400/45 to-transparent blur-md animate-[quoteSweep_5.5s_ease-in-out_infinite]" />
 
     <p className="relative text-gray-300 text-sm md:text-base italic leading-relaxed">
-      “The amount you can get done in a day if you never stop working, never
-      stop thinking, never stop flirting, texting, organizing, vibing, etc. is
-      ridiculously insane.”
+      “When purpose is missing, the heart often mistakes distraction for love. 
+      Find your purpose, and you’ll stop searching for someone to fill the void.”
       <br />
       <span className="text-blue-400/80 font-medium">
         ~ Welcome to the technical team of BVCOE
@@ -1372,8 +1371,11 @@ export default function ManageTeam({
     <div className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-pink-300/45 to-transparent blur-md animate-[quoteSweep_2.5s_ease-in-out_infinite]" />
 
     <p className="relative text-gray-300 text-sm md:text-base italic leading-relaxed">
-      “Pixels, palettes, questionable ideas, and way too many revisions -
-      somehow, we make it look intentional.”
+      “Nazar hai meri tu, hai tu hi nazaara
+Ye kya maajra hai bata
+Shayar bana hai ye dil aaj kal jo
+Tu hi toh saari wajah**
+.”
       <br />
       <span className="text-pink-300/80 font-medium">
         ~ Welcome to the Design & Creative team of BVCOE
@@ -1388,8 +1390,9 @@ export default function ManageTeam({
     <div className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-pink-300/45 to-transparent blur-md animate-[quoteSweep_2.5s_ease-in-out_infinite]" />
 
     <p className="relative text-gray-300 text-sm md:text-base italic leading-relaxed">
-      “Posting at the right time, chasing the right trend, and pretending the
-      algorithm was always on our side.”
+      “Made it out alive, but I think I lost it
+Said that I was fine, said it from my coffin
+Remember how I died when you started walking?”
       <br />
       <span className="text-pink-300/80 font-medium">
         ~ Welcome to the Social Media and Promotion team of BVCOE
