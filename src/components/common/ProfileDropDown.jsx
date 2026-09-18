@@ -252,15 +252,21 @@ function ProfileDropDown({
       if (!rect) return;
 
       const isMobileViewport = window.innerWidth < 640;
+      const isDesktopViewport = window.innerWidth >= 1024;
       const width = Math.min(256, window.innerWidth - 24);
       const top = rect.bottom + 8;
 
       // Keep the action list within the viewport while leaving the account
       // details and logout control permanently visible.
-      const menuItemsMaxHeight = Math.min(
-        200,
-        Math.max(96, window.innerHeight - top - 232),
+      const availableMenuHeight = Math.max(
+        96,
+        window.innerHeight - top - 232,
       );
+      const menuItemsMaxHeight = isMobileViewport
+        ? availableMenuHeight
+        : isDesktopViewport
+          ? Math.min(180, availableMenuHeight)
+          : availableMenuHeight;
 
       setMenuPosition({
         top,
@@ -297,7 +303,7 @@ function ProfileDropDown({
       if (!rect) return;
 
       const width = Math.min(288, window.innerWidth - 24);
-      const estimatedHeight = 260;
+      const estimatedHeight = window.innerWidth >= 1024 ? 240 : 380;
       const gap = 8;
       const leftOfTrigger = rect.left - width - gap;
       const left =
@@ -944,7 +950,7 @@ function ProfileDropDown({
               </div>
             </div>
             <div
-              className="max-h-[200px] overflow-y-auto overscroll-none px-1 py-1.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50"
+              className="max-h-[320px] overflow-y-auto overscroll-none px-1 py-1.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50 lg:max-h-[180px]"
               onWheel={handleFlyoutWheel}
             >
               {deptDashboardKeys.length ? (
