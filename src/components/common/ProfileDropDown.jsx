@@ -163,9 +163,12 @@ function ProfileDropDown({
   const [lastSeenError, setLastSeenError] = useState(null);
   const [lastSeenPlacement, setLastSeenPlacement] = useState(null);
   const [menuPosition, setMenuPosition] = useState(null);
+  const [deptFlyoutPosition, setDeptFlyoutPosition] = useState(null);
   const ref = useRef(null);
   const triggerRef = useRef(null);
   const dropdownPanelRef = useRef(null);
+  const deptDashboardTriggerRef = useRef(null);
+  const deptFlyoutCloseTimerRef = useRef(null);
   const [avatarLoadedButton, setAvatarLoadedButton] = useState(!user?.image);
   const [avatarLoadedMenu, setAvatarLoadedMenu] = useState(!user?.image);
 
@@ -177,6 +180,7 @@ function ProfileDropDown({
   useEffect(() => {
     const onClick = (e) => {
       if (e.target?.closest?.("[data-last-seen-modal]")) return;
+      if (e.target?.closest?.("[data-dept-dashboard-flyout]")) return;
       const clickedTrigger = ref.current?.contains(e.target);
       const clickedDropdown = dropdownPanelRef.current?.contains(e.target);
 
@@ -222,8 +226,20 @@ function ProfileDropDown({
   }, [open]);
 
   useEffect(() => {
-    if (!open) setLastSeenOpen(false);
+    if (!open) {
+      setLastSeenOpen(false);
+      setDeptFlyoutOpen(false);
+    }
   }, [open]);
+
+  useEffect(
+    () => () => {
+      if (deptFlyoutCloseTimerRef.current) {
+        clearTimeout(deptFlyoutCloseTimerRef.current);
+      }
+    },
+    [],
+  );
 
   useLayoutEffect(() => {
     if (!open) {
@@ -241,9 +257,9 @@ function ProfileDropDown({
 
       // Keep the action list within the viewport while leaving the account
       // details and logout control permanently visible.
-      const menuItemsMaxHeight = Math.max(
-        96,
-        window.innerHeight - top - 232,
+      const menuItemsMaxHeight = Math.min(
+        200,
+        Math.max(96, window.innerHeight - top - 232),
       );
 
       setMenuPosition({
@@ -269,6 +285,41 @@ function ProfileDropDown({
       window.removeEventListener("scroll", updatePosition, true);
     };
   }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open || !deptFlyoutOpen) {
+      setDeptFlyoutPosition(null);
+      return undefined;
+    }
+
+    const updatePosition = () => {
+      const rect = deptDashboardTriggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const width = Math.min(288, window.innerWidth - 24);
+      const estimatedHeight = 260;
+      const gap = 8;
+      const leftOfTrigger = rect.left - width - gap;
+      const left =
+        leftOfTrigger >= 8
+          ? leftOfTrigger
+          : Math.min(window.innerWidth - width - 8, rect.right + gap);
+      const top = Math.min(
+        Math.max(8, rect.top - 52),
+        window.innerHeight - estimatedHeight - 8,
+      );
+
+      setDeptFlyoutPosition({ top, left, width });
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [deptFlyoutOpen, open]);
 
   useLayoutEffect(() => {
     if (!open) {
@@ -321,6 +372,22 @@ function ProfileDropDown({
       onBeforeToggle();
     }
     setOpen((v) => !v);
+  };
+
+  const showDeptFlyout = () => {
+    if (deptFlyoutCloseTimerRef.current) {
+      clearTimeout(deptFlyoutCloseTimerRef.current);
+    }
+    setDeptFlyoutOpen(true);
+  };
+
+  const scheduleDeptFlyoutClose = () => {
+    if (deptFlyoutCloseTimerRef.current) {
+      clearTimeout(deptFlyoutCloseTimerRef.current);
+    }
+    deptFlyoutCloseTimerRef.current = setTimeout(() => {
+      setDeptFlyoutOpen(false);
+    }, 120);
   };
 
   const handleFlyoutWheel = (e) => {
@@ -615,11 +682,7 @@ function ProfileDropDown({
             </div>
 
             <div
-              className={`max-h-[var(--profile-menu-actions-max-height)] px-1 py-1.5 i-fonts scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50 ${
-                deptFlyoutOpen
-                  ? "overflow-visible"
-                  : "overflow-y-auto overscroll-none"
-              }`}
+              className="max-h-[var(--profile-menu-actions-max-height)] overflow-y-auto overscroll-none px-1 py-1.5 i-fonts scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50"
               style={{
                 "--profile-menu-actions-max-height": `${menuPosition.menuItemsMaxHeight}px`,
               }}
@@ -749,13 +812,12 @@ function ProfileDropDown({
                       {/* Hover / click flyout: all department dashboards */}
                       <div
                         className="relative"
-                        // onMouseEnter={() => setDeptFlyoutOpen(true)}
-                        // onMouseLeave={() => setDeptFlyoutOpen(false)}
-                        onMouseEnter={() => setDeptFlyoutOpen(true)}
-                        onMouseLeave={() => setDeptFlyoutOpen(false)}
+                        onMouseEnter={showDeptFlyout}
+                        onMouseLeave={scheduleDeptFlyoutClose}
                         tabIndex={0}
                       >
                         <button
+                          ref={deptDashboardTriggerRef}
                           type="button"
                           onClick={() => setDeptFlyoutOpen((v) => !v)}
                           className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
@@ -778,66 +840,6 @@ function ProfileDropDown({
                           />
                         </button>
 
-                        <div
-                          className={`absolute -top-60 right-full z-[70] mr-[-200px] w-72 max-w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-gray-500/40 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] shadow-xl backdrop-blur-sm transition-all duration-200 ease-out sm:mr-1 ${
-                            deptFlyoutOpen
-                              ? "pointer-events-auto opacity-100 translate-x-0 scale-100"
-                              : "pointer-events-none opacity-0 translate-x-1 scale-95"
-                          }`}
-                          role="menu"
-                        >
-                          <div className="px-4 py-3 border-b border-gray-500/30">
-                            <div className="text-xs font-semibold text-richblack-25">
-                              Department dashboards
-                            </div>
-                            <div className="text-[10px] text-gray-400">
-                              Jump to a department dashboard
-                            </div>
-                          </div>
-                          <div
-                            className="max-h-[320px] overflow-y-auto px-1 py-1.5 overscroll-none scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50"
-                            onWheel={handleFlyoutWheel}
-                          >
-                            {deptDashboardKeys.length ? (
-                              deptDashboardKeys.map((key) => {
-                                const title = `${getAccountTypeLabel(key) || key} Dashboard`;
-                                const to =
-                                  key === emKey
-                                    ? "/em-dashboard"
-                                    : `/dashboard/${encodeURIComponent(key)}`;
-                                return (
-                                  <button
-                                    key={key}
-                                    type="button"
-                                    onClick={() => {
-                                      setOpen(false);
-                                      setDeptFlyoutOpen(false);
-                                      navigate(to);
-                                    }}
-                                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
-                                    role="menuitem"
-                                  >
-                                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
-                                      <Layout className="h-4 w-4" />
-                                    </span>
-                                    <span className="flex-1 min-w-0">
-                                      <span className="block text-xs font-medium truncate">
-                                        {title}
-                                      </span>
-                                      <span className="block text-[10px] text-gray-500 truncate">
-                                        Departments allowed, Generate QR
-                                      </span>
-                                    </span>
-                                  </button>
-                                );
-                              })
-                            ) : (
-                              <div className="px-3 py-3 text-xs text-gray-400">
-                                No department dashboards available.
-                              </div>
-                            )}
-                          </div>
-                        </div>
                       </div>
                     </>
                   ) : (
@@ -912,6 +914,77 @@ function ProfileDropDown({
                 <LogOut className="h-3.5 w-3.5" />
                 <span>Logout</span>
               </button>
+            </div>
+          </div>,
+          document.body,
+        )}
+
+      {typeof document !== "undefined" &&
+        deptFlyoutOpen &&
+        deptFlyoutPosition &&
+        createPortal(
+          <div
+            style={{
+              top: deptFlyoutPosition.top,
+              left: deptFlyoutPosition.left,
+              width: deptFlyoutPosition.width,
+            }}
+            className="fixed z-[270] overflow-hidden rounded-2xl border border-gray-500/40 bg-gradient-to-br from-[#1e1e2f] to-[#2c2c3e] shadow-xl backdrop-blur-sm"
+            role="menu"
+            data-dept-dashboard-flyout
+            onMouseEnter={showDeptFlyout}
+            onMouseLeave={scheduleDeptFlyoutClose}
+          >
+            <div className="border-b border-gray-500/30 px-4 py-3">
+              <div className="text-xs font-semibold text-richblack-25">
+                Department dashboards
+              </div>
+              <div className="text-[10px] text-gray-400">
+                Jump to a department dashboard
+              </div>
+            </div>
+            <div
+              className="max-h-[200px] overflow-y-auto overscroll-none px-1 py-1.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50"
+              onWheel={handleFlyoutWheel}
+            >
+              {deptDashboardKeys.length ? (
+                deptDashboardKeys.map((key) => {
+                  const title = `${getAccountTypeLabel(key) || key} Dashboard`;
+                  const to =
+                    key === emKey
+                      ? "/em-dashboard"
+                      : `/dashboard/${encodeURIComponent(key)}`;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => {
+                        setOpen(false);
+                        setDeptFlyoutOpen(false);
+                        navigate(to);
+                      }}
+                      className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
+                      role="menuitem"
+                    >
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+                        <Layout className="h-4 w-4" />
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className="block truncate text-xs font-medium">
+                          {title}
+                        </span>
+                        <span className="block truncate text-[10px] text-gray-500">
+                          Departments allowed, Generate QR
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="px-3 py-3 text-xs text-gray-400">
+                  No department dashboards available.
+                </div>
+              )}
             </div>
           </div>,
           document.body,
