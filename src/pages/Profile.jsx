@@ -793,6 +793,7 @@ const Profile = () => {
                       <option value="">Select branch</option>
                       <option value="CSE">CSE</option>
                       <option value="AIML">AIML</option>
+                      <option value="CSE-AI DS">CSE-AI DS</option>
                       <option value="IT">IT</option>
                       <option value="EEE">EEE</option>
                       <option value="ECE">ECE</option>

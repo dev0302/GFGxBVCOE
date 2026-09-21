@@ -147,39 +147,38 @@ async function findAssignee(id, department) {
   return { id: user._id, name: `${user.firstName || ""} ${user.lastName || ""}`.trim(), email: user.email || "", image: user.image || "", department: TEAM_DEPARTMENTS.includes(user.accountType) ? user.accountType : "Core Team", role: user.additionalDetails?.position || user.additionalDetails?.p0 || user.accountType || "", year: "", isDepartmentMember: false };
 }
 
+function isSamePerson(a, b) {
+  if (!a || !b) return false;
+  if (a.id && b.id && String(a.id) === String(b.id)) return true;
+  const emailA = text(a.email).toLowerCase();
+  const emailB = text(b.email).toLowerCase();
+  return Boolean(emailA && emailB && emailA === emailB);
+}
+
 exports.getEligiblePeople = async (req, res) => {
   try {
     const assigner = await currentPerson(req.user);
     if (!assigner || getRankValue(assigner.role) < 40) return res.status(403).json({ success: false, message: "Only Heads, Leads, and society core roles can assign tasks." });
-    
-    const assignerRank = getRankValue(assigner.role);
+
     const query = text(req.query.search).toLowerCase();
-    const isCore = SOCIETY_ROLES.includes(text(req.user.accountType));
-    const allowedDept = req.user.isDepartmentMember ? req.user.memberDepartment : req.user.accountType;
-    const departments = isCore ? TEAM_DEPARTMENTS : [allowedDept];
     const people = [];
-    
-    const userFilter = isCore ? {} : { accountType: allowedDept };
-    const users = await User.find(userFilter).populate("additionalDetails").select("firstName lastName email image accountType additionalDetails").lean();
+
+    const users = await User.find({}).populate("additionalDetails").select("firstName lastName email image accountType additionalDetails").lean();
     users.forEach((u) => {
       const role = u.additionalDetails?.position || u.additionalDetails?.p0 || u.accountType || "";
-      const rank = getRankValue(role);
-      if (assignerRank > rank) {
-        people.push({ id: u._id, name: `${u.firstName || ""} ${u.lastName || ""}`.trim(), email: u.email || "", image: u.image || "", department: TEAM_DEPARTMENTS.includes(u.accountType) ? u.accountType : "Core Team", role, year: u.additionalDetails?.year || "", isDepartmentMember: false });
-      }
+      const person = { id: u._id, name: `${u.firstName || ""} ${u.lastName || ""}`.trim(), email: u.email || "", image: u.image || "", department: TEAM_DEPARTMENTS.includes(u.accountType) ? u.accountType : "Core Team", role, year: u.additionalDetails?.year || "", isDepartmentMember: false };
+      if (!isSamePerson(assigner, person)) people.push(person);
     });
-    
-    for (const department of departments) {
+
+    for (const department of TEAM_DEPARTMENTS) {
       const rows = await getTeamMemberModel(department).find({ $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] }).select("name email photo year profile").lean();
       rows.forEach((m) => {
         const role = m.profile?.role || m.profile?.position || m.profile?.p0 || "Member";
-        const rank = getRankValue(role);
-        if (assignerRank > rank) {
-          people.push({ id: m._id, name: m.name, email: m.email || "", image: m.photo || "", department, role, year: m.profile?.yearOfStudy || m.profile?.year || m.year || "", isDepartmentMember: true });
-        }
+        const person = { id: m._id, name: m.name, email: m.email || "", image: m.photo || "", department, role, year: m.profile?.yearOfStudy || m.profile?.year || m.year || "", isDepartmentMember: true };
+        if (!isSamePerson(assigner, person)) people.push(person);
       });
     }
-    const filtered = query ? people.filter((p) => [p.name, p.department, p.role, p.year].some((v) => text(v).toLowerCase().includes(query))) : people;
+    const filtered = query ? people.filter((p) => [p.name, p.email, p.department, p.role, p.year].some((v) => text(v).toLowerCase().includes(query))) : people;
     res.json({ success: true, people: filtered });
   } catch (error) { res.status(500).json({ success: false, message: "Unable to load eligible people.", error: error.message }); }
 };
@@ -281,16 +280,7 @@ exports.createTask = async (req, res) => {
     
     const assignedTo = await findAssignee(req.body.assignedToId, req.body.assignedToDepartment);
     if (!assignedTo) return res.status(404).json({ success: false, message: "The selected person no longer exists." });
-    
-    const assignerRank = getRankValue(assignedBy.role);
-    const assigneeRank = getRankValue(assignedTo.role);
-    if (assignerRank <= assigneeRank) return res.status(403).json({ success: false, message: "You can only assign tasks to members with a lower post/rank than yours." });
-    
-    const isCore = SOCIETY_ROLES.includes(text(req.user.accountType));
-    if (!isCore) {
-      const userDept = req.user.isDepartmentMember ? req.user.memberDepartment : req.user.accountType;
-      if (assignedTo.department !== userDept) return res.status(403).json({ success: false, message: "Heads and Leads may only assign tasks inside their department." });
-    }
+    if (isSamePerson(assignedBy, assignedTo)) return res.status(400).json({ success: false, message: "You cannot assign a task to yourself." });
     
     const task = await Task.create({ title, description, priority: ["LOW", "MEDIUM", "HIGH"].includes(req.body.priority) ? req.body.priority : "MEDIUM", assignedTo, assignedBy, department: assignedTo.department, deadline, history: [{ action: "ASSIGNED", by: assignedBy }] });
     await syncTaskExcel();

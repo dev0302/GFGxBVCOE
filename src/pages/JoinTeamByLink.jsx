@@ -36,7 +36,7 @@ const LABELS = {
 };
 
 const YEAR_OPTIONS = ["1st", "2nd", "3rd", "4th"];
-const BRANCH_OPTIONS = ["CSE", "AIML", "IT", "EEE", "ECE", "ICE"];
+const BRANCH_OPTIONS = ["CSE", "AIML", "CSE-AI DS", "IT", "EEE", "ECE", "ICE"];
 
 export default function JoinTeamByLink() {
   const { token } = useParams();

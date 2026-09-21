@@ -340,6 +340,55 @@ export function downloadAllDepartmentsExcel(departmentMembersMap, columns, label
   XLSX.writeFile(wb, sanitizeFilename(`${title || "society-member-list"}.xlsx`));
 }
 
+/**
+ * Download a live PDF with two tables: people who have a social link, then those who don't.
+ */
+export async function downloadSocialPresencePDF({ platform, label, withSocial, withoutSocial }) {
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const generatedAt = formatISTDateTime();
+  const columns = ["#", "Name", "Email", "Department", `${label} link`];
+  const toRows = (members) =>
+    members.map((member, index) => [
+      String(index + 1),
+      String(member.name || "—").substring(0, 60),
+      String(member.email || "—").substring(0, 50),
+      String(member.department || "—").substring(0, 40),
+      String(member.link || "—").substring(0, 80),
+    ]);
+
+  doc.setFontSize(16);
+  doc.text(ORG_NAME, 14, 18);
+  doc.setFontSize(12);
+  doc.text(`${label} presence list`, 14, 26);
+  doc.setFontSize(9);
+  doc.text(`Generated on ${generatedAt} (live search results)`, 14, 32);
+  doc.text(`With ${label}: ${withSocial.length}    Without ${label}: ${withoutSocial.length}`, 14, 38);
+
+  const drawTable = (title, members, startY) => {
+    doc.setFontSize(11);
+    doc.text(title, 14, startY);
+    doc.autoTable({
+      head: [columns],
+      body: members.length ? toRows(members) : [["—", "None", "—", "—", "—"]],
+      startY: startY + 4,
+      styles: { fontSize: 7.5, cellPadding: 1.5, textColor: [22, 22, 22], lineColor: [120, 120, 120], lineWidth: 0.1 },
+      headStyles: { fillColor: [58, 58, 58], textColor: [245, 245, 245] },
+      alternateRowStyles: { fillColor: [248, 248, 248] },
+      margin: { left: 14, right: 14 },
+      columnStyles: {
+        0: { cellWidth: 10 },
+        4: { cellWidth: 48 },
+      },
+    });
+    return doc.lastAutoTable.finalY;
+  };
+
+  const afterWith = drawTable(`Members with ${label} (${withSocial.length})`, withSocial, 46);
+  drawTable(`Members without ${label} (${withoutSocial.length})`, withoutSocial, afterWith + 12);
+
+  doc.save(sanitizeFilename(`${label.toLowerCase()}-presence-list.pdf`));
+}
+
 function sanitizeFilename(name) {
   return name.replace(/[\\/*?:"<>|]/g, "-").trim() || "export";
 }

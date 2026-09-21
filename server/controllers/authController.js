@@ -27,6 +27,13 @@ const {
   normalizeDepartmentName,
   departmentLookupKeys,
 } = require("../utils/departmentNames");
+const {
+  parsePeopleSearchQuery,
+  detectRoleQuery,
+  departmentMatchesTerm,
+  personRecordMatches,
+  isBroadPeopleQuery,
+} = require("../utils/peopleSearchQuery");
 const SOCIETY_ROLES = ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"];
 const ACTIVE_TEAM_MEMBER_FILTER = {
   $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
@@ -1353,28 +1360,14 @@ const TEAM_DEPARTMENTS = [
   "Sponsorship and Marketing",
 ];
 
-function filterTeamMembersByQuery(members, q) {
-  if (q.length >= 2) {
-    const lower = q.toLowerCase();
-    return members.filter(
-      (m) =>
-        (m.name && m.name.toLowerCase().includes(lower)) ||
-        (m.email && m.email.toLowerCase().includes(lower)) ||
-        (m.branch && m.branch.toLowerCase().includes(lower)) ||
-        (m.year && String(m.year).toLowerCase().includes(lower)) ||
-        (m.section && m.section.toLowerCase().includes(lower)) ||
-        (m.non_tech_society &&
-          m.non_tech_society.toLowerCase().includes(lower)) ||
-        (m.contact && String(m.contact).includes(q)),
-    );
+function filterTeamMembersByQuery(members, q, department = "") {
+  const parsed = parsePeopleSearchQuery(q);
+  if (!parsed.term) return parsed.field === "auto" && !q ? members : [];
+  if (parsed.term.length === 1 && parsed.field === "auto") {
+    const lower = parsed.term.toLowerCase();
+    return members.filter((m) => (m.name || "").toLowerCase().startsWith(lower));
   }
-  if (q.length === 1) {
-    const lower = q.toLowerCase();
-    return members.filter((m) =>
-      (m.name || "").toLowerCase().startsWith(lower),
-    );
-  }
-  return members;
+  return members.filter((m) => personRecordMatches(m, parsed, department || m.department));
 }
 
 function resolveSearchDepartments(req) {
@@ -1404,20 +1397,33 @@ function resolveSearchDepartments(req) {
 
 async function searchTeamMembersInDepartments(departments, q) {
   if (!departments.length) return [];
-  if (departments.length > 1 && q.length < 2) return [];
+  const parsed = parsePeopleSearchQuery(q);
+  const intent = detectRoleQuery(parsed.term);
+  let scoped = departments;
+  if (intent.department) {
+    const matched = departments.filter((dept) => departmentMatchesTerm(dept, intent.department));
+    if (matched.length) scoped = matched;
+  }
+  if (scoped.length > 1 && parsed.term.length < 2 && parsed.field !== "gender" && parsed.field !== "social") return [];
 
   let combined = [];
-  for (const dept of departments) {
+  for (const dept of scoped) {
     const TeamModel = getTeamMemberModel(dept);
     const all = await TeamModel.find(ACTIVE_TEAM_MEMBER_FILTER)
       .sort({ createdAt: -1 })
       .lean();
-    const filtered = filterTeamMembersByQuery(all, q);
-    for (const m of filtered) {
-      combined.push(departments.length > 1 ? { ...m, department: dept } : m);
+    for (const member of all) {
+      combined.push({ ...member, department: dept });
     }
   }
-  return combined.slice(0, 20);
+
+  if (parsed.field === "gender" || parsed.field === "position" || parsed.field === "social" || isBroadPeopleQuery(parsed)) {
+    combined = await attachTeamMemberSocials(combined);
+  }
+
+  const filtered = filterTeamMembersByQuery(combined, q);
+  const limit = parsed.field === "social" ? 1000 : isBroadPeopleQuery(parsed) || parsed.field === "gender" ? 150 : 20;
+  return filtered.slice(0, limit);
 }
 
 // Team-member records are department-scoped, while social links live in the
@@ -1430,20 +1436,27 @@ async function attachTeamMemberSocials(teamMembers) {
 
   const users = await User.find({ email: { $in: emails }, tenureEndedAt: null })
     .select("email additionalDetails")
-    .populate("additionalDetails", "socials")
+    .populate("additionalDetails", "socials gender position p0 p1 p2")
     .lean();
-  const socialsByEmail = new Map(
-    users.map((user) => [user.email?.trim().toLowerCase(), user.additionalDetails?.socials || {}]),
+  const detailsByEmail = new Map(
+    users.map((user) => [user.email?.trim().toLowerCase(), user.additionalDetails || {}]),
   );
 
   return teamMembers.map((member) => {
+    const details = detailsByEmail.get(member.email?.trim().toLowerCase()) || {};
     const recordSocials = member.profile?.socials || {};
     const hasRecordSocials = Object.values(recordSocials).some(Boolean);
+    const profile = { ...(member.profile || {}) };
+    if (!profile.gender && details.gender) profile.gender = details.gender;
+    if (!profile.position && details.position) profile.position = details.position;
+    if (!profile.p0 && details.p0) profile.p0 = details.p0;
+    if (!profile.p1 && details.p1) profile.p1 = details.p1;
+    if (!profile.p2 && details.p2) profile.p2 = details.p2;
     return {
       ...member,
-      socials: hasRecordSocials
-        ? recordSocials
-        : socialsByEmail.get(member.email?.trim().toLowerCase()) || {},
+      profile,
+      gender: profile.gender || details.gender || "",
+      socials: hasRecordSocials ? recordSocials : details.socials || {},
     };
   });
 }
@@ -1456,10 +1469,15 @@ async function attachTeamMemberSocials(teamMembers) {
 exports.searchPeople = async (req, res) => {
   try {
     const q = (req.query.q || "").trim();
+    const parsed = parsePeopleSearchQuery(q);
     const scopeDepartment = normalizeDepartmentName(req.query?.department);
     let teamMembers = [];
     let users = [];
     let predefinedOnly = [];
+
+    if (parsed.field === "event") {
+      return res.status(200).json({ success: true, teamMembers: [], users: [], predefinedOnly: [] });
+    }
 
     const searchDepartments = resolveSearchDepartments(req);
     if (searchDepartments.length) {
@@ -1467,84 +1485,121 @@ exports.searchPeople = async (req, res) => {
       teamMembers = await attachTeamMemberSocials(teamMembers);
     }
 
-    if (q.length >= 2) {
-      const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const canSearchPeople =
+      parsed.term.length >= 2 ||
+      (parsed.field === "gender" && parsed.term.length >= 1) ||
+      (parsed.field === "social" && Boolean(parsed.socialPlatform));
+    if (canSearchPeople) {
+      const intent = detectRoleQuery(parsed.term);
+      const broad = isBroadPeopleQuery(parsed) || parsed.field === "gender" || parsed.field === "social";
+      const limit = parsed.field === "social" ? 1000 : broad ? 150 : 20;
+      const lookupTerm = intent.department || parsed.term;
+      const escaped = lookupTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const regex = new RegExp(escaped, "i");
-      const qLower = q.toLowerCase();
-      let userDocs = await User.find({
-        tenureEndedAt: null,
-        $or: [
-          { firstName: regex },
-          { lastName: regex },
-          { email: regex },
-          { accountType: regex },
-        ],
-      })
-        .select("-password")
-        .populate("additionalDetails")
-        .limit(20)
-        .lean();
+      const qLower = parsed.term.toLowerCase();
+      let userDocs = [];
 
-      const profileMatches = await Profile.find({
-        $or: [
-          { year: regex },
-          { yearOfStudy: regex },
-          { branch: regex },
-          { section: regex },
-          { position: regex },
-        ],
-      })
-        .select("_id")
-        .limit(30)
-        .lean();
-      if (profileMatches.length) {
-        const byProfile = await User.find({
-          tenureEndedAt: null,
-          additionalDetails: { $in: profileMatches.map((profile) => profile._id) },
-        })
+      if (parsed.field === "social") {
+        userDocs = await User.find({ tenureEndedAt: null })
           .select("-password")
           .populate("additionalDetails")
-          .limit(20)
+          .limit(limit)
           .lean();
-        const seen = new Set(userDocs.map((u) => u._id.toString()));
-        for (const u of byProfile) {
-          if (seen.has(u._id.toString())) continue;
-          userDocs.push(u);
-          seen.add(u._id.toString());
-        }
-        userDocs = userDocs.slice(0, 20);
-      }
-
-      if (q.includes(" ")) {
-        const firstToken = q.split(/\s+/)[0];
-        if (firstToken.length >= 1) {
-          const firstRegex = new RegExp(
-            firstToken.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-            "i",
-          );
-          const byFirst = await User.find({
+      } else if (parsed.field === "gender") {
+        const genderValue = qLower === "m" ? "male" : qLower === "f" ? "female" : qLower;
+        const genderMatches = await Profile.find({
+          gender: new RegExp(`^${genderValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"),
+        })
+          .select("_id")
+          .limit(200)
+          .lean();
+        if (genderMatches.length) {
+          userDocs = await User.find({
             tenureEndedAt: null,
-            firstName: firstRegex,
+            additionalDetails: { $in: genderMatches.map((profile) => profile._id) },
           })
             .select("-password")
             .populate("additionalDetails")
-            .limit(50)
+            .limit(limit)
+            .lean();
+        }
+      } else {
+        userDocs = await User.find({
+          tenureEndedAt: null,
+          $or: [
+            { firstName: regex },
+            { lastName: regex },
+            { email: regex },
+            { accountType: regex },
+          ],
+        })
+          .select("-password")
+          .populate("additionalDetails")
+          .limit(limit)
+          .lean();
+
+        const profileQuery = {
+          $or: [
+            { year: regex },
+            { yearOfStudy: regex },
+            { branch: regex },
+            { section: regex },
+            { position: regex },
+            { p0: regex },
+            { p1: regex },
+            { p2: regex },
+          ],
+        };
+        const profileMatches = await Profile.find(profileQuery).select("_id").limit(broad ? 200 : 30).lean();
+        if (profileMatches.length) {
+          const byProfile = await User.find({
+            tenureEndedAt: null,
+            additionalDetails: { $in: profileMatches.map((profile) => profile._id) },
+          })
+            .select("-password")
+            .populate("additionalDetails")
+            .limit(limit)
             .lean();
           const seen = new Set(userDocs.map((u) => u._id.toString()));
-          for (const u of byFirst) {
+          for (const u of byProfile) {
             if (seen.has(u._id.toString())) continue;
-            const fullName = [u.firstName, u.lastName]
-              .filter(Boolean)
-              .join(" ")
-              .toLowerCase();
-            if (fullName.includes(qLower) || fullName.startsWith(qLower)) {
-              userDocs.push(u);
-              seen.add(u._id.toString());
+            userDocs.push(u);
+            seen.add(u._id.toString());
+          }
+        }
+
+        if (parsed.field === "auto" && parsed.term.includes(" ") && !intent.department) {
+          const firstToken = parsed.term.split(/\s+/)[0];
+          if (firstToken.length >= 1) {
+            const firstRegex = new RegExp(
+              firstToken.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+              "i",
+            );
+            const byFirst = await User.find({
+              tenureEndedAt: null,
+              firstName: firstRegex,
+            })
+              .select("-password")
+              .populate("additionalDetails")
+              .limit(50)
+              .lean();
+            const seen = new Set(userDocs.map((u) => u._id.toString()));
+            for (const u of byFirst) {
+              if (seen.has(u._id.toString())) continue;
+              const fullName = [u.firstName, u.lastName]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+              if (fullName.includes(qLower) || fullName.startsWith(qLower)) {
+                userDocs.push(u);
+                seen.add(u._id.toString());
+              }
             }
           }
-          userDocs = userDocs.slice(0, 20);
         }
       }
+
+      userDocs = userDocs.filter((user) => personRecordMatches(user, parsed, user.accountType)).slice(0, limit);
 
       for (const u of userDocs) {
         const predefined = await PredefinedProfile.findOne({
@@ -1565,23 +1620,31 @@ exports.searchPeople = async (req, res) => {
           ...teamMembers.map((m) => (m.email || "").trim().toLowerCase()),
         ].filter(Boolean),
       );
-      const profileDocs = await PredefinedProfile.find({
-        $or: [
-          { name: regex },
-          { email: regex },
-          { branch: regex },
-          { year: regex },
-          { position: regex },
-        ],
-      })
-        .limit(20)
-        .lean();
-      predefinedOnly = profileDocs
-        .filter((profile) => {
-          const email = (profile.email || "").trim().toLowerCase();
-          return email && !registeredEmails.has(email);
-        })
-        .map((profile) => normalizeProfileTextFields(profile));
+      if (parsed.field !== "gender") {
+        const profileQuery = parsed.field === "social"
+          ? {}
+          : {
+              $or: [
+                { name: regex },
+                { email: regex },
+                { branch: regex },
+                { year: regex },
+                { position: regex },
+                { p0: regex },
+                { p1: regex },
+                { p2: regex },
+              ],
+            };
+        const profileDocs = await PredefinedProfile.find(profileQuery)
+          .limit(limit)
+          .lean();
+        predefinedOnly = profileDocs
+          .filter((profile) => {
+            const email = (profile.email || "").trim().toLowerCase();
+            return email && !registeredEmails.has(email) && personRecordMatches(profile, parsed, profile.position);
+          })
+          .map((profile) => normalizeProfileTextFields(profile));
+      }
     }
 
     return res.status(200).json({

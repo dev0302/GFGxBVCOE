@@ -653,7 +653,7 @@ export default function Tasks() {
         <>
           <label className="relative block">
             <Search className="absolute left-3 top-3 text-gray-500" size={17} />
-            <input autoFocus value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name, department, year, or role" className="w-full rounded-xl border border-white/10 bg-black/20 py-3 pl-10 pr-3 text-sm outline-none focus:border-cyan-400" />
+            <input autoFocus value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search any member, lead, head, or core — any department" className="w-full rounded-xl border border-white/10 bg-black/20 py-3 pl-10 pr-3 text-sm outline-none focus:border-cyan-400" />
           </label>
           <div className="no-scrollbar mt-3 max-h-72 space-y-2 overflow-y-auto">
             {people.map((p) => (

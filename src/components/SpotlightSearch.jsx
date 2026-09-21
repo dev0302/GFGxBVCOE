@@ -1,11 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarDays, Command, Search, UserRound, Users, X } from "lucide-react";
+import { CalendarDays, Command, Download, Search, UserRound, Users, X } from "lucide-react";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getEvents, getSearchPeople } from "../services/api";
 import { avatarPlaceholder, photoPreviewUrl } from "../utils/teamMemberUtils";
+import {
+  completionGhost,
+  getSearchCompletions,
+  parsePeopleSearchQuery,
+  personHasSocial,
+  personRecordMatches,
+  personSocialValue,
+  resolveSocialPlatform,
+  socialPlatformLabel,
+} from "../utils/peopleSearchQuery";
+import { downloadSocialPresencePDF } from "../utils/teamListExport";
 import { MemberDetailModal, PredefinedOnlyDetailModal, UserDetailModal } from "./Search";
 import siteEvents from "../data/eventData";
 
@@ -14,7 +26,68 @@ export const openSpotlight = () => {
   window.dispatchEvent(new CustomEvent(SPOTLIGHT_OPEN_EVENT));
 };
 
-const EXAMPLES = ["Search a person", "year:3rd", "branch:cse", "section:cse-4", "event:geekhunt"];
+const EXAMPLES = [
+  "Search a person",
+  "gender:male",
+  "gender:female",
+  "technical",
+  "technical lead",
+  "role:event management head",
+  "year:3rd",
+  "branch:cse",
+  "event:geekhunt",
+  "social:github",
+  "social:insta",
+  "social:linkedin",
+];
+
+const PERSON_TYPE_RANK = { user: 0, teamMember: 1, predefinedOnly: 2 };
+
+function mergePersonItems(items) {
+  const byKey = new Map();
+  for (const item of items) {
+    const data = item.data || {};
+    const email = String(data.email || "").trim().toLowerCase();
+    const key = email || `${item.type}:${data._id || personName(item)}`;
+    const existing = byKey.get(key);
+    if (!existing) {
+      byKey.set(key, item);
+      continue;
+    }
+    const preferNew = (PERSON_TYPE_RANK[item.type] ?? 9) < (PERSON_TYPE_RANK[existing.type] ?? 9);
+    const winner = preferNew ? { ...item } : { ...existing };
+    const other = preferNew ? existing : item;
+    const winnerData = winner.data || {};
+    const otherData = other.data || {};
+    winner.data = {
+      ...otherData,
+      ...winnerData,
+      socials: {
+        ...(otherData.socials || otherData.profile?.socials || otherData.additionalDetails?.socials || {}),
+        ...(winnerData.socials || winnerData.profile?.socials || winnerData.additionalDetails?.socials || {}),
+      },
+      instaLink: winnerData.instaLink || otherData.instaLink || "",
+      linkedinLink: winnerData.linkedinLink || otherData.linkedinLink || "",
+    };
+    byKey.set(key, winner);
+  }
+  return [...byKey.values()];
+}
+
+function sortPeopleByName(items) {
+  return [...items].sort((a, b) => personName(a).localeCompare(personName(b), undefined, { sensitivity: "base" }));
+}
+
+function socialExportRow(item, platform) {
+  const data = item.data || {};
+  const meta = personMeta(item);
+  return {
+    name: personName(item),
+    email: data.email || "",
+    department: meta.department || "",
+    link: personSocialValue(data, platform),
+  };
+}
 const overlayTransition = { duration: 0.28, ease: [0.22, 1, 0.36, 1] };
 const panelTransition = { type: "spring", stiffness: 380, damping: 30, mass: 0.85 };
 const contentTransition = { duration: 0.22, ease: [0.22, 1, 0.36, 1], delay: 0.06 };
@@ -43,7 +116,9 @@ const personMeta = (item) => {
     year: data.year || profile.year || profile.yearOfStudy || "",
     branch: data.branch || profile.branch || "",
     section: data.section || profile.section || "",
-    department: item.department || data.accountType || "",
+    department: item.department || data.department || data.accountType || "",
+    gender: profile.gender || data.gender || "",
+    role: profile.position || profile.role || profile.p0 || data.position || "",
   };
 };
 
@@ -117,6 +192,7 @@ export default function SpotlightSearch() {
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState(null);
   const [gestureBurst, setGestureBurst] = useState(null);
+  const [downloadingSocial, setDownloadingSocial] = useState(false);
 
   const openRef = useRef(false);
   const selectedRef = useRef(null);
@@ -245,15 +321,17 @@ export default function SpotlightSearch() {
   useEffect(() => {
     if (!open || !user) return undefined;
     const value = query.trim();
-    const matched = value.match(/^(year|branch|section|event)\s*:\s*(.*)$/i);
-    const field = matched?.[1]?.toLowerCase() || "name";
-    const term = (matched?.[2] ?? value).trim();
-    if (field === "event") {
+    const parsed = parsePeopleSearchQuery(value);
+    if (parsed.field === "event") {
       setPeople([]);
       setLoading(false);
       return undefined;
     }
-    if (term.length < 2) {
+    const canSearch =
+      parsed.term.length >= 2 ||
+      (parsed.field === "gender" && parsed.term.length >= 1) ||
+      (parsed.field === "social" && Boolean(parsed.socialPlatform || resolveSocialPlatform(parsed.term)));
+    if (!canSearch) {
       setPeople([]);
       setLoading(false);
       return undefined;
@@ -261,7 +339,7 @@ export default function SpotlightSearch() {
     let cancelled = false;
     setLoading(true);
     const timer = window.setTimeout(() => {
-      getSearchPeople(term, undefined, true)
+      getSearchPeople(value, undefined, true)
         .then((result) => {
           if (cancelled) return;
           setPeople(mapSearchPeople(result));
@@ -279,11 +357,11 @@ export default function SpotlightSearch() {
     };
   }, [open, user, query]);
 
-  const { peopleResults, eventResults, mode } = useMemo(() => {
+  const { peopleResults, eventResults, mode, socialPlatform } = useMemo(() => {
     const value = query.trim();
-    const matched = value.match(/^(year|branch|section|event)\s*:\s*(.*)$/i);
-    const field = matched?.[1]?.toLowerCase() || "name";
-    const term = (matched?.[2] ?? value).trim().toLowerCase();
+    const parsed = parsePeopleSearchQuery(value);
+    const field = parsed.field;
+    const term = parsed.term.toLowerCase();
     if (field === "event") {
       return {
         peopleResults: [],
@@ -291,21 +369,60 @@ export default function SpotlightSearch() {
           `${event.title || event.name || ""} ${event.description || ""}`.toLowerCase().includes(term),
         ),
         mode: "event",
+        socialPlatform: "",
       };
     }
     const filtered = people.filter((item) => {
-      const data = item.data || {};
-      const meta = personMeta(item);
-      if (!term) return true;
-      if (field === "year") return String(meta.year).toLowerCase().includes(term);
-      if (field === "branch") return String(meta.branch).toLowerCase().includes(term);
-      if (field === "section") return String(meta.section).toLowerCase().includes(term);
-      return `${personName(item)} ${data.email || ""} ${meta.branch} ${meta.year} ${meta.section}`
-        .toLowerCase()
-        .includes(term);
+      const data = { ...(item.data || {}), department: item.department || item.data?.department };
+      return personRecordMatches(data, parsed, item.department || data.accountType);
     });
-    return { peopleResults: filtered, eventResults: [], mode: field };
+    const peopleResults = field === "social" ? mergePersonItems(filtered) : filtered;
+    return { peopleResults, eventResults: [], mode: field, socialPlatform: parsed.socialPlatform || "" };
   }, [query, people, events]);
+
+  const socialGroups = useMemo(() => {
+    if (mode !== "social" || !socialPlatform) {
+      return { withSocial: [], withoutSocial: [] };
+    }
+    const withSocial = [];
+    const withoutSocial = [];
+    for (const item of peopleResults) {
+      if (personHasSocial(item.data, socialPlatform)) withSocial.push(item);
+      else withoutSocial.push(item);
+    }
+    return {
+      withSocial: sortPeopleByName(withSocial),
+      withoutSocial: sortPeopleByName(withoutSocial),
+    };
+  }, [mode, peopleResults, socialPlatform]);
+
+  const downloadSocialList = async () => {
+    if (!socialPlatform || downloadingSocial) return;
+    setDownloadingSocial(true);
+    try {
+      const label = socialPlatformLabel(socialPlatform);
+      await downloadSocialPresencePDF({
+        platform: socialPlatform,
+        label,
+        withSocial: socialGroups.withSocial.map((item) => socialExportRow(item, socialPlatform)),
+        withoutSocial: socialGroups.withoutSocial.map((item) => socialExportRow(item, socialPlatform)),
+      });
+      toast.success(`${label} list downloaded`);
+    } catch (error) {
+      toast.error(error.message || "Failed to download PDF");
+    } finally {
+      setDownloadingSocial(false);
+    }
+  };
+
+  const completions = useMemo(() => getSearchCompletions(query), [query]);
+  const topCompletion = completions[0] || null;
+  const ghost = completionGhost(query, topCompletion);
+  const applyCompletion = (completion) => {
+    if (!completion?.value) return;
+    setQuery(completion.value);
+    window.setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 0);
+  };
 
   const openPerson = (item) => setSelected(item);
 
@@ -350,14 +467,43 @@ export default function SpotlightSearch() {
                 onMouseDown={(event) => event.stopPropagation()}
               >
                 <div className="flex items-center gap-3 border-b border-white/10 px-5 py-4">
-                  <Search className="h-5 w-5 text-white/45" />
-                  <input
-                    ref={inputRef}
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Search people, events, or filters…"
-                    className="min-w-0 flex-1 bg-transparent text-[17px] text-white outline-none placeholder:text-white/35"
-                  />
+                  <Search className="h-5 w-5 shrink-0 text-white/45" />
+                  <div className="relative min-w-0 flex-1">
+                    <div
+                      className="pointer-events-none absolute inset-0 truncate text-[17px] leading-[inherit]"
+                      aria-hidden="true"
+                    >
+                      <span className="invisible whitespace-pre">{query}</span>
+                      {ghost ? <span className="whitespace-pre text-white/40">{ghost}</span> : null}
+                    </div>
+                    <input
+                      ref={inputRef}
+                      value={query}
+                      onChange={(event) => setQuery(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Tab" && topCompletion) {
+                          event.preventDefault();
+                          applyCompletion(topCompletion);
+                        }
+                      }}
+                      placeholder="Name, gender:male, social:github…"
+                      className="relative z-10 w-full bg-transparent text-[17px] text-white outline-none placeholder:text-white/35"
+                      autoComplete="off"
+                      spellCheck={false}
+                    />
+                  </div>
+                  {topCompletion ? (
+                    <button
+                      type="button"
+                      onClick={() => applyCompletion(topCompletion)}
+                      className="hidden shrink-0 items-center rounded-md border border-white/15 px-1.5 py-0.5 text-[10px] text-white/55 transition hover:border-green-300/40 hover:text-green-200 sm:flex"
+                      title={`Complete “${topCompletion.label}”`}
+                    >
+                      Tab
+                    </button>
+                  ) : (
+                    <kbd className="hidden rounded-md border border-white/15 px-1.5 py-0.5 text-[10px] text-white/45 sm:block">ESC</kbd>
+                  )}
                   <button
                     type="button"
                     onClick={close}
@@ -366,7 +512,6 @@ export default function SpotlightSearch() {
                   >
                     <X size={19} />
                   </button>
-                  <kbd className="hidden rounded-md border border-white/15 px-1.5 py-0.5 text-[10px] text-white/45 sm:block">ESC</kbd>
                 </div>
                 <motion.div
                   className="max-h-[55vh] overflow-y-auto overscroll-contain p-2"
@@ -392,24 +537,88 @@ export default function SpotlightSearch() {
                         </button>
                       ))}
                     </div>
-                  ) : loading ? (
-                    <p className="p-8 text-center text-sm text-white/45">Searching records…</p>
-                  ) : query.trim().length < 2 && mode !== "event" ? (
-                    <p className="p-8 text-center text-sm text-white/45">Type at least 2 characters.</p>
                   ) : (
+                    <>
+                      {completions.length > 0 && (
+                        <div className="mb-1">
+                          <ResultLabel label="Suggestions" count={completions.length} />
+                          {completions.map((completion, index) => (
+                            <button
+                              key={completion.value}
+                              type="button"
+                              onClick={() => applyCompletion(completion)}
+                              className={`flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-sm transition hover:bg-white/8 ${
+                                index === 0 ? "bg-white/[0.04] text-white" : "text-white/75"
+                              }`}
+                            >
+                              <span className="flex min-w-0 items-center gap-3">
+                                <Command size={15} className="shrink-0 text-white/35" />
+                                <span className="truncate">{completion.label}</span>
+                              </span>
+                              {index === 0 && (
+                                <kbd className="shrink-0 rounded border border-white/15 px-1.5 py-0.5 text-[10px] text-white/45">
+                                  Tab
+                                </kbd>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {loading ? (
+                        <p className="p-8 text-center text-sm text-white/45">Searching records…</p>
+                      ) : query.trim().length < 2 && mode !== "event" && mode !== "gender" && mode !== "social" ? (
+                        <p className="p-8 text-center text-sm text-white/45">Type at least 2 characters.</p>
+                      ) : (
                     <>
                       {mode === "event" ? (
                         <ResultLabel label="Events" count={eventResults.length} />
+                      ) : mode === "social" && socialPlatform ? (
+                        <div className="mb-1 flex items-center justify-between gap-2 px-3 pb-2 pt-1">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/35">
+                            {socialPlatformLabel(socialPlatform)} · {socialGroups.withSocial.length} with · {socialGroups.withoutSocial.length} without
+                          </p>
+                          <button
+                            type="button"
+                            onClick={downloadSocialList}
+                            disabled={downloadingSocial || loading}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-2.5 py-1 text-[11px] font-medium text-white/80 transition hover:border-green-300/40 hover:bg-white/8 hover:text-green-200 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <Download size={12} />
+                            {downloadingSocial ? "Preparing…" : "Download list"}
+                          </button>
+                        </div>
                       ) : (
                         <ResultLabel label="People" count={peopleResults.length} />
                       )}
-                      {peopleResults.map((item) => (
-                        <PersonRow
-                          key={`${item.type}-${(item.data || {})._id || (item.data || {}).email}`}
-                          item={item}
-                          onOpen={openPerson}
-                        />
-                      ))}
+                      {mode === "social" && socialPlatform ? (
+                        <>
+                          <ResultLabel label={`With ${socialPlatformLabel(socialPlatform)}`} count={socialGroups.withSocial.length} />
+                          {socialGroups.withSocial.map((item) => (
+                            <PersonRow
+                              key={`${item.type}-${(item.data || {})._id || (item.data || {}).email}`}
+                              item={item}
+                              onOpen={openPerson}
+                              socialHint={personSocialValue(item.data, socialPlatform)}
+                            />
+                          ))}
+                          <ResultLabel label={`Without ${socialPlatformLabel(socialPlatform)}`} count={socialGroups.withoutSocial.length} />
+                          {socialGroups.withoutSocial.map((item) => (
+                            <PersonRow
+                              key={`${item.type}-${(item.data || {})._id || (item.data || {}).email}`}
+                              item={item}
+                              onOpen={openPerson}
+                            />
+                          ))}
+                        </>
+                      ) : (
+                        peopleResults.map((item) => (
+                          <PersonRow
+                            key={`${item.type}-${(item.data || {})._id || (item.data || {}).email}`}
+                            item={item}
+                            onOpen={openPerson}
+                          />
+                        ))
+                      )}
                       {eventResults.map((event) => (
                         <button
                           key={event._id || event.id || event.title}
@@ -431,14 +640,19 @@ export default function SpotlightSearch() {
                           </span>
                         </button>
                       ))}
-                      {!peopleResults.length && !eventResults.length && (
+                      {!peopleResults.length && !eventResults.length && completions.length === 0 && mode !== "social" && (
                         <p className="p-8 text-center text-sm text-white/45">No matching results.</p>
+                      )}
+                      {mode === "social" && socialPlatform && !peopleResults.length && !loading && (
+                        <p className="p-8 text-center text-sm text-white/45">No people found.</p>
+                      )}
+                    </>
                       )}
                     </>
                   )}
                 </motion.div>
                 <div className="flex items-center justify-between border-t border-white/10 px-5 py-3 text-[11px] text-white/35">
-                  <span>Search across the site</span>
+                  <span>Tab completes department, role, or social:github</span>
                   <span className="hidden sm:inline">
                     <kbd className="rounded border border-white/15 px-1">⌘</kbd>{" "}
                     <kbd className="rounded border border-white/15 px-1">K</kbd>
@@ -478,7 +692,7 @@ function ResultLabel({ label, count }) {
   );
 }
 
-function PersonRow({ item, onOpen }) {
+function PersonRow({ item, onOpen, socialHint }) {
   const data = item.data || {};
   const name = personName(item);
   const meta = personMeta(item);
@@ -506,7 +720,7 @@ function PersonRow({ item, onOpen }) {
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-medium text-white">{name}</span>
         <span className="block truncate text-xs text-white/45">
-          {[meta.branch, meta.year, meta.section].filter(Boolean).join(" · ") || meta.department || "Member"}
+          {socialHint || [meta.role, meta.department, meta.branch, meta.year].filter(Boolean).join(" · ") || "Member"}
         </span>
       </span>
       <Users size={16} className="text-white/25" />

@@ -119,7 +119,7 @@ const LABELS = {
 };
 // lets see whats going on
 const YEAR_OPTIONS = ["1st", "2nd", "3rd", "4th"];
-const BRANCH_OPTIONS = ["CSE", "AIML", "IT", "EEE", "ECE", "ICE"];
+const BRANCH_OPTIONS = ["CSE", "AIML", "CSE-AI DS", "IT", "EEE", "ECE", "ICE"];
 const ORG_NAME = "GFG BVCOE";
 const EXPORT_COLS = [...COLS.filter((k) => k !== "photo"), "github", "instagram", "linkedin"];
 const ALL_DEPARTMENTS_EXPORT_COLS = ["name", "department", ...EXPORT_COLS];
