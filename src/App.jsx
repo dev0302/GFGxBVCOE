@@ -63,8 +63,9 @@ import BlogForm from "./components/blogForm";
 import BlogPage from "./pages/blogPage";
 import BlogApprovalPage from "./pages/blogApprovalPage";
 import Tasks from "./pages/Tasks";
-import TaskAssignmentPrompt from "./components/TaskAssignmentPrompt";
-import SpotlightSearch from "./components/SpotlightSearch";
+import ProjectsPage from "./pages/open_source_event/ProjectsPage";
+import OpenSourceLeaderboard from "./pages/open_source_event/leaderboard";
+import UploadProjectPage from "./pages/open_source_event/UploadProjectPage";
 
 function App() {
   const location = useLocation();
@@ -99,7 +100,9 @@ function App() {
       (base) =>
         location.pathname === base || location.pathname.startsWith(`${base}/`),
     );
-  const hideNavbar = location.pathname.startsWith("/share/vault/") || location.pathname === "/share-target";
+  const hideNavbar =
+    location.pathname.startsWith("/share/vault/") ||
+    location.pathname === "/share-target";
 
   return (
     <AuthProvider>
@@ -124,8 +127,6 @@ function App() {
                   closeButton
                 />
                 {!hideNavbar && <Navbar />}
-                <TaskAssignmentPrompt />
-                <SpotlightSearch />
                 <AirdropAnimationLayer />
                 <IncomingUploadModal />
                 <AnimatePresence mode="wait">
@@ -226,8 +227,22 @@ function App() {
                           path="departments"
                           element={<DepartmentDepartmentsAllowed />}
                         />
-                        <Route path="generate-qr" element={<RequireDepartmentSectionAccess section="generate-qr"><GenerateQR /></RequireDepartmentSectionAccess>} />
-                        <Route path="documents" element={<RequireDepartmentSectionAccess section="documents"><EventDocuments /></RequireDepartmentSectionAccess>} />
+                        <Route
+                          path="generate-qr"
+                          element={
+                            <RequireDepartmentSectionAccess section="generate-qr">
+                              <GenerateQR />
+                            </RequireDepartmentSectionAccess>
+                          }
+                        />
+                        <Route
+                          path="documents"
+                          element={
+                            <RequireDepartmentSectionAccess section="documents">
+                              <EventDocuments />
+                            </RequireDepartmentSectionAccess>
+                          }
+                        />
                       </Route>
                       <Route path="/login" element={<Login />} />
                       <Route
@@ -270,6 +285,15 @@ function App() {
                       <Route path="/profile" element={<Profile />} />
                       <Route path="/settings" element={<Settings />} />
                       <Route path="/tasks" element={<Tasks />} />
+                      <Route path="/open-source" element={<ProjectsPage />} />
+                      <Route
+                        path="/open-source/leaderboard"
+                        element={<OpenSourceLeaderboard />}
+                      />
+                      <Route
+                        path="/open-source/upload"
+                        element={<UploadProjectPage />}
+                      />
                       <Route path="/manage-team" element={<ManageTeam />} />
                       <Route
                         path="/view-team"

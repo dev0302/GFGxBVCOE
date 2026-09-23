@@ -53,8 +53,25 @@ async function userCanReviewBlog(userId) {
   return ["Lead", "Head"].includes(getDepartmentRankFromPosition(position));
 }
 
+async function userCanDeleteOSProject(userId) {
+  const user = await User.findById(userId)
+    .populate("additionalDetails", "position p0")
+    .lean();
+  if (!user) return false;
+
+  const accountType = String(user.accountType || "").trim();
+  if (["ADMIN", "Chairperson", "Vice-Chairperson", "Faculty Incharge"].includes(accountType)) {
+    return true;
+  }
+
+  const position =
+    user.additionalDetails?.position || user.additionalDetails?.p0 || "";
+  return getDepartmentRankFromPosition(position) === "Lead";
+}
+
 module.exports = {
   isDefaultLeadershipTransitionRole,
   userCanAccessLeadershipTransition,
   userCanReviewBlog,
+  userCanDeleteOSProject,
 };
