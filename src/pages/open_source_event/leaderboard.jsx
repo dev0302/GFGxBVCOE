@@ -1,3 +1,6 @@
+// all code related to leaderboard written here 
+// hehe
+
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
