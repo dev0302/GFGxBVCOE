@@ -15,27 +15,114 @@ export function getAuthToken() {
   }
 }
 
+/** Returns only a public avatar URL for the optional pre-login profile badge. */
+export async function getLoginProfilePreview(email, signal) {
+  const res = await fetch(
+    `${BASE}/api/v1/auth/login-profile-preview?email=${encodeURIComponent(email)}`,
+    { signal },
+  );
+  const data = await res.json().catch(() => ({}));
+  return data.image || "";
+}
+
+/** Public lookup of the department tied to a signup-allowed email. */
+export async function lookupSignupDepartment(email, signal) {
+  const res = await fetch(
+    `${BASE}/api/v1/auth/signup-department?email=${encodeURIComponent(email)}`,
+    { signal },
+  );
+  const data = await res.json().catch(() => ({}));
+  return {
+    department: data.department || "",
+    departmentLabel: data.departmentLabel || "",
+  };
+}
+
 export async function getTaskPeople(search = "") {
-  const res = await authFetch(`/api/v1/tasks/eligible-people?search=${encodeURIComponent(search)}`);
+  const res = await authFetch(
+    `/api/v1/tasks/eligible-people?search=${encodeURIComponent(search)}`,
+  );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to load people");
   return data.people || [];
 }
 
+export async function getOSProjects({ manage = false, category = "" } = {}) {
+  const params = new URLSearchParams();
+  if (manage) params.set("manage", "1");
+  if (category) params.set("category", category);
+  const query = params.toString();
+  const res = await authFetch(
+    `/api/v1/open-source/projects${query ? `?${query}` : ""}`,
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok)
+    throw new Error(data.message || "Failed to load open source projects");
+  return data.data || [];
+}
+
+export async function getOSContributorLeaderboard() {
+  const res = await authFetch("/api/v1/open-source/contributors/leaderboard");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok)
+    throw new Error(data.message || "Failed to load contributor leaderboard");
+  return data.data || [];
+}
+
+export async function createOSProject(payload) {
+  const res = await authFetch("/api/v1/open-source/projects", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok)
+    throw new Error(data.message || "Failed to create open source project");
+  return data.data;
+}
+
+export async function updateOSProject(id, payload) {
+  const res = await authFetch(`/api/v1/open-source/projects/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok)
+    throw new Error(data.message || "Failed to update open source project");
+  return data.data;
+}
+
+export async function deleteOSProject(id) {
+  const res = await authFetch(`/api/v1/open-source/projects/${id}`, {
+    method: "DELETE",
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok)
+    throw new Error(data.message || "Failed to delete open source project");
+  return data;
+}
+
 export async function createTask(payload) {
-  const res = await authFetch("/api/v1/tasks", { method: "POST", body: JSON.stringify(payload) });
+  const res = await authFetch("/api/v1/tasks", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to assign task");
   return data;
 }
 
 export async function getTasks(status = "") {
-  const res = await authFetch(`/api/v1/tasks${status ? `?status=${encodeURIComponent(status)}` : ""}`);
+  const res = await authFetch(
+    `/api/v1/tasks${status ? `?status=${encodeURIComponent(status)}` : ""}`,
+  );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to load tasks");
   return {
     tasks: Array.isArray(data) ? data : data.tasks || [],
-    allowExecutivesSeeAll: typeof data.allowExecutivesSeeAll === "boolean" ? data.allowExecutivesSeeAll : undefined
+    allowExecutivesSeeAll:
+      typeof data.allowExecutivesSeeAll === "boolean"
+        ? data.allowExecutivesSeeAll
+        : undefined,
   };
 }
 
@@ -47,7 +134,9 @@ export async function markAssignedTasksViewed() {
 }
 
 export async function completeTask(id) {
-  const res = await authFetch(`/api/v1/tasks/${id}/complete`, { method: "PATCH" });
+  const res = await authFetch(`/api/v1/tasks/${id}/complete`, {
+    method: "PATCH",
+  });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to complete task");
   return data;
@@ -66,7 +155,9 @@ export async function getTaskReportData() {
   if (!res.ok) {
     const fallbackRes = await authFetch("/api/v1/tasks");
     const fallbackData = await fallbackRes.json().catch(() => ({}));
-    return Array.isArray(fallbackData) ? fallbackData : fallbackData.tasks || [];
+    return Array.isArray(fallbackData)
+      ? fallbackData
+      : fallbackData.tasks || [];
   }
   return Array.isArray(data) ? data : data.tasks || [];
 }
@@ -75,7 +166,13 @@ export async function getTaskConfig() {
   try {
     const res = await authFetch("/api/v1/tasks");
     const data = await res.json().catch(() => ({}));
-    return { success: true, allowExecutivesSeeAll: typeof data.allowExecutivesSeeAll === "boolean" ? data.allowExecutivesSeeAll : undefined };
+    return {
+      success: true,
+      allowExecutivesSeeAll:
+        typeof data.allowExecutivesSeeAll === "boolean"
+          ? data.allowExecutivesSeeAll
+          : undefined,
+    };
   } catch (_) {
     return { success: true, allowExecutivesSeeAll: undefined };
   }
@@ -84,7 +181,7 @@ export async function getTaskConfig() {
 export async function updateTaskConfig(allowExecutivesSeeAll) {
   const res = await authFetch("/api/v1/tasks", {
     method: "POST",
-    body: JSON.stringify({ action: "TOGGLE_CONFIG", allowExecutivesSeeAll })
+    body: JSON.stringify({ action: "TOGGLE_CONFIG", allowExecutivesSeeAll }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to update config");
@@ -442,14 +539,21 @@ export async function removeDashboardAllowedDepartment(
 }
 
 /** Enable or disable dashboard access for all members of the dashboard's department. */
-export async function updateDashboardMemberAccess(departmentKey, enabled, section) {
+export async function updateDashboardMemberAccess(
+  departmentKey,
+  enabled,
+  section,
+) {
   const key = String(departmentKey || "").trim();
   if (!key) throw new Error("dashboardKey required");
   const res = await authFetch(
     `/api/v1/dashboards/${encodeURIComponent(key)}/member-access`,
     {
       method: "POST",
-      body: JSON.stringify({ enabled: Boolean(enabled), ...(section ? { section } : {}) }),
+      body: JSON.stringify({
+        enabled: Boolean(enabled),
+        ...(section ? { section } : {}),
+      }),
     },
   );
   const data = await res.json().catch(() => ({}));
@@ -1157,7 +1261,9 @@ export async function getNotificationBroadcastAudience(department) {
   const query = department
     ? `?department=${encodeURIComponent(department)}`
     : "";
-  const res = await authFetch(`/api/v1/notifications/broadcast-audience${query}`);
+  const res = await authFetch(
+    `/api/v1/notifications/broadcast-audience${query}`,
+  );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(data.message || "Failed to fetch notification audience");
@@ -1752,37 +1858,6 @@ export async function deleteVaultFolder(id) {
   return data;
 }
 
-/** Returns only a public avatar URL for the optional pre-login profile badge. */
-export async function getLoginProfilePreview(email, signal) {
-  const res = await fetch(`${BASE}/api/v1/auth/login-profile-preview?email=${encodeURIComponent(email)}`, { signal });
-  const data = await res.json().catch(() => ({}));
-  return data.image || "";
-}
-
-/** Public lookup of the department tied to a signup-allowed email. */
-export async function lookupSignupDepartment(email, signal) {
-  const res = await fetch(
-    `${BASE}/api/v1/auth/signup-department?email=${encodeURIComponent(email)}`,
-    { signal },
-  );
-  const data = await res.json().catch(() => ({}));
-  return {
-    department: data.department || "",
-    departmentLabel: data.departmentLabel || "",
-  };
-}
-
-export async function renameVaultFolder(id, name) {
-  const res = await authFetch(`/api/v1/vault/folders/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || "Failed to rename folder");
-  return data;
-}
-
 export async function uploadVaultDocument(formData) {
   const token = getAuthToken();
   const headers = {};
@@ -1804,6 +1879,17 @@ export async function deleteVaultDocument(id) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.message || "Failed to delete document");
+  return data;
+}
+
+export async function renameVaultFolder(id, name) {
+  const res = await authFetch(`/api/v1/vault/folders/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to rename folder");
   return data;
 }
 
