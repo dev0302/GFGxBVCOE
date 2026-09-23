@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "../../context/AuthContext";
 import { deleteOSProject, getOSProjects } from "../../services/api";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
+import { canAccessOpenSource } from "../../utils/openSourceAccess";
 import {
   ChevronLeft,
   ChevronRight,
@@ -31,29 +32,11 @@ const categories = [
 ];
 
 export const canUploadProjects = (user) => {
-  if (
-    ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"].includes(
-      user?.accountType,
-    )
-  ) {
-    return true;
-  }
-  const position = String(
-    user?.additionalDetails?.position || user?.additionalDetails?.p0 || "",
-  ).toLowerCase();
-  return position.includes("lead") || position.includes("head");
+  return canAccessOpenSource(user);
 };
 
 export const canDeleteOSProjects = (user) => {
-  const accountType = String(user?.accountType || "").trim();
-  if (["ADMIN", "Chairperson", "Vice-Chairperson"].includes(accountType)) {
-    return true;
-  }
-
-  const position = String(
-    user?.additionalDetails?.position || user?.additionalDetails?.p0 || "",
-  ).toLowerCase();
-  return position.includes("lead");
+  return canAccessOpenSource(user);
 };
 
 const copyMaintainerEmail = async (email) => {

@@ -52,6 +52,7 @@ import ShareTarget from "./pages/ShareTarget";
 import DepartmentDashboardLayout from "./components/DepartmentDashboard/DepartmentDashboardLayout";
 import MemberDashboard from "./pages/MemberDashboard";
 import RequireDepartmentSectionAccess from "./components/guards/RequireDepartmentSectionAccess";
+import RequireOpenSourceAccess from "./components/guards/RequireOpenSourceAccess";
 import LeadershipTransitionLayout from "./components/LeadershipTransition/LeadershipTransitionLayout";
 import Navbar from "./components/common/Navbar";
 import NotFound from "./components/NotFound";
@@ -285,14 +286,29 @@ function App() {
                       <Route path="/profile" element={<Profile />} />
                       <Route path="/settings" element={<Settings />} />
                       <Route path="/tasks" element={<Tasks />} />
-                      <Route path="/open-source" element={<ProjectsPage />} />
+                      <Route
+                        path="/open-source"
+                        element={
+                          <RequireOpenSourceAccess>
+                            <ProjectsPage />
+                          </RequireOpenSourceAccess>
+                        }
+                      />
                       <Route
                         path="/open-source/leaderboard"
-                        element={<OpenSourceLeaderboard />}
+                        element={
+                          <RequireOpenSourceAccess>
+                            <OpenSourceLeaderboard />
+                          </RequireOpenSourceAccess>
+                        }
                       />
                       <Route
                         path="/open-source/upload"
-                        element={<UploadProjectPage />}
+                        element={
+                          <RequireOpenSourceAccess>
+                            <UploadProjectPage />
+                          </RequireOpenSourceAccess>
+                        }
                       />
                       <Route path="/manage-team" element={<ManageTeam />} />
                       <Route
