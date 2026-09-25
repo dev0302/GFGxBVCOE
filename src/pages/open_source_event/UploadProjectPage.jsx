@@ -9,6 +9,7 @@ import { createOSProject } from "../../services/api";
 const categories = [
   "Web Development",
   "App Development",
+  "AI & Machine Learning",
   "Blockchain & Web3",
   "Systems & Backend",
   "Cybersecurity",
