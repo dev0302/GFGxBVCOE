@@ -15,5 +15,5 @@ export function canAccessOpenSource(user) {
   const position = String(
     user.additionalDetails?.position || user.additionalDetails?.p0 || "",
   ).toLowerCase();
-  return position.includes("head");
+  return position.includes("head") || position.includes("lead");
 }
