@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useAuth } from "../../context/AuthContext";
 import { deleteOSProject, getOSProjects } from "../../services/api";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
-import { canAccessOpenSource } from "../../utils/openSourceAccess";
+import { canAccessOpenSource, canDeleteProject } from "../../utils/openSourceAccess";
 import {
   ChevronLeft,
   ChevronRight,
@@ -35,8 +35,8 @@ export const canUploadProjects = (user) => {
   return canAccessOpenSource(user);
 };
 
-export const canDeleteOSProjects = (user) => {
-  return canAccessOpenSource(user);
+export const canDeleteOSProjects = (user, project) => {
+  return canDeleteProject(user, project);
 };
 
 const copyMaintainerEmail = async (email) => {
@@ -374,14 +374,14 @@ function ProjectsPage() {
               >
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
                 {(project.difficultyLevel ||
-                  (canDeleteOSProjects(user) && project._id)) && (
+                  (canDeleteOSProjects(user, project) && project._id)) && (
                   <div className="absolute right-5 top-5 flex items-center gap-2">
                     {project.difficultyLevel && (
                       <span className="rounded-full border border-emerald-300/50 bg-emerald-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-300">
                         {project.difficultyLevel}
                       </span>
                     )}
-                    {canDeleteOSProjects(user) && project._id && (
+                    {canDeleteOSProjects(user, project) && project._id && (
                       <button
                         type="button"
                         onClick={() => setProjectToDelete(project)}

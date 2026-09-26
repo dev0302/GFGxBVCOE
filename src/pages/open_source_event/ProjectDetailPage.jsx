@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
-import { getOSProjects } from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
+import { deleteOSProject, getOSProjects } from "../../services/api";
+import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
+import { canDeleteProject } from "../../utils/openSourceAccess";
 import {
   ArrowLeft,
   ExternalLink,
@@ -17,6 +20,7 @@ import {
   Check,
   Code2,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 
 export const getRepositoryUrl = (repository) => {
@@ -80,12 +84,15 @@ function ProjectDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { state } = useLocation();
+  const { user } = useAuth();
 
   const [project, setProject] = useState(state?.project || null);
   const [loading, setLoading] = useState(!state?.project);
   const [error, setError] = useState("");
   const [copiedClone, setCopiedClone] = useState(false);
   const [photoError, setPhotoError] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingProject, setDeletingProject] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -145,6 +152,21 @@ function ProjectDetailPage() {
       setTimeout(() => setCopiedClone(false), 2500);
     } catch {
       toast.error("Failed to copy clone command.");
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (!project?._id) return;
+    setDeletingProject(true);
+    try {
+      await deleteOSProject(project._id);
+      toast.success("Open source project deleted successfully");
+      navigate("/open-source", { replace: true });
+    } catch (err) {
+      toast.error(err.message || "Failed to delete project");
+    } finally {
+      setDeletingProject(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -291,6 +313,16 @@ function ProjectDetailPage() {
               >
                 <AlertCircle size={16} /> Browse Issues
               </a>
+              {canDeleteProject(user, project) && project._id && (
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteModal(true)}
+                  className="flex h-11 items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 text-sm font-semibold text-red-300 transition hover:border-red-400/60 hover:bg-red-500/20 hover:text-red-100"
+                  title="Delete project"
+                >
+                  <Trash2 size={16} /> Delete
+                </button>
+              )}
             </div>
           </div>
         </header>
@@ -497,9 +529,18 @@ function ProjectDetailPage() {
           </div>
         </div>
       </main>
+
+      <ConfirmDeleteModal
+        open={showDeleteModal}
+        title="Delete open source project?"
+        description={`Delete "${project?.name || "this project"}"? This action cannot be undone.`}
+        confirmLabel="Delete project"
+        loading={deletingProject}
+        onClose={() => !deletingProject && setShowDeleteModal(false)}
+        onConfirm={handleDeleteProject}
+      />
     </div>
   );
 }
 
 export default ProjectDetailPage;
-

@@ -1,4 +1,5 @@
 const OSProject = require("../models/OSProject");
+const User = require("../models/User");
 const {
   userCanReviewBlog,
   userCanDeleteOSProject,
@@ -198,15 +199,38 @@ const updateOSProject = async (req, res) => {
 
 const deleteOSProject = async (req, res) => {
   try {
-    if (!(await requireProjectDeletionAccess(req, res))) return;
-
-    const project = await OSProject.findByIdAndDelete(req.params.id);
+    const project = await OSProject.findById(req.params.id);
     if (!project) {
       return res.status(404).json({
         success: false,
         message: "Open source project not found.",
       });
     }
+
+    const userId = req.user?.id;
+    const isUploader =
+      project.createdBy && String(project.createdBy) === String(userId);
+
+    const user = await User.findById(userId).lean();
+    const coreRoles = [
+      "ADMIN",
+      "Chairperson",
+      "Vice-Chairperson",
+      "Treasurer",
+      "Faculty Incharge",
+    ];
+    const hasCore =
+      user && coreRoles.includes(String(user.accountType || "").trim());
+
+    if (!isUploader && !hasCore) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Access denied. Only the project uploader or society core members can delete this project.",
+      });
+    }
+
+    await OSProject.findByIdAndDelete(req.params.id);
     return res.status(200).json({
       success: true,
       message: "Open source project deleted successfully.",
