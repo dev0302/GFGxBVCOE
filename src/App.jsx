@@ -1,4 +1,4 @@
-﻿import { Route, Routes, Navigate, useLocation } from "react-router-dom";
+import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
 import { AuthProvider } from "./context/AuthContext";
@@ -68,6 +68,7 @@ import ProjectsPage from "./pages/open_source_event/ProjectsPage";
 import OpenSourceLeaderboard from "./pages/open_source_event/leaderboard";
 import UploadProjectPage from "./pages/open_source_event/UploadProjectPage";
 import OSFilterPage from "./pages/open_source_event/OSFilterPage";
+import ProjectDetailPage from "./pages/open_source_event/ProjectDetailPage";
 
 function App() {
   const location = useLocation();
@@ -316,6 +317,14 @@ function App() {
                         element={
                           <RequireOpenSourceAccess>
                             <OSFilterPage />
+                          </RequireOpenSourceAccess>
+                        }
+                      />
+                      <Route
+                        path="/open-source/project/:id"
+                        element={
+                          <RequireOpenSourceAccess>
+                            <ProjectDetailPage />
                           </RequireOpenSourceAccess>
                         }
                       />
