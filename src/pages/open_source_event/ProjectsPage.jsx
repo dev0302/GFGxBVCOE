@@ -22,8 +22,8 @@ import {
 const categories = [
   "All",
   "Web Development",
-  "AI & Machine Learning",
   "App Development",
+  "AI & Machine Learning",
   "Blockchain & Web3",
   "Systems & Backend",
   "Cybersecurity",
