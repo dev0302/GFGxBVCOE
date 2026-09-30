@@ -26,6 +26,16 @@ body,
   background-color: #020808;
 }
 
+/* Keep embedded film controls in a true landscape player on narrow portrait screens. */
+@media (max-width: 639px) and (orientation: portrait) {
+  .films-player-frame {
+    width: min(100dvh, 177.78vw);
+    max-width: none;
+    flex: none;
+    transform: rotate(90deg);
+  }
+}
+
 html {
   scroll-behavior: smooth;
   overscroll-behavior-y: contain;

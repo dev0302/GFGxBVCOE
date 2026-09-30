@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Clapperboard, Play, RotateCw, X } from "lucide-react";
 import Footer from "../components/common/Footer";
@@ -196,9 +197,10 @@ export default function Films() {
       </main>
       <Footer />
 
-      <AnimatePresence>
-        {selectedFilm && (
-          <motion.div
+      {createPortal(
+        <AnimatePresence>
+          {selectedFilm && (
+            <motion.div
             className="fixed inset-0 z-[250] flex items-center justify-center overflow-y-auto bg-black/95 p-0 backdrop-blur-md sm:bg-black/85 sm:p-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -211,12 +213,12 @@ export default function Films() {
               role="dialog"
               aria-modal="true"
               aria-label={`Playing ${displayTitle(selectedFilm.name)}`}
-              className="flex h-[100dvh] max-h-[100dvh] w-full max-w-none flex-col overflow-hidden border-0 border-white/15 bg-[#101713] shadow-[0_30px_100px_rgba(0,0,0,0.6)] sm:h-auto sm:max-h-[calc(100dvh-3rem)] sm:max-w-5xl sm:rounded-2xl sm:border"
+              className="relative flex h-[100dvh] max-h-[100dvh] w-full max-w-none flex-col overflow-hidden border-0 border-white/15 bg-[#101713] shadow-[0_30px_100px_rgba(0,0,0,0.6)] sm:h-auto sm:max-h-[calc(100dvh-3rem)] sm:max-w-5xl sm:rounded-2xl sm:border"
               initial={{ y: 20, scale: 0.97 }}
               animate={{ y: 0, scale: 1 }}
               exit={{ y: 12, scale: 0.98 }}
             >
-              <div className="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-3 sm:px-6">
+              <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-4 border-b border-white/10 bg-[#101713]/90 px-4 py-3 backdrop-blur-sm sm:relative sm:bg-[#101713] sm:px-6 sm:backdrop-blur-none">
                 <h2 className="truncate text-sm font-bold text-white sm:text-base">{displayTitle(selectedFilm.name)}</h2>
                 <button
                   type="button"
@@ -227,21 +229,25 @@ export default function Films() {
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <div className="relative min-h-0 w-full flex-1 bg-black sm:aspect-video sm:max-h-[calc(100dvh-6rem)] sm:flex-none">
-                <iframe
-                  key={selectedFilm.id}
-                  src={`https://drive.google.com/file/d/${encodeURIComponent(selectedFilm.id)}/preview`}
-                  title={displayTitle(selectedFilm.name)}
-                  className="absolute inset-0 h-full w-full border-0"
-                  allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                  allowFullScreen
-                  referrerPolicy="strict-origin-when-cross-origin"
-                />
+              <div className="flex min-h-0 w-full flex-1 items-center justify-center bg-black sm:flex-none">
+                <div className="films-player-frame relative aspect-video w-full max-h-full overflow-hidden rounded-md bg-black ring-1 ring-white/10 sm:max-h-[calc(100dvh-6rem)] sm:rounded-none sm:ring-0">
+                  <iframe
+                    key={selectedFilm.id}
+                    src={`https://drive.google.com/file/d/${encodeURIComponent(selectedFilm.id)}/preview`}
+                    title={displayTitle(selectedFilm.name)}
+                    className="absolute inset-0 h-full w-full border-0"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    allowFullScreen
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  />
+                </div>
               </div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </>
   );
 }
