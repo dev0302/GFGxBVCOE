@@ -69,6 +69,7 @@ import OpenSourceLeaderboard from "./pages/open_source_event/leaderboard";
 import UploadProjectPage from "./pages/open_source_event/UploadProjectPage";
 import OSFilterPage from "./pages/open_source_event/OSFilterPage";
 import ProjectDetailPage from "./pages/open_source_event/ProjectDetailPage";
+import Films from "./pages/Films";
 import SpotlightSearch from "./components/SpotlightSearch";
 
 function App() {
@@ -157,6 +158,7 @@ function App() {
                       <Route path="/team" element={<Team2 />} />
                       <Route path="/team2526" element={<Team2526 />} />
                       <Route path="/events" element={<Events />} />
+                      <Route path="/films" element={<Films />} />
                       <Route
                         path="/member-enrollment"
                         element={<MemberEnrollment />}

@@ -10,7 +10,7 @@ import UpcomingEventSection from "../components/UpcomingEventSection";
 import { getEvents } from "../services/api";
 import { cloudinaryEventCardImageUrl } from "../utils/cloudinary";
 import { Spinner } from "@/components/ui/spinner";
-import { ChevronDown, ChevronUp, Trophy } from "lucide-react";
+import { ChevronDown, ChevronUp, Clapperboard, Trophy } from "lucide-react";
 
 /** Sub-component to detect overflow and show Read More button accurately */
 const EventDescription = ({ event, isExpanded, toggleExpand }) => {
@@ -170,6 +170,20 @@ const Events = () => {
                 Join our exciting workshops, hackathons, and masterclasses. Learn,
                 grow, and connect with the tech community.
               </p>
+              <button
+                type="button"
+                onClick={() => navigate("/films")}
+                className="group mt-7 inline-flex max-w-full items-center justify-center gap-3 rounded-2xl border border-emerald-200/25 bg-gradient-to-r from-emerald-400/15 via-emerald-300/10 to-teal-300/10 px-5 py-3 text-left text-white shadow-[0_12px_35px_rgba(16,185,129,0.12)] transition duration-300 hover:-translate-y-0.5 hover:border-emerald-200/45 hover:shadow-[0_16px_42px_rgba(16,185,129,0.2)] sm:px-6"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-300/15 text-emerald-200">
+                  <Clapperboard className="h-5 w-5" />
+                </span>
+                <span>
+                  <span className="block text-sm font-extrabold sm:text-base">Watch GFG AI Filmathon 2026</span>
+                  <span className="mt-0.5 block text-xs text-emerald-100/70 sm:text-sm">Explore all Filmathon videos</span>
+                </span>
+                <span className="ml-1 text-emerald-200 transition-transform group-hover:translate-x-1">→</span>
+              </button>
             </div>
           </section>
 
@@ -211,6 +225,16 @@ const Events = () => {
                         <h3 className="text-xl font-bold text-gray-300 mb-3 group-hover:text-cyan-400 transition-colors duration-300 font-changa">
                           {event.title}
                         </h3>
+                        {event.title?.toLowerCase().includes("gfg ai filmathon 2026") && (
+                          <button
+                            type="button"
+                            onClick={() => navigate("/films")}
+                            className="mb-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-200/25 bg-emerald-400/10 px-4 py-2.5 text-sm font-bold text-emerald-100 transition hover:border-emerald-200/45 hover:bg-emerald-400/20 focus:outline-none focus:ring-2 focus:ring-emerald-300/70"
+                          >
+                            <Clapperboard size={17} /> Watch Filmathon Videos
+                            <span aria-hidden="true">→</span>
+                          </button>
+                        )}
                         <div className="space-y-2 mb-4 text-[#aaa]">
                           <div className="flex items-center gap-2">
                             📅 <span className="text-sm">{event.date}</span>

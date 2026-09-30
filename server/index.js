@@ -1,5 +1,5 @@
-require("dotenv").config();
 const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
   process.env.PLAYWRIGHT_BROWSERS_PATH = path.join(
     __dirname,
@@ -40,6 +40,7 @@ const osProjectRoutes = require("./routes/osProjectRoute");
 const osContributorRoutes = require("./routes/osContributorRoute");
 
 const blogRoutes = require("./routes/blogRoute");
+const filmsRoutes = require("./routes/filmsRoute");
 
 const { setIo, setEmitToUser } = require("./utils/socketBus");
 const { setNotificationEmitter } = require("./utils/notificationService");
@@ -92,6 +93,7 @@ app.use("/api/v1/open-source/projects", osProjectRoutes);
 app.use("/api/v1/open-source/contributors", osContributorRoutes);
 
 app.use("/api/v1/blog", blogRoutes);
+app.use("/api/v1/films", filmsRoutes);
 
 app.use("/api/admin", vectorVisionAdminRoutes);
 app.use("/api", descriptionRouter);

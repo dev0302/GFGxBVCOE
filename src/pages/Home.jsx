@@ -19,6 +19,7 @@ import {
   ArrowRight,
   CalendarDays,
   Check,
+  Clapperboard,
   Code2,
   Handshake,
   Image as ImageIcon,
@@ -151,6 +152,17 @@ function Home() {
       tone: "from-amber-300/20 via-amber-500/10 to-orange-500/5",
       iconTone: "bg-amber-300/15 text-amber-200",
       textTone: "text-amber-200",
+    },
+    {
+      eyebrow: "AI Filmathon",
+      title: "Films",
+      description: "Watch the films created for GFG AI Filmathon 2026.",
+      cta: "Watch Films",
+      icon: Clapperboard,
+      to: "/films",
+      tone: "from-emerald-300/20 via-teal-500/10 to-cyan-500/5",
+      iconTone: "bg-emerald-300/15 text-emerald-200",
+      textTone: "text-emerald-200",
     },
     {
       eyebrow: "Get In",
@@ -728,7 +740,7 @@ const journeyPhotos = [
             </p>
           </div>
 
-          <div className="reveal-up mx-auto mt-8 grid max-w-7xl grid-cols-4 gap-2 sm:mt-7 sm:gap-4">
+          <div className="reveal-up mx-auto mt-8 grid max-w-7xl grid-cols-2 gap-2 sm:mt-7 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
             {exploreCards.map(
               ({
                 eyebrow,
