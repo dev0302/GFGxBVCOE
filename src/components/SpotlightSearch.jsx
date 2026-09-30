@@ -196,11 +196,13 @@ export default function SpotlightSearch() {
 
   const openRef = useRef(false);
   const selectedRef = useRef(null);
+  const userRef = useRef(user);
   openRef.current = open;
   selectedRef.current = selected;
+  userRef.current = user;
 
   const show = () => {
-    if (!user) return;
+    if (!userRef.current) return;
     setOpen(true);
   };
   const close = () => {
@@ -210,10 +212,6 @@ export default function SpotlightSearch() {
   };
 
   useEffect(() => {
-    if (!user) {
-      if (openRef.current) close();
-      return undefined;
-    }
     const onKeyDown = (event) => {
       const isSpotlightShortcut =
         (event.ctrlKey || event.metaKey) &&
@@ -242,6 +240,10 @@ export default function SpotlightSearch() {
       window.removeEventListener("keydown", onKeyDown, true);
       window.removeEventListener(SPOTLIGHT_OPEN_EVENT, onOpenEvent);
     };
+  }, []);
+
+  useEffect(() => {
+    if (!user && openRef.current) close();
   }, [user]);
 
   useEffect(() => {
