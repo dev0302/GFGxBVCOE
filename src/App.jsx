@@ -69,6 +69,7 @@ import OpenSourceLeaderboard from "./pages/open_source_event/leaderboard";
 import UploadProjectPage from "./pages/open_source_event/UploadProjectPage";
 import OSFilterPage from "./pages/open_source_event/OSFilterPage";
 import ProjectDetailPage from "./pages/open_source_event/ProjectDetailPage";
+import SpotlightSearch from "./components/SpotlightSearch";
 
 function App() {
   const location = useLocation();
@@ -130,6 +131,7 @@ function App() {
                   closeButton
                 />
                 {!hideNavbar && <Navbar />}
+                <SpotlightSearch />
                 <AirdropAnimationLayer />
                 <IncomingUploadModal />
                 <AnimatePresence mode="wait">
