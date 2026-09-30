@@ -215,8 +215,12 @@ export default function SpotlightSearch() {
       return undefined;
     }
     const onKeyDown = (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      const isSpotlightShortcut =
+        (event.ctrlKey || event.metaKey) &&
+        (event.key?.toLowerCase() === "k" || event.code === "KeyK");
+      if (isSpotlightShortcut) {
         event.preventDefault();
+        event.stopPropagation();
         show();
       }
       if (event.key === "Escape") {
@@ -232,10 +236,10 @@ export default function SpotlightSearch() {
       }
     };
     const onOpenEvent = () => show();
-    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKeyDown, true);
     window.addEventListener(SPOTLIGHT_OPEN_EVENT, onOpenEvent);
     return () => {
-      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keydown", onKeyDown, true);
       window.removeEventListener(SPOTLIGHT_OPEN_EVENT, onOpenEvent);
     };
   }, [user]);
