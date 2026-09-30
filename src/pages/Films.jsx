@@ -199,7 +199,7 @@ export default function Films() {
       <AnimatePresence>
         {selectedFilm && (
           <motion.div
-            className="fixed inset-0 z-[250] flex items-center justify-center overflow-y-auto bg-black/85 p-3 backdrop-blur-md sm:p-6"
+            className="fixed inset-0 z-[250] flex items-center justify-center overflow-y-auto bg-black/95 p-0 backdrop-blur-md sm:bg-black/85 sm:p-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -211,7 +211,7 @@ export default function Films() {
               role="dialog"
               aria-modal="true"
               aria-label={`Playing ${displayTitle(selectedFilm.name)}`}
-              className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-white/15 bg-[#101713] shadow-[0_30px_100px_rgba(0,0,0,0.6)]"
+              className="flex h-[100dvh] max-h-[100dvh] w-full max-w-none flex-col overflow-hidden border-0 border-white/15 bg-[#101713] shadow-[0_30px_100px_rgba(0,0,0,0.6)] sm:h-auto sm:max-h-[calc(100dvh-3rem)] sm:max-w-5xl sm:rounded-2xl sm:border"
               initial={{ y: 20, scale: 0.97 }}
               animate={{ y: 0, scale: 1 }}
               exit={{ y: 12, scale: 0.98 }}
@@ -227,7 +227,7 @@ export default function Films() {
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <div className="relative aspect-video max-h-[calc(100dvh-6rem)] w-full shrink bg-black">
+              <div className="relative min-h-0 w-full flex-1 bg-black sm:aspect-video sm:max-h-[calc(100dvh-6rem)] sm:flex-none">
                 <iframe
                   key={selectedFilm.id}
                   src={`https://drive.google.com/file/d/${encodeURIComponent(selectedFilm.id)}/preview`}
