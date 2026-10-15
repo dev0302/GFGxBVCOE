@@ -10,7 +10,6 @@ import ImageGrid from "../components/ImageGrid";
 import UpcomingEventSection from "../components/UpcomingEventSection";
 import ProfileAvatarFlip from "../components/common/ProfileAvatarFlip";
 import { useAuth } from "../context/AuthContext";
-import { canAccessOpenSource } from "../utils/openSourceAccess";
 
 import Lenis from "lenis";
 import {
@@ -490,29 +489,27 @@ const journeyPhotos = [
                     <Trophy className="h-4 w-4 transition group-hover:rotate-6 group-hover:scale-110" />
                   </button>
 
-                  {canAccessOpenSource(user) && (
-                    <button
-                      type="button"
-                      onClick={() => navigate("/open-source")}
-                      className="
-                        group inline-flex items-center gap-3
-                        rounded-full
-                        border border-white/10
-                        bg-white/[0.03]
-                        px-6 py-3.5
-                        text-xs font-semibold text-richblack-25
-                        backdrop-blur
-                        transition
-                        hover:-translate-y-1
-                        hover:border-green-300/40
-                        hover:bg-green-300/10
-                        sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
-                      "
-                    >
-                      Open Source
-                      <Code2 className="h-4 w-4 transition group-hover:scale-110" />
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => navigate("/open-source")}
+                    className="
+                      group inline-flex items-center gap-3
+                      rounded-full
+                      border border-white/10
+                      bg-white/[0.03]
+                      px-6 py-3.5
+                      text-xs font-semibold text-richblack-25
+                      backdrop-blur
+                      transition
+                      hover:-translate-y-1
+                      hover:border-green-300/40
+                      hover:bg-green-300/10
+                      sm:gap-3 sm:px-7 sm:py-3 sm:text-sm
+                    "
+                  >
+                    Open Source
+                    <Code2 className="h-4 w-4 transition group-hover:scale-110" />
+                  </button>
                   <button
                     id="btn-recruitment-result"
                     type="button"

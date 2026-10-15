@@ -296,19 +296,11 @@ function App() {
                       <Route path="/tasks" element={<Tasks />} />
                       <Route
                         path="/open-source"
-                        element={
-                          <RequireOpenSourceAccess>
-                            <ProjectsPage />
-                          </RequireOpenSourceAccess>
-                        }
+                        element={<ProjectsPage />}
                       />
                       <Route
                         path="/open-source/leaderboard"
-                        element={
-                          <RequireOpenSourceAccess>
-                            <OpenSourceLeaderboard />
-                          </RequireOpenSourceAccess>
-                        }
+                        element={<OpenSourceLeaderboard />}
                       />
                       <Route
                         path="/open-source/upload"
@@ -320,19 +312,11 @@ function App() {
                       />
                       <Route
                         path="/open-source/filter"
-                        element={
-                          <RequireOpenSourceAccess>
-                            <OSFilterPage />
-                          </RequireOpenSourceAccess>
-                        }
+                        element={<OSFilterPage />}
                       />
                       <Route
                         path="/open-source/project/:id"
-                        element={
-                          <RequireOpenSourceAccess>
-                            <ProjectDetailPage />
-                          </RequireOpenSourceAccess>
-                        }
+                        element={<ProjectDetailPage />}
                       />
                       <Route path="/manage-team" element={<ManageTeam />} />
                       <Route

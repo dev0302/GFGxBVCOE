@@ -6,7 +6,11 @@ const SOCIETY_CORE_ROLES = [
   "Faculty Incharge",
 ];
 
-export function canAccessOpenSource(user) {
+export function canAccessOpenSource(_user) {
+  return true;
+}
+
+export function canUploadProjects(user) {
   if (!user) return false;
   if (SOCIETY_CORE_ROLES.includes(String(user.accountType || "").trim())) {
     return true;

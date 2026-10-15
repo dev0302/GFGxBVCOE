@@ -318,8 +318,7 @@ export function buildAllFeatures(user, extras = {}) {
       icon: "code",
       category: "Explore",
       path: "/open-source",
-      allowed: canOs,
-      lockedReason: lockedFor(CORE_AND_LEADS),
+      allowed: true,
     },
     {
       id: "gallery",

@@ -4,7 +4,11 @@ import { toast } from "sonner";
 import { useAuth } from "../../context/AuthContext";
 import { deleteOSProject, getOSProjects } from "../../services/api";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
-import { canAccessOpenSource, canDeleteProject } from "../../utils/openSourceAccess";
+import {
+  canAccessOpenSource,
+  canDeleteProject,
+  canUploadProjects,
+} from "../../utils/openSourceAccess";
 import {
   ChevronLeft,
   ChevronRight,
@@ -31,9 +35,7 @@ const categories = [
   "Developer Tools",
 ];
 
-export const canUploadProjects = (user) => {
-  return canAccessOpenSource(user);
-};
+export { canUploadProjects };
 
 export const canDeleteOSProjects = (user, project) => {
   return canDeleteProject(user, project);

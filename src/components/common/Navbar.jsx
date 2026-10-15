@@ -47,6 +47,7 @@ function Navbar() {
   ];
   const isDarkNavbar =
     darkRoutes.includes(location.pathname) ||
+    location.pathname.startsWith("/open-source") ||
     location.pathname.startsWith("/em-dashboard/") ||
     location.pathname.startsWith("/leadership-transition/") ||
     location.pathname.startsWith("/dashboard/") ||
