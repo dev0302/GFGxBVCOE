@@ -30,9 +30,15 @@ async function uploadFileToCloudinary(
 ) {
   const options = {
     folder,
-    public_id: publicId ?? file.name.split(".")[0],
     resource_type: "auto",
   };
+  // Do not use the original filename as public_id — identical names overwrite.
+  if (publicId) {
+    options.public_id = publicId;
+  } else {
+    options.use_filename = false;
+    options.unique_filename = true;
+  }
   if (quality != null && quality !== "" && typeof quality === "number") {
     options.quality = quality;
   }

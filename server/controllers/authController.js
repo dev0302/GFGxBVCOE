@@ -1199,7 +1199,8 @@ exports.updateAvatar = async (req, res) => {
         .json({ success: false, message: "No image file provided." });
     }
     const file = req.files.avatar;
-    const result = await imageUpload(file, "gfg-avatars");
+    const uniquePublicId = `user_${userId}_${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
+    const result = await imageUpload(file, "gfg-avatars", undefined, uniquePublicId);
     const currentMember = await currentDepartmentMember(req);
     if (currentMember) {
       currentMember.member.photo = result.secure_url;
