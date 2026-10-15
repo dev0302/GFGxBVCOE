@@ -268,7 +268,7 @@ function ProfileDropDown({
       const menuItemsMaxHeight = isMobileViewport
         ? availableMenuHeight
         : isDesktopViewport
-          ? Math.min(180, availableMenuHeight)
+          ? Math.min(260, availableMenuHeight)
           : availableMenuHeight;
 
       setMenuPosition({
@@ -471,8 +471,9 @@ function ProfileDropDown({
     <div className="relative" ref={ref}>
       <button
         ref={triggerRef}
+        data-profile-menu-trigger
         onClick={handleToggle}
-        className={` i-fonts flex items-center rounded-full border shadow-sm transition-all duration-150 ${
+        className={`i-fonts flex items-center rounded-full border shadow-sm transition-all duration-150 ${
           avatarOnly && !showChevron ? "p-0.5" : "gap-1.5 p-0.5"
         } ${embedded ? embeddedButtonCls : borderCls} ${textCls}`}
         aria-label="Open profile menu"
@@ -721,11 +722,16 @@ function ProfileDropDown({
                 }}
                 className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-300">
                   <Grid className="h-4 w-4" />
                 </span>
                 <span className="flex-1">
-                  <span className="block text-xs font-medium">All features</span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="block text-xs font-medium">All features</span>
+                    <span className="rounded-full border border-emerald-400/40 bg-emerald-400/15 px-1.5 py-px text-[8px] font-bold uppercase tracking-wide text-emerald-300">
+                      New
+                    </span>
+                  </span>
                   <span className="block text-[10px] text-gray-500">
                     Browse every tool and shortcut
                   </span>
@@ -970,7 +976,7 @@ function ProfileDropDown({
               </div>
             </div>
             <div
-              className="max-h-[320px] overflow-y-auto overscroll-none px-1 py-1.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50 lg:max-h-[180px]"
+              className="max-h-[320px] overflow-y-auto overscroll-none px-1 py-1.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-cyan-500/30 hover:scrollbar-thumb-cyan-500/50 lg:max-h-[260px]"
               onWheel={handleFlyoutWheel}
             >
               {deptDashboardKeys.length ? (

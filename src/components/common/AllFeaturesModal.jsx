@@ -34,6 +34,7 @@ import {
 } from "react-feather";
 import { getVectorVisionAccess } from "../../services/api";
 import { buildAllFeatures, FEATURE_CATEGORIES } from "../../utils/allFeatures";
+import { markAllFeaturesPromoSeen } from "../../utils/allFeaturesPromo";
 
 const ICONS = {
   user: User,
@@ -107,6 +108,10 @@ export default function AllFeaturesModal({ open, onClose, user, tenureEnding }) 
   const [hasVectorVisionAccess, setHasVectorVisionAccess] = useState(false);
   const [hint, setHint] = useState(null);
   const [activeCategory, setActiveCategory] = useState(FEATURE_CATEGORIES[0]);
+
+  useEffect(() => {
+    if (open) markAllFeaturesPromoSeen();
+  }, [open]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -212,7 +217,7 @@ export default function AllFeaturesModal({ open, onClose, user, tenureEnding }) 
               animate="show"
               exit="exit"
               onMouseDown={(e) => e.stopPropagation()}
-              className="pointer-events-auto relative flex max-h-[min(86vh,720px)] w-full max-w-[40rem] flex-col overflow-hidden rounded-2xl bg-[#141622] shadow-[0_24px_80px_rgba(0,0,0,0.55)] ring-1 ring-inset ring-white/[0.08]"
+              className="pointer-events-auto relative flex max-h-[min(86vh,720px)] w-full max-w-[40rem] flex-col overflow-hidden rounded-2xl bg-[#141622] shadow-[0_24px_80px_rgba(0,0,0,0.55)] ring-1 ring-inset ring-white/[0.08] lg:min-h-[min(36rem,80vh)] lg:max-h-[min(90vh,840px)]"
             >
               <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-cyan-500/10 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-20 -left-10 h-36 w-36 rounded-full bg-emerald-500/10 blur-3xl" />

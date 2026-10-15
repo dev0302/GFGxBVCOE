@@ -71,6 +71,7 @@ import OSFilterPage from "./pages/open_source_event/OSFilterPage";
 import ProjectDetailPage from "./pages/open_source_event/ProjectDetailPage";
 import Films from "./pages/Films";
 import SpotlightSearch from "./components/SpotlightSearch";
+import AllFeaturesPromo from "./components/common/AllFeaturesPromo";
 
 function App() {
   const location = useLocation();
@@ -132,6 +133,7 @@ function App() {
                   closeButton
                 />
                 {!hideNavbar && <Navbar />}
+                {!hideNavbar && <AllFeaturesPromo />}
                 <SpotlightSearch />
                 <AirdropAnimationLayer />
                 <IncomingUploadModal />

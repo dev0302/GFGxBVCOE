@@ -816,3 +816,20 @@ body {
   50% { transform: translateX(110%); }
   100% { transform: translateX(220%); }
 }
+
+@keyframes all-features-promo-hit {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(34, 211, 238, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
+  }
+}
+
+[data-profile-menu-trigger].all-features-promo-hit {
+  animation: all-features-promo-hit 0.9s ease-out 2;
+  border-radius: 9999px;
+}
