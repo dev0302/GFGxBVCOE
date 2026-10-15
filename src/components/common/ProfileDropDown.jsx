@@ -30,6 +30,7 @@ import {
 import { useSocketContext } from "../../context/SocketProvider";
 import { useTaskAlert } from "../../context/TaskAlertContext";
 import { AiOutlineCaretDown } from "react-icons/ai";
+import AllFeaturesModal from "./AllFeaturesModal";
 
 function formatLastSeenLabel(iso) {
   if (!iso) return "No visit logged yet";
@@ -157,6 +158,7 @@ function ProfileDropDown({
   const [open, setOpen] = useState(false);
   const [deptFlyoutOpen, setDeptFlyoutOpen] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [allFeaturesOpen, setAllFeaturesOpen] = useState(false);
   const [lastSeenOpen, setLastSeenOpen] = useState(false);
   const [lastSeenRows, setLastSeenRows] = useState([]);
   const [lastSeenLoading, setLastSeenLoading] = useState(false);
@@ -180,6 +182,7 @@ function ProfileDropDown({
   useEffect(() => {
     const onClick = (e) => {
       if (e.target?.closest?.("[data-last-seen-modal]")) return;
+      if (e.target?.closest?.("[data-all-features-modal]")) return;
       if (e.target?.closest?.("[data-dept-dashboard-flyout]")) return;
       const clickedTrigger = ref.current?.contains(e.target);
       const clickedDropdown = dropdownPanelRef.current?.contains(e.target);
@@ -714,6 +717,23 @@ function ProfileDropDown({
               <button
                 onClick={() => {
                   setOpen(false);
+                  setAllFeaturesOpen(true);
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
+              >
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-500/20 text-gray-400">
+                  <Grid className="h-4 w-4" />
+                </span>
+                <span className="flex-1">
+                  <span className="block text-xs font-medium">All features</span>
+                  <span className="block text-[10px] text-gray-500">
+                    Browse every tool and shortcut
+                  </span>
+                </span>
+              </button>
+              <button
+                onClick={() => {
+                  setOpen(false);
                   navigate("/tasks");
                 }}
                 className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm text-gray-200 transition-colors duration-300 ease-out hover:bg-gray-500/20 hover:text-cyan-300"
@@ -1188,6 +1208,13 @@ function ProfileDropDown({
           </AnimatePresence>,
           document.body,
         )}
+
+      <AllFeaturesModal
+        open={allFeaturesOpen}
+        onClose={() => setAllFeaturesOpen(false)}
+        user={user}
+        tenureEnding={tenureEnding}
+      />
     </div>
   );
 }

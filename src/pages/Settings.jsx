@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import {
   Bell,
   ChevronRight,
@@ -2101,11 +2101,21 @@ function SendEmailToPersonContent() {
 
 function Settings() {
   const { user, loading: authLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [searchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(
+    allItems.some((item) => item.id === tabFromUrl) ? tabFromUrl : "overview",
+  );
   const activeLabel = useMemo(
     () => allItems.find((item) => item.id === activeTab)?.label || "Overview",
     [activeTab],
   );
+
+  useEffect(() => {
+    if (tabFromUrl && allItems.some((item) => item.id === tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl]);
 
   if (authLoading) {
     return (
