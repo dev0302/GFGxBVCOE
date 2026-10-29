@@ -5,6 +5,7 @@ const {
   getDepartments,
   addMember,
   updateMember,
+  shiftMemberDepartment,
   deleteMember,
   getDeletedTeamMembers,
   restoreTeamMember,
@@ -48,6 +49,7 @@ router.get("/invite-link", auth, requireTeamManagement, getActiveInviteLink);
 router.post("/invite-link", auth, requireTeamManagement, createInviteLink);
 router.delete("/invite-link/:token", auth, requireTeamManagement, suspendTeamInviteLink);
 router.put("/members/:id", auth, requireTeamManagement, updateMember);
+router.post("/members/:id/shift", auth, requireTeamManagement, shiftMemberDepartment);
 router.post("/members/:id/restore", auth, requireTeamManagement, restoreTeamMember);
 router.delete("/members/:id", auth, requireTeamManagement, deleteMember);
 router.post("/members/upload-excel", auth, requireTeamManagement, uploadExcel);

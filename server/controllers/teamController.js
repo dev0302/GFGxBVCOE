@@ -7,6 +7,8 @@ const User = require("../models/User");
 const PredefinedProfile = require("../models/PredefinedProfile");
 const { imageUpload, deleteImageByUrl } = require("../config/cloudinary");
 const { logActivity } = require("../utils/activityLog");
+const mailSender = require("../utils/mailSender");
+const { teamDepartmentShiftNoticeTemplate, teamDepartmentShiftMemberTemplate } = require("../mail/templates");
 const { notifyTeamInviteSubmission } = require("../utils/notificationService");
 const { normalizeProfileTextFields, departmentLookupKeys } = require("../utils/departmentNames");
 const XLSX = require("xlsx");
@@ -373,6 +375,67 @@ exports.updateMember = async (req, res) => {
     return res.status(200).json({ success: true, data: member });
   } catch (error) {
     console.error("updateMember error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.shiftMemberDepartment = async (req, res) => {
+  try {
+    const sourceDepartment = resolveDepartment(req);
+    const targetDepartment = String(req.body?.targetDepartment || "").trim();
+    if (!sourceDepartment) return res.status(400).json({ success: false, message: "A valid source department is required." });
+    if (!TEAM_DEPARTMENTS.includes(targetDepartment)) return res.status(400).json({ success: false, message: "Choose a valid department." });
+    if (targetDepartment === sourceDepartment) return res.status(400).json({ success: false, message: "Choose a different department." });
+
+    const Source = getTeamMemberModel(sourceDepartment);
+    const Target = getTeamMemberModel(targetDepartment);
+    const member = await Source.findOne({ _id: req.params.id, ...activeTeamMemberFilter });
+    if (!member) return res.status(404).json({ success: false, message: "Member not found." });
+    const email = (member.email || "").trim().toLowerCase();
+    const conflict = email && await Target.findOne({ email, ...activeTeamMemberFilter }).lean();
+    if (conflict) return res.status(409).json({ success: false, message: "This member is already active in the destination department." });
+
+    const movedRecord = member.toObject();
+    delete movedRecord.__v;
+    movedRecord.updatedAt = new Date();
+    const created = await Target.create(movedRecord);
+    try {
+      await Source.deleteOne({ _id: member._id });
+    } catch (error) {
+      await Target.deleteOne({ _id: created._id });
+      throw error;
+    }
+
+    if (email) {
+      await SignupConfig.updateMany({ department: sourceDepartment }, { $pull: { allowedEmails: email } });
+      await SignupConfig.updateMany({ department: targetDepartment }, { $addToSet: { allowedEmails: email } });
+    }
+    const initiatedAt = new Date();
+    const initiatorName = [req.user?.firstName, req.user?.lastName].filter(Boolean).join(" ").trim() || req.user?.email || "Society administrator";
+    if (req.user?.id) await logActivity(req.user.id, "team_member_department_shift", "team", { name: member.name, email, sourceDepartment, targetDepartment, initiatedAt }, member._id.toString(), "TeamMember");
+
+    const destinationUsers = await User.find({ accountType: targetDepartment, tenureEndedAt: null }).populate("additionalDetails").select("firstName lastName email additionalDetails").lean();
+    const leaders = destinationUsers.map((u) => {
+      const profile = u.additionalDetails || {};
+      const position = [profile.position, profile.p0, profile.p1, profile.p2].filter(Boolean).join(" ");
+      return { name: [u.firstName, u.lastName].filter(Boolean).join(" "), email: u.email, position };
+    }).filter((u) => /head|lead/i.test(u.position));
+    const targetCount = await Target.countDocuments(activeTeamMemberFilter);
+
+    const coreUsers = await User.find({ accountType: { $in: ["ADMIN", "Chairperson", "Vice-Chairperson", "Treasurer"] }, tenureEndedAt: null }).select("email").lean();
+    const allDepartmentUsers = await User.find({ accountType: { $in: TEAM_DEPARTMENTS }, tenureEndedAt: null }).populate("additionalDetails").select("email additionalDetails").lean();
+    const departmentLeaders = allDepartmentUsers.filter((u) => /head|lead/i.test([u.additionalDetails?.position, u.additionalDetails?.p0, u.additionalDetails?.p1, u.additionalDetails?.p2].filter(Boolean).join(" ")));
+    const recipients = [...new Set([...coreUsers.map((u) => u.email), ...departmentLeaders.map((u) => u.email)].filter(Boolean))];
+    const websiteUrl = process.env.CLIENT_URL || "https://www.gfg-bvcoe.com";
+    const notice = teamDepartmentShiftNoticeTemplate({ name: member.name, email, sourceDepartment, targetDepartment, initiatorName, initiatedAt });
+    await Promise.allSettled(recipients.map((recipient) => mailSender(recipient, `Department change: ${member.name}`, notice)));
+    if (email) {
+      const personal = teamDepartmentShiftMemberTemplate({ name: member.name, sourceDepartment, targetDepartment, leaders, memberCount: targetCount, websiteUrl });
+      await mailSender(email, `Congratulations on joining ${targetDepartment}`, personal);
+    }
+    return res.status(200).json({ success: true, message: "Member shifted successfully.", data: { member: created, sourceDepartment, targetDepartment, initiatedAt, leaders, memberCount: targetCount } });
+  } catch (error) {
+    console.error("shiftMemberDepartment error:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };

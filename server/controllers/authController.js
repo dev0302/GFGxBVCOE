@@ -59,11 +59,19 @@ async function findDepartmentMemberByEmail(email) {
 
 async function currentDepartmentMember(req) {
   if (!req.user?.isDepartmentMember || !req.user.memberDepartment) return null;
-  const member = await getTeamMemberModel(req.user.memberDepartment).findById(
+  let department = req.user.memberDepartment;
+  let member = await getTeamMemberModel(department).findById(
     req.user.id,
   );
+  if (!member) {
+    for (const candidateDepartment of TEAM_DEPARTMENTS) {
+      if (candidateDepartment === department) continue;
+      member = await getTeamMemberModel(candidateDepartment).findById(req.user.id);
+      if (member) { department = candidateDepartment; break; }
+    }
+  }
   if (!member || member.email !== req.user.email) return null;
-  return { member, department: req.user.memberDepartment };
+  return { member, department };
 }
 
 async function memberAsUser(memberDoc, department) {

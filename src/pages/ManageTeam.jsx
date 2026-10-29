@@ -9,6 +9,7 @@ import {
   getAllPeople,
   addTeamMember,
   updateTeamMember,
+  shiftTeamMemberDepartment,
   deleteTeamMember,
   getDeletedTeamMembers,
   restoreTeamMember,
@@ -46,6 +47,7 @@ import {
   Instagram,
   Linkedin,
   GitHub,
+  Shuffle,
 } from "react-feather";
 import {
   driveLinkToImageUrl,
@@ -289,6 +291,12 @@ export default function ManageTeam({
   const [expiresIn, setExpiresIn] = useState("12h");
   const [editMember, setEditMember] = useState(null);
   const [deleteConfirmMember, setDeleteConfirmMember] = useState(null);
+  const [shiftMember, setShiftMember] = useState(null);
+  const [shiftStep, setShiftStep] = useState("");
+  const [shiftTargetDepartment, setShiftTargetDepartment] = useState("");
+  const [shiftDepartments, setShiftDepartments] = useState([]);
+  const [shiftSaving, setShiftSaving] = useState(false);
+  const [shiftResult, setShiftResult] = useState(null);
   const [deletingMember, setDeletingMember] = useState(false);
   const [deletedMembers, setDeletedMembers] = useState([]);
   const [deletedRetentionDays, setDeletedRetentionDays] = useState(DELETED_MEMBER_RETENTION_DAYS);
@@ -1113,6 +1121,35 @@ export default function ManageTeam({
     }
   };
 
+  const beginShift = async (member) => {
+    setShiftMember(member);
+    setShiftStep("ask");
+    setShiftTargetDepartment("");
+    setShiftResult(null);
+    try {
+      const response = await getTeamDepartments();
+      setShiftDepartments((response.data || []).filter((name) => name !== department));
+    } catch {
+      toast.error("Could not load departments");
+      setShiftMember(null);
+      setShiftStep("");
+    }
+  };
+  const confirmShift = async () => {
+    if (!shiftMember || !shiftTargetDepartment) return;
+    setShiftSaving(true);
+    try {
+      const result = await shiftTeamMemberDepartment(shiftMember._id, { department, targetDepartment: shiftTargetDepartment });
+      setShiftResult(result.data);
+      setShiftStep("done");
+      await load();
+    } catch (e) {
+      toast.error(e.message || "Failed to shift member");
+    } finally {
+      setShiftSaving(false);
+    }
+  };
+
   const handleRestoreMember = async (id) => {
     setRestoringMemberId(id);
     try {
@@ -1614,6 +1651,14 @@ Remember how I died when you started walking?”
                                   </button>
                                   <button
                                     type="button"
+                                    onClick={() => beginShift(m)}
+                                    className="p-1.5 rounded-lg text-violet-300 hover:bg-violet-500/20 transition-colors"
+                                    title="Shift to another department"
+                                  >
+                                    <Shuffle className="h-4 w-4" />
+                                  </button>
+                                  <button
+                                    type="button"
                                     onClick={() => setDeleteConfirmMember(m)}
                                     className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/20 transition-colors"
                                     title="Delete"
@@ -1846,6 +1891,37 @@ Remember how I died when you started walking?”
         onConfirm={handleConfirmDeleteMember}
         onClose={() => !deletingMember && setDeleteConfirmMember(null)}
       />
+
+      <AnimatePresence>
+        {shiftStep && shiftMember && (
+          <motion.div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => !shiftSaving && (setShiftStep(""), setShiftMember(null))}>
+            <motion.div className="w-full max-w-lg rounded-2xl border border-violet-400/25 bg-[#171725] p-6 shadow-2xl" initial={{ opacity: 0, y: 12, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.98 }} onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
+              {shiftStep === "ask" && <>
+                <h3 className="text-lg font-bold text-richblack-25">Shift department?</h3>
+                <p className="mt-2 text-sm text-gray-300">Do you want to change the department of <strong>{shiftMember.name || shiftMember.email}</strong>?</p>
+                <div className="mt-6 flex justify-end gap-3"><button type="button" onClick={() => { setShiftStep(""); setShiftMember(null); }} className="rounded-xl bg-white/5 px-4 py-2 text-sm text-gray-300">No</button><button type="button" onClick={() => setShiftStep("select")} className="rounded-xl bg-violet-500 px-4 py-2 text-sm font-semibold text-white">Yes, continue</button></div>
+              </>}
+              {shiftStep === "select" && <>
+                <h3 className="text-lg font-bold text-richblack-25">Choose a department</h3>
+                <p className="mt-2 text-sm text-gray-400">The member role will remain Member.</p>
+                <select value={shiftTargetDepartment} onChange={(event) => setShiftTargetDepartment(event.target.value)} className="mt-4 w-full rounded-xl border border-gray-500/40 bg-[#10101a] px-3 py-3 text-sm text-gray-100"><option value="">Select department</option>{shiftDepartments.map((name) => <option key={name} value={name}>{name}</option>)}</select>
+                <div className="mt-6 flex justify-end gap-3"><button type="button" onClick={() => setShiftStep("ask")} className="rounded-xl bg-white/5 px-4 py-2 text-sm text-gray-300">Back</button><button type="button" disabled={!shiftTargetDepartment} onClick={() => setShiftStep("confirm")} className="rounded-xl bg-violet-500 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">Continue</button></div>
+              </>}
+              {shiftStep === "confirm" && <>
+                <h3 className="text-lg font-bold text-richblack-25">Confirm department change</h3>
+                <p className="mt-2 text-sm text-gray-300">Move <strong>{shiftMember.name || shiftMember.email}</strong> from <strong>{department}</strong> to <strong>{shiftTargetDepartment}</strong>? This will update their department membership in the database.</p>
+                <div className="mt-6 flex justify-end gap-3"><button type="button" disabled={shiftSaving} onClick={() => setShiftStep("select")} className="rounded-xl bg-white/5 px-4 py-2 text-sm text-gray-300">Back</button><button type="button" disabled={shiftSaving} onClick={confirmShift} className="rounded-xl bg-violet-500 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{shiftSaving ? "Shifting…" : "Confirm shift"}</button></div>
+              </>}
+              {shiftStep === "done" && shiftResult && <>
+                <h3 className="text-lg font-bold text-emerald-300">Department updated</h3>
+                <p className="mt-2 text-sm text-gray-300">{shiftMember.name || shiftMember.email} is now a Member of <strong>{shiftResult.targetDepartment}</strong>.</p>
+                <div className="mt-4 rounded-xl border border-gray-500/30 bg-black/20 p-4"><p className="text-sm font-semibold text-richblack-25">Department Head and Leads</p>{shiftResult.leaders?.length ? shiftResult.leaders.map((leader, index) => <p key={`${leader.email}-${index}`} className="mt-2 text-sm text-gray-300">{leader.position}: {leader.name}{leader.email ? ` · ${leader.email}` : ""}</p>) : <p className="mt-2 text-sm text-gray-400">No Head or Leads found.</p>}<p className="mt-3 text-sm text-gray-300">Total active members: <strong className="text-cyan-300">{shiftResult.memberCount}</strong></p></div>
+                <div className="mt-6 flex justify-end"><button type="button" onClick={() => { setShiftStep(""); setShiftMember(null); }} className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950">Done</button></div>
+              </>}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {exportModalOpen && (
         <div

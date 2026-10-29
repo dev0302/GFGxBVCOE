@@ -1489,6 +1489,16 @@ export async function updateTeamMember(id, payload) {
   return data;
 }
 
+export async function shiftTeamMemberDepartment(id, payload) {
+  const res = await authFetch(`/api/v1/team/members/${id}/shift`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || "Failed to shift member department");
+  return data;
+}
+
 export async function deleteTeamMember(id, body = {}) {
   const res = await authFetch(`/api/v1/team/members/${id}`, {
     method: "DELETE",

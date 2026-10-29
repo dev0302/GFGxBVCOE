@@ -382,6 +382,25 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
+exports.teamDepartmentShiftNoticeTemplate = (data = {}) => {
+  const { name, email, sourceDepartment, targetDepartment, initiatorName, initiatedAt } = data;
+  const when = initiatedAt ? new Date(initiatedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" }) : "";
+  return wrapCard(`<h1 style="${BASE_STYLES.title}">Team member department change</h1>
+    <div style="${BASE_STYLES.box}; text-align:left">
+      <p style="${BASE_STYLES.body}; margin:0 0 10px">${escapeHtml(name)} (${escapeHtml(email)}) has moved from <strong style="color:#e5e7eb">${escapeHtml(sourceDepartment)}</strong> to <strong style="color:#22d3ee">${escapeHtml(targetDepartment)}</strong>.</p>
+      <p style="${BASE_STYLES.body}; margin:0">Initiated by ${escapeHtml(initiatorName)}${when ? ` at ${escapeHtml(when)} IST` : ""}.</p>
+    </div><p style="${BASE_STYLES.footer}">This update was recorded in the GFGxBVCOE team roster.</p>`);
+};
+
+exports.teamDepartmentShiftMemberTemplate = (data = {}) => {
+  const { name, sourceDepartment, targetDepartment, leaders = [], memberCount = 0, websiteUrl = "https://www.gfg-bvcoe.com" } = data;
+  const leaderRows = leaders.length ? leaders.map((leader) => `<p style="color:#cbd5e1;font-size:13px;margin:5px 0"><strong>${escapeHtml(leader.position)}</strong>: ${escapeHtml(leader.name)}${leader.email ? ` · ${escapeHtml(leader.email)}` : ""}</p>`).join("") : `<p style="color:#94a3b8;font-size:13px;margin:0">Department leadership details are not available yet.</p>`;
+  return wrapCard(`<div style="font-size:34px;margin-bottom:12px">🎉</div><h1 style="${BASE_STYLES.title}">Congratulations, ${escapeHtml(name)}!</h1>
+    <p style="${BASE_STYLES.body}">Your department change has been completed. You are now a member of <strong style="color:#22d3ee">${escapeHtml(targetDepartment)}</strong>, moving from ${escapeHtml(sourceDepartment)}. Your role remains Member.</p>
+    <div style="${BASE_STYLES.box};text-align:left"><p style="color:#e5e7eb;font-weight:bold;margin:0 0 10px">Meet your new department leads</p>${leaderRows}<p style="color:#cbd5e1;font-size:13px;margin:12px 0 0">Active members in ${escapeHtml(targetDepartment)}: <strong style="color:#22d3ee">${Number(memberCount)}</strong></p></div>
+    <div style="margin:20px 0"><a href="${escapeHtml(websiteUrl)}" style="${BASE_STYLES.button}">Open GFGxBVCOE</a></div><p style="${BASE_STYLES.footer}">We’re glad to have you contributing to your new department.</p>`);
+};
+
 function profileImageBlock(image, name) {
   if (!image || !String(image).trim()) return "";
   const url = image.startsWith("http")
