@@ -12,7 +12,6 @@ const {
   notifyBlogStatusChange,
 } = require("../utils/notificationService");
 const {
-  containsProfanity,
   sanitizeHtml,
   calculateQualityAudit,
 } = require("../utils/moderation");
@@ -208,19 +207,6 @@ exports.submitPost = async (req, res) => {
         });
       }
       coverImageUrl = coverImage;
-    }
-
-    // Content Moderation: Reject vulgar/profanity words
-    if (
-      containsProfanity(title) ||
-      containsProfanity(content) ||
-      containsProfanity(summary || "")
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Submission blocked: Content contains inappropriate or vulgar language.",
-      });
     }
 
     // XSS Security: Sanitize HTML content
@@ -601,23 +587,6 @@ exports.editPost = async (req, res) => {
       });
     }
 
-    // Moderation and Audit checks
-    const checkTitle = title || post.title;
-    const checkContent = content || post.content;
-    const checkSummary = summary || post.summary || "";
-
-    if (
-      containsProfanity(checkTitle) ||
-      containsProfanity(checkContent) ||
-      containsProfanity(checkSummary)
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Update blocked: Content contains inappropriate or vulgar language.",
-      });
-    }
-
     // Apply updates
     if (title && title !== post.title) {
       post.title = title;
@@ -715,13 +684,6 @@ exports.addCategory = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Category name must be 80 characters or fewer.",
-      });
-    }
-
-    if (containsProfanity(trimmed)) {
-      return res.status(400).json({
-        success: false,
-        message: "Category name contains inappropriate language.",
       });
     }
 

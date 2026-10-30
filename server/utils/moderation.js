@@ -1,27 +1,5 @@
 const cheerio = require("cheerio");
 
-const PROFANITY_LIST = [
-  "fuck", "shit", "bitch", "asshole", "bastard", "cunt", "dick", "pussy", "slut", "whore",
-  "dumbass", "jackass", "crap", "piss"
-];
-
-/**
- * Checks if a string contains profanity words
- */
-function containsProfanity(text) {
-  if (!text || typeof text !== "string") return false;
-  // Normalize text: lowercase and strip punctuation (e.g. f*ck or s.h.i.t)
-  const normalized = text.toLowerCase().replace(/[^a-z0-9\s]/g, "");
-  
-  for (const word of PROFANITY_LIST) {
-    const regex = new RegExp(`\\b${word}\\b`, "i");
-    if (regex.test(normalized) || normalized.includes(word)) {
-      return true;
-    }
-  }
-  return false;
-}
-
 /**
  * Sanitizes HTML content on the backend to prevent XSS attacks
  */
@@ -91,7 +69,6 @@ function calculateQualityAudit(html) {
 }
 
 module.exports = {
-  containsProfanity,
   sanitizeHtml,
   calculateQualityAudit
 };
